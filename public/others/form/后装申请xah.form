@@ -1,0 +1,2199 @@
+[
+    {
+        "code": "COMPONgwd26IG3XSHpm5RN1734919221",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "容器",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": false,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONCVP63Ovn14duAJsZ1734919221",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "医院logo/名称",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 10,
+                "custom": {
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "hospital_logo_name",
+                "component_type_name": "医院logo/名称",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONgwd26IG3XSHpm5RN1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            },
+            {
+                "code": "COMPONoxrFUDhVgyv7quP11734919221",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "后装申请单",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "textAlign": "center",
+                    "fontSize": "30px",
+                    "fontWeight": "bold"
+                },
+                "span": 24,
+                "custom": {
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "text",
+                "component_type_name": "自定义文本",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONgwd26IG3XSHpm5RN1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            }
+        ],
+        "create_at": "2024-12-23T10:00:21.948000"
+    },
+    {
+        "code": "COMPONRBWfCNQTmbip7GHr1734919221",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "基本信息",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": true,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONQdDKmoWrsTFLjlvz1734919221",
+                "association_code": "name",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "姓名",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": true,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 6,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "姓名"
+                    }
+                },
+                "min_len": "",
+                "max_len": 32,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONRBWfCNQTmbip7GHr1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            },
+            {
+                "code": "COMPONxhCXK2FJzkeRVWEL1734919221",
+                "association_code": "gender",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "性别",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": true,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 6,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "性别"
+                    }
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "select",
+                "component_type_name": "下拉单选",
+                "value": "",
+                "value_template": [
+                    {
+                        "value": "男",
+                        "label": "男"
+                    },
+                    {
+                        "value": "女",
+                        "label": "女"
+                    }
+                ],
+                "parent_code": "COMPONRBWfCNQTmbip7GHr1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            },
+            {
+                "code": "COMPON2TVk04Yzw59E6nmX1734919221",
+                "association_code": "age",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "年龄[岁]",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": true,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 6,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "年龄[岁]"
+                    }
+                },
+                "min_len": "",
+                "max_len": 10,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONRBWfCNQTmbip7GHr1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            },
+            {
+                "code": "COMPONLh1NVvAS0OgMsbl31734919221",
+                "association_code": "admission_number",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "病案号",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": true,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 6,
+                "custom": {
+                    "HIS": true,
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "病案号"
+                    }
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "HIDDEN",
+                "component_type_code": "his_input",
+                "component_type_name": "病案号",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONRBWfCNQTmbip7GHr1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            },
+            {
+                "code": "COMPON8qLwCBhH4cfSypQJ1734919221",
+                "association_code": "outpatient_number",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "放疗号",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": true,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 6,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "放疗号"
+                    }
+                },
+                "min_len": 0,
+                "max_len": 64,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONRBWfCNQTmbip7GHr1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            },
+            {
+                "code": "COMPONUKjEdq2ySLbv3VzB1734919221",
+                "association_code": "event_no",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "门诊号/住院号",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": true,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 6,
+                "custom": {
+                    "setkey": "",
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "门诊号/住院号"
+                    }
+                },
+                "min_len": 0,
+                "max_len": 64,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONRBWfCNQTmbip7GHr1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            },
+            {
+                "code": "COMPONJGTR6SXso4xrg8PF1734919221",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "诊断及分期",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 12,
+                "custom": {
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "diagnose",
+                "component_type_name": "诊断及分期",
+                "value": [
+                ],
+                "value_template": [
+                ],
+                "parent_code": "COMPONRBWfCNQTmbip7GHr1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.948000"
+            },
+            {
+                "code": "COMPONaT2y4sE1xNwLqD7o1736481914",
+                "association_code": "phone",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "患者电话",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": true,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 10,
+                "custom": {
+                    "setkey": "",
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "患者电话"
+                    }
+                },
+                "min_len": 11,
+                "max_len": 11,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONRBWfCNQTmbip7GHr1734919221",
+                "children": [
+                ],
+                "create_at": "2022-07-26T15:49:35.589000"
+            }
+        ],
+        "create_at": "2024-12-23T10:00:21.948000"
+    },
+    {
+        "code": "COMPONBUja2H3dJR04SFiV1734919221",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "靶区处方剂量",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": true,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+            "setkey": ""
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONZPNQ7gOHXuxjok051734919221",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "治疗频次",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 8,
+                "custom": {
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "treatFrequency",
+                "component_type_name": "治疗频次",
+                "value": {
+                    "value": "",
+                    "frequency": 1
+                },
+                "value_template": [
+                    {
+                        "label": "1",
+                        "value": 1
+                    },
+                    {
+                        "label": "2",
+                        "value": 2
+                    },
+                    {
+                        "label": "7",
+                        "value": 7
+                    }
+                ],
+                "parent_code": "COMPONBUja2H3dJR04SFiV1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.949000"
+            },
+            {
+                "code": "COMPONVFT849uqOjMk6JsG1734919221",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "分次数[F]",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 8,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "subFrequecy",
+                "component_type_name": "分次数[F]",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONBUja2H3dJR04SFiV1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.949000"
+            },
+            {
+                "code": "COMPONqraHSFv0fctXTE781734919221",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "治疗机器",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 8,
+                "custom": {
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "treatMachine",
+                "component_type_name": "治疗机器",
+                "value": null,
+                "value_template": [
+                    {
+                        "value": "MACROOtsxzAgeRpX9BVNh51685590094",
+                        "label": "加速器机房"
+                    },
+                    {
+                        "value": "MACROOG5s6P97xRKfvIzBp1715404023",
+                        "label": "射波刀机房"
+                    },
+                    {
+                        "value": "MACROOmZH4oAGtPNfYwnr91715406801",
+                        "label": "后装机房"
+                    },
+                    {
+                        "value": "MACROOdpPwzmk1DMV9S6ns1736995620",
+                        "label": "机房1后装-时长"
+                    },
+                    {
+                        "value": "MACROOTRgDeUNKnxvQAoEB1737007636",
+                        "label": "机房1治疗-时长"
+                    },
+                    {
+                        "value": "MACROOtCp0Xy8NZrKQJBz91737007701",
+                        "label": "机房3治疗-时长"
+                    },
+                    {
+                        "value": "MACROOBUqQtPJSLRkcMGf61737007747",
+                        "label": "机房2治疗-时长"
+                    },
+                    {
+                        "value": "MACROON63ZiSRcdHt2fAWh1737014571",
+                        "label": "机房4治疗-时长"
+                    },
+                    {
+                        "value": "MACROOTHg4nt0XvBUiOw7x1737117663",
+                        "label": "治疗chh"
+                    },
+                    {
+                        "value": "MACROO3QJnHO2PFtfpWsmS1737356473",
+                        "label": "治疗2chh"
+                    },
+                    {
+                        "value": "MACROOqGPVfcQ73w1aHJmy1739327761",
+                        "label": "zlhtesst_治疗_时间段"
+                    },
+                    {
+                        "value": "MACROOlF0P9XV1OgqmTprE1739327799",
+                        "label": "zlhtest_治疗_时间点"
+                    },
+                    {
+                        "value": "MACROOvIPdblNMsLO0zRT11739773340",
+                        "label": "时间点-chh"
+                    },
+                    {
+                        "value": "MACROOnyd4HJebgOEArYUj1740454075",
+                        "label": "预约优先（时间点机房）"
+                    },
+                    {
+                        "value": "MACROOEwfvo05b4gZ27qek1740454228",
+                        "label": "预约优先（时段机房）"
+                    },
+                    {
+                        "value": "MACROOQ9evysYCRrc6L14M1740455471",
+                        "label": "治疗-签到优先"
+                    },
+                    {
+                        "value": "MACROOo6lcMTCsIV7pXBYJ1740468468",
+                        "label": "治疗-时段机房"
+                    }
+                ],
+                "parent_code": "COMPONBUja2H3dJR04SFiV1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.949000"
+            },
+            {
+                "code": "COMPONQEr73heT2cNmbDka1734919221",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "计划治疗时间",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 8,
+                "custom": {
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "datePicker",
+                "component_type_name": "日期",
+                "value": "",
+                "value_template": "yyyy-MM-dd hh:mm:ss",
+                "parent_code": "COMPONBUja2H3dJR04SFiV1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.949000"
+            }
+        ],
+        "create_at": "2024-12-23T10:00:21.949000"
+    },
+    {
+        "code": "COMPONNg9tAdakqjQlnOvy1739838525",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "麻醉",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": true,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONWoTiBNd6L5smYUfK1739838551",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "麻醉方式",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": ""
+                },
+                "span": 8,
+                "custom": {
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "select",
+                "component_type_name": "下拉单选",
+                "value": "",
+                "value_template": [
+                    {
+                        "value": "椎管麻醉",
+                        "label": "椎管麻醉"
+                    },
+                    {
+                        "value": "凝胶麻醉",
+                        "label": "凝胶麻醉"
+                    },
+                    {
+                        "value": "无",
+                        "label": "无"
+                    }
+                ],
+                "parent_code": "COMPONNg9tAdakqjQlnOvy1739838525",
+                "children": [
+                ],
+                "create_at": "2025-02-18T08:30:04.263000"
+            }
+        ],
+        "create_at": "2025-02-18T08:30:04.263000"
+    },
+    {
+        "code": "COMPONyaHFhJtWMBCcox4e1740728166",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "容器",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": false,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "form",
+                "component_type_name": "表格",
+                "value": [
+                    {
+                        "COMPONGMQTOEf8ARXjV2dz1740728227": "",
+                        "COMPONeW2zYuBUlTJRdotI1740728317": "",
+                        "COMPONpKbrVjCOi53HEsyk1740728353": "",
+                        "COMPONyOWzxNER0tIieKjQ1740728374": "",
+                        "COMPONGi0NI8Mh2ZETgPay1740729249": "",
+                        "COMPON4DgScvuOFHRkMV8a1740729229": "",
+                        "COMPON1BQnZl8mWiMawKzD1740729319": "",
+                        "COMPONzpUIahcqV10oNDny1740729391": ""
+                    }
+                ],
+                "value_template": [
+                    {
+                        "COMPONGMQTOEf8ARXjV2dz1740728227": "肿瘤"
+                    },
+                    {
+                        "COMPONeW2zYuBUlTJRdotI1740728317": "分次剂量（外）"
+                    },
+                    {
+                        "COMPONpKbrVjCOi53HEsyk1740728353": "分次数（外）"
+                    },
+                    {
+                        "COMPONyOWzxNER0tIieKjQ1740728374": "总剂量（外）"
+                    },
+                    {
+                        "COMPONGi0NI8Mh2ZETgPay1740729249": "EQD2(外)"
+                    },
+                    {
+                        "COMPON4DgScvuOFHRkMV8a1740729229": "分次剂量（后）"
+                    },
+                    {
+                        "COMPON1BQnZl8mWiMawKzD1740729319": "EQD2（后）"
+                    },
+                    {
+                        "COMPONzpUIahcqV10oNDny1740729391": "EQD2（总）"
+                    }
+                ],
+                "parent_code": "COMPONyaHFhJtWMBCcox4e1740728166",
+                "children": [
+                    {
+                        "code": "COMPONGMQTOEf8ARXjV2dz1740728227",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "肿瘤",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "fontSize": "",
+                            "width": "100px"
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "0",
+                        "max_len": 256,
+                        "component_type_source": "BASE",
+                        "component_type_code": "input",
+                        "component_type_name": "单行输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:03:02.041000"
+                    },
+                    {
+                        "code": "COMPONeW2zYuBUlTJRdotI1740728317",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次剂量（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": 5,
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:03:02.042000"
+                    },
+                    {
+                        "code": "COMPONpKbrVjCOi53HEsyk1740728353",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次数（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": "",
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:03:02.042000"
+                    },
+                    {
+                        "code": "COMPONyOWzxNER0tIieKjQ1740728374",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "总剂量（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONeW2zYuBUlTJRdotI1740728317}*{COMPONpKbrVjCOi53HEsyk1740728353}",
+                        "parent_code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:03:02.042000"
+                    },
+                    {
+                        "code": "COMPONGi0NI8Mh2ZETgPay1740729249",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2(外)",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONeW2zYuBUlTJRdotI1740728317}*{COMPONpKbrVjCOi53HEsyk1740728353}*(1+{COMPONeW2zYuBUlTJRdotI1740728317}*0.1)/1.2",
+                        "parent_code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:03:02.042000"
+                    },
+                    {
+                        "code": "COMPON4DgScvuOFHRkMV8a1740729229",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次剂量（后）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": 5,
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:03:02.042000"
+                    },
+                    {
+                        "code": "COMPON1BQnZl8mWiMawKzD1740729319",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2（后）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPON4DgScvuOFHRkMV8a1740729229}*(1+{COMPON4DgScvuOFHRkMV8a1740729229}*0.1)/1.2",
+                        "parent_code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:03:02.042000"
+                    },
+                    {
+                        "code": "COMPONzpUIahcqV10oNDny1740729391",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2（总）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONeW2zYuBUlTJRdotI1740728317}*{COMPONpKbrVjCOi53HEsyk1740728353}*(1+{COMPONeW2zYuBUlTJRdotI1740728317}*0.1)/1.2+{COMPON4DgScvuOFHRkMV8a1740729229}*(1+{COMPON4DgScvuOFHRkMV8a1740729229}*0.1)/1.2",
+                        "parent_code": "COMPONSxPp4mkBFDVv0Toj1740728166",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:03:02.042000"
+                    }
+                ],
+                "create_at": "2025-02-28T16:03:02.042000"
+            }
+        ],
+        "create_at": "2025-02-28T16:03:02.042000"
+    },
+    {
+        "code": "COMPONu90S5CHRfblM6KgD1734919221",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": false,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONxDi163NnzJXpslCg1740729964",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "form",
+                "component_type_name": "表格",
+                "value": [
+                    {
+                        "COMPONCMhNiwRPKWby3Vn01740729989": "",
+                        "COMPON294CQkPsRSwlK7Yu1740730004": "",
+                        "COMPONjDrfoJuVElWPZtvm1740730007": "",
+                        "COMPONtjKRn74yufqkZHQ61740730268": "",
+                        "COMPON8k9dPbmCnILlxut41740730306": "",
+                        "COMPONTEwV0ply4sazUQC51740730407": "",
+                        "COMPONnHONqyB2w8z5kFXa1740730421": "",
+                        "COMPON3Lj6HlqxAKsCNiQU1740730480": ""
+                    }
+                ],
+                "value_template": [
+                    {
+                        "COMPONCMhNiwRPKWby3Vn01740729989": "直肠"
+                    },
+                    {
+                        "COMPON294CQkPsRSwlK7Yu1740730004": "分次剂量（外）"
+                    },
+                    {
+                        "COMPONjDrfoJuVElWPZtvm1740730007": "分次数（外）"
+                    },
+                    {
+                        "COMPONtjKRn74yufqkZHQ61740730268": "总剂量（外）"
+                    },
+                    {
+                        "COMPON8k9dPbmCnILlxut41740730306": "EQD2(外)"
+                    },
+                    {
+                        "COMPONTEwV0ply4sazUQC51740730407": "分次剂量（后）"
+                    },
+                    {
+                        "COMPONnHONqyB2w8z5kFXa1740730421": "EQD2（后）"
+                    },
+                    {
+                        "COMPON3Lj6HlqxAKsCNiQU1740730480": "EQD2（总）"
+                    }
+                ],
+                "parent_code": "COMPONu90S5CHRfblM6KgD1734919221",
+                "children": [
+                    {
+                        "code": "COMPONCMhNiwRPKWby3Vn01740729989",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "直肠",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "fontSize": "",
+                            "width": "100px"
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "0",
+                        "max_len": 256,
+                        "component_type_source": "BASE",
+                        "component_type_code": "input",
+                        "component_type_name": "单行输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONxDi163NnzJXpslCg1740729964",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPON294CQkPsRSwlK7Yu1740730004",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次剂量（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": 5,
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONxDi163NnzJXpslCg1740729964",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONjDrfoJuVElWPZtvm1740730007",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次数（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": "",
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONxDi163NnzJXpslCg1740729964",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONtjKRn74yufqkZHQ61740730268",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "总剂量（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPON294CQkPsRSwlK7Yu1740730004}×{COMPONjDrfoJuVElWPZtvm1740730007}",
+                        "parent_code": "COMPONxDi163NnzJXpslCg1740729964",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPON8k9dPbmCnILlxut41740730306",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2(外)",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPON294CQkPsRSwlK7Yu1740730004}×{COMPONjDrfoJuVElWPZtvm1740730007}×(1+{COMPON294CQkPsRSwlK7Yu1740730004}÷3)×0.6",
+                        "parent_code": "COMPONxDi163NnzJXpslCg1740729964",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONTEwV0ply4sazUQC51740730407",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次剂量（后）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": 5,
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONxDi163NnzJXpslCg1740729964",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONnHONqyB2w8z5kFXa1740730421",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2（后）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONTEwV0ply4sazUQC51740730407}×(1+{COMPONTEwV0ply4sazUQC51740730407}÷3)×0.6",
+                        "parent_code": "COMPONxDi163NnzJXpslCg1740729964",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPON3Lj6HlqxAKsCNiQU1740730480",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2（总）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "({COMPON294CQkPsRSwlK7Yu1740730004}×{COMPONjDrfoJuVElWPZtvm1740730007}×(1+{COMPON294CQkPsRSwlK7Yu1740730004}÷3)+{COMPONTEwV0ply4sazUQC51740730407}×(1+{COMPONTEwV0ply4sazUQC51740730407}÷3))×0.6",
+                        "parent_code": "COMPONxDi163NnzJXpslCg1740729964",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    }
+                ],
+                "create_at": "2025-02-28T16:46:45.086000"
+            },
+            {
+                "code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "form",
+                "component_type_name": "表格",
+                "value": [
+                    {
+                        "COMPONkDm5LwMi63ITYApr1740730587": "",
+                        "COMPONsCH9tNuF8vdnr2hA1740730602": "",
+                        "COMPONb57yRQNfOPmlKsMw1740730657": "",
+                        "COMPONTqvjuWbdKSs4wY0p1740730670": "",
+                        "COMPON6jXVzJiAInpQh0ao1740730715": "",
+                        "COMPONlE1mdDJVtg7ResLX1740730698": "",
+                        "COMPONhmr6M4jLSzN3isKd1740730785": "",
+                        "COMPONO9A1ykipSEcQtVMx1740730912": ""
+                    }
+                ],
+                "value_template": [
+                    {
+                        "COMPONkDm5LwMi63ITYApr1740730587": "乙状结肠"
+                    },
+                    {
+                        "COMPONsCH9tNuF8vdnr2hA1740730602": "分次剂量（外）"
+                    },
+                    {
+                        "COMPONb57yRQNfOPmlKsMw1740730657": "分次数（外）"
+                    },
+                    {
+                        "COMPONTqvjuWbdKSs4wY0p1740730670": "总剂量（外）"
+                    },
+                    {
+                        "COMPON6jXVzJiAInpQh0ao1740730715": "EQD2(外)"
+                    },
+                    {
+                        "COMPONlE1mdDJVtg7ResLX1740730698": "分次剂量（后）"
+                    },
+                    {
+                        "COMPONhmr6M4jLSzN3isKd1740730785": "EQD2（后）"
+                    },
+                    {
+                        "COMPONO9A1ykipSEcQtVMx1740730912": "EQD2（总）"
+                    }
+                ],
+                "parent_code": "COMPONu90S5CHRfblM6KgD1734919221",
+                "children": [
+                    {
+                        "code": "COMPONkDm5LwMi63ITYApr1740730587",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "乙状结肠",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "fontSize": "",
+                            "width": "100px"
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "0",
+                        "max_len": 256,
+                        "component_type_source": "BASE",
+                        "component_type_code": "input",
+                        "component_type_name": "单行输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONsCH9tNuF8vdnr2hA1740730602",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次剂量（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": 5,
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONb57yRQNfOPmlKsMw1740730657",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次数（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": "",
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONTqvjuWbdKSs4wY0p1740730670",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "总剂量（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONsCH9tNuF8vdnr2hA1740730602}×{COMPONb57yRQNfOPmlKsMw1740730657}",
+                        "parent_code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPON6jXVzJiAInpQh0ao1740730715",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2(外)",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONsCH9tNuF8vdnr2hA1740730602}×{COMPONb57yRQNfOPmlKsMw1740730657}×(1+{COMPONsCH9tNuF8vdnr2hA1740730602}÷3)×0.6",
+                        "parent_code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONlE1mdDJVtg7ResLX1740730698",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次剂量（后）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": 5,
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONhmr6M4jLSzN3isKd1740730785",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2（后）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONlE1mdDJVtg7ResLX1740730698}×(1+{COMPONlE1mdDJVtg7ResLX1740730698}÷3)×0.6",
+                        "parent_code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    },
+                    {
+                        "code": "COMPONO9A1ykipSEcQtVMx1740730912",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2（总）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "({COMPONsCH9tNuF8vdnr2hA1740730602}×{COMPONb57yRQNfOPmlKsMw1740730657}×(1+{COMPONsCH9tNuF8vdnr2hA1740730602}÷3)+{COMPONlE1mdDJVtg7ResLX1740730698}×(1+{COMPONlE1mdDJVtg7ResLX1740730698}÷3))×0.6",
+                        "parent_code": "COMPON5PX6VTMSKUAG0qb21740730581",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.086000"
+                    }
+                ],
+                "create_at": "2025-02-28T16:46:45.086000"
+            },
+            {
+                "code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "form",
+                "component_type_name": "表格",
+                "value": [
+                    {
+                        "COMPONGJ5H42TinDvUzYQl1740731087": "",
+                        "COMPONcJAvsPVkR754tHhb1740731101": "",
+                        "COMPONDujHV483cMiEemdb1740731105": "",
+                        "COMPONvaCw8spQrjmx7Ah31740731108": "",
+                        "COMPONnIBzlyS4X2JNWdqU1740731117": "",
+                        "COMPONjlQgRPKN0DpATbyo1740731205": "",
+                        "COMPONmnStN3a0F2obswg41740731222": "",
+                        "COMPONWs8kmLH32elrKAbw1740731550": ""
+                    }
+                ],
+                "value_template": [
+                    {
+                        "COMPONGJ5H42TinDvUzYQl1740731087": "膀胱"
+                    },
+                    {
+                        "COMPONcJAvsPVkR754tHhb1740731101": "分次剂量（外）"
+                    },
+                    {
+                        "COMPONDujHV483cMiEemdb1740731105": "分次数（外）"
+                    },
+                    {
+                        "COMPONvaCw8spQrjmx7Ah31740731108": "总剂量（外）"
+                    },
+                    {
+                        "COMPONnIBzlyS4X2JNWdqU1740731117": "EQD2(外)"
+                    },
+                    {
+                        "COMPONjlQgRPKN0DpATbyo1740731205": "分次剂量（后）"
+                    },
+                    {
+                        "COMPONmnStN3a0F2obswg41740731222": "EQD2（后）"
+                    },
+                    {
+                        "COMPONWs8kmLH32elrKAbw1740731550": "EQD2（总）"
+                    }
+                ],
+                "parent_code": "COMPONu90S5CHRfblM6KgD1734919221",
+                "children": [
+                    {
+                        "code": "COMPONGJ5H42TinDvUzYQl1740731087",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "膀胱",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "fontSize": "",
+                            "width": "100px"
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "0",
+                        "max_len": 256,
+                        "component_type_source": "BASE",
+                        "component_type_code": "input",
+                        "component_type_name": "单行输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.087000"
+                    },
+                    {
+                        "code": "COMPONcJAvsPVkR754tHhb1740731101",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次剂量（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": 5,
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.087000"
+                    },
+                    {
+                        "code": "COMPONDujHV483cMiEemdb1740731105",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次数（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": "",
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.087000"
+                    },
+                    {
+                        "code": "COMPONvaCw8spQrjmx7Ah31740731108",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "总剂量（外）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONcJAvsPVkR754tHhb1740731101}×{COMPONDujHV483cMiEemdb1740731105}",
+                        "parent_code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.087000"
+                    },
+                    {
+                        "code": "COMPONnIBzlyS4X2JNWdqU1740731117",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2(外)",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONcJAvsPVkR754tHhb1740731101}×{COMPONDujHV483cMiEemdb1740731105}×(1+{COMPONcJAvsPVkR754tHhb1740731101}÷3)×0.6",
+                        "parent_code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.087000"
+                    },
+                    {
+                        "code": "COMPONjlQgRPKN0DpATbyo1740731205",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分次剂量（后）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "min": "",
+                            "max": "",
+                            "precision": 5,
+                            "setkey": "",
+                            "valueStyle": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "inputNumber",
+                        "component_type_name": "数字输入框",
+                        "value": "",
+                        "value_template": "",
+                        "parent_code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.087000"
+                    },
+                    {
+                        "code": "COMPONmnStN3a0F2obswg41740731222",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2（后）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "{COMPONjlQgRPKN0DpATbyo1740731205}×(1+{COMPONjlQgRPKN0DpATbyo1740731205}÷3)×0.6",
+                        "parent_code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.087000"
+                    },
+                    {
+                        "code": "COMPONWs8kmLH32elrKAbw1740731550",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "EQD2（总）",
+                        "is_must": false,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "width": "150px",
+                            "fontSize": ""
+                        },
+                        "span": 8,
+                        "custom": {
+                            "setkey": ""
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "calculate",
+                        "component_type_name": "计算公式",
+                        "value": 0,
+                        "value_template": "({COMPONcJAvsPVkR754tHhb1740731101}×{COMPONDujHV483cMiEemdb1740731105}×(1+{COMPONcJAvsPVkR754tHhb1740731101}÷3)+{COMPONjlQgRPKN0DpATbyo1740731205}×(1+{COMPONjlQgRPKN0DpATbyo1740731205}÷3))×0.6",
+                        "parent_code": "COMPONbv8UWweS5Y07pNEL1740731065",
+                        "children": [
+                        ],
+                        "create_at": "2025-02-28T16:46:45.087000"
+                    }
+                ],
+                "create_at": "2025-02-28T16:46:45.087000"
+            },
+            {
+                "code": "COMPONIcN08hy4SetrBLWv1734919221",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "备注",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "default_value": "--"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "approvalRemark",
+                "component_type_name": "审批备注",
+                "value": "",
+                "value_template": [
+                ],
+                "parent_code": "COMPONu90S5CHRfblM6KgD1734919221",
+                "children": [
+                ],
+                "create_at": "2024-12-23T10:00:21.950000"
+            }
+        ],
+        "create_at": "2024-12-23T10:00:21.950000"
+    }
+]

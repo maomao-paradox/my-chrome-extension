@@ -1,0 +1,15 @@
+{
+    "id": "floating-ball",
+    "name": "悬浮球",
+    "version": "1.0.0",
+    "description": "Shadow-DOM 悬浮球 + 工具抽屉",
+    "author": "yourname",
+    "icon": "./icon.svg",
+    "entry": "./index.ts",
+    "location": [
+        "edge",
+        "inner"
+    ],
+    "configurable": true,
+    "enabled": true
+}

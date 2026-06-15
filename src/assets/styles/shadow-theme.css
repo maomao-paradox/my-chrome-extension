@@ -1,0 +1,99 @@
+:host {
+    /* 基础变量 */
+    --z-index: 2147483647;
+    --animation-duration: .2s;
+
+    /* 颜色系统 */
+    --color-black: #000;
+    --color-white: #fff;
+    --color-border: rgba(0, 0, 0, .2);
+    --color-text-primary: rgba(0, 0, 0, .85);
+    --color-text-secondary: rgba(0, 0, 0, .6);
+    --color-text-tertiary: rgba(0, 0, 0, .3);
+    --color-fills-primary: #e8e8e8;
+    --color-fills-secondary: #f2f2f2;
+    --color-fills-tertiary: #f5f5f5;
+    --color-accents-blue: #007aff;
+    --color-fill-dark-5: rgba(0, 0, 0, .05);
+
+    /* 科幻风格主题变量 */
+    --scifi-bg-primary: #0a0e17;
+    --scifi-bg-secondary: #131c2b;
+    --scifi-text-primary: #e2e8f0;
+    --scifi-text-secondary: #94a3b8;
+    --scifi-accent-primary: #3b82f6;
+    --scifi-accent-secondary: #8b5cf6;
+    --scifi-border-color: rgba(59, 130, 246, 0.3);
+    --scifi-glow-color: rgba(59, 130, 246, 0.3);
+
+    /* Element Plus CSS变量 - 基础样式 */
+    --el-bg-color: #0f172a;
+    --el-bg-color-page: #0a0e17;
+    --el-bg-color-overlay: rgba(15, 23, 42, 0.9);
+    --el-text-color-primary: #e2e8f0;
+    --el-text-color-regular: #cbd5e1;
+    --el-text-color-secondary: #94a3b8;
+    --el-text-color-placeholder: #64748b;
+    --el-text-color-disabled: #475569;
+
+    /* Element Plus CSS变量 - 边框样式 */
+    --el-border-color: rgba(59, 130, 246, 0.3);
+    --el-border-color-light: rgba(59, 130, 246, 0.2);
+    --el-border-color-lighter: rgba(59, 130, 246, 0.1);
+    --el-border-color-extra-light: rgba(59, 130, 246, 0.05);
+
+    /* Element Plus CSS变量 - 组件特定样式 */
+    --el-dialog-bg-color: #0f172a;
+    --el-drawer-bg-color: #0f172a;
+    --el-drawer-padding-primary: 20px;
+    --el-dialog-padding-primary: 20px;
+    --el-box-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --el-box-shadow-light: 0 2px 12px 0 rgba(59, 130, 246, 0.1);
+    --el-transition-duration: 0.3s;
+
+    /* Element Plus CSS变量 - 表单组件 */
+    --el-input-bg-color: rgba(30, 41, 59, 0.8);
+    --el-input-border-color: rgba(59, 130, 246, 0.3);
+    --el-input-focus-border-color: #3b82f6;
+    --el-input-focus-box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+
+    /* Element Plus CSS变量 - 按钮组件 */
+    --el-button-primary-bg-color: #3b82f6;
+    --el-button-primary-border-color: #3b82f6;
+    --el-button-primary-hover-bg-color: #2563eb;
+    --el-button-primary-hover-border-color: #2563eb;
+    --el-button-primary-active-bg-color: #1d4ed8;
+    --el-button-primary-active-border-color: #1d4ed8;
+
+    /* Element Plus CSS变量 - 导航组件 */
+    --el-menu-bg-color: #0f172a;
+    --el-menu-border-color: rgba(59, 130, 246, 0.3);
+    --el-menu-item-hover-bg-color: rgba(59, 130, 246, 0.1);
+    --el-menu-item-active-bg-color: rgba(59, 130, 246, 0.2);
+    --el-menu-item-active-border-color: #3b82f6;
+
+    /* Element Plus CSS变量 - 标签页组件 */
+    --el-tabs-nav-wrap-background-color: transparent;
+    --el-tabs-border-color: rgba(59, 130, 246, 0.3);
+    --el-tabs-active-bar-color: #3b82f6;
+    --el-tabs-nav-item-color: #94a3b8;
+    --el-tabs-nav-item-active-color: #3b82f6;
+    --el-tabs-nav-item-hover-color: #e2e8f0;
+
+    /* 弹窗标题 */
+    --el-dialog-title-font-size: 16px;
+}
+
+* {
+    box-sizing: border-box
+}
+
+div {
+    margin: 0;
+    visibility: visible;
+    font-family: -apple-system, blinkmacsystemfont, Helvetica Neue, helvetica, segoe ui, arial, roboto, PingFang SC, miui, Hiragino Sans GB, Microsoft Yahei, sans-serif
+}
+
+textarea {
+    font-family: -apple-system, blinkmacsystemfont, Helvetica Neue, helvetica, segoe ui, arial, roboto, PingFang SC, miui, Hiragino Sans GB, Microsoft Yahei, sans-serif
+}

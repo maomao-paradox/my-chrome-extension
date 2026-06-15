@@ -1,0 +1,28 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "plugin:vue/vue3-recommended" // Vue 3 项目
+        // "plugin:vue/recommended"   // Vue 2 项目
+    ],
+    "parser": "vue-eslint-parser",
+    "parserOptions": {
+        "ecmaVersion": 2022,
+        "parser": "@babel/eslint-parser", // 关键配置
+        "sourceType": "module", // 启用 ES 模块
+        "requireConfigFile": false // 避免 Babel 配置冲突
+    },
+    "globals": {
+        "chrome": "readonly" // Chrome 扩展 API 声明
+    },
+    "rules": {
+        "no-unused-vars": [
+            "warn",
+            {
+                "argsIgnorePattern": "^_"
+            }
+        ]
+    }
+}

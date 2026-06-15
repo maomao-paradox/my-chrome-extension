@@ -1,0 +1,16 @@
+{
+    "id": "mcp",
+    "name": "MCP浏览器操作助手",
+    "version": "1.0.0",
+    "description": "通过AI对话交互的形式操作浏览器，支持点击、输入、导航等操作",
+    "author": "yourname",
+    "icon": "",
+    "entry": "./index.ts",
+    "location": [
+        "edge",
+        "inner",
+        "floatingball"
+    ],
+    "configurable": true,
+    "enabled": true
+}

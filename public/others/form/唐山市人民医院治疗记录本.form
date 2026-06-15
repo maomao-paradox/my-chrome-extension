@@ -1,0 +1,1456 @@
+[
+    {
+        "code": "rowCOMPONpBoD0mLnqON5KwU81740723505",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": false,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": "",
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONT7EAGjt5lU4f9OWe1740724513",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "医院logo/名称",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "hospital_logo_name",
+                "component_type_name": "医院logo/名称",
+                "value": "",
+                "value_template": "",
+                "parent_code": "rowCOMPONpBoD0mLnqON5KwU81740723505",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            },
+            {
+                "code": "COMPONmLe42iFZ9GKsq6H81740724526",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 6,
+                "custom": {
+                    "height": "50"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "rowCOMPONpBoD0mLnqON5KwU81740723505",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            },
+            {
+                "code": "COMPONpBoD0mLnqON5KwU81740723505",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "<b>唐山市人民医院</b><div><b>治疗记录本</b></div>",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "textAlign": "center",
+                    "textDecoration": "none",
+                    "fontSize": "36px",
+                    "fontWeight": "normal",
+                    "fontStyle": "normal"
+                },
+                "span": 24,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": 500,
+                "component_type_source": "BASE",
+                "component_type_code": "text",
+                "component_type_name": "自定义文本",
+                "value": "<b>唐山市人民医院</b><div><b>治疗记录本</b></div>",
+                "value_template": "",
+                "parent_code": "rowCOMPONpBoD0mLnqON5KwU81740723505",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            },
+            {
+                "code": "COMPONoN7lFI8g2WzS0EUc1740724227",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 6,
+                "custom": {
+                    "height": "50"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "rowCOMPONpBoD0mLnqON5KwU81740723505",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            }
+        ],
+        "create_at": "2025-02-28T14:35:36.611000"
+    },
+    {
+        "code": "COMPONFPV3xAaYLQgUq90r1740723581",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "基本信息",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": true,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+            "fontSize": "21px"
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONRXbu3iaw9nK5y6jv1740723532",
+                "association_code": "name",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "姓名",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "type": "",
+                    "setkey": "",
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "姓名"
+                    },
+                    "valueStyle": "default"
+                },
+                "min_len": "",
+                "max_len": 32,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-06-13T10:59:24.000000"
+            },
+            {
+                "code": "COMPONsHpMkv2Q4d1GeKmE1740723532",
+                "association_code": "gender",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "性别",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "性别"
+                    },
+                    "valueStyle": "default",
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "select",
+                "component_type_name": "下拉单选",
+                "value": "",
+                "value_template": [
+                    {
+                        "value": "男",
+                        "label": "男"
+                    },
+                    {
+                        "value": "女",
+                        "label": "女"
+                    }
+                ],
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-06-13T11:06:11.000000"
+            },
+            {
+                "code": "COMPONtMNlaUEhOzHDy5rp1740724779",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "height": "15"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:41:36.967000"
+            },
+            {
+                "code": "COMPONdklRgQ0CwFTAm2eJ1740723532",
+                "association_code": "age",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "年龄[岁]",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "setkey": "",
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "年龄[岁]"
+                    },
+                    "valueStyle": "default"
+                },
+                "min_len": "",
+                "max_len": 10,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-06-13T18:03:48.000000"
+            },
+            {
+                "code": "COMPONdNYVxOwiln5EpSIP1740723532",
+                "association_code": "outpatient_number",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "放疗号",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "setkey": "",
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "放疗号"
+                    }
+                },
+                "min_len": 0,
+                "max_len": 64,
+                "component_type_source": "HIDDEN",
+                "component_type_code": "radiationCode",
+                "component_type_name": "放疗号",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-07-26T15:19:27.861000"
+            },
+            {
+                "code": "COMPONiu2NZ5GdowAEjhRc1740724803",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "height": "15"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:41:36.967000"
+            },
+            {
+                "code": "COMPON9wfHbqsZg8UIxvtQ1740723532",
+                "association_code": "admission_number",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "病案号",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "HIS": false,
+                    "setkey": "",
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "病案号"
+                    }
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "HIDDEN",
+                "component_type_code": "his_input",
+                "component_type_name": "病案号",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-06-30T14:35:13.537000"
+            },
+            {
+                "code": "COMPONIQaf2X4ejUAkqz0Y1740723532",
+                "association_code": "hospital_citizen_name",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "病区",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "setkey": "",
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "病区"
+                    },
+                    "valueStyle": "default"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "select",
+                "component_type_name": "下拉单选",
+                "value": "",
+                "value_template": [
+                    {
+                        "value": "肿瘤内科一区",
+                        "label": "肿瘤内科一区"
+                    },
+                    {
+                        "value": "肿瘤内科二区",
+                        "label": "肿瘤内科二区"
+                    },
+                    {
+                        "value": "肿瘤内科三区",
+                        "label": "肿瘤内科三区"
+                    },
+                    {
+                        "value": "肿瘤内科四区",
+                        "label": "肿瘤内科四区"
+                    },
+                    {
+                        "value": "其它科室",
+                        "label": "其它科室"
+                    }
+                ],
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-06-13T11:06:11.000000"
+            },
+            {
+                "code": "COMPON4tspY8oarZDynmBN1740724812",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "height": "15"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:41:36.967000"
+            },
+            {
+                "code": "COMPON0afEsdX8nrpIA2tC1740723532",
+                "association_code": "phone",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "患者电话",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "患者电话"
+                    },
+                    "valueStyle": "default",
+                    "setkey": ""
+                },
+                "min_len": 11,
+                "max_len": 11,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-07-26T15:49:35.589000"
+            },
+            {
+                "code": "COMPONnvbHd9MfSDejBmWZ1740723532",
+                "association_code": "contact_number",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "联系人电话",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "联系人电话"
+                    },
+                    "valueStyle": "default",
+                    "setkey": ""
+                },
+                "min_len": 0,
+                "max_len": 11,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-07-26T15:49:35.589000"
+            },
+            {
+                "code": "COMPONq0jBSdQwIH2h85tP1740724820",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "height": "15"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:41:36.967000"
+            },
+            {
+                "code": "COMPONybqUpzVxAEh2fXlR1740723532",
+                "association_code": "payment_way",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "付款方式",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "setkey": "",
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "付款方式"
+                    },
+                    "valueStyle": "default"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "selectMutiple",
+                "component_type_name": "下拉多选",
+                "value": [
+                ],
+                "value_template": [
+                    {
+                        "value": "商业医保",
+                        "label": "商业医保"
+                    },
+                    {
+                        "value": "职工医院",
+                        "label": "职工医院"
+                    },
+                    {
+                        "value": "城乡医保",
+                        "label": "城乡医保"
+                    },
+                    {
+                        "value": "非医保",
+                        "label": "非医保"
+                    }
+                ],
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-06-28T12:31:48.000000"
+            },
+            {
+                "code": "COMPONWLamB5MAEcnT1SYd1740723532",
+                "association_code": "live_place",
+                "association_form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                "name": "现住址",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXdzcf0y1CsSmiqTbr1655088868",
+                        "form_name": "基本信息",
+                        "component_name": "现住址"
+                    },
+                    "valueStyle": "default",
+                    "setkey": ""
+                },
+                "min_len": "",
+                "max_len": 256,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONFPV3xAaYLQgUq90r1740723581",
+                "children": [
+                ],
+                "create_at": "2022-06-13T11:06:11.000000"
+            }
+        ],
+        "create_at": "2025-02-28T14:35:36.611000"
+    },
+    {
+        "code": "COMPONknoUaOuH1ZNG9vWK1740724229",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "容器",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": false,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+            "fontSize": "21px"
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONGRLj8YHuWZBviq5m1740724229",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 6,
+                "custom": {
+                    "height": "50"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONknoUaOuH1ZNG9vWK1740724229",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            }
+        ],
+        "create_at": "2025-02-28T14:35:36.611000"
+    },
+    {
+        "code": "COMPON78SrgmN4TXqpDcO61740723622",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "治疗信息",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": true,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+            "fontSize": "21px"
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONpRDI2ZcwU0hXltPQ1740724206",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "诊断及分期",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 24,
+                "custom": {
+                    "type": "default"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "diagnose",
+                "component_type_name": "诊断及分期",
+                "value": [
+                ],
+                "value_template": [
+                ],
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            },
+            {
+                "code": "COMPON7xEL9udUvBzipbRn1740724828",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "height": "15"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:41:36.967000"
+            },
+            {
+                "code": "COMPONuf4yi7aH6tsVZMKx1740723975",
+                "association_code": "COMPONkwl2TGmMsB6o9CvA1715063896",
+                "association_form_code": "FORMXXmXLKBd2CEekac6vr1670919850",
+                "name": "部位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "width": "100%",
+                    "float": "none",
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "association_info": {
+                        "form_code": "FORMXXmXLKBd2CEekac6vr1670919850",
+                        "form_name": "程段信息",
+                        "component_name": "部位"
+                    }
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "treatment_area",
+                "component_type_name": "放疗部位",
+                "value": [
+                ],
+                "value_template": [
+                    {
+                        "value": "头颈部",
+                        "label": "头颈部",
+                        "children": [
+                            {
+                                "value": "鼻咽",
+                                "label": "鼻咽"
+                            },
+                            {
+                                "value": "脑",
+                                "label": "脑"
+                            },
+                            {
+                                "value": "眼眶",
+                                "label": "眼眶"
+                            },
+                            {
+                                "value": "鼻腔",
+                                "label": "鼻腔"
+                            },
+                            {
+                                "value": "副鼻窦",
+                                "label": "副鼻窦"
+                            },
+                            {
+                                "value": "筛窦",
+                                "label": "筛窦"
+                            },
+                            {
+                                "value": "上颌窦",
+                                "label": "上颌窦"
+                            },
+                            {
+                                "value": "口腔",
+                                "label": "口腔"
+                            },
+                            {
+                                "value": "口咽",
+                                "label": "口咽"
+                            },
+                            {
+                                "value": "下咽",
+                                "label": "下咽"
+                            },
+                            {
+                                "value": "喉",
+                                "label": "喉"
+                            },
+                            {
+                                "value": "唾液腺",
+                                "label": "唾液腺"
+                            },
+                            {
+                                "value": "腮腺",
+                                "label": "腮腺"
+                            },
+                            {
+                                "value": "甲状腺",
+                                "label": "甲状腺"
+                            },
+                            {
+                                "value": "颈部",
+                                "label": "颈部"
+                            },
+                            {
+                                "value": "上颈",
+                                "label": "上颈"
+                            },
+                            {
+                                "value": "中颈",
+                                "label": "中颈"
+                            },
+                            {
+                                "value": "下颈",
+                                "label": "下颈"
+                            },
+                            {
+                                "value": "锁骨上窝",
+                                "label": "锁骨上窝"
+                            },
+                            {
+                                "value": "锁骨下窝",
+                                "label": "锁骨下窝"
+                            },
+                            {
+                                "value": "额窦",
+                                "label": "额窦"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "胸部",
+                        "label": "胸部",
+                        "children": [
+                            {
+                                "value": "肺",
+                                "label": "肺"
+                            },
+                            {
+                                "value": "纵隔",
+                                "label": "纵隔"
+                            },
+                            {
+                                "value": "胸壁",
+                                "label": "胸壁"
+                            },
+                            {
+                                "value": "肋骨",
+                                "label": "肋骨"
+                            },
+                            {
+                                "value": "腋窝",
+                                "label": "腋窝"
+                            },
+                            {
+                                "value": "乳腺",
+                                "label": "乳腺"
+                            },
+                            {
+                                "value": "食管",
+                                "label": "食管"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "腹部",
+                        "label": "腹部",
+                        "children": [
+                            {
+                                "value": "肝",
+                                "label": "肝"
+                            },
+                            {
+                                "value": "胆道",
+                                "label": "胆道"
+                            },
+                            {
+                                "value": "胃",
+                                "label": "胃"
+                            },
+                            {
+                                "value": "胰腺",
+                                "label": "胰腺"
+                            },
+                            {
+                                "value": "肾",
+                                "label": "肾"
+                            },
+                            {
+                                "value": "肾上腺",
+                                "label": "肾上腺"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "盆腔",
+                        "label": "盆腔",
+                        "children": [
+                            {
+                                "value": "直肠",
+                                "label": "直肠"
+                            },
+                            {
+                                "value": "结肠",
+                                "label": "结肠"
+                            },
+                            {
+                                "value": "小肠",
+                                "label": "小肠"
+                            },
+                            {
+                                "value": "膀胱",
+                                "label": "膀胱"
+                            },
+                            {
+                                "value": "子宫",
+                                "label": "子宫"
+                            },
+                            {
+                                "value": "卵巢",
+                                "label": "卵巢"
+                            },
+                            {
+                                "value": "前列腺",
+                                "label": "前列腺"
+                            },
+                            {
+                                "value": "外阴",
+                                "label": "外阴"
+                            },
+                            {
+                                "value": "阴道",
+                                "label": "阴道"
+                            },
+                            {
+                                "value": "宫颈",
+                                "label": "宫颈"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "脊柱四肢",
+                        "label": "脊柱四肢",
+                        "children": [
+                            {
+                                "value": "上肢",
+                                "label": "上肢"
+                            },
+                            {
+                                "value": "下肢",
+                                "label": "下肢"
+                            },
+                            {
+                                "value": "手",
+                                "label": "手"
+                            },
+                            {
+                                "value": "脚",
+                                "label": "脚"
+                            },
+                            {
+                                "value": "脊柱",
+                                "label": "脊柱"
+                            },
+                            {
+                                "value": "颈椎",
+                                "label": "颈椎"
+                            },
+                            {
+                                "value": "胸椎",
+                                "label": "胸椎"
+                            },
+                            {
+                                "value": "腰椎",
+                                "label": "腰椎"
+                            },
+                            {
+                                "value": "骶椎",
+                                "label": "骶椎"
+                            },
+                            {
+                                "value": "髂骨",
+                                "label": "髂骨"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "特殊部位",
+                        "label": "特殊部位",
+                        "children": [
+                            {
+                                "value": "特殊部位",
+                                "label": "特殊部位"
+                            }
+                        ]
+                    }
+                ],
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2024-05-07T14:40:24.831000"
+            },
+            {
+                "code": "COMPONECcVkrGpB6KQO51Z1740724029",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "治疗技术",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "treatTech",
+                "component_type_name": "治疗技术",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            },
+            {
+                "code": "COMPONRutLbEdq8zIxTQfs1740724835",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "height": "15"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:41:36.967000"
+            },
+            {
+                "code": "COMPONEO6CK840Dik1QYW31740724034",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "治疗机器",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "is_open_apply_time": false,
+                    "valueStyle": "default"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "treatMachine",
+                "component_type_name": "治疗机器",
+                "value": null,
+                "value_template": [
+                    {
+                        "value": "MACROOtsxzAgeRpX9BVNh51685590094",
+                        "label": "加速器机房"
+                    },
+                    {
+                        "value": "MACROOG5s6P97xRKfvIzBp1715404023",
+                        "label": "射波刀机房"
+                    },
+                    {
+                        "value": "MACROOmZH4oAGtPNfYwnr91715406801",
+                        "label": "后装机房"
+                    },
+                    {
+                        "value": "MACROOdpPwzmk1DMV9S6ns1736995620",
+                        "label": "机房1后装-时长"
+                    },
+                    {
+                        "value": "MACROOTRgDeUNKnxvQAoEB1737007636",
+                        "label": "机房1治疗-时长"
+                    },
+                    {
+                        "value": "MACROOtCp0Xy8NZrKQJBz91737007701",
+                        "label": "机房3治疗-时长"
+                    },
+                    {
+                        "value": "MACROOBUqQtPJSLRkcMGf61737007747",
+                        "label": "机房2治疗-时长"
+                    },
+                    {
+                        "value": "MACROON63ZiSRcdHt2fAWh1737014571",
+                        "label": "机房4治疗-时长"
+                    },
+                    {
+                        "value": "MACROOTHg4nt0XvBUiOw7x1737117663",
+                        "label": "治疗chh"
+                    },
+                    {
+                        "value": "MACROO3QJnHO2PFtfpWsmS1737356473",
+                        "label": "治疗2chh"
+                    },
+                    {
+                        "value": "MACROOqGPVfcQ73w1aHJmy1739327761",
+                        "label": "zlhtesst_治疗_时间段"
+                    },
+                    {
+                        "value": "MACROOlF0P9XV1OgqmTprE1739327799",
+                        "label": "zlhtest_治疗_时间点"
+                    },
+                    {
+                        "value": "MACROOvIPdblNMsLO0zRT11739773340",
+                        "label": "时间点-chh"
+                    },
+                    {
+                        "value": "MACROOnyd4HJebgOEArYUj1740454075",
+                        "label": "预约优先（时间点机房）"
+                    },
+                    {
+                        "value": "MACROOEwfvo05b4gZ27qek1740454228",
+                        "label": "预约优先（时段机房）"
+                    },
+                    {
+                        "value": "MACROOQ9evysYCRrc6L14M1740455471",
+                        "label": "治疗-签到优先"
+                    },
+                    {
+                        "value": "MACROOo6lcMTCsIV7pXBYJ1740468468",
+                        "label": "治疗-时段机房"
+                    }
+                ],
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            },
+            {
+                "code": "COMPONCtVum3k5BoqZHaOX1740724043",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "住院科室",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "valueStyle": "default",
+                    "setkey": ""
+                },
+                "min_len": "0",
+                "max_len": 256,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            },
+            {
+                "code": "COMPONePhknoHlrIgLNAR41740724843",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "占位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "height": "15"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "LAYOUT",
+                "component_type_code": "blank",
+                "component_type_name": "占位",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:41:36.967000"
+            },
+            {
+                "code": "COMPONyIfkpJYgPKZM0nwX1740724059",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "治疗方案意见",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "21px"
+                },
+                "span": 12,
+                "custom": {
+                    "valueStyle": "default",
+                    "setkey": ""
+                },
+                "min_len": "0",
+                "max_len": 256,
+                "component_type_source": "BASE",
+                "component_type_code": "input",
+                "component_type_name": "单行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPON78SrgmN4TXqpDcO61740723622",
+                "children": [
+                ],
+                "create_at": "2025-02-28T14:35:36.611000"
+            }
+        ],
+        "create_at": "2025-02-28T14:35:36.611000"
+    }
+]

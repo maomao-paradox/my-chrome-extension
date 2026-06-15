@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2015",
+    "module": "esnext",
+    "baseUrl": ".",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@types/*": [
+        "src/assets/types/*"
+      ],
+      "@components/*": [
+        "src/assets/components/*"
+      ],
+      "@icons/*": [
+        "src/assets/icons/*"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ],
+    "types": [
+      "chrome"
+    ],
+    "skipLibCheck": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "src/assets/types"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/assets/types/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "src/standalone"
+  ]
+}

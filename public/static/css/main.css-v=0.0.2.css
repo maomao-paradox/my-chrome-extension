@@ -1,0 +1,267 @@
+@charset "UTF-8";
+/*
+_________Class | CSS
+___Description | main CSS for RainText
+
+________Author | sumbioun.com
+____Programmer | pedro veneroso
+
+_______Version | 0.2β
+__Release date | Oct 24th 2016
+___Last update | Nov 5th 2016
+
+_______License | GPLv3 2016 sumbioun.com
+*/
+
+body {
+	font-family: Source Sans Pro;
+	background-color: #e1e1e1;
+	/* pensar em inversão de cores */
+	margin: 0px;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	color: black;
+}
+
+a {
+	color: #000000;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #324e87;
+}
+
+#rain_processing {
+	position: absolute;
+	z-index: -1;
+}
+
+#post_text {
+	position: absolute;
+}
+
+#control_panel {
+	z-index: 0;
+	position: absolute;
+	background-color: #1d1d1d;
+	color: white;
+}
+
+.button {
+	position: absolute;
+	width: 32px;
+	height: 32px;
+	padding: 8px 4px 8px 12px;
+	font-size: 24px;
+	font: Font Awesome;
+	text-align: left;
+	vertical-align: middle;
+	background-color: #1d1d1d;
+	color: white;
+	/*border-radius: 20px;*/
+}
+
+#send_button {
+	position: absolute;
+	width: 200px;
+	height: 18px;
+	padding: 8px 6px 8px 10px;
+	margin-left: 1px;
+	font-size: 14px;
+	font: Source Sans Pro;
+	text-align: center;
+	vertical-align: middle;
+	background-color: white;
+	color: #1c1c1c;
+	text-transform: uppercase;
+	font-weight: 700;
+}
+
+#share_button {
+	position: absolute;
+	width: 200px;
+	height: 18px;
+	padding: 8px 6px 8px 10px;
+	margin-left: 1px;
+	font-size: 14px;
+	font: Source Sans Pro;
+	text-align: center;
+	vertical-align: middle;
+	background-color: white;
+	color: #1c1c1c;
+	text-transform: uppercase;
+	font-weight: 700;
+}
+
+#share_options {
+	position: absolute;
+	width: 200px;
+	height: 18px;
+	padding: 8px 6px 8px 10px;
+	margin-left: 1px;
+	font-size: 24px;
+	font: Font Awesome;
+	text-align: center;
+	vertical-align: middle;
+	background-color: white;
+	color: #1c1c1c;
+	background-color: #ffffff;
+	text-transform: uppercase;
+	font-weight: 700;
+}
+
+textarea {
+	position: absolute;
+	z-index: 1;
+	font-family: Source Sans Pro;
+	width: 178px;
+	height: 150px;
+	font-size: 16px;
+	font-weight: 300;
+	text-align: left;
+	padding: 10px 10px 10px 30px;
+	background: #1c1c1c;
+	color: white;
+	border: none;
+	/*solid 1px #3b7b9b;*/
+	margin-top: 10px;
+	margin-left: -13px;
+	resize: none;
+}
+
+textarea:focus {
+	background: #1c1c1c;
+	color: white;
+	outline: none;
+}
+
+::-webkit-input-placeholder {
+	color: #7fa1d3;
+	text-align: left;
+	/*font-style: italic;*/
+	text-transform: uppercase;
+}
+
+:-moz-placeholder {
+	/* Firefox 18- */
+	color: #7fa1d3;
+	text-align: left;
+	/*font-style: italic;*/
+	text-transform: uppercase;
+}
+
+::-moz-placeholder {
+	/* Firefox 19+ */
+	color: #7fa1d3;
+	text-align: left;
+	/*font-style: italic;*/
+	text-transform: uppercase;
+}
+
+:-ms-input-placeholder {
+	color: #7fa1d3;
+	text-align: left;
+	/*font-style: italic;*/
+	text-transform: uppercase;
+}
+
+textarea:focus::-webkit-input-placeholder {
+	color: transparent;
+}
+
+textarea:focus:-moz-placeholder {
+	color: transparent;
+}
+
+/* FF 4-18 */
+textarea:focus::-moz-placeholder {
+	color: transparent;
+}
+
+/* FF 19+ */
+textarea:focus:-ms-input-placeholder {
+	color: transparent;
+}
+
+/* IE 10+ */
+
+#close_button {
+	position: absolute;
+	z-index: 1;
+	margin-left: 190px;
+	margin-top: -3px;
+	width: 16px;
+	height: 16px;
+	text-align: right;
+	font-size: 18px;
+	color: #1c1c1c;
+}
+
+#close_popup {
+	position: absolute;
+	z-index: 2;
+	/*margin-left: 190px;*/
+	margin-top: -3px;
+	width: 16px;
+	height: 16px;
+	text-align: right;
+	font-size: 18px;
+	color: #1c1c1c;
+}
+
+input {
+	font-family: Source Code Pro;
+	height: 24px;
+	/*width:700px;*/
+	font-size: 12px;
+	font-weight: 300;
+	text-align: center;
+	padding-left: 5px;
+	padding-right: 5px;
+	background: #ffffff;
+	color: #000000;
+	border: solid 1px #d1d1d1;
+	margin-top: 2px;
+	margin-bottom: 12px;
+	margin-left: 20px;
+}
+
+input:focus {
+	background: #ffffff;
+	color: #000000;
+	outline: none;
+}
+
+#send-data {
+	display: inline-block;
+	text-align: center;
+	vertical-align: middle;
+	color: white;
+	background: #3c3c3c;
+	/*border:solid 1px #000000;*/
+	padding: 3px 10px;
+	font-size: 16px;
+	/*margin-top: 12px;*/
+	top: 3px;
+	font-family: Source Sans Pro;
+	font-weight: 600;
+	margin-left: 12px;
+	/*border-radius: 24px;*/
+}
+
+#share_popup {
+	z-index: 1;
+	position: absolute;
+	width: 300px;
+	height: 271px;
+	color: #ffffff;
+	background-color: #7fa1d3;
+}
+
+.social_button {
+	position: absolute;
+	margin-top: 1px;
+	color: #7fa1d3;
+}

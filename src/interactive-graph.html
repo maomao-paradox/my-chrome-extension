@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>项目依赖关系网 - 蜘蛛网力导向图</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body,
+    html,
+    #chart {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
+
+    #controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      font-family: system-ui, sans-serif;
+      z-index: 100;
+      pointer-events: auto;
+      backdrop-filter: blur(4px);
+    }
+
+    input {
+      margin-left: 8px;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      width: 220px;
+      font-size: 14px;
+    }
+
+    .tip {
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="controls">
+    🔍 <input type="text" id="search" placeholder="输入文件名或路径，高亮显示">
+    <div class="tip">💡 鼠标拖拽节点 / 滚轮缩放 / 蜘蛛网力导向布局</div>
+  </div>
+  <div id="chart"></div>
+
+  <script>
+    fetch('/deps.json')
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(rawData => {
+        console.log(rawData);
+        // 将 deps.json 转换为 ECharts graph 所需格式
+        const nodes = [];
+        const edges = [];
+        const nodeIndexMap = new Map(); // 路径 -> 索引
+
+        // 计算每个模块的依赖数量
+        const dependencyCount = new Map();
+        rawData.modules.forEach(module => {
+          const source = module.source;
+          const count = module.dependencies ? module.dependencies.length : 0;
+          dependencyCount.set(source, count);
+        });
+
+        // 遍历所有模块
+        rawData.modules.forEach(module => {
+          const source = module.source;
+          // 添加源节点（如果未添加）
+          if (!nodeIndexMap.has(source)) {
+            nodeIndexMap.set(source, nodes.length);
+            // 根据模块类型设置不同的分类
+            let category = 0;
+            let baseSize = 12;
+            if (source.startsWith('node_modules/')) {
+              category = 1; // npm 依赖
+              baseSize = 10;
+            } else if (source.includes('/')) {
+              const parts = source.split('/');
+              if (parts[0] === 'src') {
+                if (parts[1] === 'components') {
+                  category = 2; // 组件
+                  baseSize = 14;
+                } else if (parts[1] === 'utils') {
+                  category = 3; // 工具函数
+                  baseSize = 12;
+                } else if (parts[1] === 'stores') {
+                  category = 4; // 状态管理
+                  baseSize = 12;
+                } else if (parts[1] === 'types') {
+                  category = 5; // 类型定义
+                  baseSize = 10;
+                } else if (parts[1] === 'api') {
+                  category = 6; // API
+                  baseSize = 12;
+                } else if (parts[1] === 'message') {
+                  category = 7; // 消息
+                  baseSize = 12;
+                } else if (parts[1] === 'event') {
+                  category = 8; // 事件总线
+                  baseSize = 12;
+                }
+              }
+            }
+            // 根据依赖数量调整节点大小
+            const count = dependencyCount.get(source) || 0;
+            const symbolSize = Math.max(baseSize, baseSize + count * 0.8);
+            nodes.push({ 
+              name: source, 
+              symbolSize, 
+              category,
+              dependencyCount: count
+            });
+          }
+          
+          // 处理每个依赖
+          if (module.dependencies) {
+            module.dependencies.forEach(dependency => {
+              const target = dependency.resolved || dependency.module;
+              if (target) {
+                // 添加目标节点（如果未添加）
+                if (!nodeIndexMap.has(target)) {
+                  nodeIndexMap.set(target, nodes.length);
+                  // 根据目标类型设置不同的分类
+                  let category = 0;
+                  let baseSize = 12;
+                  if (target.startsWith('node_modules/')) {
+                    category = 1; // npm 依赖
+                    baseSize = 10;
+                  } else if (target.includes('/')) {
+                    const parts = target.split('/');
+                    if (parts[0] === 'src') {
+                      if (parts[1] === 'components') {
+                        category = 2; // 组件
+                        baseSize = 14;
+                      } else if (parts[1] === 'utils') {
+                        category = 3; // 工具函数
+                        baseSize = 12;
+                      } else if (parts[1] === 'stores') {
+                        category = 4; // 状态管理
+                        baseSize = 12;
+                      } else if (parts[1] === 'types') {
+                        category = 5; // 类型定义
+                        baseSize = 10;
+                      } else if (parts[1] === 'api') {
+                        category = 6; // API
+                        baseSize = 12;
+                      } else if (parts[1] === 'message') {
+                        category = 7; // 消息
+                        baseSize = 12;
+                      } else if (parts[1] === 'event-bus') {
+                        category = 8; // 事件总线
+                        baseSize = 12;
+                      }
+                    }
+                  }
+                  // 根据依赖数量调整节点大小
+                  const count = dependencyCount.get(target) || 0;
+                  const symbolSize = Math.max(baseSize, baseSize + count * 0.8);
+                  nodes.push({ 
+                    name: target, 
+                    symbolSize, 
+                    category,
+                    dependencyCount: count
+                  });
+                }
+                edges.push({
+                  source: nodeIndexMap.get(source),
+                  target: nodeIndexMap.get(target)
+                });
+              }
+            });
+          }
+        });
+
+        // 可选：过滤掉孤立节点（没有连线的节点）
+        const connectedNodeSet = new Set();
+        edges.forEach(edge => {
+          connectedNodeSet.add(edge.source);
+          connectedNodeSet.add(edge.target);
+        });
+        const filteredNodes = nodes.filter((_, idx) => connectedNodeSet.has(idx));
+        // 重建索引映射
+        const newIndexMap = new Map();
+        filteredNodes.forEach((node, newIdx) => {
+          newIndexMap.set(node.name, newIdx);
+        });
+        const filteredEdges = edges.filter(edge => {
+          return newIndexMap.has(nodes[edge.source].name) && newIndexMap.has(nodes[edge.target].name);
+        }).map(edge => ({
+          source: newIndexMap.get(nodes[edge.source].name),
+          target: newIndexMap.get(nodes[edge.target].name)
+        }));
+
+        // 确保过滤后的节点保留dependencyCount属性
+        const finalNodes = filteredNodes.map(node => ({
+          ...node,
+          dependencyCount: node.dependencyCount || 0
+        }));
+        const finalEdges = filteredEdges;
+
+        // 初始化 ECharts 力导向图
+        const chart = echarts.init(document.getElementById('chart'));
+        const option = {
+          title: {
+            text: '🕸️ 项目依赖蛛网图',
+            left: 'center',
+            top: 10,
+            textStyle: { fontSize: 16, fontWeight: 'normal', color: '#333' }
+          },
+          tooltip: {
+            formatter: (params) => {
+              if (params.dataType === 'node') {
+                const node = params.data;
+                const dependencyCount = node.dependencyCount || 0;
+                return `${params.name}<br/>依赖数量: ${dependencyCount}`;
+              }
+              if (params.dataType === 'edge') {
+                const sourceNode = finalNodes[params.data.source];
+                const targetNode = finalNodes[params.data.target];
+                return `${sourceNode.name} → ${targetNode.name}`;
+              }
+              return '';
+            }
+          },
+          legend: {
+            data: ['本地文件', 'npm依赖', '组件', '工具函数', '状态管理', '类型定义', 'API', '消息', '事件总线'],
+            orient: 'vertical',
+            left: 10,
+            top: 40,
+            textStyle: { fontSize: 12 }
+          },
+          series: [{
+            type: 'graph',
+            layout: 'force',          // 力导向布局 -> 蜘蛛网效果
+            force: {
+              repulsion: 2000,        // 节点斥力，越大越分散
+              edgeLength: 200,       // 边长理想长度
+              gravity: 0.05,         // 重力，避免飞太远
+              friction: 0.1,
+              layoutAnimation: true
+            },
+            roam: true,                // 允许缩放/平移
+            draggable: true,           // 节点可拖拽
+            data: finalNodes.map(node => ({
+              name: node.name,
+              symbolSize: node.symbolSize,
+              category: node.category,
+              dependencyCount: node.dependencyCount,
+              label: { 
+                show: true, 
+                position: 'right', 
+                fontSize: 10, 
+                offset: [5, 0],
+                formatter: (params) => {
+                  // 简化显示路径，只显示文件名
+                  const name = params.name;
+                  const parts = name.split('/');
+                  const fileName = parts[parts.length - 1];
+                  // 如果文件名为index，则显示所在目录的名称
+                  if (fileName === 'index.ts' || fileName === 'index.js' || fileName === 'index.vue') {
+                    if (parts.length >= 2) {
+                      return parts[parts.length - 2];
+                    }
+                  }
+                  return fileName;
+                }
+              }
+            })),
+            links: finalEdges,
+            categories: [
+              { name: '本地文件', itemStyle: { color: '#3498db' } },
+              { name: 'npm依赖', itemStyle: { color: '#27ae60' } },
+              { name: '组件', itemStyle: { color: '#e74c3c' } },
+              { name: '工具函数', itemStyle: { color: '#f39c12' } },
+              { name: '状态管理', itemStyle: { color: '#9b59b6' } },
+              { name: '类型定义', itemStyle: { color: '#1abc9c' } },
+              { name: 'API', itemStyle: { color: '#34495e' } },
+              { name: '消息', itemStyle: { color: '#e67e22' } },
+              { name: '事件总线', itemStyle: { color: '#16a085' } }
+            ],
+            lineStyle: {
+              color: '#aaa',
+              curveness: 0.2,
+              width: 1,
+              opacity: 0.6
+            },
+            edgeSymbol: ['none', 'arrow'],
+            edgeSymbolSize: [0, 6],
+            focusNodeAdjacency: true,
+            zoom: 0.8,
+            itemStyle: {
+              borderColor: '#fff',
+              borderWidth: 1
+            }
+          }]
+        };
+        chart.setOption(option);
+
+        // 搜索高亮功能
+        const searchInput = document.getElementById('search');
+        searchInput.addEventListener('input', (e) => {
+          const keyword = e.target.value.trim().toLowerCase();
+          if (!keyword) {
+            // 恢复所有节点默认样式
+            chart.setOption({
+              series: [{
+                data: finalNodes.map(node => ({
+                  name: node.name,
+                  symbolSize: node.symbolSize,
+                  category: node.category,
+                  label: { 
+                    show: true, 
+                    fontSize: 10, 
+                    color: '#333',
+                    formatter: (params) => {
+                      const name = params.name;
+                      const parts = name.split('/');
+                      const fileName = parts[parts.length - 1];
+                      // 如果文件名为index，则显示所在目录的名称
+                      if (fileName === 'index.ts' || fileName === 'index.js' || fileName === 'index.vue') {
+                        if (parts.length >= 2) {
+                          return parts[parts.length - 2];
+                        }
+                      }
+                      return fileName;
+                    }
+                  },
+                  dependencyCount: node.dependencyCount,
+                  itemStyle: { borderColor: '#fff', borderWidth: 1 }
+                }))
+              }]
+            });
+            return;
+          }
+          const newData = finalNodes.map(node => {
+            const isMatch = node.name.toLowerCase().includes(keyword);
+            return {
+              name: node.name,
+              symbolSize: isMatch ? node.symbolSize * 1.5 : node.symbolSize * 0.8,
+              category: node.category,
+              dependencyCount: node.dependencyCount,
+              label: {
+                show: true,
+                fontSize: isMatch ? 12 : 9,
+                fontWeight: isMatch ? 'bold' : 'normal',
+                color: isMatch ? '#e34f4f' : '#666',
+                formatter: (params) => {
+                  const name = params.name;
+                  const parts = name.split('/');
+                  const fileName = parts[parts.length - 1];
+                  // 如果文件名为index，则显示所在目录的名称
+                  if (fileName === 'index.ts' || fileName === 'index.js' || fileName === 'index.vue') {
+                    if (parts.length >= 2) {
+                      return parts[parts.length - 2];
+                    }
+                  }
+                  return fileName;
+                }
+              },
+              itemStyle: isMatch ? { 
+                borderColor: '#e34f4f', 
+                borderWidth: 2, 
+                shadowBlur: 10,
+                shadowColor: '#e34f4f'
+              } : {}
+            };
+          });
+          chart.setOption({ series: [{ data: newData }] });
+        });
+      })
+      .catch(err => {
+        document.body.innerHTML = `<div style="color:red; padding:30px; font-family:monospace;">❌ 加载 deps.json 失败：${err.message}<br>请先在项目根目录运行：<code>npx depcruise --output-type json src > deps.json</code></div>`;
+      });
+  </script>
+</body>
+
+</html>

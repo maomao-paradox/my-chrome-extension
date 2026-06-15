@@ -1,0 +1,908 @@
+[
+    {
+        "code": "COMPONpm38qiPW41J0hSgt1669880565",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "基本信息",
+        "is_must": true,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": true,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONkwl2TGmMsB6o9CvA1715063896",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "放疗部位",
+                "is_must": false,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "width": "100%",
+                    "float": "none"
+                },
+                "span": 12,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "treatment_area",
+                "component_type_name": "放疗部位",
+                "value": [
+                ],
+                "value_template": [
+                    {
+                        "value": "头颈部",
+                        "label": "头颈部",
+                        "children": [
+                            {
+                                "value": "鼻咽",
+                                "label": "鼻咽"
+                            },
+                            {
+                                "value": "脑",
+                                "label": "脑"
+                            },
+                            {
+                                "value": "眼眶",
+                                "label": "眼眶"
+                            },
+                            {
+                                "value": "鼻腔",
+                                "label": "鼻腔"
+                            },
+                            {
+                                "value": "副鼻窦",
+                                "label": "副鼻窦"
+                            },
+                            {
+                                "value": "筛窦",
+                                "label": "筛窦"
+                            },
+                            {
+                                "value": "上颌窦",
+                                "label": "上颌窦"
+                            },
+                            {
+                                "value": "口腔",
+                                "label": "口腔"
+                            },
+                            {
+                                "value": "口咽",
+                                "label": "口咽"
+                            },
+                            {
+                                "value": "下咽",
+                                "label": "下咽"
+                            },
+                            {
+                                "value": "喉",
+                                "label": "喉"
+                            },
+                            {
+                                "value": "唾液腺",
+                                "label": "唾液腺"
+                            },
+                            {
+                                "value": "腮腺",
+                                "label": "腮腺"
+                            },
+                            {
+                                "value": "甲状腺",
+                                "label": "甲状腺"
+                            },
+                            {
+                                "value": "颈部",
+                                "label": "颈部"
+                            },
+                            {
+                                "value": "上颈",
+                                "label": "上颈"
+                            },
+                            {
+                                "value": "中颈",
+                                "label": "中颈"
+                            },
+                            {
+                                "value": "下颈",
+                                "label": "下颈"
+                            },
+                            {
+                                "value": "锁骨上窝",
+                                "label": "锁骨上窝"
+                            },
+                            {
+                                "value": "锁骨下窝",
+                                "label": "锁骨下窝"
+                            },
+                            {
+                                "value": "额窦",
+                                "label": "额窦"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "胸部",
+                        "label": "胸部",
+                        "children": [
+                            {
+                                "value": "肺",
+                                "label": "肺"
+                            },
+                            {
+                                "value": "纵隔",
+                                "label": "纵隔"
+                            },
+                            {
+                                "value": "胸壁",
+                                "label": "胸壁"
+                            },
+                            {
+                                "value": "肋骨",
+                                "label": "肋骨"
+                            },
+                            {
+                                "value": "腋窝",
+                                "label": "腋窝"
+                            },
+                            {
+                                "value": "乳腺",
+                                "label": "乳腺"
+                            },
+                            {
+                                "value": "食管",
+                                "label": "食管"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "腹部",
+                        "label": "腹部",
+                        "children": [
+                            {
+                                "value": "肝",
+                                "label": "肝"
+                            },
+                            {
+                                "value": "胆道",
+                                "label": "胆道"
+                            },
+                            {
+                                "value": "胃",
+                                "label": "胃"
+                            },
+                            {
+                                "value": "胰腺",
+                                "label": "胰腺"
+                            },
+                            {
+                                "value": "肾",
+                                "label": "肾"
+                            },
+                            {
+                                "value": "肾上腺",
+                                "label": "肾上腺"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "盆腔",
+                        "label": "盆腔",
+                        "children": [
+                            {
+                                "value": "直肠",
+                                "label": "直肠"
+                            },
+                            {
+                                "value": "结肠",
+                                "label": "结肠"
+                            },
+                            {
+                                "value": "小肠",
+                                "label": "小肠"
+                            },
+                            {
+                                "value": "膀胱",
+                                "label": "膀胱"
+                            },
+                            {
+                                "value": "子宫",
+                                "label": "子宫"
+                            },
+                            {
+                                "value": "卵巢",
+                                "label": "卵巢"
+                            },
+                            {
+                                "value": "前列腺",
+                                "label": "前列腺"
+                            },
+                            {
+                                "value": "外阴",
+                                "label": "外阴"
+                            },
+                            {
+                                "value": "阴道",
+                                "label": "阴道"
+                            },
+                            {
+                                "value": "宫颈",
+                                "label": "宫颈"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "脊柱四肢",
+                        "label": "脊柱四肢",
+                        "children": [
+                            {
+                                "value": "上肢",
+                                "label": "上肢"
+                            },
+                            {
+                                "value": "下肢",
+                                "label": "下肢"
+                            },
+                            {
+                                "value": "手",
+                                "label": "手"
+                            },
+                            {
+                                "value": "脚",
+                                "label": "脚"
+                            },
+                            {
+                                "value": "脊柱",
+                                "label": "脊柱"
+                            },
+                            {
+                                "value": "颈椎",
+                                "label": "颈椎"
+                            },
+                            {
+                                "value": "胸椎",
+                                "label": "胸椎"
+                            },
+                            {
+                                "value": "腰椎",
+                                "label": "腰椎"
+                            },
+                            {
+                                "value": "骶椎",
+                                "label": "骶椎"
+                            },
+                            {
+                                "value": "髂骨",
+                                "label": "髂骨"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "特殊部位",
+                        "label": "特殊部位",
+                        "children": [
+                            {
+                                "value": "特殊部位",
+                                "label": "特殊部位"
+                            }
+                        ]
+                    }
+                ],
+                "parent_code": "COMPONpm38qiPW41J0hSgt1669880565",
+                "children": [
+                ],
+                "create_at": "2024-05-07T14:40:24.831000"
+            },
+            {
+                "code": "sick_type_code",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "病发类型",
+                "is_must": true,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 12,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "select",
+                "component_type_name": "下拉单选",
+                "value": "",
+                "value_template": [
+                    {
+                        "value": "原发",
+                        "label": "原发"
+                    },
+                    {
+                        "value": "复发",
+                        "label": "复发"
+                    },
+                    {
+                        "value": "转移",
+                        "label": "转移"
+                    }
+                ],
+                "parent_code": "COMPONpm38qiPW41J0hSgt1669880565",
+                "children": [
+                ],
+                "create_at": "2023-02-17T14:35:49.960000"
+            },
+            {
+                "code": "flow_code",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "流程",
+                "is_must": true,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 12,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "select",
+                "component_type_name": "下拉单选",
+                "value": "",
+                "value_template": [
+                ],
+                "parent_code": "COMPONpm38qiPW41J0hSgt1669880565",
+                "children": [
+                ],
+                "create_at": "2023-02-17T14:35:49.960000"
+            },
+            {
+                "code": "treat_aim",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "治疗目的",
+                "is_must": true,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 12,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "select",
+                "component_type_name": "下拉单选",
+                "value": "",
+                "value_template": [
+                    {
+                        "value": "根治",
+                        "label": "根治"
+                    },
+                    {
+                        "value": "姑息",
+                        "label": "姑息"
+                    },
+                    {
+                        "value": "术前",
+                        "label": "术前"
+                    },
+                    {
+                        "value": "术后",
+                        "label": "术后"
+                    },
+                    {
+                        "value": "其他",
+                        "label": "其他"
+                    }
+                ],
+                "parent_code": "COMPONpm38qiPW41J0hSgt1669880565",
+                "children": [
+                ],
+                "create_at": "2023-02-17T14:35:49.960000"
+            },
+            {
+                "code": "reason",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "操作原因",
+                "is_must": true,
+                "is_freeze": false,
+                "is_required": true,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                    "fontSize": "14px"
+                },
+                "span": 12,
+                "custom": {
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "BASE",
+                "component_type_code": "select",
+                "component_type_name": "下拉单选",
+                "value": "",
+                "value_template": [
+                    {
+                        "value": "首程治疗",
+                        "label": "首程治疗"
+                    },
+                    {
+                        "value": "二程治疗",
+                        "label": "二程治疗"
+                    },
+                    {
+                        "value": "其他",
+                        "label": "其他"
+                    },
+                    {
+                        "value": "序贯加量",
+                        "label": "序贯加量"
+                    },
+                    {
+                        "value": "患者摆位重复性差",
+                        "label": "患者摆位重复性差"
+                    },
+                    {
+                        "value": "剂量分割模式变化",
+                        "label": "剂量分割模式变化"
+                    },
+                    {
+                        "value": "患者体重明显变化",
+                        "label": "患者体重明显变化"
+                    },
+                    {
+                        "value": "病灶明显变化需要调整靶区",
+                        "label": "病灶明显变化需要调整靶区"
+                    },
+                    {
+                        "value": "中断治疗时间较长有可能需要修改计划",
+                        "label": "中断治疗时间较长有可能需要修改计划"
+                    }
+                ],
+                "parent_code": "COMPONpm38qiPW41J0hSgt1669880565",
+                "children": [
+                ],
+                "create_at": "2023-02-17T14:35:49.960000"
+            }
+        ],
+        "create_at": "2023-02-17T14:35:49.960000"
+    },
+    {
+        "code": "COMPONHALXnBf7Emjz3xSV1705040877",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "容器",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": false,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "COMPONVR7WqHZNs16uIAi21669881228",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "诊断分期",
+                "is_must": true,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                    "tumor_diagnosis": "增加肿瘤诊断",
+                    "non_tumor_diagnosis": "增加非肿瘤诊断"
+                },
+                "min_len": "",
+                "max_len": "",
+                "component_type_source": "PRESET",
+                "component_type_code": "clinical_list",
+                "component_type_name": "诊断分期",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPONHALXnBf7Emjz3xSV1705040877",
+                "children": [
+                    {
+                        "code": "diagnoses",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "临床诊断",
+                        "is_must": true,
+                        "is_freeze": false,
+                        "is_required": true,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                        },
+                        "span": 24,
+                        "custom": {
+                            "diagnosis_type": "tumor_diagnosis",
+                            "type": "default"
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "PRESET",
+                        "component_type_code": "clinical_diagnosis",
+                        "component_type_name": "临床诊断",
+                        "value": [
+                        ],
+                        "value_template": [
+                        ],
+                        "parent_code": "COMPONVR7WqHZNs16uIAi21669881228",
+                        "children": [
+                        ],
+                        "create_at": "2023-02-17T14:35:49.960000"
+                    },
+                    {
+                        "code": "tnm_component",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "临床分期",
+                        "is_must": true,
+                        "is_freeze": false,
+                        "is_required": true,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                        },
+                        "span": 18,
+                        "custom": {
+                            "T": [
+                                {
+                                    "value": "TX"
+                                },
+                                {
+                                    "value": "T0"
+                                },
+                                {
+                                    "value": "T1"
+                                },
+                                {
+                                    "value": "T2"
+                                },
+                                {
+                                    "value": "T3"
+                                },
+                                {
+                                    "value": "T4"
+                                }
+                            ],
+                            "N": [
+                                {
+                                    "value": "N0"
+                                },
+                                {
+                                    "value": "N1"
+                                },
+                                {
+                                    "value": "N2"
+                                },
+                                {
+                                    "value": "N3"
+                                },
+                                {
+                                    "value": "NX"
+                                }
+                            ],
+                            "M": [
+                                {
+                                    "value": "M0"
+                                },
+                                {
+                                    "value": "M1"
+                                },
+                                {
+                                    "value": "MX"
+                                }
+                            ],
+                            "ABC": [
+                                {
+                                    "value": "A"
+                                },
+                                {
+                                    "value": "A1"
+                                },
+                                {
+                                    "value": "A2"
+                                },
+                                {
+                                    "value": "B"
+                                },
+                                {
+                                    "value": "B1"
+                                },
+                                {
+                                    "value": "B2"
+                                },
+                                {
+                                    "value": "B3"
+                                },
+                                {
+                                    "value": "C"
+                                },
+                                {
+                                    "value": "C1"
+                                },
+                                {
+                                    "value": "C2"
+                                }
+                            ],
+                            "CNLC": [
+                                {
+                                    "value": "Ⅰa期"
+                                },
+                                {
+                                    "value": "Ⅰb期"
+                                },
+                                {
+                                    "value": "Ⅱa期"
+                                },
+                                {
+                                    "value": "Ⅱb期"
+                                },
+                                {
+                                    "value": "Ⅲa期"
+                                },
+                                {
+                                    "value": "Ⅲb期"
+                                },
+                                {
+                                    "value": "Ⅳ期"
+                                }
+                            ]
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "HIDDEN",
+                        "component_type_code": "TNMComponent",
+                        "component_type_name": "TNM控件",
+                        "value": {
+                            "type": "CNLC",
+                            "T": "",
+                            "N": "",
+                            "M": "",
+                            "ABC": "",
+							"CNLC":""
+                        },
+                        "value_template": "",
+                        "parent_code": "COMPONVR7WqHZNs16uIAi21669881228",
+                        "children": [
+                        ],
+                        "create_at": "2023-02-17T14:35:49.960000"
+                    },
+                    {
+                        "code": "combine_stage",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "综合分期",
+                        "is_must": true,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "fontSize": "14px"
+                        },
+                        "span": 6,
+                        "custom": {
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "select",
+                        "component_type_name": "下拉单选",
+                        "value": "",
+                        "value_template": [
+                            {
+                                "value": "Ⅰ",
+                                "label": "Ⅰ"
+                            },
+                            {
+                                "value": "Ⅱ",
+                                "label": "Ⅱ"
+                            },
+                            {
+                                "value": "Ⅲ",
+                                "label": "Ⅲ"
+                            },
+                            {
+                                "value": "Ⅳ",
+                                "label": "Ⅳ"
+                            },
+                            {
+                                "value": "Ⅴ",
+                                "label": "Ⅴ"
+                            }
+                        ],
+                        "parent_code": "COMPONVR7WqHZNs16uIAi21669881228",
+                        "children": [
+                        ],
+                        "create_at": "2023-02-17T14:35:49.960000"
+                    },
+                    {
+                        "code": "stage_accord",
+                        "association_code": "",
+                        "association_form_code": "",
+                        "name": "分期依据",
+                        "is_must": true,
+                        "is_freeze": false,
+                        "is_required": false,
+                        "is_container": true,
+                        "is_quote": false,
+                        "is_enable": false,
+                        "is_updated": false,
+                        "description": "",
+                        "style": {
+                            "fontSize": "14px"
+                        },
+                        "span": 24,
+                        "custom": {
+                        },
+                        "min_len": "",
+                        "max_len": "",
+                        "component_type_source": "BASE",
+                        "component_type_code": "select",
+                        "component_type_name": "下拉单选",
+                        "value": "",
+                        "value_template": [
+                            {
+                                "value": "NCCN",
+                                "label": "NCCN"
+                            },
+                            {
+                                "value": "AJCC 8th",
+                                "label": "AJCC 8th"
+                            },
+                            {
+                                "value": "AJCC 7th",
+                                "label": "AJCC 7th"
+                            }
+                        ],
+                        "parent_code": "COMPONVR7WqHZNs16uIAi21669881228",
+                        "children": [
+                        ],
+                        "create_at": "2023-02-17T14:35:49.960000"
+                    }
+                ],
+                "create_at": "2023-02-17T14:35:49.960000"
+            }
+        ],
+        "create_at": "2024-01-12T14:27:57.908000"
+    },
+    {
+        "code": "COMPON4IQo6knwRlqaxXBJ1704433141",
+        "association_code": "",
+        "association_form_code": "",
+        "name": "容器",
+        "is_must": false,
+        "is_freeze": false,
+        "is_required": false,
+        "is_container": false,
+        "is_quote": false,
+        "is_enable": false,
+        "is_updated": false,
+        "description": "",
+        "style": {
+        },
+        "span": 24,
+        "custom": {
+        },
+        "min_len": "",
+        "max_len": "",
+        "component_type_source": "LAYOUT",
+        "component_type_code": "container",
+        "component_type_name": "容器",
+        "value": "",
+        "value_template": "",
+        "parent_code": "",
+        "children": [
+            {
+                "code": "remarks",
+                "association_code": "",
+                "association_form_code": "",
+                "name": "备注",
+                "is_must": true,
+                "is_freeze": false,
+                "is_required": false,
+                "is_container": true,
+                "is_quote": false,
+                "is_enable": false,
+                "is_updated": false,
+                "description": "",
+                "style": {
+                },
+                "span": 24,
+                "custom": {
+                },
+                "min_len": 0,
+                "max_len": 256,
+                "component_type_source": "BASE",
+                "component_type_code": "textarea",
+                "component_type_name": "多行输入框",
+                "value": "",
+                "value_template": "",
+                "parent_code": "COMPON4IQo6knwRlqaxXBJ1704433141",
+                "children": [
+                ],
+                "create_at": "2023-02-17T14:35:49.960000"
+            }
+        ],
+        "create_at": "2024-01-05T13:39:03.405000"
+    }
+]
