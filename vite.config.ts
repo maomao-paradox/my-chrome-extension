@@ -111,7 +111,7 @@ export default defineConfig({
           'content-runtime': ['@/content/runtime'],
           'components': ['@/assets/components']
         } : undefined,
-        chunkFileNames: 'assets/js/chunks/chunk-[name]-[hash].js',
+        chunkFileNames: `assets/js/chunks/chunk-[${isProduction ? 'hash' : 'name'}].js`,
         assetFileNames: (assetInfo) => {
           const fileExtname = path.extname(assetInfo.name || '');
           if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.mp3', '.wav', '.ogg', '.mp4', '.webm', '.ttf', '.woff', '.woff2', '.eot'].includes(fileExtname)) {
