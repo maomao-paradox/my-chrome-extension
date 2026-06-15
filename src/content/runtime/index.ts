@@ -116,6 +116,22 @@ const loadAppOptions = async (
     }
 };
 
+const sendFileMapToBackground = async (): Promise<void> => {
+    try {
+        const fileMap = await getChunkFileMap();
+        if (fileMap && typeof fileMap === 'object') {
+            await messenger.ext.send({
+                type: 'INIT_FILE_MAP',
+                target: 'background',
+                payload: fileMap
+            });
+            maLogger.log('已向后台发送 file_map');
+        }
+    } catch (error) {
+        maLogger.error('向后台发送 file_map 失败:', error);
+    }
+};
+
 export const initializeContent = async (ctx: AppContext): Promise<void> => {
     if (typeof document === 'undefined') {
         maLogger.warn('Document object is not available in current context');
@@ -130,7 +146,8 @@ export const initializeContent = async (ctx: AppContext): Promise<void> => {
     installGlobalModuleAccessor(ctx);
 
     const domainPermissionChecker = await genDomainPermissionChecker();
-    await getChunkFileMap();
+    const fileMap = await getChunkFileMap();
+    await sendFileMapToBackground();
 
     const moduleManager = createModuleManager(ctx, domainPermissionChecker);
     const pageTools = createPageTools(ctx);

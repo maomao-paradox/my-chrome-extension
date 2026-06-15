@@ -1,5 +1,4 @@
 import type { BackgroundMessageHandler, Bookmark, ResponseMessage } from '@/assets/types';
-import { pinyin } from 'pinyin-pro';
 import type { DevToolsPortManager } from './devtools-port-manager';
 import { openBookmark } from './bookmarks';
 import { sendRequestToActiveTab } from './chrome-tabs';
@@ -10,10 +9,30 @@ type SidePanelWithClose = typeof chrome.sidePanel & {
 	close?: (options: { tabId?: number }) => Promise<void>;
 };
 
+let fileMap: Map<string, string> | null = null;
+
+export const getFileMap = (): Map<string, string> | null => fileMap;
+
 export function createBackgroundMessageHandlers(
 	devToolsPortManager: DevToolsPortManager
 ): BackgroundMessageHandler {
 	return {
+		INIT_FILE_MAP: (payload, _sender, sendResponse) => {
+			try {
+				if (!payload || typeof payload !== 'object') {
+					sendResponse?.({ success: false, error: '无效的 file_map 数据' });
+					return true;
+				}
+
+				fileMap = new Map(Object.entries(payload));
+				console.log('file_map 已初始化，条目数:', fileMap.size);
+				sendResponse?.({ success: true });
+			} catch (error) {
+				console.error('初始化 file_map 失败:', error);
+				sendResponse?.({ success: false, error: error instanceof Error ? error.message : String(error) });
+			}
+			return true;
+		},
 		OPEN_BOOKMARK: (payload, _sender, sendResponse) => {
 			try {
 				const bookmark = { ...payload } as Bookmark;
@@ -312,22 +331,22 @@ export function createBackgroundMessageHandlers(
 			sendRequestToActiveTab({ ...payload, type: 'quickLogin' }, () => undefined);
 		},
 
-		getPinyin: async (payload, _sender, sendResponse) => {
-			if (!payload) {
-				sendResponse?.({ success: false, error: '缺少必要的字符串信息' });
-				return;
-			}
+		// getPinyin: async (payload, _sender, sendResponse) => {
+		// 	if (!payload) {
+		// 		sendResponse?.({ success: false, error: '缺少必要的字符串信息' });
+		// 		return;
+		// 	}
 
-			const { data } = payload;
-			try {
-				const result = pinyin(data, { toneType: 'none', type: 'array' }).join('');
-				sendResponse?.({ success: true, payload: result });
-			} catch (error) {
-				console.error('使用pinyin-pro失败:', error);
-				sendResponse?.({ success: false, error: '拼音转换失败: ' + (error instanceof Error ? error.message : String(error)) });
-			}
-			return true;
-		},
+		// 	const { data } = payload;
+		// 	try {
+		// 		const result = pinyin(data, { toneType: 'none', type: 'array' }).join('');
+		// 		sendResponse?.({ success: true, payload: result });
+		// 	} catch (error) {
+		// 		console.error('使用pinyin-pro失败:', error);
+		// 		sendResponse?.({ success: false, error: '拼音转换失败: ' + (error instanceof Error ? error.message : String(error)) });
+		// 	}
+		// 	return true;
+		// },
 
 		getImage: (payload, sender, sendResponse) => {
 			if (!payload) {

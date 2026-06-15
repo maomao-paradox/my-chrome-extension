@@ -7,8 +7,7 @@
  * @date 2026-02-05T02:38:01.693Z
  */
 
-import './background/dom-shim';
-import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils';
+import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/pure-utils';
 import { DevToolsPortManager } from './background/devtools-port-manager';
 import { StreamManager } from './background/stream-manager';
 import { initClearAiSessionListener } from './background/ai-session-listener';
