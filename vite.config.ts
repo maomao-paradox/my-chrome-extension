@@ -103,7 +103,10 @@ export default defineConfig({
         manualChunks: isProduction ? {
           'vue': ['vue', 'vue-router', 'pinia'],
           'element-plus': ['element-plus', '@element-plus/icons-vue'],
-          'infrastructure': ['@/utils'],
+          // 基础设施 - 纯函数工具，可在 Service Worker 中使用
+          'infrastructure-pure': ['@/utils/pure-utils'],
+          // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
+          'infrastructure-dom': ['@/utils/dom-utils'],
           'message': ['@/message'],
           'content-runtime': ['@/content/runtime'],
           'components': ['@/assets/components']
