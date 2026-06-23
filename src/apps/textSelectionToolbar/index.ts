@@ -342,13 +342,13 @@ class TextSelectionToolbarModule implements AppModule {
           });
         }
       },
-      {
-        id: 'light',
-        label: '高亮',
-        handler: () => {
-          // 功能开发中，敬请期待
-        }
-      },
+      // {
+      //   id: 'light',
+      //   label: '高亮',
+      //   handler: () => {
+      //     // 功能开发中，敬请期待
+      //   }
+      // },
       {
         id: 'search',
         label: '搜索',

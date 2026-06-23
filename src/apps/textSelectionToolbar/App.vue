@@ -10,12 +10,8 @@
         <TranslationPanel v-for="panel in translationPanels" :key="panel.messageId" :visible="true"
             :content="panel.content" :status="panel.status" :position="panel.position" :shake-key="panel.shakeKey"
             @close="hideTranslationPanel(panel.messageId)" />
-        <ReplaceModal
-            :visible="showReplaceModal"
-            :searchText="replaceSearchText"
-            @close="hideReplaceModal"
-            @replace="handleReplace"
-        />
+        <ReplaceModal :visible="showReplaceModal" :searchText="replaceSearchText" @close="hideReplaceModal"
+            @replace="handleReplace" />
     </div>
 </template>
 
@@ -27,6 +23,7 @@ import ReplaceModal from './ReplaceModal.vue'
 import { componentManager } from '@/utils/componentManager'
 import { TextTool } from '@/assets/types'
 import { eventManager } from "@/event"
+import findAndReplaceDOMText, { Finder } from './findAndReplaceDOMText'
 
 interface TextSelectionToolbarProps {
     initialText: string;
@@ -259,10 +256,10 @@ const handleReplace = async (replaceText: string, options: { caseSensitive: bool
             return
         }
 
-        const findAndReplaceDOMText = await import('./findAndReplaceDOMText').then(m => m.default)
+        // const findAndReplaceDOMText = await import('./findAndReplaceDOMText.js').then(m => m.default)
 
         let regexPattern = searchText.replace(/[.*+?^=!:${}()|[\]\/\\]/g, '\\$&')
-        
+
         if (options.wholeWord) {
             regexPattern = `\\b${regexPattern}\\b`
         }
@@ -270,7 +267,7 @@ const handleReplace = async (replaceText: string, options: { caseSensitive: bool
         const flags = options.caseSensitive ? 'g' : 'gi'
         const regex = new RegExp(regexPattern, flags)
 
-        const instance = findAndReplaceDOMText(document.body, {
+        const instance: Finder = findAndReplaceDOMText(document.body, {
             find: regex,
             replace: replaceText,
             preset: 'prose'
@@ -292,31 +289,43 @@ const handleReplace = async (replaceText: string, options: { caseSensitive: bool
 const showReplaceSuccess = (count: number) => {
     const successContainer = document.createElement('div')
     successContainer.style.cssText = `
-        background-color: #e8f5e8;
-        border: 1px solid #c8e6c9;
-        border-radius: 4px;
-        padding: 12px 16px;
+        background: rgba(20, 24, 33, 0.9);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(46, 191, 92, 0.3);
+        border-radius: 12px;
+        padding: 14px 18px;
         font-size: 14px;
         line-height: 1.5;
-        max-width: 300px;
+        max-width: 280px;
         position: fixed;
         z-index: 9999999;
         right: 20px;
         top: 20px;
-        animation: slideIn 0.3s ease-out;
+        box-shadow: 
+            0 8px 24px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(46, 191, 92, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     `
 
-    successContainer.innerHTML = `<div style="color: #2e7d32;">成功替换 ${count} 处文本！</div>`
+    successContainer.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ebf5c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span style="color: rgba(255, 255, 255, 0.9); font-weight: 500;">成功替换 ${count} 处文本！</span>
+        </div>
+    `
 
     const style = document.createElement('style')
     style.textContent = `
         @keyframes slideIn {
             from {
-                transform: translateX(100%);
+                transform: translateX(100%) scale(0.95);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translateX(0) scale(1);
                 opacity: 1;
             }
         }
@@ -326,7 +335,7 @@ const showReplaceSuccess = (count: number) => {
     document.body.appendChild(successContainer)
 
     setTimeout(() => {
-        successContainer.style.animation = 'slideIn 0.3s ease-out reverse'
+        successContainer.style.animation = 'slideIn 0.3s cubic-bezier(0.55, 0, 1, 1) reverse'
         setTimeout(() => {
             try {
                 document.body.removeChild(successContainer)
@@ -335,7 +344,7 @@ const showReplaceSuccess = (count: number) => {
                 // 元素可能已经被移除
             }
         }, 300)
-    }, 3000)
+    }, 3500)
 }
 
 onMounted(() => {
@@ -382,31 +391,45 @@ onUnmounted(() => {
 /* 红点指示器样式 */
 .red-dot {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 10px;
-    height: 10px;
-    background-color: #ff4757;
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, #ff4757, #ff6b7a);
     border-radius: 50%;
     cursor: pointer;
     pointer-events: auto;
-    box-shadow: 0 0 0 2px white;
+    box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.1),
+        0 0 12px rgba(255, 71, 87, 0.5);
     animation: pulse 2s infinite;
     z-index: 999999;
+    transition: transform 0.2s ease;
 }
 
-/* 红点动画 */
+.red-dot:hover {
+    transform: scale(1.15);
+}
+
+/* 红点脉冲动画 */
 @keyframes pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+        box-shadow:
+            0 0 0 2px rgba(255, 255, 255, 0.1),
+            0 0 12px rgba(255, 71, 87, 0.5);
     }
 
-    70% {
-        box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
+    50% {
+        box-shadow:
+            0 0 0 3px rgba(255, 255, 255, 0.15),
+            0 0 20px rgba(255, 71, 87, 0.7),
+            0 0 30px rgba(255, 71, 87, 0.3);
     }
 
     100% {
-        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+        box-shadow:
+            0 0 0 2px rgba(255, 255, 255, 0.1),
+            0 0 12px rgba(255, 71, 87, 0.5);
     }
 }
 </style>
