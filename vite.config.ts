@@ -147,7 +147,7 @@ export default defineConfig({
       'pinia',
       'vue-router',
       'element-plus',
-      'pinyin-pro',
+      // 'pinyin-pro',
       'jszip',
       'file-saver',
       'crypto-js'

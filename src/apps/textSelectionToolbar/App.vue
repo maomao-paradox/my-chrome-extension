@@ -10,6 +10,12 @@
         <TranslationPanel v-for="panel in translationPanels" :key="panel.messageId" :visible="true"
             :content="panel.content" :status="panel.status" :position="panel.position" :shake-key="panel.shakeKey"
             @close="hideTranslationPanel(panel.messageId)" />
+        <ReplaceModal
+            :visible="showReplaceModal"
+            :searchText="replaceSearchText"
+            @close="hideReplaceModal"
+            @replace="handleReplace"
+        />
     </div>
 </template>
 
@@ -17,6 +23,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import TextSelectionToolbar from './TextToolbar.vue'
 import TranslationPanel from './TranslationPanel.vue'
+import ReplaceModal from './ReplaceModal.vue'
 import { componentManager } from '@/utils/componentManager'
 import { TextTool } from '@/assets/types'
 import { eventManager } from "@/event"
@@ -58,6 +65,9 @@ const showRedDot = ref(false)
 // 工具栏组件引用
 const toolbarRef = ref<InstanceType<typeof TextSelectionToolbar> | null>(null)
 const initialText = ref<string>(props.initialText)
+// 替换弹窗相关
+const showReplaceModal = ref(false)
+const replaceSearchText = ref('')
 const translationPanels = ref<Array<{
     messageId: string;
     content: string;
@@ -229,6 +239,105 @@ const hideTranslationPanel = (messageId?: string) => {
     translationPanels.value = translationPanels.value.filter(panel => panel.messageId !== messageId)
 }
 
+// 显示替换弹窗
+const showReplaceModalFn = (text: string) => {
+    replaceSearchText.value = text
+    showReplaceModal.value = true
+}
+
+// 隐藏替换弹窗
+const hideReplaceModal = () => {
+    showReplaceModal.value = false
+    replaceSearchText.value = ''
+}
+
+// 处理替换操作
+const handleReplace = async (replaceText: string, options: { caseSensitive: boolean; wholeWord: boolean }) => {
+    try {
+        const searchText = replaceSearchText.value.trim()
+        if (!searchText || !replaceText.trim()) {
+            return
+        }
+
+        const findAndReplaceDOMText = await import('./findAndReplaceDOMText').then(m => m.default)
+
+        let regexPattern = searchText.replace(/[.*+?^=!:${}()|[\]\/\\]/g, '\\$&')
+        
+        if (options.wholeWord) {
+            regexPattern = `\\b${regexPattern}\\b`
+        }
+
+        const flags = options.caseSensitive ? 'g' : 'gi'
+        const regex = new RegExp(regexPattern, flags)
+
+        const instance = findAndReplaceDOMText(document.body, {
+            find: regex,
+            replace: replaceText,
+            preset: 'prose'
+        })
+
+        maLogger.log('替换完成，共替换:', instance.matches.length, '处')
+
+        if (instance.matches.length > 0) {
+            showReplaceSuccess(instance.matches.length)
+        }
+    } catch (error) {
+        maLogger.error('替换失败:', error)
+    } finally {
+        hideReplaceModal()
+    }
+}
+
+// 显示替换成功提示
+const showReplaceSuccess = (count: number) => {
+    const successContainer = document.createElement('div')
+    successContainer.style.cssText = `
+        background-color: #e8f5e8;
+        border: 1px solid #c8e6c9;
+        border-radius: 4px;
+        padding: 12px 16px;
+        font-size: 14px;
+        line-height: 1.5;
+        max-width: 300px;
+        position: fixed;
+        z-index: 9999999;
+        right: 20px;
+        top: 20px;
+        animation: slideIn 0.3s ease-out;
+    `
+
+    successContainer.innerHTML = `<div style="color: #2e7d32;">成功替换 ${count} 处文本！</div>`
+
+    const style = document.createElement('style')
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `
+    document.head.appendChild(style)
+
+    document.body.appendChild(successContainer)
+
+    setTimeout(() => {
+        successContainer.style.animation = 'slideIn 0.3s ease-out reverse'
+        setTimeout(() => {
+            try {
+                document.body.removeChild(successContainer)
+                document.head.removeChild(style)
+            } catch (error) {
+                // 元素可能已经被移除
+            }
+        }, 300)
+    }, 3000)
+}
+
 onMounted(() => {
     // 加载保存的状态
     loadState()
@@ -240,7 +349,8 @@ onMounted(() => {
         showTranslationPanel,
         updateTranslationPanel,
         shakeTranslationPanelBySourceText,
-        hideTranslationPanel
+        hideTranslationPanel,
+        showReplaceModal: showReplaceModalFn
     })
 })
 

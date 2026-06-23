@@ -6,6 +6,7 @@
     "study": "vite --open /pages/study.html",
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "dev:ext": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "dev:study": "vite --open /pages/study.html",
     "dev:options": "vite --open /pages/options.html",
     "dp": "npx depcruise --output-type json src > src/deps.json && vite --open /interactive-graph.html",
     "build": "vite build && cp -rf ./dist/ /mnt/h/mria_extension/",

@@ -366,6 +366,14 @@ class TextSelectionToolbarModule implements AppModule {
         id: 'bookmark',
         label: '书签',
         handler: (text: string) => this.handleBookmark(text)
+      },
+      {
+        id: 'replace',
+        label: '替换',
+        handler: (text: string) => {
+          const textToReplace = text || this.selectedText;
+          componentManager.call('TextSelectionToolbar', 'showReplaceModal', textToReplace);
+        }
       }
     ]
   }
