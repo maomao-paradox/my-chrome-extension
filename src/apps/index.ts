@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.689Z
  */
 
-import { PluginConfigs } from "@/assets/types";
+import { PluginConfigs } from "@/types";
 
 // export const appConfigKey = 'appConfig';
 

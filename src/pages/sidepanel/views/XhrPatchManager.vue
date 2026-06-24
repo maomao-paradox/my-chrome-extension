@@ -145,7 +145,7 @@ import { ref, computed, onMounted } from 'vue';
 import SubRule from '../../../assets/components/SubRule.vue';
 import MRDialog from '../../../assets/components/MRDialog.vue';
 import HandlerSection from '../../../assets/components/HandlerSection.vue';
-import type { XhrRulesArray, XhrRule, RuleInstruction } from '@/assets/types';
+import type { XhrRulesArray, XhrRule, RuleInstruction } from '@/types/index.js';
 
 // 响应式数据
 const isLoading = ref(false);

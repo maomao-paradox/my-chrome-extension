@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.696Z
  */
 
-import type { XhrRulesMap, ExtMessage } from "@/assets/types";
+import type { XhrRulesMap, ExtMessage } from "@/types";
 import { storage } from "@/stores";
 import  messenger  from "@/message";
 import { injectScriptToActivateTab } from "@/utils/element-control";

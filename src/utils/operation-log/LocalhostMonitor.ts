@@ -8,7 +8,7 @@
  */
 
 import { operationLogManager } from './OperationLogManager';
-import { LogType, LocalhostLog, LocalhostChangeType, LocalhostChange, LocalhostResource } from '../../assets/types/operation-log';
+import { LogType, LocalhostLog, LocalhostChangeType, LocalhostChange, LocalhostResource } from '../../types/operation-log';
 
 class LocalhostMonitor {
   private isMonitoring = false;

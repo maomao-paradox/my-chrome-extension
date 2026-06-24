@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import { MACarousel } from '@components/index'
 import { ref, watch } from 'vue'
-import { Tool } from '@/assets/types'
+import { Tool } from '@/types/index.js'
 import { IconCommunity } from '@icons/index'
 import { eventManager } from '@/event'
 import HoverMenu from './HoverMenu.vue'

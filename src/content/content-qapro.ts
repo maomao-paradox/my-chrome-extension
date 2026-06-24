@@ -10,7 +10,7 @@
 import { waitForSelector, addElementToDom, getElementAbsolutePosition, createEl, PositionStrategy } from '@/utils/element-control';
 import { QuickLogin } from "@components/index";
 import messenger from '@/message';
-import { ExtMessage, MessageHandler } from '@/assets/types';
+import { ExtMessage, MessageHandler } from '@/types';
 import { storage } from "@/stores";
 import { getQueryParams } from '@/utils/base';
 import { injectXhrPatch } from '@/runtime/xhr-patch/xhr_message_handler';

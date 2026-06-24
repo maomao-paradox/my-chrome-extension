@@ -152,7 +152,7 @@ import { ref, onMounted, computed } from 'vue'
 import { IconDownload, IconSearch, IconDelete, IconInfo, IconSetting, IconDocument, IconLoading, IconCircleCheck } from '@icons/index'
 import { scanImages, downloadAllImages, downloadSingleImage } from '@/utils/image-zip-download'
 import { SciFiConfirmDialog } from '@components/index'
-import { ImageInfo } from '@/assets/types/utils'
+import { ImageInfo } from '@/types/utils'
 
 const containerRef = ref<HTMLElement | null>(null)
 

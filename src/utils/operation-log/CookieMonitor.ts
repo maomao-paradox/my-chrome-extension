@@ -8,7 +8,7 @@
  */
 
 import { operationLogManager } from './OperationLogManager';
-import { LogType, CookieLog, CookieAction } from '../../assets/types/operation-log';
+import { LogType, CookieLog, CookieAction } from '../../types/operation-log';
 
 class CookieMonitor {
   private isMonitoring = false;

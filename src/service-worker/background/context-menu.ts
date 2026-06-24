@@ -1,4 +1,4 @@
-import type { ContextMenuHandler } from '@/assets/types';
+import type { ContextMenuHandler } from '@/types';
 import { addDisabledDomain, extractDomain } from './domain-state';
 
 interface MenuItem extends chrome.contextMenus.CreateProperties {

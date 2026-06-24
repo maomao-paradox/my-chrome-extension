@@ -40,9 +40,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import IconLoading from '@icons/IconLoading.vue'
 import { eventManager } from "@/event"
-import IconClose from '@icons/IconClose.vue'
+import { IconClose, IconLoading } from '@/assets/icons'
 
 interface SciFiConfirmDialogProps {
   title: string
@@ -54,8 +53,8 @@ interface SciFiConfirmDialogProps {
 
 // Props
 const props = withDefaults(defineProps<SciFiConfirmDialogProps>(), {
-  confirmText: 'Confirm' ,
-  cancelText: 'Cancel' ,
+  confirmText: 'Confirm',
+  cancelText: 'Cancel',
   loadingText: 'Loading...'
 })
 

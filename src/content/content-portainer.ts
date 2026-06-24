@@ -9,7 +9,7 @@
  */
 
 import { waitForSelector, addElementToDom, injectScriptToActivateTab } from "@/utils/element-control"
-import { Tool } from "@/assets/types"
+import { Tool } from "@/types"
 import messenger from "@/message"
 import { getRuntimeScript } from "@/utils/common";
 

@@ -8,7 +8,7 @@
  */
 
 import { operationLogManager } from './OperationLogManager';
-import { LogType, NetworkLog } from '@/assets/types/operation-log';
+import { LogType, NetworkLog } from '@/types/operation-log';
 
 // 记录请求的临时存储，用于跟踪请求生命周期
 interface PendingRequest {

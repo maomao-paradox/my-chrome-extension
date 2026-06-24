@@ -64,7 +64,7 @@
 import toolMap from "./views/index"
 import { computed, ref } from 'vue'
 import { Static404 } from '@components/index'
-import { Tool } from "@/assets/types"
+import { Tool } from "@/types"
 import { Bell, CircleCheck, Warning, CircleClose, InfoFilled } from '@element-plus/icons-vue'
 
 interface Notification {

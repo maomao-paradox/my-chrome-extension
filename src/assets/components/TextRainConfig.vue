@@ -51,7 +51,7 @@
 <script lang="ts" setup>
 import { ref, watch, onMounted } from 'vue';
 import { sendMessageToContentScript } from '@/message/back-content';
-import { ConfigItem } from '@/assets/types';
+import { ConfigItem } from '@/types';
 
 // Props
 const props = defineProps<{

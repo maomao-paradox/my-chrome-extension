@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.696Z
  */
 
-import { XhrRulesMap, XhrRule, XhrResponse, XHR_PATCH_CONFIG, RuleInstruction } from '@/assets/types';
+import { XhrRulesMap, XhrRule, XhrResponse, XHR_PATCH_CONFIG, RuleInstruction } from '@/types';
 
 
 (function () {

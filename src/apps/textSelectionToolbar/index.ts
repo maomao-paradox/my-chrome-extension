@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.692Z
  */
 
-import { AppModule } from '@/assets/types'
+import { AppModule } from '@/types/index.js'
 import { shadowHostId } from '@/config'
 import TextSelectionToolbarApp from './App.vue'
 import { createShadowHost, injectCssDom } from '@/utils/shadow-dom'
@@ -16,7 +16,7 @@ import { pinia } from '@/stores/index'
 import { getElementAbsolutePosition, debounce, ElementPositionInfo, addElementToDom, PositionStrategy } from '@/utils/element-control'
 import { createApp } from 'vue'
 import { componentManager } from '@/utils/componentManager'
-import { TextTool } from '@/assets/types'
+import { TextTool } from '@/types'
 import { bus } from '@/event'
 import { getAssetsAbstractPath, getAssetsAbstractPathSync } from '@/utils/common'
 import { generateId } from '@/utils/base'
@@ -342,13 +342,49 @@ class TextSelectionToolbarModule implements AppModule {
           });
         }
       },
-      // {
-      //   id: 'light',
-      //   label: '高亮',
-      //   handler: () => {
-      //     // 功能开发中，敬请期待
-      //   }
-      // },
+      {
+        id: 'comment',
+        label: '留言',
+        handler: (text: string) => {
+          const textToComment = text || this.selectedText;
+          if (textToComment.trim() && this.selectionRange) {
+            const getXPathForNode = (node: Node): string => {
+              if (node.nodeType === Node.DOCUMENT_NODE) return '';
+              if (node.nodeType === Node.TEXT_NODE) {
+                let count = 1;
+                let sibling = node.previousSibling;
+                while (sibling) {
+                  if (sibling.nodeType === Node.TEXT_NODE) count++;
+                  sibling = sibling.previousSibling;
+                }
+                const parentXPath = node.parentNode ? getXPathForNode(node.parentNode) : '';
+                if (parentXPath) {
+                  return `${parentXPath}/text()[${count}]`;
+                }
+                return `/text()[${count}]`;
+              }
+              let count = 1;
+              let sibling = node.previousSibling;
+              while (sibling) {
+                if (sibling.nodeName === node.nodeName) count++;
+                sibling = sibling.previousSibling;
+              }
+              const parentXPath = node.parentNode ? getXPathForNode(node.parentNode) : '';
+              const nodeName = node.nodeName.toLowerCase();
+              return parentXPath ? `${parentXPath}/${nodeName}[${count}]` : `/${nodeName}[${count}]`;
+            };
+
+            const rangeInfo = {
+              startContainerXPath: getXPathForNode(this.selectionRange.startContainer),
+              startOffset: this.selectionRange.startOffset,
+              endContainerXPath: getXPathForNode(this.selectionRange.endContainer),
+              endOffset: this.selectionRange.endOffset
+            };
+
+            componentManager.call('TextSelectionToolbar', 'showCommentModal', textToComment, rangeInfo);
+          }
+        }
+      },
       {
         id: 'search',
         label: '搜索',

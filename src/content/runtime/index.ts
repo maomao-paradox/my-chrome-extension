@@ -2,7 +2,7 @@ import { storage } from '@/stores';
 import { equalDomain, parseDomains, getChunkFileMap } from '@/utils/common';
 import { whenDomReady } from '@/utils/element-control';
 import messenger from '@/message';
-import type { ExtMessage, PluginConfigs } from '@/assets/types';
+import type { ExtMessage, PluginConfigs } from '@/types';
 import { defaultPluginConfigs } from '@/apps/index';
 import { appConfigKey } from '@/config';
 import { createModuleManager } from './module-manager';

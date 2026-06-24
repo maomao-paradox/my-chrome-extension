@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { Close } from '@element-plus/icons-vue'
-import { Tool } from '@/assets/types'
+import { Tool } from '@/types'
 import { ref } from 'vue'
 import Draggable from '@/plugins/floatingball/Draggable.vue'
 

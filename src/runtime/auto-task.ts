@@ -4,7 +4,7 @@
  * @description 自动任务脚本
 */
 
-import { MCPTool, type MCPToolConfig } from "@/assets/types";
+import { MCPTool, type MCPToolConfig } from "@/types";
 
 const headers = {
     "accept": "application/json, text/plain, */*",

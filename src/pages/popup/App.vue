@@ -88,7 +88,7 @@ const tabs = [
   },
   {
     key: 'accessibility',
-    label: '无障碍',
+    label: '理解',
     hint: '从当前页面拾取组件，结果同步到开发者工具。',
     icon: IconDocument,
   },
@@ -260,12 +260,14 @@ onMounted(async () => {
 
 .tab-navigation {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   padding: 8px 16px 0;
 }
 
 .tab-btn {
+  width: max-content;
+  padding: 0 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -305,8 +307,8 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 10px;
   background: var(--popup-control-bg);
 }

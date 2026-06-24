@@ -5,7 +5,7 @@
  */
 
 import { generateId } from '@/utils/base';
-import type { PatientRegistrationData, Response, ExtMessage,MessageHandler } from "@/assets/types"
+import type { PatientRegistrationData, Response, ExtMessage,MessageHandler } from "@/types"
 
 
 // 定义回调函数类型

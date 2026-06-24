@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.697Z
  */
 
-import { OperationLog, OperationLogFilter, LogType } from '@/assets/types/operation-log';
+import { OperationLog, OperationLogFilter, LogType } from '@/types/operation-log';
 import storage from './chromestorge';
 
 // 存储键名

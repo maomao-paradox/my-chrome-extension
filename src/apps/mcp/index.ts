@@ -12,7 +12,7 @@ import MCPDialog from './MCPDialog.vue'
 import { createApp } from 'vue'
 import { $id, addElementToDom } from '@/utils/element-control'
 import { createShadowHost } from '@/utils/shadow-dom'
-import { AppModule } from '@/assets/types/utils'
+import { AppModule } from '@/types/utils/index.js'
 
 /**
  * MCP浏览器操作助手插件

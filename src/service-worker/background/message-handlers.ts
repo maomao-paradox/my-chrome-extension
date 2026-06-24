@@ -1,4 +1,4 @@
-import type { BackgroundMessageHandler, Bookmark, ResponseMessage } from '@/assets/types';
+import type { BackgroundMessageHandler, Bookmark, ResponseMessage } from '@/types';
 import type { DevToolsPortManager } from './devtools-port-manager';
 import { openBookmark } from './bookmarks';
 import { sendRequestToActiveTab } from './chrome-tabs';

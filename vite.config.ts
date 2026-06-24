@@ -10,6 +10,7 @@ import encryptFileMapPlugin from './plugins/encrypt-file-map'
 import removeConsole from 'vite-plugin-remove-console'
 import scanFiles from './plugins/scan-input-file'
 import generateFileMapPlugin from './plugins/generate-file-map'
+import svgLoader from 'vite-svg-loader'
 
 const isProduction = process.env.NODE_ENV === 'production'
 const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === 'true'
@@ -29,6 +30,7 @@ export default defineConfig({
   cacheDir: '../node_modules/.vite',
   plugins: [
     vue(),
+    svgLoader(),
     AutoImport({
       resolvers: [ElementPlusResolver()],
       dts: true,

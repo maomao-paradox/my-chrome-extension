@@ -1,5 +1,5 @@
 import messenger from '@/message';
-import type { BackgroundMessageHandler } from '@/assets/types';
+import type { BackgroundMessageHandler } from '@/types';
 
 export function initMessageListener(messageHandlers: BackgroundMessageHandler): void {
 	messenger.ext.listen((request, sender, sendResponse) => {

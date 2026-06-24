@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.695Z
  */
 
-import type { ExtMessage, ResponseMessage } from "@/assets/types"
+import type { ExtMessage, ResponseMessage } from "@/types"
 
 /**
  * 极简跨端通信封装

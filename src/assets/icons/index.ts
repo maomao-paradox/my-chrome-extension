@@ -8,24 +8,25 @@
  */
 
 // 简洁的导入导出方式
-export { default as IconDownload } from './IconDownload.vue';
-export { default as IconSearch } from './IconSearch.vue';
-export { default as IconDelete } from './IconDelete.vue';
-export { default as IconInfo } from './IconInfo.vue';
-export { default as IconSetting } from './IconSetting.vue';
-export { default as IconDocumentation } from './IconDocumentation.vue';
-export { default as IconLoading } from './IconLoading.vue';
-export { default as IconCircleCheck } from './IconCircleCheck.vue';
-export { default as IconCommunity } from './IconCommunity.vue';
-export { default as IconSupport } from './IconSupport.vue';
-export { default as IconTooling } from './IconTooling.vue';
-export { default as IconEcosystem } from './IconEcosystem.vue';
-export { default as IconUpload } from './IconUpload.vue';
-export { default as IconOpen } from './IconOpen.vue';
-export { default as IconBookmark } from './IconBookmark.vue';
-export { default as IconFullScreen } from './IconFullScreen.vue';
-export { default as IconOffScreen } from './IconOffScreen.vue';
-export { default as IconClose } from './IconClose.vue';
-export { default as IconTime } from './IconTime.vue';
-export { default as IconCapture } from './IconCapture.vue';
-export { default as IconDocument } from './IconDocument.vue';
+export { default as IconDownload } from './download.svg?component';
+export { default as IconSearch } from './search.svg?component';
+export { default as IconDelete } from './delete.svg?component';
+export { default as IconInfo } from './info.svg?component';
+export { default as IconEarth } from './earth.svg?component';
+export { default as IconSetting } from './setting.svg?component';
+export { default as IconDocument } from './document.svg?component';
+export { default as IconLoading } from './loading.svg?component';
+export { default as IconCommunity } from './community.svg?component';
+export { default as IconSupport } from './support.svg?component';
+export { default as IconTooling } from './tool.svg?component';
+export { default as IconEcosystem } from './ecosystem.svg?component';
+export { default as IconUpload } from './upload.svg?component';
+export { default as IconOpen } from './open.svg?component';
+export { default as IconBookmark } from './bookmark.svg?component';
+export { default as IconFullScreen } from './full-screen.svg?component';
+export { default as IconOffScreen } from './off-screen.svg?component';
+export { default as IconClose } from './close.svg?component';
+export { default as IconTime } from './time.svg?component';
+export { default as IconCapture } from './capture.svg?component';
+export { default as GlowingArrow } from './GlowingArrow.vue'
+export { default as IconConfirm } from './confirm.svg?component'

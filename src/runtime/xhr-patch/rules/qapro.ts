@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.696Z
  */
 
-import { type XhrRulesMap } from '@/assets/types';
+import { type XhrRulesMap } from '@/types';
 
 export const rules: XhrRulesMap = {
     '/api/qa-pro/form/one/query': {

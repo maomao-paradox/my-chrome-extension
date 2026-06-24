@@ -8,7 +8,7 @@
  */
 
 import { storage } from '@/stores'
-import type { DEBUGER } from '@/assets/types';
+import type { DEBUGER } from '@/types';
 import WasmFileMapDecryptor from './wasmFileMapDecryptor';
 
 

@@ -8,7 +8,7 @@
  */
 
 import { generateId } from '../base';
-import { OperationLog, LogType, OperationLogFilter } from '../../assets/types/operation-log';
+import { OperationLog, LogType, OperationLogFilter } from '../../types/operation-log';
 import { storage } from '../../assets/stores';
 
 // 存储键名

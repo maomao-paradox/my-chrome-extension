@@ -12,18 +12,38 @@
             @close="hideTranslationPanel(panel.messageId)" />
         <ReplaceModal :visible="showReplaceModal" :searchText="replaceSearchText" @close="hideReplaceModal"
             @replace="handleReplace" />
+        <CommentModal 
+            :visible="showCommentModal" 
+            :selectedText="currentSelectedText"
+            :commentId="editingCommentId"
+            :existingComment="editingCommentContent"
+            @close="hideCommentModal"
+            @save="handleSaveComment"
+            @delete="handleDeleteComment"
+        />
+        <CommentDisplay 
+            v-if="selectedComment"
+            :visible="showCommentDisplay"
+            :comment="selectedComment"
+            :position="commentDisplayPosition"
+            @close="hideCommentDisplay"
+            @edit="handleEditComment"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import TextSelectionToolbar from './TextToolbar.vue'
 import TranslationPanel from './TranslationPanel.vue'
 import ReplaceModal from './ReplaceModal.vue'
+import CommentModal from './CommentModal.vue'
+import CommentDisplay from './CommentDisplay.vue'
 import { componentManager } from '@/utils/componentManager'
-import { TextTool } from '@/assets/types'
+import { TextTool } from '@/types/index.js'
 import { eventManager } from "@/event"
 import findAndReplaceDOMText, { Finder } from './findAndReplaceDOMText'
+import { CommentStorage, type Comment } from '@/services/commentStorage'
 
 interface TextSelectionToolbarProps {
     initialText: string;
@@ -46,23 +66,17 @@ interface TranslationPanelPayload {
     sourceText?: string;
 }
 
-// 接收props
 const props = withDefaults(defineProps<TextSelectionToolbarProps>(), {
     showCloseBtn: true
 })
 
-// 存储键名
 const STORAGE_KEY = 'textSelectionToolbarState'
 
-// 控制组件显示和隐藏
 const isVisible = ref(false)
 const showToolbar = ref(true)
-// 控制红点显示
 const showRedDot = ref(false)
-// 工具栏组件引用
 const toolbarRef = ref<InstanceType<typeof TextSelectionToolbar> | null>(null)
 const initialText = ref<string>(props.initialText)
-// 替换弹窗相关
 const showReplaceModal = ref(false)
 const replaceSearchText = ref('')
 const translationPanels = ref<Array<{
@@ -74,7 +88,22 @@ const translationPanels = ref<Array<{
     shakeKey: number;
 }>>([])
 
-// 从存储中加载状态
+// 留言相关状态
+const showCommentModal = ref(false)
+const showCommentDisplay = ref(false)
+const currentSelectedText = ref('')
+const selectedComment = ref<Comment | null>(null)
+const commentDisplayPosition = ref({ x: 100, y: 100 })
+const editingCommentId = ref('')
+const editingCommentContent = ref('')
+const pageComments = ref<Comment[]>([])
+const currentRangeInfo = ref<{
+    startContainerXPath: string;
+    startOffset: number;
+    endContainerXPath: string;
+    endOffset: number;
+} | null>(null)
+
 const loadState = () => {
     try {
         const storedState = localStorage.getItem(STORAGE_KEY)
@@ -88,7 +117,6 @@ const loadState = () => {
     }
 }
 
-// 保存状态到存储
 const saveState = () => {
     try {
         const state = {
@@ -101,7 +129,6 @@ const saveState = () => {
     }
 }
 
-// 暴露控制方法给父组件
 const show = () => {
     isVisible.value = true
 }
@@ -110,24 +137,20 @@ const hide = () => {
     isVisible.value = false
 }
 
-// 处理工具栏关闭事件
 const handleClose = () => {
     showToolbar.value = false
     showRedDot.value = true
     saveState()
 }
 
-// 处理红点点击事件
 const handleRedDotClick = () => {
     showRedDot.value = false
     showToolbar.value = true
     saveState()
 }
 
-// 监听isVisible变化，自动隐藏
 watch(isVisible, (newValue) => {
     if (newValue) {
-        // 3秒后自动隐藏
         setTimeout(() => {
             isVisible.value = false
         }, 3000)
@@ -136,7 +159,6 @@ watch(isVisible, (newValue) => {
 
 defineExpose({ show, hide })
 
-//@ts-ignore
 const localTools = ref<TextTool[]>([...props.customTools])
 
 watch(() => props.customTools, (newTools) => {
@@ -236,27 +258,22 @@ const hideTranslationPanel = (messageId?: string) => {
     translationPanels.value = translationPanels.value.filter(panel => panel.messageId !== messageId)
 }
 
-// 显示替换弹窗
 const showReplaceModalFn = (text: string) => {
     replaceSearchText.value = text
     showReplaceModal.value = true
 }
 
-// 隐藏替换弹窗
 const hideReplaceModal = () => {
     showReplaceModal.value = false
     replaceSearchText.value = ''
 }
 
-// 处理替换操作
 const handleReplace = async (replaceText: string, options: { caseSensitive: boolean; wholeWord: boolean }) => {
     try {
         const searchText = replaceSearchText.value.trim()
         if (!searchText || !replaceText.trim()) {
             return
         }
-
-        // const findAndReplaceDOMText = await import('./findAndReplaceDOMText.js').then(m => m.default)
 
         let regexPattern = searchText.replace(/[.*+?^=!:${}()|[\]\/\\]/g, '\\$&')
 
@@ -285,7 +302,6 @@ const handleReplace = async (replaceText: string, options: { caseSensitive: bool
     }
 }
 
-// 显示替换成功提示
 const showReplaceSuccess = (count: number) => {
     const successContainer = document.createElement('div')
     successContainer.style.cssText = `
@@ -347,9 +363,409 @@ const showReplaceSuccess = (count: number) => {
     }, 3500)
 }
 
+// XPath 辅助函数
+const getXPathForNode = (node: Node): string => {
+    if (node.nodeType === Node.DOCUMENT_NODE) {
+        return ''
+    }
+    
+    if (node.nodeType === Node.TEXT_NODE) {
+        let count = 1
+        let sibling = node.previousSibling
+        while (sibling) {
+            if (sibling.nodeType === Node.TEXT_NODE) {
+                count++
+            }
+            sibling = sibling.previousSibling
+        }
+        const parentXPath = node.parentNode ? getXPathForNode(node.parentNode) : ''
+        if (parentXPath) {
+            return `${parentXPath}/text()[${count}]`
+        }
+        return `/text()[${count}]`
+    }
+    
+    let count = 1
+    let sibling = node.previousSibling
+    while (sibling) {
+        if (sibling.nodeName === node.nodeName) {
+            count++
+        }
+        sibling = sibling.previousSibling
+    }
+    
+    const parentXPath = node.parentNode ? getXPathForNode(node.parentNode) : ''
+    const nodeName = node.nodeName.toLowerCase()
+    
+    if (parentXPath) {
+        return `${parentXPath}/${nodeName}[${count}]`
+    }
+    return `/${nodeName}[${count}]`
+}
+
+const getNodeByXPath = (xpath: string): Node | null => {
+    try {
+        const result = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        return result.singleNodeValue
+    } catch (error) {
+        maLogger.error('XPath 查询失败:', error)
+        return null
+    }
+}
+
+// 留言功能相关方法
+const loadPageComments = async () => {
+    try {
+        pageComments.value = await CommentStorage.getCommentsForCurrentPage()
+        maLogger.log('加载当前页面留言:', pageComments.value)
+        highlightCommentedText()
+    } catch (error) {
+        maLogger.error('加载留言失败:', error)
+    }
+}
+
+const highlightCommentedText = () => {
+    const existingMarkers = document.querySelectorAll('.comment-highlight-marker')
+    existingMarkers.forEach(marker => {
+        const textContent = marker.textContent || ''
+        const textNode = document.createTextNode(textContent)
+        marker.parentNode?.replaceChild(textNode, marker)
+    })
+
+    pageComments.value.forEach(comment => {
+        if (!comment.text) return
+
+        let range: Range | null = null
+
+        if (comment.rangeInfo) {
+            const { startContainerXPath, startOffset, endContainerXPath, endOffset } = comment.rangeInfo
+            if (startContainerXPath && endContainerXPath) {
+                const startNode = getNodeByXPath(startContainerXPath)
+                const endNode = getNodeByXPath(endContainerXPath)
+                
+                if (startNode && endNode) {
+                    try {
+                        range = document.createRange()
+                        range.setStart(startNode, startOffset || 0)
+                        range.setEnd(endNode, endOffset || 0)
+                    } catch (e) {
+                        maLogger.warn('使用XPath定位失败，回退到文本匹配:', e)
+                        range = null
+                    }
+                }
+            }
+        }
+
+        if (!range) {
+            range = findTextRange(comment.text)
+        }
+
+        if (range) {
+            const span = document.createElement('span')
+            span.className = 'comment-highlight-marker'
+            span.dataset.commentId = comment.id
+            span.style.cssText = `
+                text-decoration: underline;
+                text-decoration-color: #6366f1;
+                text-decoration-thickness: 2px;
+                text-underline-offset: 4px;
+                cursor: pointer;
+                color: inherit;
+                background: rgba(99, 102, 241, 0.1);
+                border-radius: 2px;
+                transition: all 0.2s ease;
+                position: relative;
+                z-index: 1;
+            `
+            span.addEventListener('click', (event) => {
+                event.stopPropagation()
+                event.preventDefault()
+                const rect = span.getBoundingClientRect()
+                commentDisplayPosition.value = {
+                    x: Math.min(rect.left + rect.width / 2 - 170, window.innerWidth - 360),
+                    y: rect.bottom + 10
+                }
+                selectedComment.value = comment
+                showCommentDisplay.value = true
+            })
+            try {
+                range.surroundContents(span)
+            } catch (e) {
+                maLogger.warn('无法高亮文本:', e)
+            }
+        }
+    })
+}
+
+const findTextRange = (searchText: string): Range | null => {
+    const treeWalker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        {
+            acceptNode: (node) => {
+                if (node.parentElement?.closest('script, style, noscript, iframe')) {
+                    return NodeFilter.FILTER_REJECT
+                }
+                return NodeFilter.FILTER_ACCEPT
+            }
+        }
+    )
+
+    let currentNode: Node | null
+    while ((currentNode = treeWalker.nextNode())) {
+        const textContent = currentNode.textContent || ''
+        const index = textContent.indexOf(searchText)
+        if (index !== -1) {
+            const range = document.createRange()
+            range.setStart(currentNode, index)
+            range.setEnd(currentNode, index + searchText.length)
+            return range
+        }
+    }
+    return null
+}
+
+const highlightTextNode = (textNode: Text, searchText: string, commentId: string) => {
+    const content = textNode.textContent || ''
+    const index = content.indexOf(searchText)
+    
+    if (index === -1) return
+
+    const range = document.createRange()
+    range.setStart(textNode, index)
+    range.setEnd(textNode, index + searchText.length)
+
+    const span = document.createElement('span')
+    span.className = 'comment-highlight-marker'
+    span.dataset.commentId = commentId
+    span.style.cssText = `
+        text-decoration: underline;
+        text-decoration-color: #6366f1;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 4px;
+        cursor: pointer;
+        color: inherit;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 2px;
+        transition: all 0.2s ease;
+    `
+
+    try {
+        range.surroundContents(span)
+    } catch (e) {
+        maLogger.warn('无法高亮文本节点:', e)
+    }
+}
+
+const showCommentModalFn = (text: string, rangeInfo?: {
+    startContainerXPath: string;
+    startOffset: number;
+    endContainerXPath: string;
+    endOffset: number;
+}) => {
+    currentSelectedText.value = text
+    editingCommentId.value = ''
+    editingCommentContent.value = ''
+    currentRangeInfo.value = rangeInfo || null
+    showCommentModal.value = true
+}
+
+const hideCommentModal = () => {
+    showCommentModal.value = false
+    currentSelectedText.value = ''
+    editingCommentId.value = ''
+    editingCommentContent.value = ''
+}
+
+const hideCommentDisplay = () => {
+    showCommentDisplay.value = false
+    selectedComment.value = null
+}
+
+const handleSaveComment = async (data: { text: string; comment: string; commentId?: string }) => {
+    try {
+        const url = window.location.href
+        const hash = window.location.hash || '#'
+        
+        if (data.commentId) {
+            await CommentStorage.updateComment(data.commentId, { comment: data.comment })
+            maLogger.log('更新留言成功:', data.commentId)
+        } else {
+            await CommentStorage.saveComment({
+                text: data.text,
+                comment: data.comment,
+                url,
+                hash,
+                rangeInfo: currentRangeInfo.value || undefined
+            })
+            maLogger.log('保存留言成功')
+        }
+
+        hideCommentModal()
+        currentRangeInfo.value = null
+        await loadPageComments()
+        showCommentSuccess()
+    } catch (error) {
+        maLogger.error('保存留言失败:', error)
+    }
+}
+
+const handleDeleteComment = async (commentId: string) => {
+    try {
+        await CommentStorage.deleteComment(commentId)
+        maLogger.log('删除留言成功:', commentId)
+        hideCommentModal()
+        await loadPageComments()
+        showDeleteSuccess()
+    } catch (error) {
+        maLogger.error('删除留言失败:', error)
+    }
+}
+
+const handleEditComment = () => {
+    if (selectedComment.value) {
+        editingCommentId.value = selectedComment.value.id
+        editingCommentContent.value = selectedComment.value.comment
+        currentSelectedText.value = selectedComment.value.text
+        showCommentDisplay.value = false
+        showCommentModal.value = true
+    }
+}
+
+const showCommentSuccess = () => {
+    const successContainer = document.createElement('div')
+    successContainer.style.cssText = `
+        background: rgba(20, 24, 33, 0.9);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 12px;
+        padding: 14px 18px;
+        font-size: 14px;
+        line-height: 1.5;
+        max-width: 280px;
+        position: fixed;
+        z-index: 9999999;
+        right: 20px;
+        top: 20px;
+        box-shadow: 
+            0 8px 24px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(99, 102, 241, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    `
+
+    successContainer.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span style="color: rgba(255, 255, 255, 0.9); font-weight: 500;">留言保存成功！</span>
+        </div>
+    `
+
+    const style = document.createElement('style')
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+        }
+    `
+    document.head.appendChild(style)
+
+    document.body.appendChild(successContainer)
+
+    setTimeout(() => {
+        successContainer.style.animation = 'slideIn 0.3s cubic-bezier(0.55, 0, 1, 1) reverse'
+        setTimeout(() => {
+            try {
+                document.body.removeChild(successContainer)
+                document.head.removeChild(style)
+            } catch (error) {
+                // 元素可能已经被移除
+            }
+        }, 300)
+    }, 3500)
+}
+
+const showDeleteSuccess = () => {
+    const successContainer = document.createElement('div')
+    successContainer.style.cssText = `
+        background: rgba(20, 24, 33, 0.9);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 12px;
+        padding: 14px 18px;
+        font-size: 14px;
+        line-height: 1.5;
+        max-width: 280px;
+        position: fixed;
+        z-index: 9999999;
+        right: 20px;
+        top: 20px;
+        box-shadow: 
+            0 8px 24px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(239, 68, 68, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    `
+
+    successContainer.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg>
+            <span style="color: rgba(255, 255, 255, 0.9); font-weight: 500;">留言已删除</span>
+        </div>
+    `
+
+    const style = document.createElement('style')
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+        }
+    `
+    document.head.appendChild(style)
+
+    document.body.appendChild(successContainer)
+
+    setTimeout(() => {
+        successContainer.style.animation = 'slideIn 0.3s cubic-bezier(0.55, 0, 1, 1) reverse'
+        setTimeout(() => {
+            try {
+                document.body.removeChild(successContainer)
+                document.head.removeChild(style)
+            } catch (error) {
+                // 元素可能已经被移除
+            }
+        }, 300)
+    }, 3500)
+}
+
+const handleHashChange = () => {
+    loadPageComments()
+}
+
 onMounted(() => {
-    // 加载保存的状态
     loadState()
+    loadPageComments()
+    
+    window.addEventListener('hashchange', handleHashChange)
+    
     componentManager.register('TextSelectionToolbar', {
         show,
         hide,
@@ -359,11 +775,13 @@ onMounted(() => {
         updateTranslationPanel,
         shakeTranslationPanelBySourceText,
         hideTranslationPanel,
-        showReplaceModal: showReplaceModalFn
+        showReplaceModal: showReplaceModalFn,
+        showCommentModal: showCommentModalFn
     })
 })
 
 onUnmounted(() => {
+    window.removeEventListener('hashchange', handleHashChange)
     componentManager.unregister('TextSelectionToolbar')
 })
 </script>
@@ -388,7 +806,6 @@ onUnmounted(() => {
     pointer-events: auto;
 }
 
-/* 红点指示器样式 */
 .red-dot {
     position: absolute;
     top: -4px;
@@ -411,7 +828,6 @@ onUnmounted(() => {
     transform: scale(1.15);
 }
 
-/* 红点脉冲动画 */
 @keyframes pulse {
     0% {
         box-shadow:

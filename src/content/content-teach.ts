@@ -10,7 +10,7 @@
 import { waitForSelector, getElementAbsolutePosition, createEl, PositionStrategy } from "@/utils/element-control"
 import { createApp } from 'vue'
 import { Requester, get_token } from "@/services/api/mria-api"
-import type { Response, ExtMessage, MessageHandler, Tool, } from "@/assets/types"
+import type { Response, ExtMessage, MessageHandler, Tool, } from "@/types"
 import { QuickLogin } from "@components/index"
 import { storage } from "@/stores"
 import { whenDomReady } from "@/utils/element-control"

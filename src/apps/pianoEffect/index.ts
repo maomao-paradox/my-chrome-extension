@@ -11,7 +11,7 @@
 import { storage } from '@/stores';
 import { getStaticAbstractPath } from '@/utils/common';
 import { wzyTool } from '@/apps/rainmeter';
-import { AppModule } from '@/assets/types';
+import { AppModule } from '@/types';
 
 const fetchAndDecodeAudioBuffer = async (
   soundFile: string,

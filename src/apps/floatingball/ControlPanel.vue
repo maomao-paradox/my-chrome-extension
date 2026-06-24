@@ -101,7 +101,7 @@
 
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue';
-import { Tool } from '@/assets/types';
+import { Tool } from '@/types/index.js';
 import AIConversation from './views/AIConversation.vue';
 import { Draggable } from '@components/index';
 import { IconFullScreen, IconOffScreen, IconClose } from '@icons/index';

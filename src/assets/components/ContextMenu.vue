@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Tool } from '@/assets/types'
+import { Tool } from '@/types'
 
 // Props定义
 const props = withDefaults(defineProps<{

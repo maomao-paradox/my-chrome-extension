@@ -6,7 +6,7 @@ import JSZip from 'jszip'
 //@ts-ignore
 import { saveAs } from 'file-saver'
 
-import { ImageInfo } from '@/assets/types/utils'
+import { ImageInfo } from '@/types/utils'
 
 // 下载选项接口
 export interface DownloadOptions {

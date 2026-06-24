@@ -136,7 +136,7 @@
       <div class="save-dock" :class="`save-dock--${saveState}`" aria-live="polite">
         <button class="primary-btn" :disabled="isSaving" @click="saveConfig">
           <span class="primary-btn__icon">
-            <IconCircleCheck />
+            <IconConfirm />
           </span>
           <span class="primary-btn__copy">
             <strong>{{ saveButtonTitle }}</strong>
@@ -155,7 +155,7 @@ import { sendMessageToContentScript } from '@/message/back-content';
 import { MASwitch } from '@components/index';
 import TableContainer from './TableContainer.vue';
 import { appConfigKey, domainConfigsKey } from '@/config';
-import { IconCircleCheck, IconDocument, IconSetting, IconTime, IconTooling } from '@icons/index';
+import { IconConfirm, IconDocument, IconSetting, IconTime, IconTooling } from '@icons/index';
 import { useDomainState } from '../composables/useDomainState';
 import { popupThemes, usePopupTheme, type PopupThemeKey } from '../composables/usePopupTheme';
 import { usePopupMouseTrail } from '../composables/usePopupMouseTrail';
@@ -1082,6 +1082,7 @@ onBeforeUnmount(() => {
 }
 
 @keyframes savePulse {
+
   0%,
   100% {
     transform: scale(1);

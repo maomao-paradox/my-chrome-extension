@@ -11,7 +11,7 @@ import { getQueryParams, parseCSV, base64ToBlob, randomString, randomNum, random
 import { cloneEl, saveToLocal, addElementToDom, injectScriptToActivateTab, addFileInput, waitForSelector, injectVueComponent, getElementAbsolutePosition, createEl, PositionStrategy } from "@/utils/element-control"
 import { createApp } from 'vue'
 import { Requester, getFormCodeByName, addForm, addUser, autoDelay, autoCheckTimeoutTask, createTreatflow, deletePatient, getFormDesign, get_token, markHighRisk, registerPatient, reloadRemoteDevices, updateForm, updatePatientImage, uploadSignPicture, userLogin, userLogout } from "@/services/api/mria-api"
-import type { PatientRegistrationData, Response, ExtMessage, MessageHandler, Tool } from "@/assets/types"
+import type { PatientRegistrationData, Response, ExtMessage, MessageHandler, Tool } from "@/types"
 import { QuickLogin, ElInputSearch } from "@components/index"
 import { storage } from "@/stores"
 import { getRuntimeScript,  } from "@/utils"

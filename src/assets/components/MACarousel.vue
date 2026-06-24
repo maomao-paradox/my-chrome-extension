@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Tool } from "@/assets/types"
+import { Tool } from "@/types"
 
 const visible = defineModel<boolean>('visible', {
     default: false

@@ -2,7 +2,7 @@ import { appModules, appConfigKey } from '@/config';
 import { storage } from '@/stores';
 import { ModuleOption } from '@/utils';
 import { ref } from 'vue';
-import { PluginConfigs } from '../types';
+import { PluginConfigs } from '../../types';
 import { defaultPluginConfigs } from '@/apps'
 
 export const usePluginManager = () => {

@@ -1,4 +1,4 @@
-import type { ExtMessage, ResponseMessage } from '@/assets/types';
+import type { ExtMessage, ResponseMessage } from '@/types';
 
 export function sendRequestToActiveTab(
 	requests: ExtMessage,

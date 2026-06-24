@@ -10,7 +10,7 @@
 // stores/floatingball.ts
 import { defineStore } from 'pinia'
 import { ref, computed, Ref } from 'vue'
-import { Tool } from '@/assets/types'
+import { Tool } from '@/types'
 import { storage } from '@/stores'
 import { appConfigKey } from '@/config'
 

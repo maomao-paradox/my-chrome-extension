@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { ExtMessage, ResponseMessage } from '@/assets/types/message';
+import { ExtMessage, ResponseMessage } from '@/types/message';
 
 // 文本替换相关数据
 const findText = ref('');

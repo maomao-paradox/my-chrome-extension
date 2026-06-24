@@ -13,11 +13,11 @@ import { createApp } from 'vue'
 import { $id, addElementToDom } from '@/utils/element-control'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { createShadowHost, injectCssDom, injectStyles } from '@/utils/shadow-dom'
-import { Tool } from '@/assets/types'
+import { Tool } from '@/types/index.js'
 import { getAssetsAbstractPath, getAssetsAbstractPathSync, getStaticAbstractPath } from '@/utils/common'
 import { storage } from '@/stores';
 import { appConfigKey } from '@/config';
-import { AppModule } from '@/assets/types/utils';
+import { AppModule } from '@/types/utils/index.js';
 import { shadowHostId } from '@/config';
 
 /**

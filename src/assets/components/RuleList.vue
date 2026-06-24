@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Rule } from '@types/index'
+import { Rule } from '@/types/index'
 
 interface RuleProps {
     rules: Rule[]

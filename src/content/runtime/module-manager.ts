@@ -1,4 +1,4 @@
-import type { PluginConfigs } from '@/assets/types';
+import type { PluginConfigs } from '@/types';
 import { contentModules, appModules } from '@/config';
 import { ESMModuleLoader } from '@/utils/esm-module-loader';
 

@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.696Z
  */
 
-import { type XhrRulesMap } from '@/assets/types';
+import { type XhrRulesMap } from '@/types';
 import { rules as mriaRules } from './mria';
 import {rules as qaproRules } from './qapro'
 

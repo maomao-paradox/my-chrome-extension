@@ -57,7 +57,7 @@ import { watch, computed } from 'vue';
 import MRIconButton from './MRIconButton.vue';
 import MRInput from './MRInput.vue';
 import MRSelect from './MRSelect.vue';
-import { RuleInstruction } from '@/assets/types';
+import { RuleInstruction } from '@/types/index.js';
 
 interface Props {
   index: number;

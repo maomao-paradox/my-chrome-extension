@@ -10,17 +10,14 @@
 import { createApp } from 'vue'
 import { createShadowHost, injectCssDom } from '@/utils/shadow-dom'
 import { addElementToDom, $id } from '@/utils/element-control'
-import { Tool } from '@/assets/types'
+import { Tool, AppModule, Bookmark } from '@/types'
 import App from './App.vue'
 import { bus } from '@/event'
 import { getAssetsAbstractPathSync } from '@/utils/common'
 import { storage } from '@/stores';
-import { AppModule } from '@/assets/types/utils';
 import { shadowHostId, appConfigKey } from '@/config';
-import IconDocument from '@/assets/icons/IconDocument.vue'
-import IconBookmark from '@/assets/icons/IconBookmark.vue'
+import { IconDocument, IconBookmark } from '@/assets/icons'
 import { BookmarkStorage } from '@/services/bookmarkStorage'
-import { Bookmark } from '@/assets/types/components'
 
 /**
  * @author 不可以是我吗

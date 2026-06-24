@@ -1,6 +1,6 @@
 {
-	"pluginName": {"message": "MRIA-EX"},
-	"pluginDesc": {"message": "MRIA 扩展，一个多功能的浏览器扩展。"},
+	"pluginName": {"message": "KRIA-NOVE"},
+	"pluginDesc": {"message": "NOVE 扩展，一个多功能的浏览器扩展。"},
 	"pluginVersion": {"message": "1.0.10"},
-	"popupTitle": {"message": "Manteia Boost"}
+	"popupTitle": {"message": "KRIA NOVE"}
 }

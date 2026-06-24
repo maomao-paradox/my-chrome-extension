@@ -11,10 +11,10 @@
 <script setup lang="ts">
 import { getStaticAbstractPath } from '@/utils/common'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { Tool } from "@/assets/types"
+import { Tool } from "@/types/index.js"
 import { appConfigKey } from '@/config'
 import { useFloatingballStore } from '@/stores/floatingball'
-import { PluginConfigs } from "@/assets/types";
+import { PluginConfigs } from "@/types/index.js";
 import ToolDrawer  from "./ToolDrawer.vue";
 import ControlPanel from "./ControlPanel.vue";
 import FloatingBall from "./FloatingBall.vue";

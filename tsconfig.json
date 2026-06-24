@@ -13,7 +13,7 @@
         "./src/*"
       ],
       "@types/*": [
-        "src/assets/types/*"
+        "src/types/*"
       ],
       "@components/*": [
         "src/assets/components/*"
@@ -34,7 +34,7 @@
     "skipLibCheck": true,
     "typeRoots": [
       "./node_modules/@types",
-      "src/assets/types"
+      "src/types"
     ]
   },
   "include": [
@@ -42,7 +42,7 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "src/assets/types/*"
+    "src/types/*"
   ],
   "exclude": [
     "node_modules",

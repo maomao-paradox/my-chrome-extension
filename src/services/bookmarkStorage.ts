@@ -1,5 +1,5 @@
 import storage from '@/stores/chromestorge';
-import { Bookmark } from '@/assets/types/components';
+import { Bookmark } from '@/types/components';
 import { generateId } from '@/utils/base';
 
 const BOOKMARKS_STORAGE_KEY = 'textSelectionToolbookmarks';

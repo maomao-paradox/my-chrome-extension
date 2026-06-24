@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.695Z
  */
 
-import type { ExtMessage } from "@/assets/types"
+import type { ExtMessage } from "@/types"
 
 interface SendMessageOptions {
     preferredTabId?: number;

@@ -8,11 +8,11 @@
 
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { MonitorConfig, ConfigValidationResult } from '@/assets/types/error-monitor';
+import type { MonitorConfig, ConfigValidationResult } from '@/types/error-monitor';
 import {
   DEFAULT_MONITOR_CONFIG,
   MonitorConfigUtils,
-} from '@/assets/types/error-monitor';
+} from '@/types/error-monitor';
 
 /** Storage 键名 */
 const STORAGE_KEY = 'errorMonitorConfig';

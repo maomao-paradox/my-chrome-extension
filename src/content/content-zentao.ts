@@ -9,7 +9,7 @@
 
 import { addElementToDom, injectScriptToActivateTab, waitForSelector } from "@/utils/element-control"
 import messenger from "@/message"
-import { ExtMessage, Tool, TextTool } from "@/assets/types"
+import { ExtMessage, Tool, TextTool } from "@/types"
 import { getRuntimeScript } from "@/utils/common";
 
 const convertToCSV = (data: any[]): string => {

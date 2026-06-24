@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { RuleForm, RuleList, TestTool } from '@components/index'
-import { Rule } from '@/assets/types/components/index'
+import { Rule } from '@/types/components/index'
 
 const activeTab = ref('rules')
 const rules = ref<Rule[]>([])

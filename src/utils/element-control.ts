@@ -16,7 +16,7 @@ import type {
   CloneElemOpts,
   AddElemOpts,
   WaitForSelectorOptions,
-} from '@/assets/types';
+} from '@/types';
 import { getAssetsAbstractPath, getRuntimeScript } from '@/utils/common';
 
 export const $id = document.getElementById.bind(document);

@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
-import { TextTool } from '@/assets/types'
+import { TextTool } from '@/types'
 import { componentManager } from '@/utils/componentManager'
 
 // 组件props

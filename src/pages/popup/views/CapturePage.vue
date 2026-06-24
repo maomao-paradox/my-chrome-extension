@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import type { ExtMessage } from '@/assets/types';
+import type { ExtMessage } from '@/types';
 import { useDomainState } from '../composables/useDomainState';
 import TableContainer from './TableContainer.vue';
 

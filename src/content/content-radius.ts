@@ -8,7 +8,7 @@
  */
 
 import { addElementToDom, waitForSelector } from "@/utils/element-control"
-import { Tool } from "@/assets/types"
+import { Tool } from "@/types"
 import messenger from "@/message";
 
 

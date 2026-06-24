@@ -7,7 +7,7 @@
 
 
 
-import { AppModule } from '@/assets/types'
+import { AppModule } from '@/types/index.js'
 import { shadowHostId } from '@/config'
 import ComponentCaptureApp from './App.vue'
 import { createShadowHost, injectCssDom } from '@/utils/shadow-dom'

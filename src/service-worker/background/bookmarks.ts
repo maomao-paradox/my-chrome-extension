@@ -1,4 +1,4 @@
-import type { Bookmark } from '@/assets/types';
+import type { Bookmark } from '@/types';
 import { createTabAndWaitComplete } from './chrome-tabs';
 import { executeBookmarkScript } from './execute-script';
 

@@ -13,8 +13,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Tool } from '@/assets/types'
-import IconCommunity from '@icons/IconCommunity.vue'
+import { Tool } from '@/types'
+import { IconCommunity } from '@icons/index'
 import { eventManager } from '@/event'
 
 // Props定义

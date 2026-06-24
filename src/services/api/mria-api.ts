@@ -10,7 +10,7 @@
 import { randomSelect, getQueryParams, getFirstClipboard } from '@/utils/base';
 import { saveToLocal } from '@/utils/element-control';
 import { storage } from '@/stores';
-import { SessionInfo, RequestHeaders, RequestBody, UserInfo } from '@/assets/types';
+import { SessionInfo, RequestHeaders, RequestBody, UserInfo } from '@/types';
 
 // 获取token
 export function get_token(): string | null {
