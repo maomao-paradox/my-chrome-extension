@@ -1,5 +1,5 @@
 import storage from '@/stores/chromestorge';
-import { Bookmark } from '@/types/components';
+import { Bookmark, BookmarkComment } from '@/types/components';
 import { generateId } from '@/utils/base';
 
 const BOOKMARKS_STORAGE_KEY = 'textSelectionToolbookmarks';
@@ -11,20 +11,16 @@ export class BookmarkStorage {
    */
   static async saveBookmark(bookmark: Omit<Bookmark, 'id' | 'timestamp'>): Promise<Bookmark> {
     try {
-      // 获取现有的书签列表
       const bookmarks = await this.getBookmarks();
       
-      // 创建新书签
       const newBookmark: Bookmark = {
         ...bookmark,
         id: generateId(),
         timestamp: Date.now(),
+        comments: [],
       };
       
-      // 添加到书签列表
       bookmarks.push(newBookmark);
-      
-      // 保存到存储
       await storage.ext.local.set(BOOKMARKS_STORAGE_KEY, bookmarks);
       
       return newBookmark;
@@ -40,7 +36,10 @@ export class BookmarkStorage {
   static async getBookmarks(): Promise<Bookmark[]> {
     try {
       const bookmarks = await storage.ext.local.get(BOOKMARKS_STORAGE_KEY, []);
-      return Array.isArray(bookmarks) ? bookmarks : [];
+      return Array.isArray(bookmarks) ? bookmarks.map(bookmark => ({
+        ...bookmark,
+        comments: bookmark.comments || [],
+      })) : [];
     } catch (error) {
       maLogger.error('获取书签失败:', error);
       return [];
@@ -88,6 +87,63 @@ export class BookmarkStorage {
     } catch (error) {
       maLogger.error('清空书签失败:', error);
       return false;
+    }
+  }
+  
+  /**
+   * 为书签添加留言
+   * @param bookmarkId 书签ID
+   * @param commentText 留言内容
+   */
+  static async addComment(bookmarkId: string, commentText: string): Promise<Bookmark | null> {
+    try {
+      const bookmarks = await this.getBookmarks();
+      const index = bookmarks.findIndex(bookmark => bookmark.id === bookmarkId);
+      
+      if (index === -1) {
+        return null;
+      }
+      
+      const newComment: BookmarkComment = {
+        id: generateId(),
+        comment: commentText,
+        timestamp: Date.now(),
+      };
+      
+      if (!bookmarks[index].comments) {
+        bookmarks[index].comments = [];
+      }
+      bookmarks[index].comments.push(newComment);
+      
+      await storage.ext.local.set(BOOKMARKS_STORAGE_KEY, bookmarks);
+      return bookmarks[index];
+    } catch (error) {
+      maLogger.error('添加留言失败:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * 删除书签的留言
+   * @param bookmarkId 书签ID
+   * @param commentId 留言ID
+   */
+  static async deleteComment(bookmarkId: string, commentId: string): Promise<Bookmark | null> {
+    try {
+      const bookmarks = await this.getBookmarks();
+      const index = bookmarks.findIndex(bookmark => bookmark.id === bookmarkId);
+      
+      if (index === -1) {
+        return null;
+      }
+      
+      bookmarks[index].comments = bookmarks[index].comments?.filter(comment => comment.id !== commentId) || [];
+      
+      await storage.ext.local.set(BOOKMARKS_STORAGE_KEY, bookmarks);
+      return bookmarks[index];
+    } catch (error) {
+      maLogger.error('删除留言失败:', error);
+      return null;
     }
   }
 }

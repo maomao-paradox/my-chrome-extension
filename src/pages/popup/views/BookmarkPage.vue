@@ -71,6 +71,45 @@
             </div>
           </div>
 
+          <div class="bookmark-comments" v-if="bookmark.comments?.length">
+            <div class="comments-header">
+              <InfoFilled class="comments-icon" />
+              <span class="comments-count">{{ bookmark.comments.length }} 条留言</span>
+            </div>
+            <div class="comments-list">
+              <div
+                v-for="comment in bookmark.comments"
+                :key="comment.id"
+                class="comment-item"
+              >
+                <div class="comment-text">{{ comment.comment }}</div>
+                <div class="comment-footer">
+                  <span class="comment-date">{{ formatDate(comment.timestamp) }}</span>
+                  <button class="comment-delete" @click="deleteComment(bookmark.id, comment.id)" title="删除留言">
+                    <CircleClose />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bookmark-comment-input">
+            <input
+              v-model="newComments[bookmark.id]"
+              type="text"
+              class="comment-input"
+              placeholder="添加留言..."
+              @keyup.enter="addComment(bookmark.id)"
+            />
+            <button class="comment-submit"
+              @click="addComment(bookmark.id)"
+              :disabled="!newComments[bookmark.id]?.trim()"
+              title="发送留言"
+            >
+              <ArrowDown />
+            </button>
+          </div>
+
           <div class="bookmark-footer">
             <span class="bookmark-domain">{{ getDomainLabel(bookmark.url) }}</span>
             <span class="bookmark-date">{{ formatDate(bookmark.timestamp) }}</span>
@@ -98,6 +137,7 @@ import { ref, onMounted, computed } from 'vue';
 import { Bookmark } from '@/types/components/index.js';
 import { BookmarkStorage } from '@/services/bookmarkStorage';
 import { IconDelete, IconOpen, IconBookmark, IconUpload, IconDownload, IconSearch } from '@icons/index';
+import { InfoFilled, ArrowDown, CircleClose } from '@element-plus/icons-vue';
 import TableContainer from './TableContainer.vue';
 
 const bookmarks = ref<Bookmark[]>([]);
@@ -105,6 +145,7 @@ const showDeleteConfirm = ref(false);
 const bookmarkToDelete = ref<string>('');
 const fileInput = ref<HTMLInputElement | null>(null);
 const filterKeyword = ref('');
+const newComments = ref<Record<string, string>>({});
 
 const normalizedFilterKeyword = computed(() => filterKeyword.value.trim().toLowerCase());
 const filteredBookmarks = computed(() => {
@@ -243,6 +284,28 @@ const getDomainLabel = (url: string) => {
 const formatDate = (timestamp: number) => {
   const date = new Date(timestamp);
   return date.toLocaleString();
+};
+
+const addComment = async (bookmarkId: string) => {
+  const commentText = newComments.value[bookmarkId]?.trim();
+  if (!commentText) return;
+
+  try {
+    await BookmarkStorage.addComment(bookmarkId, commentText);
+    await loadBookmarks();
+    newComments.value[bookmarkId] = '';
+  } catch (error) {
+    maLogger.error('添加留言失败:', error);
+  }
+};
+
+const deleteComment = async (bookmarkId: string, commentId: string) => {
+  try {
+    await BookmarkStorage.deleteComment(bookmarkId, commentId);
+    await loadBookmarks();
+  } catch (error) {
+    maLogger.error('删除留言失败:', error);
+  }
 };
 
 onMounted(() => {
@@ -517,6 +580,136 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
     padding: 0 9px;
     border-radius: 999px;
     background: var(--popup-control-bg);
+  }
+
+  &-comments {
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--popup-card-bg-muted);
+    margin-top: 8px;
+  }
+
+  &-comment-input {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 12px;
+    background: var(--popup-control-bg);
+  }
+}
+
+.comments-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--popup-text-muted);
+}
+
+.comments-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.comments-count {
+  font-size: 12px;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comment-item {
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--popup-control-bg);
+}
+
+.comment-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--popup-text-secondary);
+  word-break: break-word;
+}
+
+.comment-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.comment-date {
+  font-size: 11px;
+  color: var(--popup-text-subtle);
+}
+
+.comment-delete {
+  @include flex-center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--popup-text-subtle);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+    color: var(--popup-danger-strong);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.comment-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--popup-border);
+  border-radius: 10px;
+  background: var(--popup-card-bg);
+  color: var(--popup-text-primary);
+  font-size: 13px;
+  outline: none;
+
+  &::placeholder {
+    color: var(--popup-text-subtle);
+  }
+}
+
+.comment-submit {
+  @include flex-center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: var(--popup-button-bg);
+  color: var(--popup-text-on-accent);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
 }
 

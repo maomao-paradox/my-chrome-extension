@@ -42,6 +42,12 @@ export interface PluginConfigs {
   [key: string]: ConfigItem
 }
 
+export interface BookmarkComment {
+  id: string;
+  comment: string;
+  timestamp: number;
+}
+
 export interface Bookmark {
   id: string;
   text: string;
@@ -52,4 +58,5 @@ export interface Bookmark {
   };
   timestamp: number;
   title?: string;
+  comments?: BookmarkComment[];
 }
