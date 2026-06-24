@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manteia Boost 个人主页">
+  <meta name="theme-color" content="#090914">
+  <title>Manteia Profile</title>
+  <style>
+    @font-face {
+      font-family: "ProfileQuicksand";
+      src: url("/static/front/Quicksand-VariableFont_wght.ttf") format("truetype");
+      font-weight: 300 700;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "ProfilePoppins";
+      src: url("/static/front/Poppins-Light.ttf") format("truetype");
+      font-weight: 300;
+      font-display: swap;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: #090914;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      font-family: "ProfileQuicksand", "Avenir Next", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: #eff5f2;
+      background: #090914;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    #app {
+      min-height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type="module" src="./profile/main.ts"></script>
+</body>
+
+</html>

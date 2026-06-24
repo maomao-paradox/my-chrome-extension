@@ -68,6 +68,7 @@ export default defineConfig({
     cssCodeSplit: true,
     rollupOptions: {
       input: {
+        'pages/profile': path.resolve(__dirname, 'src/pages/profile.html'),
         ...(isProduction ? {
           ...scanFiles({
             dirPath: 'src/apps',
