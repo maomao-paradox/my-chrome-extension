@@ -29,6 +29,10 @@ export const defaultPluginConfigs: PluginConfigs = {
         "desc": "文本选择工具栏",
         "value": true
     },
+    "menu": {
+        "desc": "菜单",
+        "value": true
+    },
     // "componentCapture": {
     //     "desc": "组件捕获",
     //     "value": true

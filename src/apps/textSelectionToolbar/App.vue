@@ -44,6 +44,7 @@ import { TextTool } from '@/types/index.js'
 import { eventManager } from "@/event"
 import findAndReplaceDOMText, { Finder } from './findAndReplaceDOMText'
 import { CommentStorage, type Comment } from '@/services/commentStorage'
+import { showSuccessMessage } from '@/utils/index.js'
 
 interface TextSelectionToolbarProps {
     initialText: string;
@@ -159,10 +160,10 @@ watch(isVisible, (newValue) => {
 
 defineExpose({ show, hide })
 
-const localTools = ref<TextTool[]>([...props.customTools])
+const localTools = ref<TextTool[]>([...props.customTools!])
 
 watch(() => props.customTools, (newTools) => {
-    localTools.value = [...newTools]
+    localTools.value = [...newTools!]
 }, { deep: true })
 
 eventManager.useBus('update:toolbar:tools', (newTools: TextTool[]) => {
@@ -293,74 +294,13 @@ const handleReplace = async (replaceText: string, options: { caseSensitive: bool
         maLogger.log('替换完成，共替换:', instance.matches.length, '处')
 
         if (instance.matches.length > 0) {
-            showReplaceSuccess(instance.matches.length)
+            showSuccessMessage(`成功替换 ${instance.matches.length} 处文本！`)
         }
     } catch (error) {
         maLogger.error('替换失败:', error)
     } finally {
         hideReplaceModal()
     }
-}
-
-const showReplaceSuccess = (count: number) => {
-    const successContainer = document.createElement('div')
-    successContainer.style.cssText = `
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(13, 148, 136, 0.22);
-        border-radius: 12px;
-        padding: 14px 18px;
-        font-size: 14px;
-        line-height: 1.5;
-        max-width: 280px;
-        position: fixed;
-        z-index: 9999999;
-        right: 20px;
-        top: 20px;
-        box-shadow: 
-            0 18px 42px rgba(15, 23, 42, 0.18),
-            0 4px 12px rgba(13, 148, 136, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.84);
-        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    `
-
-    successContainer.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            <span style="color: #134e4a; font-weight: 700;">成功替换 ${count} 处文本！</span>
-        </div>
-    `
-
-    const style = document.createElement('style')
-    style.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%) scale(0.95);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0) scale(1);
-                opacity: 1;
-            }
-        }
-    `
-    document.head.appendChild(style)
-
-    document.body.appendChild(successContainer)
-
-    setTimeout(() => {
-        successContainer.style.animation = 'slideIn 0.3s cubic-bezier(0.55, 0, 1, 1) reverse'
-        setTimeout(() => {
-            try {
-                document.body.removeChild(successContainer)
-                document.head.removeChild(style)
-            } catch (error) {
-                // 元素可能已经被移除
-            }
-        }, 300)
-    }, 3500)
 }
 
 // XPath 辅助函数
@@ -604,7 +544,7 @@ const handleSaveComment = async (data: { text: string; comment: string; commentI
         hideCommentModal()
         currentRangeInfo.value = null
         await loadPageComments()
-        showCommentSuccess()
+        showSuccessMessage('留言保存成功！')
     } catch (error) {
         maLogger.error('保存留言失败:', error)
     }
@@ -616,7 +556,7 @@ const handleDeleteComment = async (commentId: string) => {
         maLogger.log('删除留言成功:', commentId)
         hideCommentModal()
         await loadPageComments()
-        showDeleteSuccess()
+        showSuccessMessage('留言删除成功！')
     } catch (error) {
         maLogger.error('删除留言失败:', error)
     }
@@ -630,130 +570,6 @@ const handleEditComment = () => {
         showCommentDisplay.value = false
         showCommentModal.value = true
     }
-}
-
-const showCommentSuccess = () => {
-    const successContainer = document.createElement('div')
-    successContainer.style.cssText = `
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(13, 148, 136, 0.22);
-        border-radius: 12px;
-        padding: 14px 18px;
-        font-size: 14px;
-        line-height: 1.5;
-        max-width: 280px;
-        position: fixed;
-        z-index: 9999999;
-        right: 20px;
-        top: 20px;
-        box-shadow: 
-            0 18px 42px rgba(15, 23, 42, 0.18),
-            0 4px 12px rgba(13, 148, 136, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.84);
-        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    `
-
-    successContainer.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span style="color: #134e4a; font-weight: 700;">留言保存成功！</span>
-        </div>
-    `
-
-    const style = document.createElement('style')
-    style.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%) scale(0.95);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0) scale(1);
-                opacity: 1;
-            }
-        }
-    `
-    document.head.appendChild(style)
-
-    document.body.appendChild(successContainer)
-
-    setTimeout(() => {
-        successContainer.style.animation = 'slideIn 0.3s cubic-bezier(0.55, 0, 1, 1) reverse'
-        setTimeout(() => {
-            try {
-                document.body.removeChild(successContainer)
-                document.head.removeChild(style)
-            } catch (error) {
-                // 元素可能已经被移除
-            }
-        }, 300)
-    }, 3500)
-}
-
-const showDeleteSuccess = () => {
-    const successContainer = document.createElement('div')
-    successContainer.style.cssText = `
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(220, 38, 38, 0.18);
-        border-radius: 12px;
-        padding: 14px 18px;
-        font-size: 14px;
-        line-height: 1.5;
-        max-width: 280px;
-        position: fixed;
-        z-index: 9999999;
-        right: 20px;
-        top: 20px;
-        box-shadow: 
-            0 18px 42px rgba(15, 23, 42, 0.18),
-            0 4px 12px rgba(220, 38, 38, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.84);
-        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    `
-
-    successContainer.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-            </svg>
-            <span style="color: #7f1d1d; font-weight: 700;">留言已删除</span>
-        </div>
-    `
-
-    const style = document.createElement('style')
-    style.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%) scale(0.95);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0) scale(1);
-                opacity: 1;
-            }
-        }
-    `
-    document.head.appendChild(style)
-
-    document.body.appendChild(successContainer)
-
-    setTimeout(() => {
-        successContainer.style.animation = 'slideIn 0.3s cubic-bezier(0.55, 0, 1, 1) reverse'
-        setTimeout(() => {
-            try {
-                document.body.removeChild(successContainer)
-                document.head.removeChild(style)
-            } catch (error) {
-                // 元素可能已经被移除
-            }
-        }, 300)
-    }, 3500)
 }
 
 const handleHashChange = () => {

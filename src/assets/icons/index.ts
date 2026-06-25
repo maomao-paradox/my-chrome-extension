@@ -7,6 +7,8 @@
  * @date 2026-02-05T02:38:01.693Z
  */
 
+import { Component } from 'vue';
+
 // 简洁的导入导出方式
 export { default as IconDownload } from './download.svg?component';
 export { default as IconSearch } from './search.svg?component';
@@ -30,3 +32,10 @@ export { default as IconTime } from './time.svg?component';
 export { default as IconCapture } from './capture.svg?component';
 export { default as GlowingArrow } from './GlowingArrow.vue'
 export { default as IconConfirm } from './confirm.svg?component'
+export { default as IconAIChat } from './ai-chat.svg?component'
+
+import IconAIChat from './ai-chat.svg?component'
+
+export const toolIcon: Map<string, Component> = new Map([
+    ['ai-chat', IconAIChat as Component],
+])

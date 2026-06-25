@@ -13,12 +13,11 @@ import TextSelectionToolbarApp from './App.vue'
 import { createShadowHost, injectCssDom } from '@/utils/shadow-dom'
 import { storage } from '@/stores'
 import { pinia } from '@/stores/index'
-import { getElementAbsolutePosition, debounce, ElementPositionInfo, addElementToDom, PositionStrategy } from '@/utils/element-control'
+import { getElementAbsolutePosition, debounce, ElementPositionInfo, addElementToDom, PositionStrategy, showSuccessMessage } from '@/utils'
 import { createApp } from 'vue'
 import { componentManager } from '@/utils/componentManager'
 import { TextTool } from '@/types'
-import { bus } from '@/event'
-import { getAssetsAbstractPath, getAssetsAbstractPathSync } from '@/utils/common'
+import { getAssetsAbstractPathSync } from '@/utils/common'
 import { generateId } from '@/utils/base'
 import { BookmarkStorage } from '@/services/bookmarkStorage'
 import { loadAIConfig } from '@/utils/ai-config'
@@ -278,55 +277,7 @@ class TextSelectionToolbarModule implements AppModule {
    * 显示书签保存成功的反馈
    */
   private showBookmarkSuccess(): void {
-    const successContainer = document.createElement('div');
-    successContainer.style.cssText = `
-      background-color: #e8f5e8;
-      border: 1px solid #c8e6c9;
-      border-radius: 4px;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 14px;
-      line-height: 1.5;
-      max-width: 300px;
-      position: fixed;
-      z-index: 999999;
-      right: 20px;
-      top: 20px;
-      animation: slideIn 0.3s ease-out;
-    `;
-
-    successContainer.innerHTML = `<div style="color: #2e7d32;">书签保存成功！</div>`;
-
-    // 添加动画
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-
-    document.body.appendChild(successContainer);
-
-    // 3秒后自动移除
-    setTimeout(() => {
-      successContainer.style.animation = 'slideIn 0.3s ease-out reverse';
-      setTimeout(() => {
-        try {
-          document.body.removeChild(successContainer);
-          document.head.removeChild(style);
-        } catch (error) {
-          // 元素可能已经被移除
-        }
-      }, 300);
-    }, 3000);
+    showSuccessMessage('书签保存成功！')
   }
 
   constructor(options?: TextSelectionToolbarOptions) {

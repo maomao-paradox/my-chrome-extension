@@ -27,7 +27,7 @@ export const contentModules = contentDomains.reduce((acc, domain) => acc.set(dom
 }), new Map<string, ModuleOption>());
 
 
-const appDomains = ['sidebar', 'floatingball', 'pianoEffect', 'textSelectionToolbar', 'componentCapture', 'errorMonitor'];
+const appDomains = ['sidebar', 'floatingball', 'pianoEffect', 'textSelectionToolbar', 'componentCapture', 'errorMonitor', 'menu'];
 
 export const appModules = appDomains.reduce((acc, domain) => acc.set(domain, {
     flag: `__APP_${domain.toUpperCase()}`,

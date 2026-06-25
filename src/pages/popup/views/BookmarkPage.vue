@@ -71,7 +71,7 @@
             </div>
           </div>
 
-          <div class="bookmark-comments" v-if="bookmark.comments?.length">
+          <!-- <div class="bookmark-comments" v-if="bookmark.comments?.length">
             <div class="comments-header">
               <InfoFilled class="comments-icon" />
               <span class="comments-count">{{ bookmark.comments.length }} 条留言</span>
@@ -108,7 +108,7 @@
             >
               <ArrowDown />
             </button>
-          </div>
+          </div> -->
 
           <div class="bookmark-footer">
             <span class="bookmark-domain">{{ getDomainLabel(bookmark.url) }}</span>
@@ -137,7 +137,6 @@ import { ref, onMounted, computed } from 'vue';
 import { Bookmark } from '@/types/components/index.js';
 import { BookmarkStorage } from '@/services/bookmarkStorage';
 import { IconDelete, IconOpen, IconBookmark, IconUpload, IconDownload, IconSearch } from '@icons/index';
-import { InfoFilled, ArrowDown, CircleClose } from '@element-plus/icons-vue';
 import TableContainer from './TableContainer.vue';
 
 const bookmarks = ref<Bookmark[]>([]);
@@ -284,28 +283,6 @@ const getDomainLabel = (url: string) => {
 const formatDate = (timestamp: number) => {
   const date = new Date(timestamp);
   return date.toLocaleString();
-};
-
-const addComment = async (bookmarkId: string) => {
-  const commentText = newComments.value[bookmarkId]?.trim();
-  if (!commentText) return;
-
-  try {
-    await BookmarkStorage.addComment(bookmarkId, commentText);
-    await loadBookmarks();
-    newComments.value[bookmarkId] = '';
-  } catch (error) {
-    maLogger.error('添加留言失败:', error);
-  }
-};
-
-const deleteComment = async (bookmarkId: string, commentId: string) => {
-  try {
-    await BookmarkStorage.deleteComment(bookmarkId, commentId);
-    await loadBookmarks();
-  } catch (error) {
-    maLogger.error('删除留言失败:', error);
-  }
 };
 
 onMounted(() => {
