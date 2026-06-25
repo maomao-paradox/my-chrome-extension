@@ -16,6 +16,7 @@ const localTools = ref<Tool[]>([...props.tools!].slice(0, 4))
 
 const menuRef = ref<HTMLDivElement>();
 const toggleRef = ref<HTMLDivElement>();
+const count = ref<number>(1);
 
 const emit = defineEmits(['toolClick']);
 
@@ -37,11 +38,18 @@ const toggleMenu = () => {
 
 	// ----- 点击事件处理 -----
 	toggleRef.value.addEventListener('click', function (ev) {
-		if (rot == -1620) {
-			showSuccessMessage('达成成就：打开菜单10次');
+		count.value++;
+		// 在10次，20次，30次，40次，50次，60次，70次，80次，90次，100次时，提示成就
+		if (count.value >= 10 && count.value % 10 === 0) {
+			showSuccessMessage(`达成成就：点击菜单${count.value}次`);
+			count.value = 0;
 		}
 		// 1. 更新旋转角度 (每次减180)
-		rot = rot - 180;
+		if (rot < 180) {
+			rot += 180;
+		} else {
+			rot -= 180;
+		}
 		// 2. 应用旋转到 menu (加单位deg)
 		menuRef.value!.style.transform = 'rotate(' + rot + 'deg)';
 		// 兼容旧版webkit (非必须, 但保留原逻辑)
@@ -121,7 +129,6 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-
 @use "sass:list";
 @use "sass:math";
 @use "sass:string";
