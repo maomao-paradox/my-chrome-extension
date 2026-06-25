@@ -1,7 +1,7 @@
 <template>
     <div class="toolbar-root">
         <div v-show="isVisible">
-            <div v-if="showRedDot" class="red-dot" @click="handleRedDotClick" />
+            <button v-if="showRedDot" class="red-dot" type="button" aria-label="展开文本选择工具栏" @click="handleRedDotClick" />
             <div v-show="showToolbar" class="animation-container show">
                 <TextSelectionToolbar ref="toolbarRef" :initialText="initialText" :customTools="localTools"
                     :showCloseBtn="showCloseBtn" @close="handleClose" />
@@ -305,9 +305,9 @@ const handleReplace = async (replaceText: string, options: { caseSensitive: bool
 const showReplaceSuccess = (count: number) => {
     const successContainer = document.createElement('div')
     successContainer.style.cssText = `
-        background: rgba(20, 24, 33, 0.9);
+        background: rgba(255, 255, 255, 0.96);
         backdrop-filter: blur(12px);
-        border: 1px solid rgba(46, 191, 92, 0.3);
+        border: 1px solid rgba(13, 148, 136, 0.22);
         border-radius: 12px;
         padding: 14px 18px;
         font-size: 14px;
@@ -318,18 +318,18 @@ const showReplaceSuccess = (count: number) => {
         right: 20px;
         top: 20px;
         box-shadow: 
-            0 8px 24px rgba(0, 0, 0, 0.4),
-            0 0 0 1px rgba(46, 191, 92, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 18px 42px rgba(15, 23, 42, 0.18),
+            0 4px 12px rgba(13, 148, 136, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.84);
         animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     `
 
     successContainer.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2ebf5c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            <span style="color: rgba(255, 255, 255, 0.9); font-weight: 500;">成功替换 ${count} 处文本！</span>
+            <span style="color: #134e4a; font-weight: 700;">成功替换 ${count} 处文本！</span>
         </div>
     `
 
@@ -466,12 +466,12 @@ const highlightCommentedText = () => {
             span.dataset.commentId = comment.id
             span.style.cssText = `
                 text-decoration: underline;
-                text-decoration-color: #6366f1;
+                text-decoration-color: #0d9488;
                 text-decoration-thickness: 2px;
                 text-underline-offset: 4px;
                 cursor: pointer;
                 color: inherit;
-                background: rgba(99, 102, 241, 0.1);
+                background: rgba(13, 148, 136, 0.12);
                 border-radius: 2px;
                 transition: all 0.2s ease;
                 position: relative;
@@ -540,12 +540,12 @@ const highlightTextNode = (textNode: Text, searchText: string, commentId: string
     span.dataset.commentId = commentId
     span.style.cssText = `
         text-decoration: underline;
-        text-decoration-color: #6366f1;
+        text-decoration-color: #0d9488;
         text-decoration-thickness: 2px;
         text-underline-offset: 4px;
         cursor: pointer;
         color: inherit;
-        background: rgba(99, 102, 241, 0.1);
+        background: rgba(13, 148, 136, 0.12);
         border-radius: 2px;
         transition: all 0.2s ease;
     `
@@ -635,9 +635,9 @@ const handleEditComment = () => {
 const showCommentSuccess = () => {
     const successContainer = document.createElement('div')
     successContainer.style.cssText = `
-        background: rgba(20, 24, 33, 0.9);
+        background: rgba(255, 255, 255, 0.96);
         backdrop-filter: blur(12px);
-        border: 1px solid rgba(99, 102, 241, 0.3);
+        border: 1px solid rgba(13, 148, 136, 0.22);
         border-radius: 12px;
         padding: 14px 18px;
         font-size: 14px;
@@ -648,18 +648,18 @@ const showCommentSuccess = () => {
         right: 20px;
         top: 20px;
         box-shadow: 
-            0 8px 24px rgba(0, 0, 0, 0.4),
-            0 0 0 1px rgba(99, 102, 241, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 18px 42px rgba(15, 23, 42, 0.18),
+            0 4px 12px rgba(13, 148, 136, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.84);
         animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     `
 
     successContainer.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
-            <span style="color: rgba(255, 255, 255, 0.9); font-weight: 500;">留言保存成功！</span>
+            <span style="color: #134e4a; font-weight: 700;">留言保存成功！</span>
         </div>
     `
 
@@ -696,9 +696,9 @@ const showCommentSuccess = () => {
 const showDeleteSuccess = () => {
     const successContainer = document.createElement('div')
     successContainer.style.cssText = `
-        background: rgba(20, 24, 33, 0.9);
+        background: rgba(255, 255, 255, 0.96);
         backdrop-filter: blur(12px);
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        border: 1px solid rgba(220, 38, 38, 0.18);
         border-radius: 12px;
         padding: 14px 18px;
         font-size: 14px;
@@ -709,9 +709,9 @@ const showDeleteSuccess = () => {
         right: 20px;
         top: 20px;
         box-shadow: 
-            0 8px 24px rgba(0, 0, 0, 0.4),
-            0 0 0 1px rgba(239, 68, 68, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            0 18px 42px rgba(15, 23, 42, 0.18),
+            0 4px 12px rgba(220, 38, 38, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.84);
         animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     `
 
@@ -722,7 +722,7 @@ const showDeleteSuccess = () => {
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
             </svg>
-            <span style="color: rgba(255, 255, 255, 0.9); font-weight: 500;">留言已删除</span>
+            <span style="color: #7f1d1d; font-weight: 700;">留言已删除</span>
         </div>
     `
 
@@ -786,7 +786,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .toolbar-root {
     position: relative;
 }
@@ -810,15 +810,17 @@ onUnmounted(() => {
     position: absolute;
     top: -4px;
     right: -4px;
-    width: 12px;
-    height: 12px;
-    background: linear-gradient(135deg, #ff4757, #ff6b7a);
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    border: 2px solid rgba(255, 255, 255, 0.94);
+    background: linear-gradient(135deg, #f97316, #0d9488);
     border-radius: 50%;
     cursor: pointer;
     pointer-events: auto;
     box-shadow:
-        0 0 0 2px rgba(255, 255, 255, 0.1),
-        0 0 12px rgba(255, 71, 87, 0.5);
+        0 6px 16px rgba(15, 23, 42, 0.18),
+        0 0 0 4px rgba(13, 148, 136, 0.14);
     animation: pulse 2s infinite;
     z-index: 999999;
     transition: transform 0.2s ease;
@@ -828,24 +830,37 @@ onUnmounted(() => {
     transform: scale(1.15);
 }
 
+.red-dot:focus-visible {
+    outline: 2px solid rgba(249, 115, 22, 0.8);
+    outline-offset: 3px;
+}
+
 @keyframes pulse {
     0% {
         box-shadow:
-            0 0 0 2px rgba(255, 255, 255, 0.1),
-            0 0 12px rgba(255, 71, 87, 0.5);
+            0 6px 16px rgba(15, 23, 42, 0.18),
+            0 0 0 4px rgba(13, 148, 136, 0.14);
     }
 
     50% {
         box-shadow:
-            0 0 0 3px rgba(255, 255, 255, 0.15),
-            0 0 20px rgba(255, 71, 87, 0.7),
-            0 0 30px rgba(255, 71, 87, 0.3);
+            0 8px 18px rgba(15, 23, 42, 0.2),
+            0 0 0 7px rgba(13, 148, 136, 0.1),
+            0 0 0 11px rgba(249, 115, 22, 0.08);
     }
 
     100% {
         box-shadow:
-            0 0 0 2px rgba(255, 255, 255, 0.1),
-            0 0 12px rgba(255, 71, 87, 0.5);
+            0 6px 16px rgba(15, 23, 42, 0.18),
+            0 0 0 4px rgba(13, 148, 136, 0.14);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animation-container,
+    .red-dot {
+        animation: none;
+        transition: none;
     }
 }
 </style>

@@ -2,20 +2,35 @@
   <div ref="toolbarRef" class="text-selection-toolbar" :style="toolbarStyle">
     <div class="toolbar-content">
       <!-- 显示关闭按钮 -->
-      <button v-if="showCloseBtn" class="close-btn" @click="closeToolbar">X</button>
+      <button v-if="showCloseBtn" class="close-btn" type="button" aria-label="收起文本选择工具栏" @click="closeToolbar">
+        <CloseBold aria-hidden="true" />
+      </button>
       <!-- 分割线 -->
       <div v-if="showCloseBtn && tools.length > 0" class="toolbar-divider"></div>
       <!-- 动态渲染工具按钮 -->
-      <button v-for="(tool, index) in tools" :key="index" class="toolbar-btn" @click="handleToolClick(tool)">
-        <span v-if="tool.icon" class="tool-icon">{{ tool.icon }}</span>
-        <span>{{ tool.label }}</span>
+      <button v-for="(tool, index) in tools" :key="index" class="toolbar-btn" type="button" @click="handleToolClick(tool)">
+        <span class="tool-icon" aria-hidden="true">
+          <span v-if="tool.icon" class="tool-custom-icon">{{ tool.icon }}</span>
+          <component :is="getToolIcon(tool)" v-else class="tool-svg" />
+        </span>
+        <span class="tool-label">{{ tool.label }}</span>
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted, watch, type Component } from 'vue'
+import {
+  ChatDotRound,
+  CloseBold,
+  CollectionTag,
+  CopyDocument,
+  EditPen,
+  RefreshLeft,
+  Search,
+  Tools
+} from '@element-plus/icons-vue'
 import { TextTool } from '@/types'
 import { componentManager } from '@/utils/componentManager'
 
@@ -58,6 +73,19 @@ const tools = computed(() => {
   return []
 })
 
+const toolIconMap: Record<string, Component> = {
+  bookmark: CollectionTag,
+  comment: ChatDotRound,
+  copy: CopyDocument,
+  replace: RefreshLeft,
+  search: Search,
+  translate: EditPen
+}
+
+const getToolIcon = (tool: TextTool) => {
+  return toolIconMap[tool.id] || Tools
+}
+
 // 计算工具栏样式
 const toolbarStyle = computed(() => {
   return {
@@ -90,29 +118,49 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .text-selection-toolbar {
-  position: fixed;
-  background: var(--scifi-bg-secondary) !important;
-  border: 1px solid var(--scifi-border-color);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px var(--scifi-glow-color), 0 0 0 1px var(--scifi-border-color);
+  --toolbar-primary: #0d9488;
+  --toolbar-primary-strong: #0f766e;
+  --toolbar-accent: #f97316;
+  --toolbar-surface: rgba(255, 255, 255, 0.96);
+  --toolbar-surface-hover: #f0fdfa;
+  --toolbar-border: rgba(15, 118, 110, 0.18);
+  --toolbar-text: #134e4a;
+  --toolbar-muted: #475569;
+  --toolbar-shadow: 0 18px 42px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(13, 148, 136, 0.12);
+
+  position: relative;
+  background: var(--toolbar-surface);
+  border: 1px solid var(--toolbar-border);
+  border-radius: 10px;
+  box-shadow: var(--toolbar-shadow);
   z-index: 999999;
   user-select: none;
-  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  backdrop-filter: blur(16px) saturate(1.2);
   overflow: visible;
-  position: relative;
+  color: var(--toolbar-text);
+  font-family: "Plus Jakarta Sans", "Inter", "Segoe UI", Arial, sans-serif;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: 9px;
+    pointer-events: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  }
 }
 
 .toolbar-content {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 6px;
-  padding: 6px;
-  background: var(--scifi-bg-secondary) !important;
-  border-radius: 8px;
+  gap: 4px;
+  padding: 5px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 250, 0.92));
+  border-radius: 10px;
   position: relative;
   z-index: 1;
 }
@@ -120,27 +168,49 @@ onUnmounted(() => {
 .toolbar-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  background: linear-gradient(135deg, var(--scifi-bg-primary), var(--scifi-bg-secondary));
-  border: 1px solid var(--scifi-border-color);
-  border-radius: 6px;
-  font-family: 'Courier New', Courier, monospace;
+  justify-content: center;
+  gap: 5px;
+  min-width: 58px;
+  height: 32px;
+  padding: 0 9px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
   font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--scifi-text-primary);
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  color: var(--toolbar-text);
   position: relative;
-  overflow: hidden;
-  height: 28px;
+  overflow: visible;
+
+  &:hover {
+    background: var(--toolbar-surface-hover);
+    border-color: rgba(13, 148, 136, 0.25);
+    color: var(--toolbar-primary-strong);
+    box-shadow: 0 7px 18px rgba(13, 148, 136, 0.14);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(249, 115, 22, 0.8);
+    outline-offset: 2px;
+  }
 }
 
 /* 分割线样式 */
 .toolbar-divider {
   width: 1px;
-  background: var(--scifi-border-color);
-  margin: 0 8px;
-  height: 24px;
+  background: rgba(15, 118, 110, 0.16);
+  margin: 0 4px;
+  height: 22px;
   align-self: center;
 }
 
@@ -149,98 +219,85 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  background: linear-gradient(135deg, var(--scifi-bg-primary), var(--scifi-bg-secondary));
-  border: 1px solid var(--scifi-border-color);
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
+  background: #ecfeff;
+  border: 1px solid rgba(13, 148, 136, 0.16);
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--scifi-text-primary);
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  color: var(--toolbar-muted);
   position: relative;
   overflow: hidden;
-}
 
-.close-btn:hover {
-  background: linear-gradient(135deg, var(--scifi-bg-secondary), var(--scifi-accent-primary));
-  border-color: var(--scifi-accent-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--scifi-glow-color), 0 0 0 1px var(--scifi-accent-primary);
-}
-
-.close-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 0 0 1px var(--scifi-accent-primary);
-}
-
-/* 按钮发光效果 */
-.toolbar-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
-  transition: left 0.3s ease;
-  z-index: 0;
-}
-
-.toolbar-btn:hover {
-  background: linear-gradient(135deg, var(--scifi-bg-secondary), var(--scifi-accent-primary));
-  border-color: var(--scifi-accent-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--scifi-glow-color), 0 0 0 1px var(--scifi-accent-primary);
-}
-
-.toolbar-btn:hover::before {
-  left: 100%;
-}
-
-.toolbar-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 0 0 1px var(--scifi-accent-primary);
-}
-
-.toolbar-btn svg {
-  flex-shrink: 0;
-  color: var(--scifi-accent-primary);
-  position: relative;
-  z-index: 1;
-}
-
-.toolbar-btn .tool-icon {
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-  font-size: 14px;
-}
-
-.toolbar-btn span {
-  position: relative;
-  z-index: 1;
-}
-
-.toolbar-btn:hover svg {
-  color: var(--scifi-text-primary);
-  filter: drop-shadow(0 0 2px var(--scifi-accent-primary));
-}
-
-.toolbar-btn:hover .tool-icon {
-  filter: drop-shadow(0 0 2px var(--scifi-accent-primary));
-}
-
-/* 科幻风格动画 */
-@keyframes scifiScanline {
-  0% {
-    left: -100%;
+  svg {
+    width: 14px;
+    height: 14px;
   }
 
-  100% {
-    left: 100%;
+  &:hover {
+    background: #fff7ed;
+    border-color: rgba(249, 115, 22, 0.28);
+    color: #c2410c;
+    box-shadow: 0 7px 18px rgba(249, 115, 22, 0.14);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(249, 115, 22, 0.8);
+    outline-offset: 2px;
+  }
+}
+
+.tool-icon,
+.tool-svg {
+  flex-shrink: 0;
+}
+
+.tool-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  color: var(--toolbar-primary);
+}
+
+.tool-svg {
+  width: 15px;
+  height: 15px;
+}
+
+.tool-custom-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.tool-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .toolbar-btn {
+    min-width: 36px;
+    padding: 0 8px;
+  }
+
+  .tool-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-selection-toolbar,
+  .toolbar-btn,
+  .close-btn {
+    transition: none;
   }
 }
 </style>
