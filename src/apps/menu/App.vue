@@ -17,6 +17,7 @@ const localTools = ref<Tool[]>([...props.tools!].slice(0, 4))
 const menuRef = ref<HTMLDivElement>();
 const toggleRef = ref<HTMLDivElement>();
 const count = ref<number>(1);
+const flag = ref<number>(1);
 
 const emit = defineEmits(['toolClick']);
 
@@ -45,11 +46,12 @@ const toggleMenu = () => {
 			count.value = 0;
 		}
 		// 1. 更新旋转角度 (每次减180)
-		if (rot < 180) {
-			rot += 180;
-		} else {
-			rot -= 180;
+		if (rot == 180) {
+			flag.value = -1;
+		} else if (rot == -180) {
+			flag.value = 1;
 		}
+		rot += flag.value * 180;
 		// 2. 应用旋转到 menu (加单位deg)
 		menuRef.value!.style.transform = 'rotate(' + rot + 'deg)';
 		// 兼容旧版webkit (非必须, 但保留原逻辑)
