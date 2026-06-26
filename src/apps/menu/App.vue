@@ -440,6 +440,11 @@ $transition-ease: ease;
 	@include transition(all $transition-duration $transition-ease);
 	right: 30px;
 	@include rotate(180deg);
+	opacity: 0.5;
+
+	&:hover {
+		opacity: 1;		
+	}
 
 	// 主菜单按钮
 	>.menu {
