@@ -103,6 +103,7 @@ import ErrorMonitorConfig from '@/pages/options/views/ErrorMonitorConfig.vue';
 import BrowserVarView from '@/pages/options/views/BrowserVarView.vue';
 import XHRuleOption from '@/pages/options/views/XHRuleOption.vue';
 import AITerminalView from '@/pages/options/views/AITerminalView.vue';
+import KnowledgeGraphView from '@/pages/options/views/KnowledgeGraphView.vue';
 import TacticalOverview from '@/pages/options/views/TacticalOverview.vue';
 import GlowingArrow from '@icons/GlowingArrow.vue';
 import {
@@ -161,6 +162,7 @@ const componentMap: Record<StarshipPanelId, Component> = {
     left: ExtensionSettings,
     right: UserOption,
     bottom: ContentScriptDomainConfig,
+    "bottom-left": KnowledgeGraphView,
     "bottom-right": AITerminalView,
 };
 
@@ -547,6 +549,18 @@ const loadTelemetry = async () => {
             metric: `${enabledRoutes}/${domainEntries.length}`,
             headline: domainEntries.length === 0 ? '尚未建立域名航线' : `${enabledRoutes} 条航线保持开放`,
             detail: domainEntries.length === 0 ? '首次打开后会自动生成默认域名矩阵' : `总脚本模块 ${domainEntries.length} 个`,
+        };
+
+        const knowledgeNodes = safeJsonParse<any[]>(window.localStorage.getItem('mria_knowledge_graph_nodes'), []);
+        const masteredNodes = knowledgeNodes.filter((node) => node?.status === 'mastered').length;
+        const activeNodes = knowledgeNodes.filter((node) => node?.status === 'active').length;
+        next['bottom-left'] = {
+            status: knowledgeNodes.length === 0 ? 'standby' : masteredNodes > 0 ? 'online' : 'standby',
+            metric: knowledgeNodes.length > 0 ? String(knowledgeNodes.length).padStart(2, '0') : 'SEED',
+            headline: knowledgeNodes.length === 0 ? '等待生成技能图谱' : `${activeNodes} 个节点处于实践中`,
+            detail: knowledgeNodes.length === 0
+                ? '首次进入后会加载内置技能书模板'
+                : `已掌握 ${masteredNodes} / 总节点 ${knowledgeNodes.length}`,
         };
 
         const monitorConfig = (snapshot.errorMonitorConfig || {}) as Record<string, any>;

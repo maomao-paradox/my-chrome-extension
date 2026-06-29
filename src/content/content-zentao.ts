@@ -237,6 +237,20 @@ export default (ctx: AppContext, config = {}) => {
 		});
 
 		waitForSelector({
+			selector: "#mainContent > div.main-col.col-8 > div.main-actions > div > a:nth-child(3)",
+			iframeSelector: "#appIframe-qa",
+			useMutationObserver: true,
+			filter: (el) => el.firstElementChild?.classList.contains('icon-testtask-runCase'),
+			callback: (el: HTMLElement) => {
+				const newEl = el.cloneNode(true) as HTMLElement;
+				newEl.lastElementChild!.innerHTML = "录制";
+				newEl.removeAttribute('href');
+				newEl.onclick = async () => ctx.message.info("功能开发中，敬请期待");
+				el.after(newEl);
+			}
+		});
+
+		waitForSelector({
 			selector: ["#dataform > div > div.side-col.col-4 > div.cell", "#dataform > table > tfoot"],
 			iframeSelector: "#appIframe-qa",
 			useMutationObserver: true,

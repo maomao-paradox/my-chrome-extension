@@ -6,6 +6,7 @@ export type StarshipPanelId =
   | 'left'
   | 'right'
   | 'bottom'
+  | 'bottom-left'
   | 'bottom-right';
 
 export type StarshipStatus = 'online' | 'warning' | 'standby';
@@ -198,6 +199,26 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       anchor: { x: 500, y: 462 },
       lineEnd: { x: 500, y: 586 },
       card: { x: 500, y: 604, align: 'center' },
+    },
+  },
+  {
+    id: 'bottom-left',
+    glyph: 'KGM',
+    title: '知识图谱',
+    code: 'Skill Atlas',
+    section: 'Deck-08',
+    description: '构建个人知识图谱与技能书，支持节点拖拽、缩放、增删与本地持久化。',
+    position: { x: -1, y: -1 },
+    defaultTelemetry: {
+      status: 'online',
+      headline: '技能图谱可编辑',
+      detail: '拖拽节点整理结构，任意节点可继续扩展分支',
+      metric: 'MAP',
+    },
+    overview: {
+      anchor: { x: 386, y: 432 },
+      lineEnd: { x: 188, y: 536 },
+      card: { x: 46, y: 468, align: 'left' },
     },
   },
   {

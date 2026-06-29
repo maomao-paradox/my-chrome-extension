@@ -413,6 +413,7 @@ const POD_LAYOUT: Record<PeripheralPanelId, PodLayout> = {
   left: { x: 146, y: 350, anchorX: 322, anchorY: 350 },
   right: { x: 854, y: 350, anchorX: 680, anchorY: 350 },
   bottom: { x: 500, y: 574, anchorX: 500, anchorY: 454 },
+  'bottom-left': { x: 214, y: 560, anchorX: 376, anchorY: 430 },
   'bottom-right': { x: 786, y: 560, anchorX: 624, anchorY: 430 },
 };
 
