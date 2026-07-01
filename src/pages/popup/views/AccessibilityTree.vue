@@ -1,6 +1,6 @@
 <template>
     <div class="header">
-        <h1>🌳 Accessibility Tree 提取器</h1>
+        <h1>Accessibility Tree 提取器</h1>
         <div class="url">{{ currentUrl }}</div>
     </div>
 
@@ -25,19 +25,19 @@
 
     <div class="button-group">
         <button class="btn-primary" @click="extractAccessibilityTree" :disabled="isLoading">
-            {{ isLoading ? '⏳ 提取中...' : '🚀 提取无障碍树' }}
+            {{ isLoading ? '提取中...' : '提取无障碍树' }}
         </button>
         <button class="btn-secondary" @click="copyMarkdown" :disabled="!canCopy || copySuccess">
-            {{ copySuccess ? '✅ 已复制！' : '📋 复制 Markdown' }}
+            {{ copySuccess ? '已复制' : '复制 Markdown' }}
         </button>
     </div>
 
     <div class="output-area">
         <div class="output-header">
-            <h3>📄 提取结果（大模型友好格式）</h3>
+            <h3>提取结果</h3>
         </div>
         <div class="output-content">
-            <div v-if="isLoading" class="loading">⏳ 正在提取无障碍树，请稍候...</div>
+            <div v-if="isLoading" class="loading">正在提取无障碍树，请稍候...</div>
             <div v-else-if="error" class="error">{{ error }}</div>
             <div v-else-if="markdown" class="markdown-content">
                 <pre>{{ markdown }}</pre>
@@ -102,7 +102,7 @@ async function extractAccessibilityTree() {
         }, (response: any) => {
             if (chrome.runtime.lastError) {
                 maLogger.error('发送消息失败:', chrome.runtime.lastError.message);
-                error.value = '⚠️ 无法连接到页面，请刷新页面后重试。';
+                error.value = '无法连接到页面，请刷新页面后重试。';
                 isLoading.value = false;
                 return;
             }
@@ -113,7 +113,7 @@ async function extractAccessibilityTree() {
                 markdown.value = response.data.markdown;
                 showStats.value = true;
             } else {
-                error.value = `❌ 错误: ${response?.error || '提取失败'}`;
+                error.value = `错误: ${response?.error || '提取失败'}`;
             }
             isLoading.value = false;
         });
@@ -122,9 +122,9 @@ async function extractAccessibilityTree() {
         maLogger.error('提取失败:', errorMessage);
 
         if (errorMessage.includes('Could not establish connection')) {
-            error.value = '⚠️ 无法连接到页面，请刷新页面后重试。';
+            error.value = '无法连接到页面，请刷新页面后重试。';
         } else {
-            error.value = `❌ 错误: ${errorMessage}`;
+            error.value = `错误: ${errorMessage}`;
         }
         isLoading.value = false;
     }
@@ -150,76 +150,86 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-body {
-    width: 500px;
-    max-height: 600px;
-    margin: 0;
-    padding: 16px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
+<style scoped lang="scss">
 .header {
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--popup-border);
 }
 
 h1 {
-    font-size: 18px;
-    margin: 0 0 4px 0;
-    color: #1a73e8;
+    margin: 0 0 5px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--popup-text-primary);
 }
 
 .url {
-    font-size: 12px;
-    color: #5f6368;
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--popup-text-subtle);
     word-break: break-all;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .stats {
     display: none;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 8px;
 }
 
 .stats-visible {
-    display: flex;
+    display: grid;
 }
 
 .stat-card {
-    flex: 1;
+    min-width: 0;
+    padding: 7px 4px;
+    border: 1px solid var(--popup-border);
+    border-radius: 12px;
+    background: var(--popup-control-bg);
     text-align: center;
+    box-shadow: var(--popup-inset-highlight);
 }
 
 .stat-number {
-    font-size: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 16px;
     font-weight: bold;
-    color: #1a73e8;
+    line-height: 1;
+    color: var(--popup-accent);
 }
 
 .stat-label {
-    font-size: 11px;
-    color: #5f6368;
     margin-top: 4px;
+    font-size: 10px;
+    line-height: 1;
+    color: var(--popup-text-subtle);
 }
 
 .button-group {
     display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: 6px;
+    margin-bottom: 8px;
 }
 
 button {
     flex: 1;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
+    min-width: 0;
+    min-height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--popup-border);
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 700;
     transition: all 0.2s;
 }
 
@@ -229,37 +239,44 @@ button:disabled {
 }
 
 .btn-primary {
-    background: #1a73e8;
-    color: white;
+    border-color: var(--popup-button-border);
+    background: var(--popup-button-bg);
+    color: var(--popup-text-on-accent);
+    box-shadow: var(--popup-shadow-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: #1557b0;
+    transform: translateY(-1px);
+    filter: brightness(1.05);
 }
 
 .btn-secondary {
-    background: #e8eaed;
-    color: #3c4043;
+    background: var(--popup-control-bg);
+    color: var(--popup-text-secondary);
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background: #dadce0;
+    transform: translateY(-1px);
+    border-color: var(--popup-border-strong);
+    background: var(--popup-control-hover-bg);
 }
 
 .output-area {
-    margin-top: 16px;
+    margin-top: 8px;
 }
 
 .output-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .output-header h3 {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.2;
+    color: var(--popup-text-primary);
 }
 
 .copy-btn {
@@ -276,30 +293,41 @@ button:disabled {
 }
 
 pre {
-    background: #1e1e1e;
-    color: #d4d4d4;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-family: 'Monaco', 'Menlo', monospace;
-    max-height: 350px;
+    margin: 0;
+    max-height: 210px;
     overflow: auto;
+    padding: 10px;
+    border: 1px solid var(--popup-border);
+    border-radius: 12px;
+    background: var(--popup-card-bg);
+    color: var(--popup-text-secondary);
+    font-size: 10px;
+    line-height: 1.45;
+    font-family: 'Monaco', 'Menlo', monospace;
     white-space: pre-wrap;
     word-wrap: break-word;
+    box-shadow: var(--popup-inset-highlight);
 }
 
 .loading {
     text-align: center;
-    padding: 20px;
-    color: #5f6368;
+    padding: 24px 12px;
+    border: 1px dashed var(--popup-border);
+    border-radius: 12px;
+    background: var(--popup-control-bg);
+    color: var(--popup-text-muted);
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .error {
-    color: #d93025;
-    background: #fce8e6;
-    padding: 12px;
-    border-radius: 6px;
+    color: var(--popup-danger-text);
+    background: var(--popup-danger-bg);
+    border: 1px solid var(--popup-danger-border);
+    padding: 10px;
+    border-radius: 12px;
     font-size: 12px;
+    line-height: 1.4;
 }
 
 .markdown-content {

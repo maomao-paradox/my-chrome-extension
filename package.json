@@ -1,6 +1,6 @@
 {
   "name": "ma-extension",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "study": "vite --open /pages/study.html",
@@ -10,9 +10,10 @@
     "dev:options": "vite --open /pages/options.html",
     "dp": "npx depcruise --output-type json src > src/deps.json && vite --open /interactive-graph.html",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "build": "vite build && cp -rf ./dist/ /mnt/h/mria_extension/",
-    "build:enc": "ENCRYPT_FILE_MAP=true VITE_FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef vite build && cp -rf ./dist/ /mnt/h/mria_extension/"
+    "build": "vite build && cp -rf ./dist/ /mnt/h/my-chrome-extension/",
+    "build:enc": "ENCRYPT_FILE_MAP=true VITE_FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef yarn build"
   },
+  "license": "MIT",
   "dependencies": {
     "@crxjs/vite-plugin": "^2.0.0",
     "@element-plus/icons-vue": "^2.3.2",

@@ -9,15 +9,10 @@
  */
 
 /**
- * 消息类型
- */
-export type MessageType = 'EXECUTE_SCRIPT' | 'LOAD_URL_SCRIPT' | 'VALIDATE_SCRIPT';
-
-/**
  * 消息结构
  */
 export interface Message {
-  type: MessageType;
+  type: string;
   payload: any;
 }
 
@@ -41,7 +36,7 @@ export function sendMessageToContentScript(message: Message): Promise<Response> 
       if (tabs.length > 0) {
         const tabId = tabs[0].id;
         if (tabId) {
-          chrome.tabs.sendMessage(tabId, message, (response) => {
+          chrome.tabs.sendMessage(tabId, { ...message, target: 'content' }, (response) => {
             if (chrome.runtime.lastError) {
               resolve({ error: chrome.runtime.lastError.message });
             } else {
@@ -65,7 +60,7 @@ export function sendMessageToContentScript(message: Message): Promise<Response> 
  */
 export function sendMessageToBackground(message: Message): Promise<Response> {
   return new Promise((resolve) => {
-    chrome.runtime.sendMessage(message, (response) => {
+    chrome.runtime.sendMessage({ ...message, target: 'background' }, (response) => {
       if (chrome.runtime.lastError) {
         resolve({ error: chrome.runtime.lastError.message });
       } else {

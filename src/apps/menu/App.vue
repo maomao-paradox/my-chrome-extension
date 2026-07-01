@@ -2,7 +2,7 @@
 import { Tool } from '@/types'
 import { onMounted, ref } from 'vue'
 import { toolIcon } from '@/assets/icons'
-import { showSuccessMessage } from '@/utils';
+import { sendMessageToBackground, showSuccessMessage } from '@/utils';
 
 interface MenuProps {
 	visible: boolean;
@@ -23,6 +23,14 @@ const emit = defineEmits(['toolClick']);
 
 const handleToolClick = (toolId: string) => {
 	maLogger.log(toolId);
+	
+	sendMessageToBackground({
+		type: 'CREATE_TAB_WITH_SCRIPT',
+		payload: {
+			url: 'https://baidu.com',
+			scriptPath: 'js/runtime/test.js'
+		}
+	});
 	emit('toolClick', toolId);
 }
 const toggleMenu = () => {
@@ -443,7 +451,7 @@ $transition-ease: ease;
 	opacity: 0.5;
 
 	&:hover {
-		opacity: 1;		
+		opacity: 1;
 	}
 
 	// 主菜单按钮

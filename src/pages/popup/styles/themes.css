@@ -1,6 +1,6 @@
 :root {
-  --popup-width: 392px;
-  --popup-max-height: 620px;
+  --popup-width: 320px;
+  --popup-max-height: 480px;
   --popup-radius-sm: 12px;
   --popup-radius-md: 14px;
   --popup-radius-lg: 18px;

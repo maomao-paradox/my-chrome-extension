@@ -7,12 +7,15 @@
     </template>
     <template #head__right>
       <div class="capture-status" :class="captureStatusClass">
+        <span class="status-dot"></span>
         <span>{{ captureStatusText }}</span>
       </div>
     </template>
     <template #default>
       <button class="capture-btn" :disabled="isCaptureDisabled" @click="triggerComponentCapture">
-        <span class="capture-icon">⌖</span>
+        <span class="capture-icon">
+          <IconCapture />
+        </span>
         <span class="capture-copy">
           <strong>开始捕获</strong>
           <small>点击后 popup 会自动关闭，随后在页面中点选目标组件。</small>
@@ -42,6 +45,7 @@ import { computed, ref, watch } from 'vue';
 import type { ExtMessage } from '@/types';
 import { useDomainState } from '../composables/useDomainState';
 import TableContainer from './TableContainer.vue';
+import { IconCapture } from '@icons/index';
 
 const props = defineProps<{
   isActive: boolean;
@@ -155,10 +159,10 @@ watch(() => props.isActive, (isActive) => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .section-kicker {
-  margin: 0 0 8px;
-  font-size: 11px;
+  margin: 0 0 4px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -167,16 +171,16 @@ watch(() => props.isActive, (isActive) => {
 
 .section-title {
   margin: 0;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.1;
   color: var(--popup-text-primary);
 }
 
 .section-subtitle {
-  margin: 8px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
   color: var(--popup-text-muted);
 }
 
@@ -184,66 +188,69 @@ watch(() => props.isActive, (isActive) => {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   justify-content: center;
-  min-width: 64px;
-  min-height: 34px;
-  border-radius: 14px;
-  font-size: 13px;
+  min-width: 58px;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--popup-text-primary);
   background: var(--popup-accent-gradient);
   border: 1px solid var(--popup-button-border);
-}
 
-.capture-status--on {
-  color: var(--popup-success-text);
-  background: var(--popup-success-bg);
-  border-color: var(--popup-success-border);
-}
+  &--on {
+    color: var(--popup-success-text);
+    background: var(--popup-success-bg);
+    border-color: var(--popup-success-border);
 
-.capture-status--pending {
-  color: var(--popup-info-text);
-  background: var(--popup-info-bg);
-  border-color: var(--popup-info-border);
-}
+    .status-dot {
+      background: var(--popup-success-dot);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-success-dot) 16%, transparent);
+    }
+  }
 
-.capture-status--off {
-  color: var(--popup-danger-text);
-  background: var(--popup-danger-bg);
-  border-color: var(--popup-danger-border);
+  &--pending {
+    color: var(--popup-info-text);
+    background: var(--popup-info-bg);
+    border-color: var(--popup-info-border);
+
+    .status-dot {
+      background: var(--popup-info-dot);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-info-dot) 16%, transparent);
+    }
+  }
+
+  &--off {
+    color: var(--popup-danger-text);
+    background: var(--popup-danger-bg);
+    border-color: var(--popup-danger-border);
+
+    .status-dot {
+      background: var(--popup-danger-dot);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-danger-dot) 16%, transparent);
+    }
+  }
 }
 
 .status-dot {
   flex-shrink: 0;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
 
-.capture-status--on .status-dot {
-  background: var(--popup-success-dot);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-success-dot) 16%, transparent);
-}
-
-.capture-status--pending .status-dot {
-  background: var(--popup-info-dot);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-info-dot) 16%, transparent);
-}
-
-.capture-status--off .status-dot {
-  background: var(--popup-danger-dot);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-danger-dot) 16%, transparent);
-}
 
 .capture-btn {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   width: 100%;
-  min-height: 84px;
-  padding: 16px;
+  min-height: 74px;
+  padding: 10px 12px;
   border: 1px solid var(--popup-border-strong);
-  border-radius: 20px;
+  border-radius: 16px;
   background: var(--popup-button-bg);
   color: var(--popup-text-on-accent);
   cursor: pointer;
@@ -253,61 +260,68 @@ watch(() => props.isActive, (isActive) => {
     box-shadow 0.2s ease,
     filter 0.2s ease;
   box-shadow: var(--popup-shadow-accent);
-}
 
-.capture-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--popup-shadow-accent);
-}
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--popup-shadow-accent);
+  }
 
-.capture-btn:disabled {
-  cursor: not-allowed;
-  filter: saturate(0.6);
-  opacity: 0.6;
-  box-shadow: none;
+  &:disabled {
+    cursor: not-allowed;
+    filter: saturate(0.6);
+    opacity: 0.6;
+    box-shadow: none;
+  }
 }
 
 .capture-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
   background: color-mix(in srgb, var(--popup-text-on-accent) 16%, transparent);
-  font-size: 24px;
-  font-weight: 700;
   box-shadow: var(--popup-inset-highlight);
+
+  :deep(svg) {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .capture-copy {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
+  gap: 3px;
 
-.capture-copy strong {
-  font-size: 17px;
-  font-weight: 700;
-}
+  strong {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.15;
+  }
 
-.capture-copy small {
-  font-size: 12px;
-  line-height: 1.5;
-  color: color-mix(in srgb, var(--popup-text-on-accent) 88%, transparent);
+  small {
+    font-size: 11px;
+    line-height: 1.35;
+    color: color-mix(in srgb, var(--popup-text-on-accent) 88%, transparent);
+  }
 }
 
 .capture-steps {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .step-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
-  border-radius: 16px;
+  gap: 9px;
+  min-height: 38px;
+  padding: 7px 9px;
+  border-radius: 13px;
   border: 1px solid var(--popup-border);
   background: var(--popup-control-bg);
 }
@@ -317,19 +331,19 @@ watch(() => props.isActive, (isActive) => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
   background: var(--popup-accent-gradient);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--popup-accent);
 }
 
 .step-card p {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.35;
   color: var(--popup-text-muted);
 }
 </style>

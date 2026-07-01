@@ -1,35 +1,36 @@
 <template>
-  <TableContainer>
+  <TableContainer density="compact" section-gap="8px" content-gap="8px" hero-gap="8px" right-max-width="88px"
+    title-font-weight="500">
     <template #head__left>
       <p class="section-kicker">Quick Access</p>
-      <h2 class="section-title">书签管理</h2>
+      <h2 class="section-title">锚点管理</h2>
       <p class="section-subtitle">已保存的片段会按时间倒序排列，支持本地导入与导出。</p>
     </template>
     <template #head__right>
-      <div class="section-badge">{{ bookmarks.length }} 条</div>
+      <div class="section-badge">{{ bookmarks.length }} 个</div>
     </template>
     <template #default>
       <section class="filter-panel">
         <label class="filter-panel-input-shell">
           <IconSearch class="filter-panel-icon" />
-          <input v-model.trim="filterKeyword" type="search" class="filter-panel-input" placeholder="筛选书签文本、页面标题、链接或域名" />
-          <button v-if="filterKeyword" type="button" class="filter-panel-clear" @click="filterKeyword = ''">
-            清空
+          <input v-model.trim="filterKeyword" type="search" class="filter-panel-input"
+            placeholder="筛选锚点文本、页面标题、链接或域名" />
+          <button v-if="filterKeyword" type="button" class="filter-panel-clear" title="清空筛选"
+            @click="filterKeyword = ''">
+            <IconClose />
           </button>
         </label>
-        <div class="section-actions">
-          <button class="toolbar-btn toolbar-btn--export" @click="exportBookmarks" title="导出书签">
+        <div class="filter-meta">
+          {{ filterSummary }}
+        </div>
+        <div class="section-actions" aria-label="锚点数据操作">
+          <button class="toolbar-btn toolbar-btn--export" @click="exportBookmarks" title="导出锚点" aria-label="导出锚点">
             <IconDownload />
-            <span>导出</span>
           </button>
-          <button class="toolbar-btn toolbar-btn--import" @click="triggerImport" title="导入书签">
+          <button class="toolbar-btn toolbar-btn--import" @click="triggerImport" title="导入锚点" aria-label="导入锚点">
             <IconUpload />
-            <span>导入</span>
           </button>
           <input type="file" ref="fileInput" class="visually-hidden" accept=".json" @change="importBookmarks" />
-          <div class="filter-meta">
-            {{ filterSummary }}
-          </div>
         </div>
       </section>
 
@@ -38,16 +39,16 @@
           <div class="empty-icon">
             <IconBookmark />
           </div>
-          <p class="empty-title">还没有保存书签</p>
-          <p class="empty-hint">选中文本后点击页面工具栏中的书签按钮，即可在这里回看。</p>
+          <p class="empty-title">还没有保存锚点</p>
+          <p class="empty-hint">选中文本后点击页面工具栏中的锚点按钮，即可在这里回看。</p>
         </div>
 
         <div v-else-if="filteredBookmarks.length === 0" class="empty-state empty-state--filtered">
           <div class="empty-icon">
             <IconSearch />
           </div>
-          <p class="empty-title">没有找到匹配的书签</p>
-          <p class="empty-hint">换个关键词试试，或清空筛选条件查看全部书签。</p>
+          <p class="empty-title">没有找到匹配的锚点</p>
+          <p class="empty-hint">换个关键词试试，或清空筛选条件查看全部锚点。</p>
         </div>
 
         <article v-for="bookmark in filteredBookmarks" :key="bookmark.id" class="bookmark-item">
@@ -62,53 +63,14 @@
             </div>
 
             <div class="bookmark-actions">
-              <button class="icon-btn icon-btn--open" @click="openBookmark(bookmark)" title="打开书签">
+              <button class="icon-btn icon-btn--open" @click="openBookmark(bookmark)" title="打开锚点">
                 <IconOpen />
               </button>
-              <button class="icon-btn icon-btn--delete" @click="confirmDelete(bookmark.id)" title="删除书签">
+              <button class="icon-btn icon-btn--delete" @click="confirmDelete(bookmark.id)" title="删除锚点">
                 <IconDelete />
               </button>
             </div>
           </div>
-
-          <!-- <div class="bookmark-comments" v-if="bookmark.comments?.length">
-            <div class="comments-header">
-              <InfoFilled class="comments-icon" />
-              <span class="comments-count">{{ bookmark.comments.length }} 条留言</span>
-            </div>
-            <div class="comments-list">
-              <div
-                v-for="comment in bookmark.comments"
-                :key="comment.id"
-                class="comment-item"
-              >
-                <div class="comment-text">{{ comment.comment }}</div>
-                <div class="comment-footer">
-                  <span class="comment-date">{{ formatDate(comment.timestamp) }}</span>
-                  <button class="comment-delete" @click="deleteComment(bookmark.id, comment.id)" title="删除留言">
-                    <CircleClose />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="bookmark-comment-input">
-            <input
-              v-model="newComments[bookmark.id]"
-              type="text"
-              class="comment-input"
-              placeholder="添加留言..."
-              @keyup.enter="addComment(bookmark.id)"
-            />
-            <button class="comment-submit"
-              @click="addComment(bookmark.id)"
-              :disabled="!newComments[bookmark.id]?.trim()"
-              title="发送留言"
-            >
-              <ArrowDown />
-            </button>
-          </div> -->
 
           <div class="bookmark-footer">
             <span class="bookmark-domain">{{ getDomainLabel(bookmark.url) }}</span>
@@ -118,11 +80,11 @@
       </div>
 
       <div v-if="showDeleteConfirm" class="confirm-dialog">
-        <div class="confirm-content">
-          <div class="confirm-badge">Delete Bookmark</div>
-          <h3>确认删除这个书签？</h3>
+        <div class="confirm-dialog-content">
+          <div class="confirm-dialog-badge">Delete Anchor</div>
+          <h3>确认删除这个锚点？</h3>
           <p>删除后无法恢复，但不会影响原页面内容。</p>
-          <div class="confirm-actions">
+          <div class="confirm-dialog-actions">
             <button class="dialog-btn dialog-btn--ghost" @click="showDeleteConfirm = false">取消</button>
             <button class="dialog-btn dialog-btn--danger" @click="deleteBookmark">删除</button>
           </div>
@@ -136,7 +98,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { Bookmark } from '@/types/components/index.js';
 import { BookmarkStorage } from '@/services/bookmarkStorage';
-import { IconDelete, IconOpen, IconBookmark, IconUpload, IconDownload, IconSearch } from '@icons/index';
+import { IconDelete, IconOpen, IconBookmark, IconUpload, IconDownload, IconSearch, IconClose } from '@icons/index';
 import TableContainer from './TableContainer.vue';
 
 const bookmarks = ref<Bookmark[]>([]);
@@ -144,7 +106,6 @@ const showDeleteConfirm = ref(false);
 const bookmarkToDelete = ref<string>('');
 const fileInput = ref<HTMLInputElement | null>(null);
 const filterKeyword = ref('');
-const newComments = ref<Record<string, string>>({});
 
 const normalizedFilterKeyword = computed(() => filterKeyword.value.trim().toLowerCase());
 const filteredBookmarks = computed(() => {
@@ -166,7 +127,7 @@ const filteredBookmarks = computed(() => {
 });
 const filterSummary = computed(() => {
   if (!normalizedFilterKeyword.value) {
-    return `共 ${bookmarks.value.length} 条书签`;
+    return `共 ${bookmarks.value.length} 个锚点`;
   }
 
   return `筛选结果 ${filteredBookmarks.value.length} / ${bookmarks.value.length}`;
@@ -178,7 +139,7 @@ const loadBookmarks = async () => {
     loadedBookmarks.sort((a, b) => b.timestamp - a.timestamp);
     bookmarks.value = loadedBookmarks;
   } catch (error) {
-    maLogger.error('加载书签失败:', error);
+    maLogger.error('加载锚点失败:', error);
   }
 };
 
@@ -199,7 +160,7 @@ const deleteBookmark = async () => {
     await loadBookmarks();
     showDeleteConfirm.value = false;
   } catch (error) {
-    maLogger.error('删除书签失败:', error);
+    maLogger.error('删除锚点失败:', error);
   }
 };
 
@@ -215,7 +176,7 @@ const exportBookmarks = async () => {
     a.click();
     URL.revokeObjectURL(url);
   } catch (error) {
-    maLogger.error('导出书签失败:', error);
+    maLogger.error('导出锚点失败:', error);
   }
 };
 
@@ -235,7 +196,7 @@ const readFileAsText = (file: File): Promise<string> => {
 const parseBookmarks = (content: string): Bookmark[] => {
   const data = JSON.parse(content);
   if (!Array.isArray(data)) {
-    throw new Error('无效的书签数据格式');
+    throw new Error('无效的锚点数据格式');
   }
   return data as Bookmark[];
 };
@@ -262,7 +223,7 @@ const importBookmarks = async (event: Event): Promise<void> => {
     await loadBookmarks();
     target.value = '';
   } catch (error) {
-    maLogger.error('导入书签失败:', error);
+    maLogger.error('导入锚点失败:', error);
   }
 };
 
@@ -299,14 +260,14 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   justify-content: center;
 }
 
-@mixin button-base($padding: 0 14px, $border-radius: 14px) {
+@mixin button-base($padding: 0 10px, $border-radius: 12px) {
   min-height: 30px;
   padding: $padding;
   border: 1px solid var(--popup-border);
   border-radius: $border-radius;
   background: var(--popup-control-bg);
   color: var(--popup-text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: $transition-base, color 0.2s ease;
@@ -320,8 +281,8 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
 }
 
 .section-kicker {
-  margin: 0 0 8px;
-  font-size: 11px;
+  margin: 0 0 4px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -330,27 +291,32 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
 
 .section-title {
   margin: 0;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.1;
   color: var(--popup-text-primary);
 }
 
 .section-subtitle {
-  margin: 8px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
   color: var(--popup-text-muted);
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .section-badge {
   flex-shrink: 0;
   @include flex-center;
-  min-width: 64px;
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 14px;
-  font-size: 13px;
+  min-width: 52px;
+  min-height: 30px;
+  padding: 0 9px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--popup-text-primary);
   background: var(--popup-accent-gradient);
@@ -359,33 +325,45 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
 
 .section-actions {
   display: flex;
-  gap: inherit;
-  width: auto;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .filter-panel {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 7px;
+  padding: 8px;
+  border-radius: 15px;
+  border: 1px solid var(--popup-border);
+  background: var(--popup-panel-bg);
+  box-shadow: var(--popup-shadow-soft), var(--popup-inset-highlight);
 
   &-input-shell {
-    flex: 1;
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 10px;
-    min-height: 46px;
-    padding: 0 14px;
-    border-radius: 16px;
-    border: 1px solid var(--popup-border);
-    background: var(--popup-card-bg);
-    box-shadow: var(--popup-shadow-soft), var(--popup-inset-highlight);
+    gap: 7px;
+    min-height: 32px;
+    padding: 0 9px;
+    border-radius: 11px;
+    border: 1px solid var(--popup-border-muted);
+    background: var(--popup-control-bg);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--popup-border-strong);
+      background: var(--popup-control-bg-strong);
+      box-shadow: 0 0 0 4px var(--popup-focus-ring);
+    }
   }
 
   &-icon {
-    width: 20px;
-    height: 20px;
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
     @include flex-center;
     color: var(--popup-accent);
   }
@@ -396,7 +374,8 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
     border: none;
     background: transparent;
     color: var(--popup-text-primary);
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1;
     outline: none;
 
     &::placeholder {
@@ -406,32 +385,52 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
 
   &-clear {
     flex-shrink: 0;
-    @include button-base(0 10px, 999px);
+    @include flex-center;
+    width: 22px;
+    height: 22px;
+    min-height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--popup-text-subtle);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
 
     &:hover {
-      border-color: var(--popup-border-strong);
+      background: var(--popup-control-hover-bg);
+      color: var(--popup-text-primary);
+    }
+
+    :deep(svg) {
+      width: 12px;
+      height: 12px;
     }
   }
 
   &-meta {
-    position: relative;
-    left: 96px;
-    padding-bottom: 7px;
     flex-shrink: 0;
-    font-size: 12px;
-    font-weight: 600;
+    max-width: 88px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
     color: var(--popup-text-muted);
+    white-space: nowrap;
   }
 }
 
 .toolbar-btn {
   @include flex-center;
-  gap: 8px;
-  @include button-base;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  @include button-base(0, 11px);
 
-  > svg {
-    width: 20px;
-    height: 20px;
+  >svg {
+    width: 15px;
+    height: 15px;
   }
 
   @include hover-lift;
@@ -452,23 +451,29 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
 }
 
 .visually-hidden {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .bookmark {
   &-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
   &-item {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 16px;
-    border-radius: 20px;
+    gap: 9px;
+    padding: 10px 10px 10px 12px;
+    border-radius: 15px;
     background: var(--popup-card-bg);
     border: 1px solid var(--popup-border);
     box-shadow: var(--popup-shadow-soft), var(--popup-inset-highlight);
@@ -479,7 +484,7 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
       position: absolute;
       inset: 0 auto 0 0;
       width: 3px;
-      border-radius: 20px 0 0 20px;
+      border-radius: 15px 0 0 15px;
       background: var(--popup-accent-line-gradient);
       opacity: 0.9;
     }
@@ -494,20 +499,21 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   &-text {
     display: -webkit-box;
     overflow: hidden;
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.42;
     color: var(--popup-text-primary);
     word-break: break-word;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
   }
 
   &-meta-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 14px;
+    align-items: center;
+    gap: 10px;
   }
 
   &-meta {
@@ -519,23 +525,23 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--popup-text-secondary);
   }
 
   &-url {
-    margin-top: 5px;
+    margin-top: 3px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: 10px;
     color: var(--popup-text-subtle);
   }
 
   &-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
   }
 
   &-footer {
@@ -547,16 +553,26 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
 
   &-domain,
   &-date {
-    font-size: 12px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 10px;
+    line-height: 1.2;
     color: var(--popup-text-subtle);
+    white-space: nowrap;
   }
 
   &-domain {
     @include flex-center;
-    min-height: 24px;
-    padding: 0 9px;
+    max-width: 55%;
+    min-height: 20px;
+    padding: 0 7px;
     border-radius: 999px;
     background: var(--popup-control-bg);
+  }
+
+  &-date {
+    flex-shrink: 0;
   }
 
   &-comments {
@@ -694,8 +710,8 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 24px;
-  border-radius: 22px;
+  padding: 24px 18px;
+  border-radius: 15px;
   border: 1px dashed var(--popup-border);
   background: var(--popup-card-bg-muted);
   text-align: center;
@@ -709,44 +725,50 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
 
   &-icon {
     @include flex-center;
-    width: 64px;
-    height: 64px;
-    margin-bottom: 18px;
-    border-radius: 20px;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 12px;
+    border-radius: 15px;
     color: var(--popup-accent);
     background: var(--popup-accent-gradient);
     box-shadow: var(--popup-inset-highlight);
 
     :deep(svg) {
-      width: 24px;
-      height: 24px;
+      width: 19px;
+      height: 19px;
     }
   }
 
   &-title {
     margin: 0;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--popup-text-primary);
   }
 
   &-hint {
-    margin: 10px 0 0;
-    font-size: 13px;
-    line-height: 1.6;
+    margin: 7px 0 0;
+    font-size: 12px;
+    line-height: 1.45;
     color: var(--popup-text-muted);
   }
 }
 
 .icon-btn {
   @include flex-center;
-  width: 24px;
-  height: 24px;
-  border: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--popup-border-muted);
+  border-radius: 10px;
   background: var(--popup-control-bg);
   color: var(--popup-text-secondary);
   cursor: pointer;
   transition: $transition-base, color 0.2s ease;
+
+  >svg {
+    width: 14px;
+    height: 14px;
+  }
 
   @include hover-lift;
 
@@ -777,22 +799,37 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   backdrop-filter: blur(8px);
 
   &-content {
-    width: min(100%, 320px);
-    padding: 22px;
-    border-radius: 22px;
+    width: min(100%, 292px);
+    padding: 18px;
+    border-radius: 18px;
     border: 1px solid var(--popup-danger-border);
     background: var(--popup-dialog-bg);
     box-shadow: var(--popup-shadow-strong);
+
+    h3 {
+      margin: 14px 0 8px;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--popup-danger-text);
+    }
+
+    p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--popup-text-muted);
+    }
   }
 
   &-badge {
     @include flex-center;
-    min-height: 28px;
-    padding: 0 10px;
+    width: fit-content;
+    min-height: 24px;
+    padding: 0 8px;
     border-radius: 999px;
     border: 1px solid var(--popup-danger-border);
     background: var(--popup-danger-bg);
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -807,27 +844,12 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   }
 }
 
-.confirm-content {
-  h3 {
-    margin: 16px 0 10px;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--popup-danger-text);
-  }
-
-  p {
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--popup-text-muted);
-  }
-}
 
 .dialog-btn {
-  min-height: 42px;
-  border-radius: 14px;
+  min-height: 36px;
+  border-radius: 12px;
   border: 1px solid var(--popup-border);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: $transition-base;
@@ -858,14 +880,24 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   }
 }
 
-@media (max-width: 640px) {
+.filter-panel-input:focus-visible,
+.filter-panel-clear:focus-visible,
+.toolbar-btn:focus-visible,
+.icon-btn:focus-visible,
+.dialog-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--popup-focus-ring);
+}
+
+@media (max-width: 360px) {
   .filter-panel {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .filter-meta {
-    align-self: flex-end;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    max-width: none;
   }
 }
 </style>

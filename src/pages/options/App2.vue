@@ -22,6 +22,7 @@ import GlassCursor from '@components/cursors/GlassCursor.vue';
 import PanelNav from '@components/layout/PanelNav.vue';
 import { useOptionsPerformance } from './composables/useOptionsPerformance';
 import 'element-plus/dist/index.css';
+import '@/assets/styles/element-message-box.scss';
 
 const { performanceLevel, isHighPerformance } = useOptionsPerformance();
 

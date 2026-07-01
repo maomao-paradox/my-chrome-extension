@@ -6,12 +6,12 @@ export const popupThemes = [
   {
     key: 'midnight',
     label: '深海',
-    description: '深色高对比界面',
+    description: '深色高对比',
   },
   {
     key: 'daylight',
     label: '晨雾',
-    description: '浅色柔和界面',
+    description: '浅色柔和',
   },
 ] as const;
 

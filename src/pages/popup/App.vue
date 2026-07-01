@@ -26,7 +26,6 @@
           <span class="tab-icon">
             <component :is="tab.icon" />
           </span>
-          <span class="tab-label">{{ tab.label }}</span>
         </button>
       </nav>
 
@@ -76,7 +75,7 @@ const popupTitle = computed(() => chrome.i18n.getMessage('popupTitle'));
 const tabs = [
   {
     key: 'bookmarks',
-    label: '书签',
+    label: '锚点',
     hint: '管理片段书签，快速回到对应页面。',
     icon: IconBookmark,
   },
@@ -115,11 +114,11 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .popup-shell {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   background: var(--popup-page-background);
 }
@@ -130,22 +129,23 @@ onMounted(async () => {
   filter: blur(0);
   pointer-events: none;
   opacity: 0.45;
-}
 
-.popup-orb--left {
-  top: -68px;
-  left: -80px;
-  width: 180px;
-  height: 180px;
-  background: var(--popup-orb-left);
-}
 
-.popup-orb--right {
-  right: -90px;
-  bottom: 110px;
-  width: 220px;
-  height: 220px;
-  background: var(--popup-orb-right);
+  &--left {
+    top: -68px;
+    left: -80px;
+    width: 180px;
+    height: 180px;
+    background: var(--popup-orb-left);
+  }
+
+  &--right {
+    right: -90px;
+    bottom: 110px;
+    width: 220px;
+    height: 220px;
+    background: var(--popup-orb-right);
+  }
 }
 
 .popup-container {
@@ -160,24 +160,25 @@ onMounted(async () => {
 
 .popup-header {
   position: relative;
-  padding: 12px 16px 10px;
+  padding: 10px 14px 8px;
   background: var(--popup-header-bg);
   border-bottom: 1px solid var(--popup-border);
-}
 
-.popup-header::after {
-  content: '';
-  position: absolute;
-  inset: auto 16px 0;
-  height: 1px;
-  background: var(--popup-divider-gradient);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 16px 0;
+    height: 1px;
+    background: var(--popup-divider-gradient);
+  }
 }
 
 .header-version {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 24px;
+  min-height: 5vh;
   padding: 0 8px;
   border-radius: 999px;
   font-size: 10px;
@@ -199,10 +200,16 @@ onMounted(async () => {
   min-width: 0;
 }
 
+@font-face {
+  font-family: 'EagleLake';
+  src: url('/static/fonts/EagleLake-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+
 .logo {
   margin: 0;
+  font-family: 'EagleLake', sans-serif;
   font-size: 20px;
-  font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.1;
   color: var(--popup-text-primary);
@@ -220,25 +227,35 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 30px;
+  min-height: 5vh;
   padding: 0 10px;
   border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
   border: 1px solid transparent;
   backdrop-filter: blur(12px);
-}
 
-.status-chip--on {
-  color: var(--popup-success-text);
-  background: var(--popup-success-bg);
-  border-color: var(--popup-success-border);
-}
+  &--on {
+    color: var(--popup-success-text);
+    background: var(--popup-success-bg);
+    border-color: var(--popup-success-border);
 
-.status-chip--off {
-  color: var(--popup-danger-text);
-  background: var(--popup-danger-bg);
-  border-color: var(--popup-danger-border);
+    .status-dot {
+      background: var(--popup-success-dot);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-success-dot) 18%, transparent);
+    }
+  }
+
+  &--off {
+    color: var(--popup-danger-text);
+    background: var(--popup-danger-bg);
+    border-color: var(--popup-danger-border);
+
+    .status-dot {
+      background: var(--popup-danger-dot);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-danger-dot) 18%, transparent);
+    }
+  }
 }
 
 .status-dot {
@@ -248,35 +265,21 @@ onMounted(async () => {
   animation: pulse 2.4s ease-in-out infinite;
 }
 
-.status-chip--on .status-dot {
-  background: var(--popup-success-dot);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-success-dot) 18%, transparent);
-}
-
-.status-chip--off .status-dot {
-  background: var(--popup-danger-dot);
-  box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-danger-dot) 18%, transparent);
-}
-
 .tab-navigation {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 8px 16px 0;
+  display: flex;
+  gap: 6px;
 }
 
 .tab-btn {
   width: max-content;
-  padding: 0 16px;
+  padding: 0 4vw;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 34px;
-  /* padding: 8px 10px; */
-  border: 1px solid var(--popup-border);
-  border-radius: 16px;
-  background: var(--popup-tab-bg);
+  min-height: 6vh;
+  border: none;
+  background-color: transparent;
   color: var(--popup-text-muted);
   cursor: pointer;
   transition:
@@ -285,22 +288,31 @@ onMounted(async () => {
     background 0.2s ease,
     color 0.2s ease,
     box-shadow 0.2s ease;
-}
 
-.tab-btn:hover {
-  transform: translateY(-1px);
-  color: var(--popup-text-primary);
-  border-color: var(--popup-border-strong);
-  background: var(--popup-tab-hover-bg);
-}
+  &:hover {
+    border-radius: 12px;
+    border: 1px solid var(--popup-border);
+    transform: translateY(-1px);
+    color: var(--popup-text-primary);
+    background: var(--popup-tab-hover-bg);
+  }
 
-.tab-btn.active {
-  color: var(--popup-text-primary);
-  border-color: var(--popup-border-strong);
-  background: var(--popup-tab-active-bg);
-  box-shadow:
-    var(--popup-shadow-soft),
-    var(--popup-inset-highlight);
+  &.active {
+    border-radius: 12px;
+    border: 1px solid var(--popup-border-strong);
+    color: var(--popup-text-primary);
+    background: var(--popup-tab-active-bg);
+    box-shadow:
+      var(--popup-shadow-soft),
+      var(--popup-inset-highlight);
+
+    .tab-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--popup-accent-gradient);
+      box-shadow: var(--popup-inset-highlight);
+    }
+  }
 }
 
 .tab-icon {
@@ -311,11 +323,6 @@ onMounted(async () => {
   height: 20px;
   border-radius: 10px;
   background: var(--popup-control-bg);
-}
-
-.tab-btn.active .tab-icon {
-  background: var(--popup-accent-gradient);
-  box-shadow: var(--popup-inset-highlight);
 }
 
 .tab-label {
