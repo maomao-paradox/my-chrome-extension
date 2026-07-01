@@ -22,6 +22,7 @@ const EXTENSION_CONFIGS_KEY = 'extensionSettings';
 const ROOT_PERMISSION_KEY = 'Eve';
 const LOGGER_TITLE = 'ZERO DEBUG';
 
+
 installGlobalLogger({ title: LOGGER_TITLE, enabled: false });
 
 const parseDomains = (domainsString: string): [string, string][] => {
@@ -89,6 +90,11 @@ const loadRuntime = async (): Promise<void> => {
 };
 
 (async () => {
+    if (location.origin === 'chrome://extensions') {
+        maLogger.log('Content bootstrap is not available in chrome://extensions');
+        return;
+    }
+
     if (typeof document === 'undefined') {
         console.warn('Document object is not available in current context');
         return;

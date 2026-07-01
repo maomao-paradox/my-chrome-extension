@@ -356,7 +356,6 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
     &:focus-within {
       border-color: var(--popup-border-strong);
       background: var(--popup-control-bg-strong);
-      box-shadow: 0 0 0 4px var(--popup-focus-ring);
     }
   }
 
@@ -880,8 +879,6 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   }
 }
 
-.filter-panel-input:focus-visible,
-.filter-panel-clear:focus-visible,
 .toolbar-btn:focus-visible,
 .icon-btn:focus-visible,
 .dialog-btn:focus-visible {
