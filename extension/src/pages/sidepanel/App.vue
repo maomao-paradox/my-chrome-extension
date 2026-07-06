@@ -6,7 +6,8 @@
         <div class="nav-tabs">
           <button v-for="tab in tabs" :key="tab.id" :class="['nav-tab', { active: currentTab === tab.id }]"
             @click="handleTabClick(tab.id)">
-            <span class="tab-icon">{{ getTabIcon(tab.id) }}</span>
+            <span v-if="tab.id === 'automation'" class="tab-icon automation-tab-icon" aria-hidden="true"></span>
+            <span v-else class="tab-icon">{{ getTabIcon(tab.id) }}</span>
             <span class="tab-label">{{ tab.name }}</span>
           </button>
         </div>
@@ -59,6 +60,11 @@
       <div v-else-if="currentTab === 'music'" class="music-container fade-in">
         <Music />
       </div>
+
+      <!-- 真实标签页自动化 -->
+      <div v-else-if="currentTab === 'automation'" class="automation-container fade-in">
+        <AutomationPanel />
+      </div>
     </main>
 
     <!-- 状态栏 -->
@@ -95,6 +101,7 @@ import HiddenPathScanner from './views/HiddenPathScanner.vue';
 import XhrPatchManager from './views/XhrPatchManager.vue';
 import AIChat from './views/FuturisticAIChat.vue';
 import Music from './views/Music.vue';
+import AutomationPanel from './views/AutomationPanel.vue';
 
 // 导航选项卡定义
 interface Tab {
@@ -105,6 +112,7 @@ interface Tab {
 // 导航选项卡列表
 const tabs: Tab[] = [
   { id: 'ai-chat', name: '网页分析' },
+  { id: 'automation', name: '自动化' },
   { id: 'other-features', name: '功能面板' },
   { id: 'browser-var', name: '调试面板' },
   { id: 'path-scanner', name: '路径扫描' },
@@ -445,6 +453,26 @@ body {
 
 .tab-icon {
   font-size: 14px;
+}
+
+.automation-tab-icon {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  position: relative;
+  display: inline-block;
+}
+
+.automation-tab-icon::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
 }
 
 .tab-label {

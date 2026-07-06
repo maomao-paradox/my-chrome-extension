@@ -12,6 +12,11 @@ Go HTTP backend for the KIRA:NOVE Chrome extension. Its main job is to expose a 
   - click, fill, press keys, and wait for selectors
   - extract text
   - return PNG screenshots as base64
+- Extension automation task center:
+  - create tasks and save structured automation steps
+  - create runs and receive execution events from the extension
+  - archive screenshot base64 strings or file paths for each run
+  - optionally ask AI to generate structured steps from natural language
 - Optional OpenAI-compatible AI proxy remains available for extension features that need it
 - Optional bearer/API-key protection with `API_TOKEN`
 - CORS support for `chrome-extension://*` and local Vite development origins
@@ -56,6 +61,58 @@ Use environment variables:
 If `AI_BASE_URL` or `AI_API_KEY` is missing, chat endpoints return `503` and the rest of the backend remains available.
 
 ## Automation API
+
+The primary product flow is extension-driven automation against the user's real Chrome tab. Store durable automation plans as structured JSON steps, then let the extension translate them into `playwright-crx` actions.
+
+Create a task:
+
+```bash
+curl -s http://127.0.0.1:8787/api/automation/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"登录并导出报表","description":"打开系统，登录，进入报表页，导出本月数据"}'
+```
+
+Save steps:
+
+```bash
+curl -s http://127.0.0.1:8787/api/automation/tasks/<task-id>/steps \
+  -H 'Content-Type: application/json' \
+  -d '{"steps":[{"type":"goto","url":"https://example.com/login"},{"type":"fill","target":{"kind":"label","text":"用户名"},"value":"admin"},{"type":"click","target":{"kind":"role","role":"button","name":"登录"}}]}'
+```
+
+Load task detail, including runs:
+
+```bash
+curl -s http://127.0.0.1:8787/api/automation/tasks/<task-id>
+```
+
+Create a run and report execution:
+
+```bash
+curl -s http://127.0.0.1:8787/api/automation/tasks/<task-id>/runs \
+  -H 'Content-Type: application/json' \
+  -d '{"mode":"real-run","page":{"url":"https://example.com/login","title":"Login"}}'
+
+curl -s http://127.0.0.1:8787/api/automation/runs/<run-id>/events \
+  -H 'Content-Type: application/json' \
+  -d '{"stepId":"step_001","status":"passed","durationMs":530,"page":{"url":"https://example.com/dashboard","title":"Dashboard"}}'
+
+curl -s http://127.0.0.1:8787/api/automation/runs/<run-id>/screenshots \
+  -H 'Content-Type: application/json' \
+  -d '{"stepId":"step_001","base64":"<png-base64>","contentType":"image/png"}'
+```
+
+Generate structured steps with the configured AI upstream:
+
+```bash
+curl -s http://127.0.0.1:8787/api/automation/generate \
+  -H 'Content-Type: application/json' \
+  -d '{"intent":"登录系统并打开销售报表","pageSnapshot":"当前页面包含用户名、密码和登录按钮"}'
+```
+
+Generated steps are schema-validated before being returned. The backend rejects arbitrary JavaScript step types.
+
+## Playwright Session API
 
 Create a Chromium session and open a page:
 
@@ -109,7 +166,7 @@ Close the session:
 curl -s -X DELETE http://127.0.0.1:8787/api/automation/sessions/<session-id>
 ```
 
-The Playwright backend launches a separate browser instance. It does not control the user's currently open Chrome tab directly; the extension should send target URLs and selectors to this backend.
+The Playwright backend launches a separate browser instance. It does not control the user's currently open Chrome tab directly. Use the task APIs above for real-tab extension automation records and logs.
 
 ## Other API Examples
 

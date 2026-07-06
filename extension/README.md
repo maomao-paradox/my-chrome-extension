@@ -70,6 +70,27 @@ await chrome.runtime.sendMessage({
 
 可选参数：`active` 控制新页签是否激活，默认 `true`；`world` 支持 `ISOLATED` 或 `MAIN`，默认 `ISOLATED`；`allFrames` 默认 `false`；`waitUntil` 支持 `loading` 或 `complete`，默认 `loading`；`timeoutMs` 默认 `30000`。
 
+### 真实标签页自动化
+- Side Panel 新增“自动化”页，可连接当前真实 Chrome 标签页，读取 title/url，执行截图，录制用户操作并生成结构化步骤
+- 支持结构化步骤：`goto`、`click`、`fill`、`press`、`wait`、`extract`、`screenshot`、`verifyText`
+- 后台通过 `chrome.scripting.executeScript` 在当前页执行步骤，优先使用 `role`、`label`、`placeholder`、`text`、`testid` 定位，`css` 作为 fallback
+- 面板可创建/加载后端任务，保存步骤，创建 run，并逐条上报 event 和 screenshot
+- 默认后端地址为 `http://127.0.0.1:8787`，可在面板中修改并保存到 `chrome.storage.local`
+- `real-run` 会在执行前要求用户确认；提交、删除、支付、发送等高风险点击默认需要明确确认
+- 当前实现不依赖 `debugger` 权限；如果后续切换为 `@playwright-repl/playwright-crx`，再启用 `debugger` 权限和 Playwright page/context runtime
+
+最小使用流程：
+
+```text
+打开目标网页
+  -> 打开扩展 Side Panel 的“自动化”
+  -> 点击“连接当前页”
+  -> 手动添加 JSON 步骤，或点击“开始录制”生成步骤
+  -> 保存任务和步骤
+  -> 选择 dry-run 或 real-run
+  -> 执行并上报到 Go 后端
+```
+
 ### 个人主页
 - 提供独立创意个人主页，包含动漫赛博主视觉、幻想展柜、技法展示、丰富动画交互与静态模式切换
 - 开发模式可访问 `http://127.0.0.1:5173/pages/profile.html`

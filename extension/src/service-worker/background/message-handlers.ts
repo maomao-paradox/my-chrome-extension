@@ -5,6 +5,10 @@ import { createTabAndWaitForLoad, sendRequestToActiveTab, type TabWaitUntil } fr
 import { postJsonFromBackground } from './http';
 import { fetchImageFromAPI } from './image-api';
 import FileMapDecryptor from '@/utils/fileMapDecryptor';
+import type { AutomationStep } from '@/types/automation';
+import { attachToTab, detachFromTab, ensureAttachedTab, getPageSnapshot } from '../automation/tab-runtime';
+import { runStep, runSteps } from '../automation/step-runner';
+import { startRecorder, stopRecorder } from '../automation/recorder';
 
 type SidePanelWithClose = typeof chrome.sidePanel & {
 	close?: (options: { tabId?: number }) => Promise<void>;
@@ -50,6 +54,7 @@ const DEFAULT_CREATE_TAB_TIMEOUT_MS = 30000;
 const viteEnv = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
 const FILE_MAP_KEY = viteEnv?.VITE_FILE_MAP_KEY || 'mria_extension_default_key_32bytes_1234567890abcdef';
 const backgroundFileMapDecryptor = new FileMapDecryptor(FILE_MAP_KEY);
+const RECORDED_STEPS_STORAGE_KEY = 'automationRecordedSteps';
 
 const normalizeExtensionPath = (path: string): string => {
 	return path
@@ -198,10 +203,135 @@ const createTabWithScript = async (payload: CreateTabWithScriptPayload | undefin
 	};
 };
 
+const appendRecordedStep = async (tabId: number | undefined, step: AutomationStep, page: unknown): Promise<void> => {
+	const stored = await chrome.storage.local.get(RECORDED_STEPS_STORAGE_KEY);
+	const current = Array.isArray(stored[RECORDED_STEPS_STORAGE_KEY])
+		? stored[RECORDED_STEPS_STORAGE_KEY]
+		: [];
+	const entry = {
+		id: `recorded_${Date.now()}`,
+		tabId,
+		step,
+		page,
+		createdAt: new Date().toISOString(),
+	};
+	await chrome.storage.local.set({
+		[RECORDED_STEPS_STORAGE_KEY]: [...current, entry].slice(-200),
+	});
+	chrome.runtime.sendMessage({
+		target: 'sidepanel',
+		type: 'AUTOMATION_RECORDED_ACTION',
+		payload: entry,
+	});
+};
+
 export function createBackgroundMessageHandlers(
 	devToolsPortManager: DevToolsPortManager
 ): BackgroundMessageHandler {
 	return {
+		AUTOMATION_ATTACH: async (payload, _sender, sendResponse) => {
+			try {
+				const tabId = typeof payload?.tabId === 'number' ? payload.tabId : undefined;
+				const result = await attachToTab(tabId);
+				sendResponse?.({ success: true, payload: result });
+			} catch (error) {
+				sendResponse?.({ success: false, error: error instanceof Error ? error.message : String(error) });
+			}
+			return true;
+		},
+
+		AUTOMATION_DETACH: (_payload, _sender, sendResponse) => {
+			detachFromTab();
+			sendResponse?.({ success: true });
+			return true;
+		},
+
+		AUTOMATION_HEALTH: async (_payload, _sender, sendResponse) => {
+			try {
+				const tabId = await ensureAttachedTab();
+				const page = await getPageSnapshot(tabId);
+				sendResponse?.({ success: true, payload: { tabId, page } });
+			} catch (error) {
+				sendResponse?.({ success: false, error: error instanceof Error ? error.message : String(error) });
+			}
+			return true;
+		},
+
+		AUTOMATION_RUN_STEP: async (payload, _sender, sendResponse) => {
+			try {
+				const tabId = await ensureAttachedTab();
+				const step = payload?.step as AutomationStep | undefined;
+				if (!step) {
+					sendResponse?.({ success: false, error: '缺少 step' });
+					return true;
+				}
+				const result = await runStep(tabId, step, { allowRisky: payload?.allowRisky === true });
+				sendResponse?.({ success: true, payload: result });
+			} catch (error) {
+				sendResponse?.({ success: false, error: error instanceof Error ? error.message : String(error) });
+			}
+			return true;
+		},
+
+		AUTOMATION_RUN_STEPS: async (payload, _sender, sendResponse) => {
+			try {
+				const tabId = await ensureAttachedTab();
+				const steps = Array.isArray(payload?.steps) ? payload.steps as AutomationStep[] : [];
+				if (steps.length === 0) {
+					sendResponse?.({ success: false, error: '缺少 steps' });
+					return true;
+				}
+				const result = await runSteps(tabId, steps, { allowRisky: payload?.allowRisky === true });
+				sendResponse?.({ success: true, payload: result });
+			} catch (error) {
+				sendResponse?.({ success: false, error: error instanceof Error ? error.message : String(error) });
+			}
+			return true;
+		},
+
+		AUTOMATION_RECORD_START: async (_payload, _sender, sendResponse) => {
+			try {
+				const tabId = await ensureAttachedTab();
+				await startRecorder(tabId);
+				sendResponse?.({ success: true, payload: { tabId } });
+			} catch (error) {
+				sendResponse?.({ success: false, error: error instanceof Error ? error.message : String(error) });
+			}
+			return true;
+		},
+
+		AUTOMATION_RECORD_STOP: async (_payload, _sender, sendResponse) => {
+			try {
+				const tabId = await ensureAttachedTab();
+				await stopRecorder(tabId);
+				sendResponse?.({ success: true, payload: { tabId } });
+			} catch (error) {
+				sendResponse?.({ success: false, error: error instanceof Error ? error.message : String(error) });
+			}
+			return true;
+		},
+
+		AUTOMATION_RECORDED_ACTION: async (payload, sender, sendResponse) => {
+			try {
+				const step = payload?.step as AutomationStep | undefined;
+				if (!step) {
+					sendResponse?.({ success: false, error: '缺少录制步骤' });
+					return true;
+				}
+				await appendRecordedStep(sender?.tab?.id, step, payload?.page);
+				sendResponse?.({ success: true });
+			} catch (error) {
+				sendResponse?.({ success: false, error: error instanceof Error ? error.message : String(error) });
+			}
+			return true;
+		},
+
+		AUTOMATION_RECORDED_STEPS_CLEAR: async (_payload, _sender, sendResponse) => {
+			await chrome.storage.local.set({ [RECORDED_STEPS_STORAGE_KEY]: [] });
+			sendResponse?.({ success: true });
+			return true;
+		},
+
 		INIT_FILE_MAP: (payload, _sender, sendResponse) => {
 			try {
 				if (!payload || typeof payload !== 'object') {

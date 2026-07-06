@@ -85,9 +85,10 @@ export default defineManifest({
     'contextMenus',
     'cookies',
     'sidePanel',
+    'webNavigation',
     // "automation"
   ],
-  host_permissions: ['*://*/*'],
+  host_permissions: ['<all_urls>'],
 
   content_security_policy: {
     extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",

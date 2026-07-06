@@ -22,6 +22,7 @@ type Handler struct {
 	aiClient *ai.Client
 	sessions *SessionStore
 	auto     *automation.Service
+	tasks    *automation.TaskStore
 }
 
 type SessionStore struct {
@@ -39,7 +40,8 @@ func New(cfg config.Config, logger *slog.Logger) *Handler {
 			cleared:  make(map[string]time.Time),
 			modified: time.Now().UTC(),
 		},
-		auto: automation.NewService(),
+		auto:  automation.NewService(),
+		tasks: automation.NewTaskStore(),
 	}
 }
 
@@ -77,6 +79,8 @@ func (h *Handler) ExtensionConfig(w http.ResponseWriter, _ *http.Request) {
 			"enabled": true,
 			"endpoints": map[string]string{
 				"sessions": "/api/automation/sessions",
+				"tasks":    "/api/automation/tasks",
+				"generate": "/api/automation/generate",
 			},
 		},
 	})
