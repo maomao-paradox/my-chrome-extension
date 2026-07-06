@@ -7,16 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-package-lock.json
-dist
-dist-service
-dist-ssr
-*.local
-.deepseek-service
-src/plugins/live2d-widget
-src/auto-imports.d.ts
-src/components.d.ts
+# Extension
+extension/node_modules
+extension/package-lock.json
+extension/dist
+extension/dist-service
+extension/dist-ssr
+extension/src/plugins/live2d-widget
+extension/src/auto-imports.d.ts
+extension/src/components.d.ts
+extension/rust-wasm/target
+extension/rust-wasm/pkg
+extension/src/pages/study*
+extension/src/deps.json
+
+# Backend
 
 # Editor directories and files
 .vscode/*
@@ -31,10 +36,7 @@ src/components.d.ts
 .trae
 .codex
 
-src/deps.json
 test-*
 !test/*
-src/pages/study*
-*.svs
-rust-wasm/target
-rust-wasm/pkg
+
+*/**/*.svs
