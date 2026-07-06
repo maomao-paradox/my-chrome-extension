@@ -2,9 +2,10 @@ import { getCurrentInstance, onBeforeUnmount } from 'vue';
 import { shadowHostId } from '@/config';
 import { createShadowHost } from '@/utils/shadow-dom';
 
-interface StarTrailOptions {
+interface MusicNoteTrailOptions {
   hostId?: string;
   canvasId?: string;
+  maxParticles?: number;
   maxStars?: number;
   spawnInterval?: number;
   burstCount?: number;
@@ -12,7 +13,7 @@ interface StarTrailOptions {
   zIndex?: number;
 }
 
-interface StarTrailControls {
+interface MusicNoteTrailControls {
   canvas: HTMLCanvasElement | null;
   start: () => void;
   stop: () => void;
@@ -26,19 +27,21 @@ interface PointerPosition {
   moved: boolean;
 }
 
-const DEFAULT_CANVAS_ID = 'starCanvas';
-const DEFAULT_MAX_STARS = 180;
+const DEFAULT_CANVAS_ID = 'musicNoteTrailCanvas';
+const DEFAULT_MAX_PARTICLES = 180;
 const DEFAULT_SPAWN_INTERVAL = 24;
 const DEFAULT_BURST_COUNT = 36;
 const DEFAULT_JITTER = 18;
 const DEFAULT_Z_INDEX = 2147483646;
 const MAX_DEVICE_PIXEL_RATIO = 2;
+const MUSIC_NOTE_SYMBOLS = ['♪', '♫', '♬', '♩', '♭', '♯'];
 
-let activeControls: StarTrailControls | null = null;
+let activeControls: MusicNoteTrailControls | null = null;
 
-class StarParticle {
+class MusicNoteParticle {
   private readonly image: HTMLCanvasElement;
   private readonly imageSize: number;
+  private readonly note: string;
   private readonly opacitySpeed: number;
   private readonly rotateSpeed: number;
   private readonly scaleSpeed: number;
@@ -54,7 +57,8 @@ class StarParticle {
     private y: number,
     burst = false,
   ) {
-    this.size = Math.random() * 9 + 5;
+    this.size = Math.random() * 12 + 16;
+    this.note = MUSIC_NOTE_SYMBOLS[Math.floor(Math.random() * MUSIC_NOTE_SYMBOLS.length)];
     this.vx = (Math.random() - 0.5) * (burst ? 9 : 3);
     this.vy = burst ? (Math.random() - 0.5) * 9 : Math.random() * 1.6 + 0.4;
     this.opacitySpeed = Math.random() * 0.012 + 0.008;
@@ -96,9 +100,9 @@ class StarParticle {
 
   private createImage(): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
-    const imageSize = Math.ceil(this.size * 4);
+    const imageSize = Math.ceil(this.size * 3.2);
     const center = imageSize / 2;
-    const color = `hsl(${Math.floor(Math.random() * 42) + 195}, 72%, 66%)`;
+    const color = `hsl(${Math.floor(Math.random() * 76) + 190}, 78%, 68%)`;
     const ctx = canvas.getContext('2d');
 
     canvas.width = imageSize;
@@ -108,33 +112,19 @@ class StarParticle {
       return canvas;
     }
 
-    ctx.translate(center, center);
-    ctx.beginPath();
-
-    for (let point = 0; point < 10; point += 1) {
-      const radius = point % 2 === 0 ? this.size : this.size * 0.45;
-      const angle = -Math.PI / 2 + point * Math.PI / 5;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
-
-      if (point === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    }
-
-    ctx.closePath();
+    ctx.font = `700 ${this.size}px "Times New Roman", Georgia, serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = color;
     ctx.shadowColor = color;
-    ctx.shadowBlur = this.size * 1.8;
-    ctx.fill();
+    ctx.shadowBlur = this.size * 0.8;
+    ctx.fillText(this.note, center, center);
 
     return canvas;
   }
 }
 
-const createNoopControls = (): StarTrailControls => ({
+const createNoopControls = (): MusicNoteTrailControls => ({
   canvas: null,
   start: () => undefined,
   stop: () => undefined,
@@ -150,13 +140,13 @@ const getEventPoint = (event: MouseEvent | TouchEvent): { x: number; y: number }
   return { x: event.clientX, y: event.clientY };
 };
 
-const trimStars = (stars: StarParticle[], maxStars: number): void => {
-  if (stars.length > maxStars) {
-    stars.splice(0, stars.length - maxStars);
+const trimParticles = (particles: MusicNoteParticle[], maxParticles: number): void => {
+  if (particles.length > maxParticles) {
+    particles.splice(0, particles.length - maxParticles);
   }
 };
 
-export function useStarTrails(options: StarTrailOptions = {}): StarTrailControls {
+export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNoteTrailControls {
   if (activeControls?.isRunning()) {
     if (getCurrentInstance()) {
       onBeforeUnmount(activeControls.stop);
@@ -213,7 +203,7 @@ export function useStarTrails(options: StarTrailOptions = {}): StarTrailControls
     return createNoopControls();
   }
 
-  const stars: StarParticle[] = [];
+  const particles: MusicNoteParticle[] = [];
   const pointer: PointerPosition = {
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
@@ -221,7 +211,7 @@ export function useStarTrails(options: StarTrailOptions = {}): StarTrailControls
     moved: false,
   };
   const cleanupFns: Array<() => void> = [];
-  const maxStars = options.maxStars ?? DEFAULT_MAX_STARS;
+  const maxParticles = options.maxParticles ?? options.maxStars ?? DEFAULT_MAX_PARTICLES;
   const spawnInterval = options.spawnInterval ?? DEFAULT_SPAWN_INTERVAL;
   const burstCount = options.burstCount ?? DEFAULT_BURST_COUNT;
   const jitter = options.jitter ?? DEFAULT_JITTER;
@@ -259,20 +249,20 @@ export function useStarTrails(options: StarTrailOptions = {}): StarTrailControls
     }
   };
 
-  const spawnStar = (x = pointer.x, y = pointer.y, burst = false): void => {
-    stars.push(
-      new StarParticle(
+  const spawnNote = (x = pointer.x, y = pointer.y, burst = false): void => {
+    particles.push(
+      new MusicNoteParticle(
         x + (Math.random() - 0.5) * jitter,
         y + (Math.random() - 0.5) * jitter,
         burst,
       ),
     );
-    trimStars(stars, maxStars);
+    trimParticles(particles, maxParticles);
   };
 
   const spawnBurst = (x: number, y: number): void => {
     for (let index = 0; index < burstCount; index += 1) {
-      spawnStar(x, y, true);
+      spawnNote(x, y, true);
     }
   };
 
@@ -310,22 +300,22 @@ export function useStarTrails(options: StarTrailOptions = {}): StarTrailControls
     ctx.clearRect(0, 0, viewportWidth, viewportHeight);
 
     if (pointer.active && pointer.moved && time - lastSpawnTime >= spawnInterval) {
-      spawnStar();
+      spawnNote();
       pointer.moved = false;
       lastSpawnTime = time;
     }
 
-    for (let index = stars.length - 1; index >= 0; index -= 1) {
-      const star = stars[index];
-      star.draw(ctx);
+    for (let index = particles.length - 1; index >= 0; index -= 1) {
+      const particle = particles[index];
+      particle.draw(ctx);
 
-      if (star.isDead(viewportWidth, viewportHeight)) {
-        stars.splice(index, 1);
+      if (particle.isDead(viewportWidth, viewportHeight)) {
+        particles.splice(index, 1);
       }
     }
   };
 
-  const controls: StarTrailControls = {
+  const controls: MusicNoteTrailControls = {
     canvas,
     start: () => {
       if (running) {
@@ -358,7 +348,7 @@ export function useStarTrails(options: StarTrailOptions = {}): StarTrailControls
       }
 
       cleanupFns.splice(0).forEach((cleanup) => cleanup());
-      stars.splice(0);
+      particles.splice(0);
       ctx.clearRect(0, 0, viewportWidth, viewportHeight);
       canvas.remove();
 
@@ -378,3 +368,5 @@ export function useStarTrails(options: StarTrailOptions = {}): StarTrailControls
 
   return controls;
 }
+
+export const useStarTrails = useMusicNoteTrails;
