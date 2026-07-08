@@ -34,7 +34,7 @@ const DEFAULT_BURST_COUNT = 36;
 const DEFAULT_JITTER = 18;
 const DEFAULT_Z_INDEX = 2147483646;
 const MAX_DEVICE_PIXEL_RATIO = 2;
-const MUSIC_NOTE_SYMBOLS = ['♪', '♫', '♬', '♩', '♭', '♯'];
+const MUSIC_NOTE_SYMBOLS = ['♩', '♪', '♫', '♬', '♯', '♭', '♮', '𝄞', '𝄢'];
 
 let activeControls: MusicNoteTrailControls | null = null;
 

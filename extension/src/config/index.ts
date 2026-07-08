@@ -26,6 +26,12 @@ export const contentModules = contentDomains.reduce((acc, domain) => acc.set(dom
     path: getContentScriptUrl(domain.toLowerCase())
 }), new Map<string, ModuleOption>());
 
+contentModules.set('TextareaAi', {
+    domainKey: 'contentTextareaAiDomains',
+    flag: '__CONTENT_SCRIPT_TEXTAREA_AI',
+    path: getContentScriptUrl('textarea-ai')
+});
+
 
 const appDomains = ['sidebar', 'floatingball', 'pianoEffect', 'textSelectionToolbar', 'componentCapture', 'errorMonitor', 'menu'];
 

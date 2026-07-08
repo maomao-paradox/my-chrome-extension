@@ -24,7 +24,15 @@ import { loadAIConfig } from '@/utils/ai-config'
 
 const appName = 'textSelectionToolbar'
 
-const TRANSLATOR_CONFIG = { role: 'translator' } as const
+const TRANSLATOR_ROLE_PREFIX = 'translator'
+
+const getTranslationSessionRole = (): string => {
+  const hostname = location.hostname.trim().toLowerCase()
+  const fallbackScope = location.protocol.replace(/:$/, '') || 'page'
+  const scope = hostname || fallbackScope
+  const safeScope = scope.replace(/[^a-z0-9.-]/g, '_')
+  return `${TRANSLATOR_ROLE_PREFIX}_${safeScope}`
+}
 
 const createTranslationStreamPort = (messageId: string) => {
   const port = chrome.runtime.connect({ name: `ai-conversation-${messageId}` })
@@ -211,7 +219,7 @@ class TextSelectionToolbarModule implements AppModule {
         type: 'START_AI_CONVERSATION',
         payload: {
           prompt: `请先将以下文本翻译成中文，并结合对话上下文附带简短的解释：\n\n${textToTranslate}`,
-          ...TRANSLATOR_CONFIG,
+          role: getTranslationSessionRole(),
           provider: aiConfig.provider,
           model: aiConfig.modelId,
           apiKey: aiConfig.apiKey,

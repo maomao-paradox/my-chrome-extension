@@ -27,7 +27,10 @@ export const useDomainManager = () => {
                 maLogger.log('未找到域名配置，使用默认配置');
                 // 默认配置：全部启用，content-main 允许所有域名
                 configs = contentModules.values().reduce((acc, script: ModuleOption) => {
-                    acc[script.domainKey!] = { enabled: true, domains: "" };
+                    acc[script.domainKey!] = {
+                        enabled: true,
+                        domains: script.domainKey === 'contentTextareaAiDomains' ? '*:*' : ""
+                    };
                     return acc;
                 }, {} as DomainConfigs);
                 configs['Eve'] = { enabled: true, domains: "*:*" };

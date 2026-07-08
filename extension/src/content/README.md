@@ -3,6 +3,21 @@
 ## 概述
 内容脚本（Content Script）是 Chrome 扩展的重要组成部分，用于在网页上下文中执行 JavaScript 代码，实现对网页的操作和增强。
 
+## 已有脚本
+
+### content-textarea-ai
+
+`content-textarea-ai.ts` 会扫描页面上的 `textarea[placeholder]`，并根据 `placeholder`、关联 label、页面标题和 URL 调用扩展内置 AI 生成可直接填入的正文。
+
+- 仅处理可见的、非 `disabled`、非 `readonly` textarea。
+- 页面初次扫描和 textarea 获得焦点时只会在输入框右下角显示小圆点，不会自动填充。
+- 点击小圆点后才会请求 AI 并填入生成内容，用户可以自行决定是否触发填入。
+- 如果 textarea 已有内容，点击小圆点会先清空当前内容，再重新填入 AI 生成内容；如果生成失败且用户期间没有输入，会恢复原内容。
+- 如果用户在 AI 返回前已经输入内容，脚本会跳过写入，不覆盖用户输入。
+- 填入前会合并流式返回中的重叠内容，并去掉明显重复的段落或行。
+- 手动填入会派发 `input` 和 `change` 事件，兼容 Vue、React 等受控表单。
+- 默认域名配置为 `*:*`，可在内容脚本域名配置中使用 `contentTextareaAiDomains` 禁用或限定域名。
+
 ## 文件结构
 每个内容脚本应该遵循以下文件结构：
 

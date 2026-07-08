@@ -4,7 +4,7 @@ import { whenDomReady } from '@/utils/element-control';
 import messenger from '@/message';
 import type { ExtMessage, PluginConfigs } from '@/types';
 import { defaultPluginConfigs } from '@/apps/index';
-import { appConfigKey } from '@/config';
+import { appConfigKey, contentModules, domainConfigsKey } from '@/config';
 import { createModuleManager } from './module-manager';
 import { createMessageHandlers, type ContentMessageHandlers } from './message-handlers';
 import { createPageTools } from './page-tools';
@@ -25,7 +25,25 @@ const checkDomainMatch = (allowedDomains: [string, string][]): boolean => {
 };
 
 export async function genDomainPermissionChecker(): Promise<(configKey: string) => boolean> {
-    const domainConfigs: Record<string, any> = await storage.ext.local.get("domainConfigs") || {};
+    const domainConfigs: Record<string, any> = await storage.ext.local.get(domainConfigsKey) || {};
+    let shouldPersist = false;
+
+    for (const script of contentModules.values()) {
+        if (!script.domainKey || Object.prototype.hasOwnProperty.call(domainConfigs, script.domainKey)) {
+            continue;
+        }
+
+        domainConfigs[script.domainKey] = {
+            enabled: true,
+            domains: script.domainKey === 'contentTextareaAiDomains' ? '*:*' : ''
+        };
+        shouldPersist = true;
+    }
+
+    if (shouldPersist) {
+        await storage.ext.local.set(domainConfigsKey, domainConfigs);
+    }
+
     return (configKey: string): boolean => {
         try {
             const config = domainConfigs[configKey];
