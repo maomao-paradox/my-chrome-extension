@@ -81,11 +81,10 @@ export const createMessageHandlers = (
     },
 
     TOGGLE_MOUSE_TRAIL: (data, sendResponse) => {
-        const enabled = Boolean(data?.enabled);
-        applyWebpageMouseTrail(enabled);
+        applyWebpageMouseTrail(data);
         sendResponse({
             success: true,
-            msg: enabled ? '鼠标拖尾已启用' : '鼠标拖尾已关闭',
+            msg: data?.enabled ? '鼠标拖尾已启用' : '鼠标拖尾已关闭',
         });
         return false;
     },

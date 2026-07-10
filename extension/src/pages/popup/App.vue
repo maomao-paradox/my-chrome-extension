@@ -21,9 +21,9 @@
       </header>
 
       <nav class="tab-navigation" aria-label="Popup navigation" role="tablist">
-        <button v-for="tab in tabs" :key="tab.key" class="tab-btn" :class="{ active: activeTab === tab.key }"
-          role="tab" type="button" :aria-selected="activeTab === tab.key"
-          :aria-controls="`popup-panel-${tab.key}`" :title="tab.label" @click="activeTab = tab.key">
+        <button v-for="tab in tabs" :key="tab.key" class="tab-btn" :class="{ active: activeTab === tab.key }" role="tab"
+          type="button" :aria-selected="activeTab === tab.key" :aria-controls="`popup-panel-${tab.key}`"
+          :title="tab.label" @click="activeTab = tab.key">
           <span class="tab-icon">
             <component :is="tab.icon" />
           </span>
@@ -32,21 +32,11 @@
       </nav>
 
       <main class="popup-content">
-        <div id="popup-panel-bookmarks" v-show="activeTab === 'bookmarks'" class="tab-content" role="tabpanel">
-          <BookmarkPage />
-        </div>
-
-        <div id="popup-panel-capture" v-show="activeTab === 'capture'" class="tab-content" role="tabpanel">
-          <CapturePage :is-active="activeTab === 'capture'" />
-        </div>
-
-        <div id="popup-panel-accessibility" v-show="activeTab === 'accessibility'" class="tab-content" role="tabpanel">
-          <AccessibilityTreePage />
-        </div>
-
-        <div id="popup-panel-settings" v-show="activeTab === 'settings'" class="tab-content" role="tabpanel">
-          <SettingPage />
-        </div>
+        <Transition name="tab-fade" mode="out-in">
+          <KeepAlive>
+            <component :is="activeTabPage" :key="activeTab" />
+          </KeepAlive>
+        </Transition>
       </main>
 
       <footer class="popup-footer">
@@ -62,11 +52,10 @@ import { computed, onMounted, ref } from 'vue';
 import BookmarkPage from './views/BookmarkPage.vue';
 import SettingPage from './views/SettingPage.vue';
 import CapturePage from './views/CapturePage.vue';
-import { IconSetting, IconCapture, IconBookmark, IconDocument } from '@icons/index';
+import { IconSetting, IconCapture, IconBookmark } from '@icons/index';
 import { useDomainState } from './composables/useDomainState.js';
 import { usePopupTheme } from './composables/usePopupTheme.js';
 import { usePopupMouseTrail } from './composables/usePopupMouseTrail.js';
-import AccessibilityTreePage from './views/AccessibilityTree.vue';
 
 const { isDomainDisabled, checkDomainStatus } = useDomainState();
 const { loadPopupTheme } = usePopupTheme();
@@ -80,30 +69,36 @@ const tabs = [
     label: '锚点',
     hint: '管理片段书签，快速回到对应页面。',
     icon: IconBookmark,
+    tabPage: BookmarkPage,
   },
   {
     key: 'capture',
     label: '捕获',
     hint: '从当前页面拾取组件，结果同步到开发者工具。',
     icon: IconCapture,
+    tabPage: CapturePage,
   },
-  {
-    key: 'accessibility',
-    label: '理解',
-    hint: '查看当前页面的可访问性树，辅助理解页面结构。',
-    icon: IconDocument,
-  },
+  // {
+  //   key: 'accessibility',
+  //   label: '理解',
+  //   hint: '查看当前页面的可访问性树，辅助理解页面结构。',
+  //   icon: IconDocument,
+  //   tabPage: AccessibilityTreePage,
+  // },
   {
     key: 'settings',
     label: '设置',
     hint: '管理内容脚本与插件默认打开方式。',
     icon: IconSetting,
+    tabPage: SettingPage,
   },
 ] as const;
 
 type TabKey = (typeof tabs)[number]['key'];
 
-const activeTab = ref<TabKey>('bookmarks');
+const activeTab = ref<TabKey>(tabs[0].key);
+
+const activeTabPage = computed(() => tabs.find((tab) => tab.key === activeTab.value)?.tabPage);
 
 const activeTabHint = computed(() => {
   return tabs.find((tab) => tab.key === activeTab.value)?.hint ?? tabs[0].hint;
@@ -363,14 +358,10 @@ onMounted(async () => {
 
 .popup-content {
   flex: 1;
-  min-height: 0;
-  padding: 12px 10px 0 14px;
-}
-
-.tab-content {
+  padding: 12px 12px 0 14px;
   height: 100%;
   overflow-y: auto;
-  padding-right: 2px;
+  scrollbar-width: none;
 }
 
 .popup-footer {
@@ -413,5 +404,18 @@ onMounted(async () => {
   .tab-btn {
     transition: none;
   }
+}
+
+.tab-fade-enter-active,
+.tab-fade-leave-active {
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+}
+
+.tab-fade-enter-from,
+.tab-fade-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
 }
 </style>

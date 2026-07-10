@@ -1,14 +1,19 @@
 import { ref } from 'vue';
 import {
+  defaultMouseTrailPreset,
   mouseTrailStorageKey,
+  normalizeMouseTrailPreset,
   persistMouseTrail,
-  readStoredMouseTrail,
+  readStoredMouseTrailPreference,
+  type MouseTrailPreference,
+  type MouseTrailPreset,
 } from '@/assets/composables/mouse/mouseTrailPreference';
 
 export const popupMouseTrailStorageKey = mouseTrailStorageKey;
 
 const defaultMouseTrailEnabled = false;
 const isMouseTrailEnabled = ref(defaultMouseTrailEnabled);
+const mouseTrailPreset = ref<MouseTrailPreset>(defaultMouseTrailPreset);
 const isMouseTrailLoaded = ref(false);
 
 const isUsablePageTab = (tab: chrome.tabs.Tab | undefined): tab is chrome.tabs.Tab & { id: number } => {
@@ -24,7 +29,12 @@ const isUsablePageTab = (tab: chrome.tabs.Tab | undefined): tab is chrome.tabs.T
     && !url.startsWith('about:');
 };
 
-const notifyCurrentPageMouseTrail = async (enabled: boolean): Promise<void> => {
+const getCurrentPreference = (): MouseTrailPreference => ({
+  enabled: isMouseTrailEnabled.value,
+  preset: mouseTrailPreset.value,
+});
+
+const notifyCurrentPageMouseTrail = async (preference: MouseTrailPreference): Promise<void> => {
   try {
     if (typeof chrome === 'undefined' || !chrome.tabs) {
       return;
@@ -42,7 +52,7 @@ const notifyCurrentPageMouseTrail = async (enabled: boolean): Promise<void> => {
         type: 'TOGGLE_MOUSE_TRAIL',
         source: 'popup',
         target: 'content',
-        payload: { enabled },
+        payload: preference,
       }, () => {
         if (chrome.runtime.lastError) {
           maLogger.warn('当前页面暂未接收鼠标拖尾消息:', chrome.runtime.lastError.message);
@@ -58,25 +68,37 @@ const notifyCurrentPageMouseTrail = async (enabled: boolean): Promise<void> => {
 export const usePopupMouseTrail = () => {
   const loadPopupMouseTrail = async (): Promise<void> => {
     if (isMouseTrailLoaded.value) {
-      await notifyCurrentPageMouseTrail(isMouseTrailEnabled.value);
+      await notifyCurrentPageMouseTrail(getCurrentPreference());
       return;
     }
 
-    isMouseTrailEnabled.value = await readStoredMouseTrail();
+    const preference = await readStoredMouseTrailPreference();
+    isMouseTrailEnabled.value = preference.enabled;
+    mouseTrailPreset.value = preference.preset;
     isMouseTrailLoaded.value = true;
-    await notifyCurrentPageMouseTrail(isMouseTrailEnabled.value);
+    await notifyCurrentPageMouseTrail(preference);
   };
 
   const setPopupMouseTrail = async (enabled: boolean): Promise<void> => {
     isMouseTrailEnabled.value = enabled;
-    await persistMouseTrail(enabled);
-    await notifyCurrentPageMouseTrail(enabled);
+    const preference = getCurrentPreference();
+    await persistMouseTrail(preference);
+    await notifyCurrentPageMouseTrail(preference);
+  };
+
+  const setPopupMouseTrailPreset = async (preset: MouseTrailPreset): Promise<void> => {
+    mouseTrailPreset.value = normalizeMouseTrailPreset(preset);
+    const preference = getCurrentPreference();
+    await persistMouseTrail(preference);
+    await notifyCurrentPageMouseTrail(preference);
   };
 
   return {
     isMouseTrailEnabled,
+    mouseTrailPreset,
     isMouseTrailLoaded,
     loadPopupMouseTrail,
     setPopupMouseTrail,
+    setPopupMouseTrailPreset,
   };
 };

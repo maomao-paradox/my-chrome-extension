@@ -47,7 +47,14 @@
           </div>
 
           <div class="switch-row switch-row--appearance">
-            <MASwitch v-model="isMouseTrailEnabled" label="鼠标拖尾" @change="handleMouseTrailChange" />
+            <MASwitch v-model="isMouseTrailEnabled" label="鼠标拖尾" @change="handleMouseTrailChange">
+              <select v-model="mouseTrailPreset" class="dropdown-select mouse-trail-preset-select"
+                :disabled="!isMouseTrailEnabled" aria-label="鼠标拖尾样式" @change="handleMouseTrailPresetChange">
+                <option v-for="option in mouseTrailPresetOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </MASwitch>
           </div>
         </section>
 
@@ -156,12 +163,13 @@ import { IconConfirm, IconDocument, IconSetting, IconTime, IconTooling } from '@
 import { useDomainState } from '../composables/useDomainState.js';
 import { popupThemes, usePopupTheme, type PopupThemeKey } from '../composables/usePopupTheme.js';
 import { usePopupMouseTrail } from '../composables/usePopupMouseTrail.js';
+import { mouseTrailPresetOptions } from '@/assets/composables/mouse/mouseTrailPreference';
 import { useDomainManager, type DomainConfigItem } from '@/assets/composables/useDomainManager';
 import { usePluginManager } from '@/assets/composables/usePluginManager';
 
 const { extractDomain } = useDomainState();
 const { activeTheme, setPopupTheme } = usePopupTheme();
-const { isMouseTrailEnabled, setPopupMouseTrail } = usePopupMouseTrail();
+const { isMouseTrailEnabled, mouseTrailPreset, setPopupMouseTrail, setPopupMouseTrailPreset } = usePopupMouseTrail();
 const { domainConfigs, loadDomainConfigs } = useDomainManager();
 const { pluginConfigs, loadPluginConfigs } = usePluginManager();
 
@@ -325,6 +333,10 @@ const selectTheme = async (themeKey: PopupThemeKey): Promise<void> => {
 
 const handleMouseTrailChange = async (enabled: boolean): Promise<void> => {
   await setPopupMouseTrail(enabled);
+};
+
+const handleMouseTrailPresetChange = async (): Promise<void> => {
+  await setPopupMouseTrailPreset(mouseTrailPreset.value);
 };
 
 const loadConfig = async (): Promise<void> => {

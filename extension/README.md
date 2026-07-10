@@ -60,6 +60,11 @@ npm run build:enc
 - `payload.url` 仅支持 `http` / `https` 页面，`payload.scriptPath` 建议使用 `file-map` key，例如 `js/runtime/bookmark-highlight`
 - 后台会自动解析构建后的真实脚本路径；如果 `file-map` 尚未由内容脚本同步，会懒加载 `file-map.json`
 
+### DOM 结构提取
+- `src/runtime/dom-structure-extractor.ts` 可注入当前网页，提取 title、url、语义区块、标题层级、表单字段、图片 alt/id/title 以及裁剪后的 DOM 树，输出适合 AI 理解的 Markdown 和 JSON
+- 注入后会把 Markdown 摘要打印到控制台并尝试复制到剪贴板，同时暴露 `window.extractDomStructure(options)` 和最近一次结果 `window.lastDomStructureSummary`
+- 常用参数：`rootSelector` 指定根节点，`maxDepth` 控制层级深度，`maxChildrenPerNode` 控制每层子节点数量，`includeHidden` 控制是否包含隐藏元素
+
 ```typescript
 await chrome.runtime.sendMessage({
   type: 'CREATE_TAB_WITH_SCRIPT',

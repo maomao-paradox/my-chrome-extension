@@ -1,10 +1,12 @@
 import { getCurrentInstance, onBeforeUnmount } from 'vue';
 import { shadowHostId } from '@/config';
 import { createShadowHost } from '@/utils/shadow-dom';
+import type { MouseTrailPreset } from './mouseTrailPreference';
 
 interface MusicNoteTrailOptions {
   hostId?: string;
   canvasId?: string;
+  preset?: MouseTrailPreset;
   maxParticles?: number;
   maxStars?: number;
   spawnInterval?: number;
@@ -34,7 +36,11 @@ const DEFAULT_BURST_COUNT = 36;
 const DEFAULT_JITTER = 18;
 const DEFAULT_Z_INDEX = 2147483646;
 const MAX_DEVICE_PIXEL_RATIO = 2;
-const MUSIC_NOTE_SYMBOLS = ['♩', '♪', '♫', '♬', '♯', '♭', '♮', '𝄞', '𝄢'];
+const TRAIL_SYMBOLS: Record<MouseTrailPreset, string[]> = {
+  star: ['✦', '✧', '✡', '⚝', '✩'],
+  snowflake: ['❄', '❅', '❆', '✻'],
+  music: ['♩', '♪', '♫', '♬', '♯', '♭', '♮', '𝄞', '𝄢'],
+};
 
 let activeControls: MusicNoteTrailControls | null = null;
 
@@ -46,6 +52,7 @@ class MusicNoteParticle {
   private readonly rotateSpeed: number;
   private readonly scaleSpeed: number;
   private readonly size: number;
+  private readonly preset: MouseTrailPreset;
   private opacity = 1;
   private rotate = Math.random() * Math.PI * 2;
   private scale = Math.random() * 0.45 + 0.75;
@@ -55,14 +62,16 @@ class MusicNoteParticle {
   constructor(
     private x: number,
     private y: number,
+    preset: MouseTrailPreset,
     burst = false,
   ) {
-    this.size = Math.random() * 12 + 16;
-    this.note = MUSIC_NOTE_SYMBOLS[Math.floor(Math.random() * MUSIC_NOTE_SYMBOLS.length)];
-    this.vx = (Math.random() - 0.5) * (burst ? 9 : 3);
-    this.vy = burst ? (Math.random() - 0.5) * 9 : Math.random() * 1.6 + 0.4;
-    this.opacitySpeed = Math.random() * 0.012 + 0.008;
-    this.rotateSpeed = (Math.random() - 0.5) * 0.12;
+    this.preset = preset;
+    this.size = this.createSize();
+    this.note = this.createSymbol();
+    this.vx = (Math.random() - 0.5) * this.getVelocityRange(burst);
+    this.vy = this.createInitialVerticalVelocity(burst);
+    this.opacitySpeed = this.createOpacitySpeed();
+    this.rotateSpeed = (Math.random() - 0.5) * (this.preset === 'snowflake' ? 0.055 : 0.12);
     this.scaleSpeed = Math.random() * 0.018 + 0.01;
 
     this.image = this.createImage();
@@ -102,7 +111,7 @@ class MusicNoteParticle {
     const canvas = document.createElement('canvas');
     const imageSize = Math.ceil(this.size * 3.2);
     const center = imageSize / 2;
-    const color = `hsl(${Math.floor(Math.random() * 76) + 190}, 78%, 68%)`;
+    const color = this.createColor();
     const ctx = canvas.getContext('2d');
 
     canvas.width = imageSize;
@@ -112,7 +121,7 @@ class MusicNoteParticle {
       return canvas;
     }
 
-    ctx.font = `700 ${this.size}px "Times New Roman", Georgia, serif`;
+    ctx.font = `${this.preset === 'snowflake' ? 500 : 700} ${this.size}px "Times New Roman", Georgia, serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = color;
@@ -121,6 +130,63 @@ class MusicNoteParticle {
     ctx.fillText(this.note, center, center);
 
     return canvas;
+  }
+
+  private createSymbol(): string {
+    const symbols = TRAIL_SYMBOLS[this.preset];
+    return symbols[Math.floor(Math.random() * symbols.length)];
+  }
+
+  private createSize(): number {
+    if (this.preset === 'snowflake') {
+      return Math.random() * 10 + 14;
+    }
+
+    if (this.preset === 'star') {
+      return Math.random() * 10 + 15;
+    }
+
+    return Math.random() * 12 + 16;
+  }
+
+  private createColor(): string {
+    if (this.preset === 'snowflake') {
+      return `hsl(${Math.floor(Math.random() * 18) + 198}, 86%, 82%)`;
+    }
+
+    if (this.preset === 'star') {
+      return `hsl(${Math.floor(Math.random() * 48) + 38}, 92%, 66%)`;
+    }
+
+    return `hsl(${Math.floor(Math.random() * 76) + 190}, 78%, 68%)`;
+  }
+
+  private getVelocityRange(burst: boolean): number {
+    if (this.preset === 'snowflake') {
+      return burst ? 5 : 1.8;
+    }
+
+    return burst ? 9 : 3;
+  }
+
+  private createInitialVerticalVelocity(burst: boolean): number {
+    if (burst) {
+      return (Math.random() - 0.5) * this.getVelocityRange(true);
+    }
+
+    if (this.preset === 'snowflake') {
+      return Math.random() * 0.8 + 0.18;
+    }
+
+    return Math.random() * 1.6 + 0.4;
+  }
+
+  private createOpacitySpeed(): number {
+    if (this.preset === 'snowflake') {
+      return Math.random() * 0.007 + 0.005;
+    }
+
+    return Math.random() * 0.012 + 0.008;
   }
 }
 
@@ -215,6 +281,7 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
   const spawnInterval = options.spawnInterval ?? DEFAULT_SPAWN_INTERVAL;
   const burstCount = options.burstCount ?? DEFAULT_BURST_COUNT;
   const jitter = options.jitter ?? DEFAULT_JITTER;
+  const preset = options.preset ?? 'music';
 
   let animationFrameId: number | null = null;
   let lastSpawnTime = 0;
@@ -254,6 +321,7 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
       new MusicNoteParticle(
         x + (Math.random() - 0.5) * jitter,
         y + (Math.random() - 0.5) * jitter,
+        preset,
         burst,
       ),
     );

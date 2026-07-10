@@ -41,15 +41,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import type { ExtMessage } from '@/types';
 import { useDomainState } from '../composables/useDomainState';
 import TableContainer from './TableContainer.vue';
 import { IconCapture } from '@icons/index';
-
-const props = defineProps<{
-  isActive: boolean;
-}>();
 
 const { isDomainDisabled, checkDomainStatus } = useDomainState();
 const isCheckingSiteReadiness = ref(false);
@@ -150,12 +146,8 @@ const triggerComponentCapture = async (): Promise<void> => {
   }
 };
 
-watch(() => props.isActive, (isActive) => {
-  if (!isActive) {
-    return;
-  }
-
-  void refreshCaptureStatus();
+onMounted(() => {
+  refreshCaptureStatus();
 });
 </script>
 
