@@ -7,38 +7,44 @@
  * @date 2026-02-05T02:38:01.689Z
  */
 
-import { PluginConfigs } from "@/types";
+import { PluginConfigMap } from "@/types";
 
-// export const appConfigKey = 'appConfig';
+export const defaultPluginConfigs: PluginConfigMap = {
+  floatingball: {
+    id: "floatingball",
+    name: "悬浮球",
+    type: "floating",
+    enabled: false
+  },
 
-export const defaultPluginConfigs: PluginConfigs = {
-    "floatingball": {
-        "desc": "悬浮球",
-        "type": "sidepanel",
-        "value": true
+  pianoEffect: {
+    id: "pianoEffect",
+    name: "钢琴音效",
+    type: "effect",
+    enabled: false,
+  },
+
+  sidebar: {
+    id: "sidebar",
+    name: "侧边工具栏",
+    type: "sidebar",
+    enabled: false,
+  },
+
+  textSelectionToolbar: {
+    id: "textSelectionToolbar",
+    name: "文本选择工具栏",
+    type: "toolbar",
+    enabled: false,
+    options: {
+      brandColor: "#ff0dc5",
     },
-    "pianoEffect": {
-        "desc": "钢琴音效",
-        "value": true
-    },
-    "sidebar": {
-        "desc": "侧边工具栏",
-        "value": true
-    },
-    "textSelectionToolbar": {
-        "desc": "文本选择工具栏",
-        "value": true
-    },
-    "menu": {
-        "desc": "菜单",
-        "value": true
-    },
-    // "componentCapture": {
-    //     "desc": "组件捕获",
-    //     "value": true
-    // },
-    // "errorMonitor": {
-    //     "desc": "异常监控",
-    //     "value": true
-    // },
-}
+  },
+
+  menu: {
+    id: "menu",
+    name: "菜单",
+    type: "menu",
+    enabled: true,
+  },
+};

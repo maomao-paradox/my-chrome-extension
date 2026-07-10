@@ -32,9 +32,18 @@
           </div>
 
           <div class="theme-grid">
-            <button v-for="theme in popupThemes" :key="theme.key" type="button" class="theme-option"
-              :class="[`theme-option--${theme.key}`, { 'theme-option--active': activeTheme === theme.key }]"
-              :aria-pressed="activeTheme === theme.key" @click="selectTheme(theme.key)">
+            <button
+              v-for="theme in popupThemes"
+              :key="theme.key"
+              type="button"
+              class="theme-option"
+              :class="[
+                `theme-option--${theme.key}`,
+                { 'theme-option--active': activeTheme === theme.key },
+              ]"
+              :aria-pressed="activeTheme === theme.key"
+              @click="selectTheme(theme.key)"
+            >
               <span class="theme-preview">
                 <span class="theme-preview__panel"></span>
                 <span class="theme-preview__accent"></span>
@@ -47,10 +56,23 @@
           </div>
 
           <div class="switch-row switch-row--appearance">
-            <MASwitch v-model="isMouseTrailEnabled" label="鼠标拖尾" @change="handleMouseTrailChange">
-              <select v-model="mouseTrailPreset" class="dropdown-select mouse-trail-preset-select"
-                :disabled="!isMouseTrailEnabled" aria-label="鼠标拖尾样式" @change="handleMouseTrailPresetChange">
-                <option v-for="option in mouseTrailPresetOptions" :key="option.value" :value="option.value">
+            <MASwitch
+              v-model="isMouseTrailEnabled"
+              label="鼠标拖尾"
+              @change="handleMouseTrailChange"
+            >
+              <select
+                v-model="mouseTrailPreset"
+                class="dropdown-select mouse-trail-preset-select"
+                :disabled="!isMouseTrailEnabled"
+                aria-label="鼠标拖尾样式"
+                @change="handleMouseTrailPresetChange"
+              >
+                <option
+                  v-for="option in mouseTrailPresetOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
                   {{ option.label }}
                 </option>
               </select>
@@ -67,35 +89,55 @@
               <p class="card-kicker">Current Site</p>
               <h3 class="card-title">内容脚本</h3>
             </div>
-            <span class="panel-status">{{ availableContentScripts.length }} 个</span>
+            <span class="panel-status"
+              >{{ availableContentScripts.length }} 个</span
+            >
           </div>
 
           <div class="site-controls">
             <div class="domain-row">
               <span class="field-label">当前域名</span>
-              <strong class="domain-value">{{ currentActivedTabDomain || '未识别' }}</strong>
+              <strong class="domain-value">{{
+                currentActivedTabDomain || "未识别"
+              }}</strong>
             </div>
 
             <label class="script-field">
               <span class="field-label">绑定脚本</span>
               <span class="select-shell">
-                <select v-model="selectedContentScript" class="content-script-select"
-                  :disabled="availableContentScripts.length === 0 || !currentActivedTabDomain"
-                  @change="handleScriptChange">
+                <select
+                  v-model="selectedContentScript"
+                  class="content-script-select"
+                  :disabled="
+                    availableContentScripts.length === 0 ||
+                    !currentActivedTabDomain
+                  "
+                  @change="handleScriptChange"
+                >
                   <option value="">不启用内容脚本</option>
-                  <option v-for="script of availableContentScripts" :key="script" :value="script">
+                  <option
+                    v-for="script of availableContentScripts"
+                    :key="script"
+                    :value="script"
+                  >
                     {{ script }}
                   </option>
                 </select>
               </span>
             </label>
 
-            <div class="selection-summary" :class="{ 'selection-summary--empty': !selectedContentScript }">
+            <div
+              class="selection-summary"
+              :class="{ 'selection-summary--empty': !selectedContentScript }"
+            >
               <span class="selection-dot"></span>
               <span>{{ selectedScriptLabel }}</span>
             </div>
 
-            <p v-if="availableContentScripts.length === 0" class="selector-hint">
+            <p
+              v-if="availableContentScripts.length === 0"
+              class="selector-hint"
+            >
               暂无可用内容脚本
             </p>
           </div>
@@ -113,18 +155,25 @@
             <span class="panel-status">{{ routedPluginCount }} 个入口</span>
           </div>
 
-          <TransitionGroup v-if="pluginConfigEntries.length > 0" name="config-row" tag="div" class="switch-list">
-            <div v-for="[key, value] in pluginConfigEntries" :key="key" class="switch-row"
-              :class="{ 'switch-row--routed': value.type !== undefined }">
-              <MASwitch v-if="value.type !== undefined" v-model="pluginConfigs[key].value" :label="value.desc">
-                <select v-model="pluginConfigs[key].type" class="dropdown-select">
-                  <option value="dialog">弹窗</option>
-                  <option value="sidepanel">侧边栏</option>
-                </select>
+          <TransitionGroup
+            v-if="pluginConfigEntries.length > 0"
+            name="config-row"
+            tag="div"
+            class="switch-list"
+          >
+            <div
+              v-for="[key, app] in pluginConfigEntries"
+              :key="key"
+              class="switch-row"
+              :class="{ 'switch-row--routed': app.type !== undefined }"
+            >
+              <MASwitch v-model="pluginConfigs[key].enabled" :label="app.name">
+                <input
+                  v-if="app.type === 'toolbar'"
+                  type="color"
+                  v-model="app.options.brandColor"
+                />
               </MASwitch>
-
-              <MASwitch v-else-if="typeof value.value === 'boolean'" v-model="pluginConfigs[key].value"
-                :label="value.desc" />
             </div>
           </TransitionGroup>
 
@@ -137,7 +186,11 @@
         </section>
       </div>
 
-      <div class="save-dock" :class="`save-dock--${saveState}`" aria-live="polite">
+      <div
+        class="save-dock"
+        :class="`save-dock--${saveState}`"
+        aria-live="polite"
+      >
         <button class="primary-btn" :disabled="isSaving" @click="saveConfig">
           <span class="primary-btn__icon">
             <IconConfirm />
@@ -153,44 +206,62 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { storage } from '@/stores';
-import { sendMessageToContentScript } from '@/message/back-content';
-import { MASwitch } from '@components/index';
-import TableContainer from './TableContainer.vue';
-import { appConfigKey, domainConfigsKey } from '@/config';
-import { IconConfirm, IconDocument, IconSetting, IconTime, IconTooling } from '@icons/index';
-import { useDomainState } from '../composables/useDomainState.js';
-import { popupThemes, usePopupTheme, type PopupThemeKey } from '../composables/usePopupTheme.js';
-import { usePopupMouseTrail } from '../composables/usePopupMouseTrail.js';
-import { mouseTrailPresetOptions } from '@/assets/composables/mouse/mouseTrailPreference';
-import { useDomainManager, type DomainConfigItem } from '@/assets/composables/useDomainManager';
-import { usePluginManager } from '@/assets/composables/usePluginManager';
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { storage } from "@/stores";
+import { sendMessageToContentScript } from "@/message/back-content";
+import { MASwitch } from "@components/index";
+import TableContainer from "./TableContainer.vue";
+import { appConfigKey, domainConfigsKey } from "@/config";
+import {
+  IconConfirm,
+  IconDocument,
+  IconSetting,
+  IconTime,
+  IconTooling,
+} from "@icons/index";
+import { useDomainState } from "../composables/useDomainState.js";
+import {
+  popupThemes,
+  usePopupTheme,
+  type PopupThemeKey,
+} from "../composables/usePopupTheme.js";
+import { usePopupMouseTrail } from "../composables/usePopupMouseTrail.js";
+import { mouseTrailPresetOptions } from "@/assets/composables/mouse/mouseTrailPreference";
+import {
+  useDomainManager,
+  type DomainConfigItem,
+} from "@/assets/composables/useDomainManager";
+import { usePluginManager } from "@/assets/composables/usePluginManager";
 
 const { extractDomain } = useDomainState();
 const { activeTheme, setPopupTheme } = usePopupTheme();
-const { isMouseTrailEnabled, mouseTrailPreset, setPopupMouseTrail, setPopupMouseTrailPreset } = usePopupMouseTrail();
+const {
+  isMouseTrailEnabled,
+  mouseTrailPreset,
+  setPopupMouseTrail,
+  setPopupMouseTrailPreset,
+} = usePopupMouseTrail();
 const { domainConfigs, loadDomainConfigs } = useDomainManager();
 const { pluginConfigs, loadPluginConfigs } = usePluginManager();
 
 const MESSAGE_TYPE = {
-  '0': 'CONFIG_INIT',
-  '1': 'CONFIG_UPDATE',
-  '2': 'CONFIG_DELETE',
+  "0": "CONFIG_INIT",
+  "1": "CONFIG_UPDATE",
+  "2": "CONFIG_DELETE",
 } as const;
 
-const selectedContentScript = ref<string>('');
-const currentActivedTabDomain = ref<string>('');
-const saveState = ref<'idle' | 'saving' | 'saved' | 'error'>('idle');
+const selectedContentScript = ref<string>("");
+const currentActivedTabDomain = ref<string>("");
+const saveState = ref<"idle" | "saving" | "saved" | "error">("idle");
 let saveResetTimer: ReturnType<typeof setTimeout> | undefined;
 
 const availableContentScripts = computed<string[]>(() => {
   return Object.entries(domainConfigs.value)
     .filter(([key, config]) => {
-      if (key === 'Eve') {
+      if (key === "Eve") {
         return false;
       }
-      if (typeof config === 'object' && config !== null) {
+      if (typeof config === "object" && config !== null) {
         return config.enabled;
       }
       return true;
@@ -200,51 +271,57 @@ const availableContentScripts = computed<string[]>(() => {
 
 const pluginConfigEntries = computed(() => Object.entries(pluginConfigs.value));
 const enabledPluginCount = computed(() => {
-  return pluginConfigEntries.value.filter(([, value]) => Boolean(value.value)).length;
+  return pluginConfigEntries.value.filter(([_, app]) => Boolean(app.enabled))
+    .length;
 });
 const routedPluginCount = computed(() => {
-  return pluginConfigEntries.value.filter(([, value]) => value.type !== undefined).length;
+  return pluginConfigEntries.value.filter(
+    ([, value]) => value.type !== undefined,
+  ).length;
 });
 const currentThemeLabel = computed(() => {
-  return popupThemes.find((theme) => theme.key === activeTheme.value)?.label ?? popupThemes[0].label;
+  return (
+    popupThemes.find((theme) => theme.key === activeTheme.value)?.label ??
+    popupThemes[0].label
+  );
 });
 const selectedScriptLabel = computed(() => {
   if (!currentActivedTabDomain.value) {
-    return '当前站点未识别';
+    return "当前站点未识别";
   }
 
-  return selectedContentScript.value || '当前站点未绑定脚本';
+  return selectedContentScript.value || "当前站点未绑定脚本";
 });
-const isSaving = computed(() => saveState.value === 'saving');
+const isSaving = computed(() => saveState.value === "saving");
 const saveButtonTitle = computed(() => {
-  if (saveState.value === 'saving') {
-    return '保存中';
+  if (saveState.value === "saving") {
+    return "保存中";
   }
 
-  if (saveState.value === 'saved') {
-    return '已保存';
+  if (saveState.value === "saved") {
+    return "已保存";
   }
 
-  if (saveState.value === 'error') {
-    return '保存失败';
+  if (saveState.value === "error") {
+    return "保存失败";
   }
 
-  return '保存配置';
+  return "保存配置";
 });
 const saveButtonHint = computed(() => {
-  if (saveState.value === 'saving') {
-    return '正在写入本地并同步页面';
+  if (saveState.value === "saving") {
+    return "正在写入本地并同步页面";
   }
 
-  if (saveState.value === 'saved') {
-    return '配置已同步到当前页面';
+  if (saveState.value === "saved") {
+    return "配置已同步到当前页面";
   }
 
-  if (saveState.value === 'error') {
-    return '请稍后重试或检查当前页面状态';
+  if (saveState.value === "error") {
+    return "请稍后重试或检查当前页面状态";
   }
 
-  return '写入本地并同步到当前页面';
+  return "写入本地并同步到当前页面";
 });
 
 const parseDomains = (domainsString: string): string[] => {
@@ -255,7 +332,7 @@ const parseDomains = (domainsString: string): string[] => {
   return Array.from(
     new Set(
       domainsString
-        .split(',')
+        .split(",")
         .map((item) => item.trim())
         .filter(Boolean),
     ),
@@ -264,21 +341,21 @@ const parseDomains = (domainsString: string): string[] => {
 
 const getDomainsString = (scriptKey: string): string => {
   const config = domainConfigs.value[scriptKey];
-  if (typeof config === 'object' && config !== null) {
-    return config.domains || '';
+  if (typeof config === "object" && config !== null) {
+    return config.domains || "";
   }
-  return typeof config === 'string' ? config : '';
+  return typeof config === "string" ? config : "";
 };
 
 const ensureDomainConfigObject = (scriptKey: string): DomainConfigItem => {
   const currentConfig = domainConfigs.value[scriptKey];
-  if (typeof currentConfig === 'object' && currentConfig !== null) {
+  if (typeof currentConfig === "object" && currentConfig !== null) {
     return currentConfig;
   }
 
   const normalizedConfig: DomainConfigItem = {
     enabled: true,
-    domains: typeof currentConfig === 'string' ? currentConfig : '',
+    domains: typeof currentConfig === "string" ? currentConfig : "",
   };
   domainConfigs.value[scriptKey] = normalizedConfig;
   return normalizedConfig;
@@ -290,33 +367,39 @@ const syncCurrentDomainSelection = (scriptKey: string): void => {
   }
 
   for (const [key] of Object.entries(domainConfigs.value)) {
-    if (key === 'Eve') {
+    if (key === "Eve") {
       continue;
     }
 
     const config = ensureDomainConfigObject(key);
-    const filteredDomains = parseDomains(config.domains).filter((item) => item !== currentActivedTabDomain.value);
+    const filteredDomains = parseDomains(config.domains).filter(
+      (item) => item !== currentActivedTabDomain.value,
+    );
 
     if (scriptKey && key === scriptKey) {
       filteredDomains.push(currentActivedTabDomain.value);
     }
 
-    config.domains = Array.from(new Set(filteredDomains)).join(',');
+    config.domains = Array.from(new Set(filteredDomains)).join(",");
   }
 };
 
 const resolveSelectedScript = (): string => {
   if (!currentActivedTabDomain.value) {
-    return '';
+    return "";
   }
 
   for (const scriptKey of availableContentScripts.value) {
-    if (parseDomains(getDomainsString(scriptKey)).includes(currentActivedTabDomain.value)) {
+    if (
+      parseDomains(getDomainsString(scriptKey)).includes(
+        currentActivedTabDomain.value,
+      )
+    ) {
       return scriptKey;
     }
   }
 
-  return '';
+  return "";
 };
 
 const handleScriptChange = () => {
@@ -344,7 +427,7 @@ const loadConfig = async (): Promise<void> => {
     await loadPluginConfigs();
     await loadDomainConfigs();
   } catch (error) {
-    maLogger.error('加载配置失败:', error);
+    maLogger.error("加载配置失败:", error);
   }
 };
 
@@ -355,7 +438,7 @@ const getActivedTab = async (): Promise<chrome.tabs.Tab | undefined> => {
 
 const getActivedTabDomain = async (): Promise<string> => {
   const tab = await getActivedTab();
-  return extractDomain(tab?.url || '');
+  return extractDomain(tab?.url || "");
 };
 
 const scheduleSaveStateReset = (): void => {
@@ -364,7 +447,7 @@ const scheduleSaveStateReset = (): void => {
   }
 
   saveResetTimer = setTimeout(() => {
-    saveState.value = 'idle';
+    saveState.value = "idle";
     saveResetTimer = undefined;
   }, 1800);
 };
@@ -374,7 +457,7 @@ const saveConfig = async (): Promise<void> => {
     return;
   }
 
-  saveState.value = 'saving';
+  saveState.value = "saving";
 
   try {
     if (chrome.storage?.local) {
@@ -382,12 +465,15 @@ const saveConfig = async (): Promise<void> => {
       await storage.ext.local.set(domainConfigsKey, domainConfigs.value);
     }
 
-    const res = await sendMessageToContentScript({ type: MESSAGE_TYPE['1'], payload: pluginConfigs.value });
+    const res = await sendMessageToContentScript({
+      type: MESSAGE_TYPE["1"],
+      payload: pluginConfigs.value,
+    });
     maLogger.log(res);
-    saveState.value = 'saved';
+    saveState.value = "saved";
   } catch (error) {
-    maLogger.error('保存配置失败:', error);
-    saveState.value = 'error';
+    maLogger.error("保存配置失败:", error);
+    saveState.value = "error";
   } finally {
     scheduleSaveStateReset();
   }
@@ -495,13 +581,11 @@ onBeforeUnmount(() => {
   border-radius: 15px;
   border: 1px solid var(--popup-border);
   background: var(--popup-panel-bg);
-  box-shadow:
-    var(--popup-shadow-soft),
-    var(--popup-inset-highlight);
+  box-shadow: var(--popup-shadow-soft), var(--popup-inset-highlight);
 }
 
 .settings-panel::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0 10px auto;
   height: 1px;
@@ -600,9 +684,7 @@ onBeforeUnmount(() => {
   &--active {
     border-color: var(--popup-border-strong);
     background: var(--popup-theme-option-active-bg);
-    box-shadow:
-      var(--popup-shadow-soft),
-      var(--popup-inset-highlight);
+    box-shadow: var(--popup-shadow-soft), var(--popup-inset-highlight);
   }
 }
 
@@ -631,7 +713,11 @@ onBeforeUnmount(() => {
     width: 17px;
     height: 12px;
     border-radius: 5px;
-    background: color-mix(in srgb, var(--popup-text-on-accent) 42%, transparent);
+    background: color-mix(
+      in srgb,
+      var(--popup-text-on-accent) 42%,
+      transparent
+    );
   }
 
   &__accent {
@@ -709,7 +795,7 @@ onBeforeUnmount(() => {
   min-width: 0;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     right: 12px;
@@ -806,11 +892,12 @@ onBeforeUnmount(() => {
 
 // 提取可复用的过渡mixin
 @mixin fade-slide($duration: 0.2s, $offset: 6px) {
-
   &-enter-active,
   &-leave-active,
   &-move {
-    transition: opacity $duration ease, transform $duration ease;
+    transition:
+      opacity $duration ease,
+      transform $duration ease;
   }
 
   &-enter-from,
@@ -827,6 +914,13 @@ onBeforeUnmount(() => {
   background: var(--popup-theme-option-bg);
   transition: all 0.2s ease;
 
+  .color-picker {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
   &:hover {
     transform: translateY(-1px);
     border-color: var(--popup-border-strong);
@@ -834,7 +928,6 @@ onBeforeUnmount(() => {
   }
 
   :deep() {
-
     // 容器
     .sci-fi-switch-container {
       display: grid;
@@ -986,7 +1079,12 @@ onBeforeUnmount(() => {
   bottom: 0;
   z-index: 4;
   padding: 7px 0 0;
-  background: linear-gradient(180deg, transparent 0%, var(--popup-bg-primary) 38%, var(--popup-bg-primary) 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--popup-bg-primary) 38%,
+    var(--popup-bg-primary) 100%
+  );
 
   .primary-btn {
     display: grid;
@@ -1021,7 +1119,11 @@ onBeforeUnmount(() => {
       width: 30px;
       height: 30px;
       border-radius: 11px;
-      background: color-mix(in srgb, var(--popup-text-on-accent) 18%, transparent);
+      background: color-mix(
+        in srgb,
+        var(--popup-text-on-accent) 18%,
+        transparent
+      );
       box-shadow: var(--popup-inset-highlight);
 
       :deep(svg) {
@@ -1069,16 +1171,23 @@ onBeforeUnmount(() => {
   }
 
   &--saved {
-    @include state-variant(--popup-success-text, --popup-success-bg, --popup-success-border);
+    @include state-variant(
+      --popup-success-text,
+      --popup-success-bg,
+      --popup-success-border
+    );
   }
 
   &--error {
-    @include state-variant(--popup-danger-text, --popup-danger-bg, --popup-danger-border);
+    @include state-variant(
+      --popup-danger-text,
+      --popup-danger-bg,
+      --popup-danger-border
+    );
   }
 }
 
 @keyframes savePulse {
-
   0%,
   100% {
     transform: scale(1);

@@ -147,6 +147,7 @@ export interface XHR_PATCH_CONFIG {
 }
 
 export interface AppModule {
+  _ctx: any;
   shadowHostId: string;
   isInjected: boolean;
   vueContainer: HTMLElement | null;

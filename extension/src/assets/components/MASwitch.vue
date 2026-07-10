@@ -2,56 +2,64 @@
 <template>
   <div class="sci-fi-switch-container">
     <label class="sci-fi-switch-label">{{ label }}</label>
-    <slot></slot>
-    <div class="sci-fi-switch" :class="{ 'active': modelValue }" @click="handleClick" role="switch"
-      :aria-checked="modelValue">
+    <slot name="default"></slot>
+    <div
+      class="sci-fi-switch"
+      :class="{ active: modelValue }"
+      @click="handleClick"
+      role="switch"
+      :aria-checked="modelValue"
+    >
       <div class="switch-track">
         <div class="switch-thumb"></div>
         <div class="switch-glow"></div>
-        <div class="switch-indicator">{{ modelValue ? 'ON' : 'OFF' }}</div>
+        <div class="switch-indicator">{{ modelValue ? "ON" : "OFF" }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed } from "vue";
 
 // 定义组件名称
 defineOptions({
-  name: 'MASwitch'
+  name: "MASwitch",
 });
 
 // 定义props和默认值
-const props = withDefaults(defineProps<{
-  modelValue: boolean;
-  label?: string;
-  openText?: string;
-  closeText?: string;
-}>(), {
-  modelValue: false,
-  label: '',
-  openText: '启用',
-  closeText: '禁用'
-});
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean;
+    label?: string;
+    openText?: string;
+    closeText?: string;
+  }>(),
+  {
+    modelValue: false,
+    label: "",
+    openText: "启用",
+    closeText: "禁用",
+  },
+);
 
 // 定义事件
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void;
-  (e: 'change', value: boolean): void;
+  (e: "update:modelValue", value: boolean): void;
+  (e: "change", value: boolean): void;
 }>();
 
 // 计算属性用于控制开关状态
 const checked = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  set: (value) => emit("update:modelValue", value),
 });
 
 // 点击开关事件
 const handleClick = () => {
   const newValue = !checked.value;
   checked.value = newValue;
-  emit('change', newValue);
+  emit("change", newValue);
 };
 </script>
 
@@ -114,7 +122,11 @@ const handleClick = () => {
   left: 50%;
   width: 0;
   height: 0;
-  background: radial-gradient(circle, rgba(0, 240, 255, 0.3) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 240, 255, 0.3) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: all 0.5s ease;
@@ -155,7 +167,11 @@ const handleClick = () => {
 .sci-fi-switch.active .switch-glow {
   width: 150px;
   height: 150px;
-  background: radial-gradient(circle, rgba(0, 240, 255, 0.4) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 240, 255, 0.4) 0%,
+    transparent 70%
+  );
 }
 
 .sci-fi-switch.active .switch-indicator {

@@ -139,9 +139,7 @@ const hide = () => {
 }
 
 const handleClose = () => {
-    showToolbar.value = false
-    showRedDot.value = true
-    saveState()
+    isVisible.value = false
 }
 
 const handleRedDotClick = () => {
@@ -149,14 +147,6 @@ const handleRedDotClick = () => {
     showToolbar.value = true
     saveState()
 }
-
-watch(isVisible, (newValue) => {
-    if (newValue) {
-        setTimeout(() => {
-            isVisible.value = false
-        }, 3000)
-    }
-})
 
 defineExpose({ show, hide })
 

@@ -16,31 +16,55 @@ export interface Rule {
 }
 
 export interface Tool {
-  id: string
-  label: string
-  icon?: any
-  image?: string
-  details?: string
-  color?: string
-  children?: Tool[]
-  onClick?: () => void
+  id: string;
+  label: string;
+  icon?: any;
+  image?: string;
+  details?: string;
+  color?: string;
+  children?: Tool[];
+  onClick?: () => void;
 }
 
 export interface TextTool extends Tool {
-  handler: (text?: string) => void
+  handler: (text?: string) => void;
 }
 
 export interface ConfigItem {
   id?: string;
   value: boolean;
   desc: string;
-  type?: 'dialog' | 'sidepanel';
+  type?: "dialog" | "sidepanel";
   [key: string]: any;
 }
 
-export interface PluginConfigs {
-  [key: string]: ConfigItem
+// 1. 定义插件类型枚举
+type PluginType = "sidebar" | "toolbar" | "effect" | "menu" | "floating";
+
+// 2. 基础配置
+interface BasePluginConfig {
+  id: string;
+  name: string;
+  enabled: boolean;
+  type: PluginType;
+  options?: any;
 }
+
+// 3. 各插件特有配置
+interface ToolbarPluginConfig extends BasePluginConfig {
+  type: "toolbar";
+  options: {
+    brandColor: string;
+  };
+}
+
+// 4. 联合类型
+export type PluginConfig = ToolbarPluginConfig | BasePluginConfig; // 默认配置
+
+// 5. 配置映射
+export type PluginConfigMap = {
+  [key: string]: PluginConfig;
+};
 
 export interface BookmarkComment {
   id: string;

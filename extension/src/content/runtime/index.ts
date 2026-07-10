@@ -2,7 +2,7 @@ import { storage } from '@/stores';
 import { equalDomain, parseDomains, getChunkFileMap } from '@/utils/common';
 import { whenDomReady } from '@/utils/element-control';
 import messenger from '@/message';
-import type { ExtMessage, PluginConfigs } from '@/types';
+import type { ExtMessage, PluginConfigMap } from '@/types';
 import { defaultPluginConfigs } from '@/apps/index';
 import { appConfigKey, contentModules, domainConfigsKey } from '@/config';
 import { createModuleManager } from './module-manager';
@@ -113,7 +113,7 @@ const installMessageListener = (
 };
 
 const loadAppOptions = async (
-    applyConfig: (config: PluginConfigs | null | undefined) => Promise<void>,
+    applyConfig: (config: PluginConfigMap | null | undefined) => Promise<void>,
 ): Promise<void> => {
     try {
         const result = await storage.ext.local.get(appConfigKey, null);
@@ -128,7 +128,7 @@ const loadAppOptions = async (
             return;
         }
 
-        await applyConfig(result as PluginConfigs);
+        await applyConfig(result as PluginConfigMap);
     } catch (error: any) {
         maLogger.error('初始化配置失败:', error.message);
     }
