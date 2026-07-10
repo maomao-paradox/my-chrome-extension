@@ -757,7 +757,7 @@ class TextSelectionToolbarModule implements AppModule {
   /**
    * 启用文本选择工具栏
    */
-  enable(): void {
+  enable(options?: any): void {
     try {
       // 确保ShadowRoot存在
       if (!this.shadowRoot) {
@@ -772,6 +772,8 @@ class TextSelectionToolbarModule implements AppModule {
           maLogger.error("注入文本选择工具栏失败:", error);
         });
       }
+      maLogger.log("设置品牌颜色:", options.brandColor);
+      this.brandColor = options.brandColor;
       document.body.style.setProperty("--kria-brand-color", this.brandColor);
       document.addEventListener(
         "selectionchange",

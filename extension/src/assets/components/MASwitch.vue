@@ -1,7 +1,7 @@
 <!-- 科幻风格开关组件 -->
 <template>
   <div class="sci-fi-switch-container">
-    <label class="sci-fi-switch-label">{{ label }}</label>
+    <div class="sci-fi-switch-label">{{ label }}</div>
     <slot name="default"></slot>
     <div
       class="sci-fi-switch"

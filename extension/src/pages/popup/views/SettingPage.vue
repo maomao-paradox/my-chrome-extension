@@ -171,6 +171,8 @@
                 <input
                   v-if="app.type === 'toolbar'"
                   type="color"
+                  class="color-picker"
+                  aria-label="选择品牌颜色"
                   v-model="app.options.brandColor"
                 />
               </MASwitch>
@@ -206,7 +208,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
 import { MASwitch } from "@components/index";
@@ -478,6 +480,33 @@ const saveConfig = async (): Promise<void> => {
     scheduleSaveStateReset();
   }
 };
+
+watch(
+  () => pluginConfigs.value,
+  async (newValue) => {
+    if (newValue) {
+      if (isSaving.value) {
+        return;
+      }
+
+      saveState.value = "saving";
+
+      try {
+        const res = await sendMessageToContentScript({
+          type: MESSAGE_TYPE["1"],
+          payload: pluginConfigs.value,
+        });
+        maLogger.log(res);
+        saveState.value = "saved";
+      } catch (error) {
+        maLogger.error("保存配置失败:", error);
+        saveState.value = "error";
+      } finally {
+        scheduleSaveStateReset();
+      }
+    }
+  },
+);
 
 onMounted(async () => {
   await loadConfig();
@@ -915,10 +944,24 @@ onBeforeUnmount(() => {
   transition: all 0.2s ease;
 
   .color-picker {
-    width: 24px;
-    height: 24px;
-    border-radius: 999px;
+    width: 22px;
+    height: 22px;
+    border-radius: 2px;
     cursor: pointer;
+    border: 1px solid var(--popup-border);
+
+    /* 颜色预览区域的外层容器 */
+    &::-webkit-color-swatch-wrapper {
+      padding: 0;
+      border: none;
+      background: transparent;
+    }
+
+    /* 颜色预览块 - 这里就是实际显示颜色的地方 */
+    &::-webkit-color-swatch {
+      border: none;
+      transition: all 0.3s ease;
+    }
   }
 
   &:hover {
@@ -930,8 +973,6 @@ onBeforeUnmount(() => {
   :deep() {
     // 容器
     .sci-fi-switch-container {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
       align-items: center;
       gap: 8px;
       min-height: 44px;
@@ -1226,10 +1267,6 @@ onBeforeUnmount(() => {
   .script-field {
     grid-template-columns: 1fr;
     gap: 6px;
-  }
-
-  .switch-row :deep(.sci-fi-switch-container) {
-    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .switch-row :deep(.dropdown-select) {
