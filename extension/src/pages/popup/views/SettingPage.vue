@@ -167,14 +167,16 @@
               class="switch-row"
               :class="{ 'switch-row--routed': app.type !== undefined }"
             >
-              <MASwitch v-model="pluginConfigs[key].enabled" :label="app.name">
-                <input
-                  v-if="app.type === 'toolbar'"
-                  type="color"
-                  class="color-picker"
-                  aria-label="选择品牌颜色"
-                  v-model="app.options.brandColor"
-                />
+              <MASwitch v-model="app.enabled" :label="app.name">
+                <div v-if="app.type === 'toolbar'" class="color-picker-wrapper">
+                  <input
+                    type="color"
+                    class="color-picker"
+                    aria-label="选择品牌颜色"
+                    v-model="app.options.brandColor"
+                  />
+                  <span>{{ app.options.brandColor }}</span>
+                </div>
               </MASwitch>
             </div>
           </TransitionGroup>
@@ -481,32 +483,32 @@ const saveConfig = async (): Promise<void> => {
   }
 };
 
-watch(
-  () => pluginConfigs.value,
-  async (newValue) => {
-    if (newValue) {
-      if (isSaving.value) {
-        return;
-      }
+// watch(
+//   () => pluginConfigs.value,
+//   async (newValue) => {
+//     if (newValue) {
+//       if (isSaving.value) {
+//         return;
+//       }
 
-      saveState.value = "saving";
+//       saveState.value = "saving";
 
-      try {
-        const res = await sendMessageToContentScript({
-          type: MESSAGE_TYPE["1"],
-          payload: pluginConfigs.value,
-        });
-        maLogger.log(res);
-        saveState.value = "saved";
-      } catch (error) {
-        maLogger.error("保存配置失败:", error);
-        saveState.value = "error";
-      } finally {
-        scheduleSaveStateReset();
-      }
-    }
-  },
-);
+//       try {
+//         const res = await sendMessageToContentScript({
+//           type: MESSAGE_TYPE["1"],
+//           payload: pluginConfigs.value,
+//         });
+//         maLogger.log(res);
+//         saveState.value = "saved";
+//       } catch (error) {
+//         maLogger.error("保存配置失败:", error);
+//         saveState.value = "error";
+//       } finally {
+//         scheduleSaveStateReset();
+//       }
+//     }
+//   },
+// );
 
 onMounted(async () => {
   await loadConfig();
@@ -943,24 +945,35 @@ onBeforeUnmount(() => {
   background: var(--popup-theme-option-bg);
   transition: all 0.2s ease;
 
-  .color-picker {
-    width: 22px;
-    height: 22px;
-    border-radius: 2px;
-    cursor: pointer;
-    border: 1px solid var(--popup-border);
+  .color-picker-wrapper {
+    display: flex;
+    align-items: center;
 
-    /* 颜色预览区域的外层容器 */
-    &::-webkit-color-swatch-wrapper {
-      padding: 0;
-      border: none;
-      background: transparent;
-    }
+    .color-picker {
+      width: 22px;
+      height: 22px;
+      border-radius: 2px;
+      cursor: pointer;
+      border: 1px solid var(--popup-border);
 
-    /* 颜色预览块 - 这里就是实际显示颜色的地方 */
-    &::-webkit-color-swatch {
-      border: none;
-      transition: all 0.3s ease;
+      /* 颜色预览区域的外层容器 */
+      &::-webkit-color-swatch-wrapper {
+        padding: 0;
+        border: none;
+        background: transparent;
+      }
+
+      /* 颜色预览块 - 这里就是实际显示颜色的地方 */
+      &::-webkit-color-swatch {
+        border: none;
+        transition: all 0.3s ease;
+      }
+
+      & + span {
+        font-size: 12px;
+        font-weight: 400;
+        margin-left: 4px;
+      }
     }
   }
 
