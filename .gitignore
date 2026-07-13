@@ -10,6 +10,7 @@ lerna-debug.log*
 # Extension
 extension/node_modules
 extension/package-lock.json
+extension/yarn.lock
 extension/dist
 extension/dist-service
 extension/dist-ssr
@@ -39,4 +40,5 @@ extension/src/deps.json
 test-*
 !test/*
 
-*/**/*.svs
+*.svs
+*.zip
