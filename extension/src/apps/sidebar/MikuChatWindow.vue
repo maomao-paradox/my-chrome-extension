@@ -1,76 +1,107 @@
 <template>
-  <div class="miku-chat-window" role="dialog" aria-modal="false" aria-label="Miku 角色对话">
-    <div class="chat-stage">
-      <div class="character-panel">
-        <img :src="mikuSrc" alt="" aria-hidden="true" class="character-image" />
-        <div class="character-status">
-          <span class="status-light"></span>
-          <span>MIKU ONLINE</span>
-        </div>
-      </div>
-
-      <section class="dialog-panel">
-        <header class="dialog-header">
-          <div class="dialog-title-group">
-            <span class="dialog-kicker">TAVERN ROLE CHAT</span>
-            <h3>Hatsune Miku</h3>
+  <Draggable
+    initial-position="right"
+    :adsorb-margin="112"
+    :enable-adsorption="false"
+    :can-overflow="false"
+    drag-handle=".dialog-header"
+    :container-style="draggableContainerStyle"
+  >
+    <div
+      class="miku-chat-window"
+      role="dialog"
+      aria-modal="false"
+      aria-label="Miku 角色对话"
+    >
+      <div class="chat-stage">
+        <div class="character-panel">
+          <img
+            :src="mikuSrc"
+            alt=""
+            aria-hidden="true"
+            class="character-image"
+          />
+          <div class="character-status">
+            <span class="status-light"></span>
+            <span>MIKU ONLINE</span>
           </div>
+        </div>
 
-          <button type="button" class="close-button" aria-label="关闭 Miku 对话" @click="$emit('close')">
-            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path
-                d="M5 5L15 15M15 5L5 15"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-width="1.7"
-              />
-            </svg>
-          </button>
-        </header>
+        <section class="dialog-panel">
+          <header class="dialog-header">
+            <div class="dialog-title-group">
+              <span class="dialog-kicker">TAVERN ROLE CHAT</span>
+              <h3>Hatsune Miku</h3>
+            </div>
 
-        <AIConversation
-          class="miku-conversation"
-          title="Miku"
-          welcome-title="今晚想聊点什么？"
-          welcome-message="这里是 Miku 的小酒馆席位。告诉她你的想法、歌词灵感、代码烦恼或日常碎碎念。"
-          welcome-icon="MK"
-          user-icon="YOU"
-          ai-icon="MK"
-          typing-message="Miku 正在组织语言..."
-          input-placeholder="和 Miku 说点什么..."
-          send-button-text="发送"
-          input-hint="Enter 发送，Shift + Enter 换行。"
-          default-role="hatsune_miku_tavern"
-          :show-toolbar="false"
-          :role-options="mikuRoles"
-        />
-      </section>
+            <button
+              type="button"
+              class="close-button"
+              aria-label="关闭 Miku 对话"
+              @click="$emit('close')"
+            >
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path
+                  d="M5 5L15 15M15 5L5 15"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-width="1.7"
+                />
+              </svg>
+            </button>
+          </header>
+
+          <AIConversation
+            class="miku-conversation"
+            title="Miku"
+            welcome-title="今晚想聊点什么？"
+            welcome-message="这里是 Miku 的小酒馆席位。告诉她你的想法、歌词灵感、代码烦恼或日常碎碎念。"
+            welcome-icon="MK"
+            user-icon="YOU"
+            ai-icon="MK"
+            typing-message="Miku 正在组织语言..."
+            input-placeholder="和 Miku 说点什么..."
+            send-button-text="发送"
+            input-hint="Enter 发送，Shift + Enter 换行。"
+            default-role="hatsune_miku_tavern"
+            :show-toolbar="false"
+            :role-options="mikuRoles"
+          />
+        </section>
+      </div>
     </div>
-  </div>
+  </Draggable>
 </template>
 
 <script setup lang="ts">
-import AIConversation from '../floatingball/views/AIConversation.vue';
+import { computed } from "vue";
+import { Draggable } from "@components/index";
+import AIConversation from "../floatingball/views/AIConversation.vue";
 
 defineEmits<{
   close: [];
 }>();
 
-const mikuSrc = chrome.runtime.getURL('static/img/miku.png');
+const mikuSrc = chrome.runtime.getURL("static/img/miku.png");
+
+const draggableContainerStyle = computed<Record<string, string>>(() => ({
+  "--z-index": "10000",
+  cursor: "default",
+}));
 
 const mikuSystemPrompt = [
-  '你正在进行角色扮演：你是初音未来风格的虚拟歌姬 Miku，在一个安静、温暖的酒馆式对话窗口里和用户聊天。',
-  '用中文为主回应，语气轻快、亲切、有一点舞台感，但不要过度卖萌，不要刷屏。',
-  '你可以谈音乐、创作、日常陪伴、学习和编程想法；当用户需要严肃帮助时，保持清晰、实用、可靠。',
-  '不要声称自己是真实人物或真人偶像；你是一个由 AI 模拟的角色。',
-  '回答尽量自然，短句优先。需要步骤时用简洁列表。',
-].join('\n');
+  "你正在进行角色扮演：你是初音未来风格的虚拟歌姬 Miku，在一个安静、温暖的酒馆式对话窗口里和用户聊天。",
+  "用中文为主回应，语气轻快、亲切、有一点舞台感，但不要过度卖萌，不要刷屏。",
+  "你可以谈音乐、创作、日常陪伴、学习和编程想法；当用户需要严肃帮助时，保持清晰、实用、可靠。",
+  "不要声称自己是真实人物或真人偶像；你是一个由 AI 模拟的角色。",
+  "回答尽量自然，短句优先。需要步骤时用简洁列表。",
+].join("\n");
 
 const mikuRoles = [
   {
-    value: 'hatsune_miku_tavern',
-    label: 'Hatsune Miku',
-    avatar: 'MK',
+    value: "hatsune_miku_tavern",
+    label: "Hatsune Miku",
+    avatar: "MK",
     systemPrompt: mikuSystemPrompt,
   },
 ];
@@ -78,14 +109,11 @@ const mikuRoles = [
 
 <style scoped lang="scss">
 .miku-chat-window {
-  position: fixed;
-  right: 104px;
-  bottom: 24px;
   width: min(720px, calc(100vw - 32px));
   height: min(620px, calc(100vh - 48px));
-  z-index: 10000;
   color: rgba(248, 251, 255, 0.94);
   font-family: "Noto Sans JP", "SF Pro Text", "Segoe UI", sans-serif;
+  cursor: default;
 }
 
 .chat-stage {
@@ -114,13 +142,17 @@ const mikuRoles = [
   padding: 18px 12px 54px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 45% 22%, rgba(90, 230, 224, 0.22), transparent 34%),
+    radial-gradient(
+      circle at 45% 22%,
+      rgba(90, 230, 224, 0.22),
+      transparent 34%
+    ),
     linear-gradient(180deg, rgba(15, 118, 110, 0.2), rgba(15, 23, 42, 0.28));
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .character-panel::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -181,6 +213,12 @@ const mikuRoles = [
   gap: 12px;
   padding: 0 0 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: grab;
+  user-select: none;
+}
+
+.dialog-header:active {
+  cursor: grabbing;
 }
 
 .dialog-title-group {
@@ -236,14 +274,14 @@ const mikuRoles = [
 }
 
 .miku-conversation {
+  overflow-x: hidden;
+  overflow-y: auto;
   min-height: 0;
   padding-top: 12px;
 }
 
 @media (max-width: 680px) {
   .miku-chat-window {
-    right: 12px;
-    bottom: 12px;
     width: calc(100vw - 24px);
     height: min(680px, calc(100vh - 24px));
   }

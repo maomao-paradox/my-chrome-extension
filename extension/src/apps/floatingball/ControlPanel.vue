@@ -51,7 +51,7 @@
                         @click="togglePanel(0)">
                         <div class="panel-surface">
                             <div v-show="activePanel === 0" class="panel-content">
-                                <AIConversation />
+                                <!-- <AIConversation /> -->
                             </div>
 
                             <div v-show="activePanel !== 0" class="panel-handle">
@@ -102,7 +102,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue';
 import { Tool } from '@/types/index.js';
-import AIConversation from './views/AIConversation.vue';
+// import AIConversation from './views/AIConversation.vue';
 import { Draggable } from '@components/index';
 import { IconFullScreen, IconOffScreen, IconClose } from '@icons/index';
 

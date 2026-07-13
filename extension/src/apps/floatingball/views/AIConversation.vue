@@ -4,8 +4,16 @@
       <div class="toolbar-select-group">
         <label class="toolbar-select-shell">
           <span class="sr-only">Role</span>
-          <select v-model="selectedRole" :disabled="loading" class="toolbar-select">
-            <option v-for="role in aiRoles" :key="role.value" :value="role.value">
+          <select
+            v-model="selectedRole"
+            :disabled="loading"
+            class="toolbar-select"
+          >
+            <option
+              v-for="role in aiRoles"
+              :key="role.value"
+              :value="role.value"
+            >
               {{ role.label }}
             </option>
           </select>
@@ -13,8 +21,16 @@
 
         <label class="toolbar-select-shell">
           <span class="sr-only">Model</span>
-          <select v-model="selectedModel" :disabled="loading" class="toolbar-select">
-            <option v-for="model in aiModels" :key="model.value" :value="model.value">
+          <select
+            v-model="selectedModel"
+            :disabled="loading"
+            class="toolbar-select"
+          >
+            <option
+              v-for="model in aiModels"
+              :key="model.value"
+              :value="model.value"
+            >
               {{ model.label }}
             </option>
           </select>
@@ -29,18 +45,7 @@
         title="Reset conversation"
         @click="clearConversation"
       >
-        <span class="toolbar-action-label">Reset</span>
-        <svg
-          class="toolbar-action-icon"
-          viewBox="0 0 1024 1024"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            d="M202.666667 256h-42.666667a32 32 0 0 1 0-64h704a32 32 0 0 1 0 64H266.666667v565.333333a53.333333 53.333333 0 0 0 53.333333 53.333334h384a53.333333 53.333333 0 0 0 53.333333-53.333334V352a32 32 0 0 1 64 0v469.333333c0 64.8-52.533333 117.333333-117.333333 117.333334H320c-64.8 0-117.333333-52.533333-117.333333-117.333334V256z m224-106.666667a32 32 0 0 1 0-64h170.666666a32 32 0 0 1 0 64H426.666667z m-32 288a32 32 0 0 1 64 0v256a32 32 0 0 1-64 0V437.333333z m170.666666 0a32 32 0 0 1 64 0v256a32 32 0 0 1-64 0V437.333333z"
-            fill="currentColor"
-          />
-        </svg>
+        <IconDelete />
       </button>
     </div>
 
@@ -68,7 +73,7 @@
           :class="['message-item', message.role]"
         >
           <div class="message-avatar">
-            {{ message.role === 'user' ? userIcon : currentAssistantIcon }}
+            {{ message.role === "user" ? userIcon : currentAssistantIcon }}
           </div>
 
           <div class="message-shell">
@@ -83,7 +88,9 @@
             </div>
 
             <div class="message-meta">
-              <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+              <span class="message-time">{{
+                formatTime(message.timestamp)
+              }}</span>
               <button
                 v-if="message.role === 'assistant' && message.content"
                 type="button"
@@ -91,7 +98,7 @@
                 :title="copiedIndex === index ? 'Copied' : 'Copy message'"
                 @click="copyMessage(message.content, index)"
               >
-                {{ copiedIndex === index ? 'Done' : 'Copy' }}
+                {{ copiedIndex === index ? "Done" : "Copy" }}
               </button>
             </div>
           </div>
@@ -112,7 +119,12 @@
     </div>
 
     <div class="ai-conversation-footer">
-      <div :class="['composer-shell', { 'is-focused': isInputFocused, 'has-value': !!input.trim() }]">
+      <div
+        :class="[
+          'composer-shell',
+          { 'is-focused': isInputFocused, 'has-value': !!input.trim() },
+        ]"
+      >
         <textarea
           ref="messageInput"
           v-model="input"
@@ -132,8 +144,15 @@
           :class="['send-button', { 'is-visible': showSendButton, loading }]"
           @click="sendMessage"
         >
-          <span class="sr-only">{{ loading ? 'Sending' : sendButtonText }}</span>
-          <svg class="send-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <span class="sr-only">{{
+            loading ? "Sending" : sendButtonText
+          }}</span>
+          <svg
+            class="send-icon"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
             <path
               d="M3.5 10H16.5M10.5 4L16.5 10L10.5 16"
               stroke="currentColor"
@@ -150,7 +169,12 @@
       <div v-if="error" class="error-line">
         <span class="error-dot"></span>
         <span class="error-copy">{{ error }}</span>
-        <button type="button" class="close-error" title="Dismiss" @click="error = ''">
+        <button
+          type="button"
+          class="close-error"
+          title="Dismiss"
+          @click="error = ''"
+        >
           Dismiss
         </button>
       </div>
@@ -159,13 +183,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import type { PropType } from 'vue';
-import {MaMarkdown} from '@components/index';
-import { loadAIConfig } from '@/utils/ai-config';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import type { PropType } from "vue";
+import { MaMarkdown } from "@components/index";
+import { loadAIConfig } from "@/utils/ai-config";
+import { IconDelete } from "@/assets/icons";
 
 type ChatMessage = {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
 };
@@ -180,51 +205,51 @@ type AiRoleOption = {
 const props = defineProps({
   title: {
     type: String,
-    default: 'AI 助手',
+    default: "AI 助手",
   },
   welcomeTitle: {
     type: String,
-    default: '开始一段临床级问答',
+    default: "开始一段临床级问答",
   },
   welcomeMessage: {
     type: String,
-    default: '输入病例、数据问题或工作流需求，AI 将在当前面板中连续响应。',
+    default: "输入病例、数据问题或工作流需求，AI 将在当前面板中连续响应。",
   },
   welcomeIcon: {
     type: String,
-    default: 'AI',
+    default: "AI",
   },
   userIcon: {
     type: String,
-    default: 'YOU',
+    default: "YOU",
   },
   aiIcon: {
     type: String,
-    default: 'AI',
+    default: "AI",
   },
   typingMessage: {
     type: String,
-    default: 'Generating response...',
+    default: "Generating response...",
   },
   inputPlaceholder: {
     type: String,
-    default: 'Ask about radiotherapy workflows, metrics, or current records...',
+    default: "Ask about radiotherapy workflows, metrics, or current records...",
   },
   sendButtonText: {
     type: String,
-    default: 'Send',
+    default: "Send",
   },
   inputHint: {
     type: String,
-    default: 'Enter to send. Shift + Enter for a new line.',
+    default: "Enter to send. Shift + Enter for a new line.",
   },
   defaultRole: {
     type: String,
-    default: '',
+    default: "",
   },
   systemPrompt: {
     type: String,
-    default: '',
+    default: "",
   },
   showToolbar: {
     type: Boolean,
@@ -233,42 +258,59 @@ const props = defineProps({
   roleOptions: {
     type: Array as PropType<AiRoleOption[]>,
     default: () => [
-      { value: '', label: 'AI Assistant' },
-      { value: 'Fuka Shikuzaki', label: 'Fuka Shikuzaki', avatar: 'FS' },
+      { value: "", label: "AI Assistant" },
+      { value: "Fuka Shikuzaki", label: "Fuka Shikuzaki", avatar: "FS" },
     ],
   },
 });
 
-const emit = defineEmits(['messageSent', 'messageReceived', 'error', 'conversationCleared']);
+const emit = defineEmits([
+  "messageSent",
+  "messageReceived",
+  "error",
+  "conversationCleared",
+]);
 
-const aiModels = [{ value: 'deepseek', label: 'DeepSeek' }];
+const aiModels = [{ value: "deepseek", label: "DeepSeek" }];
 const aiRoles = computed(() => props.roleOptions);
 
-const input = ref('');
+const input = ref("");
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
-const error = ref('');
+const error = ref("");
 const conversationBody = ref<HTMLElement | null>(null);
 const messageInput = ref<HTMLTextAreaElement | null>(null);
-const selectedModel = ref('deepseek');
+const selectedModel = ref("deepseek");
 const selectedRole = ref(props.defaultRole);
 const copiedIndex = ref<number | null>(null);
 const autoScrollEnabled = ref(true);
 const isInputFocused = ref(false);
-const currentMessageId = ref('');
+const currentMessageId = ref("");
 const currentPort = ref<chrome.runtime.Port | null>(null);
 
-const currentRoleOption = computed(() => aiRoles.value.find((role) => role.value === selectedRole.value));
-const currentAssistantIcon = computed(() => currentRoleOption.value?.avatar || props.aiIcon);
-const currentSystemPrompt = computed(() => currentRoleOption.value?.systemPrompt || props.systemPrompt);
-const showSendButton = computed(() => isInputFocused.value || !!input.value.trim() || loading.value);
+const currentRoleOption = computed(() =>
+  aiRoles.value.find((role) => role.value === selectedRole.value),
+);
+const currentAssistantIcon = computed(
+  () => currentRoleOption.value?.avatar || props.aiIcon,
+);
+const currentSystemPrompt = computed(
+  () => currentRoleOption.value?.systemPrompt || props.systemPrompt,
+);
+const showSendButton = computed(
+  () => isInputFocused.value || !!input.value.trim() || loading.value,
+);
 const showTypingIndicator = computed(() => {
   if (!loading.value) {
     return false;
   }
 
   const lastMessage = messages.value[messages.value.length - 1];
-  return !lastMessage || lastMessage.role !== 'assistant' || !lastMessage.content.trim();
+  return (
+    !lastMessage ||
+    lastMessage.role !== "assistant" ||
+    !lastMessage.content.trim()
+  );
 });
 
 let historySaveTimer: number | null = null;
@@ -295,13 +337,13 @@ const resizeMessageInput = () => {
       return;
     }
 
-    inputElement.style.height = '0px';
+    inputElement.style.height = "0px";
     const nextHeight = Math.min(Math.max(inputElement.scrollHeight, 32), 108);
     inputElement.style.height = `${nextHeight}px`;
   });
 };
 
-const scheduleScrollToBottom = (behavior: ScrollBehavior = 'auto') => {
+const scheduleScrollToBottom = (behavior: ScrollBehavior = "auto") => {
   nextTick(() => {
     if (!conversationBody.value || !autoScrollEnabled.value) {
       return;
@@ -340,12 +382,13 @@ const flushHistorySave = () => {
 };
 
 const getStorageKey = () => {
-  const roleKey = selectedRole.value || 'default_ai_assistant';
+  const roleKey = selectedRole.value || "default_ai_assistant";
   return `shared_chat_history_${roleKey}`;
 };
 
 const normalizeTimestamp = (timestamp: unknown) => {
-  const parsedTimestamp = timestamp instanceof Date ? timestamp : new Date(timestamp as string);
+  const parsedTimestamp =
+    timestamp instanceof Date ? timestamp : new Date(timestamp as string);
   return Number.isNaN(parsedTimestamp.getTime()) ? new Date() : parsedTimestamp;
 };
 
@@ -356,7 +399,7 @@ const normalizeStoredMessages = (storedData: unknown): ChatMessage[] => {
 
   const source = Array.isArray(storedData)
     ? storedData
-    : typeof storedData === 'object'
+    : typeof storedData === "object"
       ? Object.keys(storedData as Record<string, unknown>)
           .map(Number)
           .sort((left, right) => left - right)
@@ -364,10 +407,13 @@ const normalizeStoredMessages = (storedData: unknown): ChatMessage[] => {
       : [];
 
   return source
-    .filter((message) => message && (message.role === 'user' || message.role === 'assistant'))
+    .filter(
+      (message) =>
+        message && (message.role === "user" || message.role === "assistant"),
+    )
     .map((message) => ({
-      role: message.role as 'user' | 'assistant',
-      content: typeof message.content === 'string' ? message.content : '',
+      role: message.role as "user" | "assistant",
+      content: typeof message.content === "string" ? message.content : "",
       timestamp: normalizeTimestamp(message.timestamp),
     }));
 };
@@ -380,14 +426,17 @@ const disconnectCurrentPort = () => {
   try {
     currentPort.value.disconnect();
   } catch (disconnectError) {
-    maLogger.warn('Failed to disconnect AI conversation port:', disconnectError);
+    maLogger.warn(
+      "Failed to disconnect AI conversation port:",
+      disconnectError,
+    );
   } finally {
     currentPort.value = null;
   }
 };
 
 async function loadChatHistory() {
-  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+  if (typeof chrome === "undefined" || !chrome.storage?.local) {
     messages.value = [];
     return;
   }
@@ -397,15 +446,19 @@ async function loadChatHistory() {
     const result = await chrome.storage.local.get([storageKey]);
     messages.value = normalizeStoredMessages(result[storageKey]);
     autoScrollEnabled.value = true;
-    scheduleScrollToBottom('auto');
+    scheduleScrollToBottom("auto");
   } catch (loadError) {
-    maLogger.error('Error loading AI conversation history:', loadError);
+    maLogger.error("Error loading AI conversation history:", loadError);
     messages.value = [];
   }
 }
 
 async function saveChatHistory() {
-  if (typeof chrome === 'undefined' || !chrome.storage?.local || messages.value.length === 0) {
+  if (
+    typeof chrome === "undefined" ||
+    !chrome.storage?.local ||
+    messages.value.length === 0
+  ) {
     return;
   }
 
@@ -420,13 +473,13 @@ async function saveChatHistory() {
 
     await chrome.storage.local.set(payload);
   } catch (saveError) {
-    maLogger.error('Error saving AI conversation history:', saveError);
+    maLogger.error("Error saving AI conversation history:", saveError);
   }
 }
 
 const formatTime = (timestamp: Date) => {
   const date = normalizeTimestamp(timestamp);
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 };
 
 const isAtBottom = () => {
@@ -444,7 +497,7 @@ const handleScroll = () => {
 
 const handleInput = () => {
   if (error.value) {
-    error.value = '';
+    error.value = "";
   }
 
   resizeMessageInput();
@@ -473,32 +526,32 @@ const sendMessage = async () => {
     return;
   }
 
-  if (typeof chrome === 'undefined' || !chrome.runtime?.connect) {
-    error.value = 'AI service is unavailable in the current runtime.';
+  if (typeof chrome === "undefined" || !chrome.runtime?.connect) {
+    error.value = "AI service is unavailable in the current runtime.";
     return;
   }
 
-  error.value = '';
+  error.value = "";
   autoScrollEnabled.value = true;
 
   messages.value.push({
-    role: 'user',
+    role: "user",
     content: text,
     timestamp: new Date(),
   });
   scheduleHistorySave(80);
 
-  input.value = '';
+  input.value = "";
   resizeMessageInput();
-  scheduleScrollToBottom('smooth');
-  emit('messageSent', text);
+  scheduleScrollToBottom("smooth");
+  emit("messageSent", text);
 
   try {
     loading.value = true;
     const assistantMessageIndex =
       messages.value.push({
-        role: 'assistant',
-        content: '',
+        role: "assistant",
+        content: "",
         timestamp: new Date(),
       }) - 1;
 
@@ -535,20 +588,23 @@ const sendMessage = async () => {
       }
 
       loading.value = false;
-      currentMessageId.value = '';
+      currentMessageId.value = "";
 
       if (currentPort.value === port) {
         currentPort.value = null;
       }
 
-      scheduleScrollToBottom('auto');
+      scheduleScrollToBottom("auto");
       flushHistorySave();
 
       if (options?.disconnectPort !== false) {
         try {
           port.disconnect();
         } catch (disconnectError) {
-          maLogger.warn('Failed to disconnect settled AI conversation port:', disconnectError);
+          maLogger.warn(
+            "Failed to disconnect settled AI conversation port:",
+            disconnectError,
+          );
         }
       }
     };
@@ -558,23 +614,27 @@ const sendMessage = async () => {
         return;
       }
 
-      if (message.type === 'AI_CONVERSATION_STREAM_DATA') {
+      if (message.type === "AI_CONVERSATION_STREAM_DATA") {
         if (messages.value[assistantMessageIndex]) {
-          messages.value[assistantMessageIndex].content += message.payload.content || '';
+          messages.value[assistantMessageIndex].content +=
+            message.payload.content || "";
         }
         scheduleHistorySave(320);
-        scheduleScrollToBottom('auto');
-        emit('messageReceived', messages.value[assistantMessageIndex]?.content || '');
+        scheduleScrollToBottom("auto");
+        emit(
+          "messageReceived",
+          messages.value[assistantMessageIndex]?.content || "",
+        );
         return;
       }
 
-      if (message.type === 'AI_CONVERSATION_COMPLETE') {
+      if (message.type === "AI_CONVERSATION_COMPLETE") {
         settleStream({ trimEnd: true });
         return;
       }
 
-      if (message.type === 'AI_CONVERSATION_ERROR') {
-        emit('error', message.payload.error);
+      if (message.type === "AI_CONVERSATION_ERROR") {
+        emit("error", message.payload.error);
         settleStream({
           errorMessage: `Sorry, something went wrong: ${message.payload.error}`,
         });
@@ -587,7 +647,7 @@ const sendMessage = async () => {
       }
 
       settleStream({
-        errorMessage: 'Connection to the background service was interrupted.',
+        errorMessage: "Connection to the background service was interrupted.",
         disconnectPort: false,
       });
     });
@@ -595,7 +655,7 @@ const sendMessage = async () => {
     const config = await loadAIConfig();
 
     port.postMessage({
-      type: 'START_AI_CONVERSATION',
+      type: "START_AI_CONVERSATION",
       payload: {
         prompt: text,
         messageId: currentMessageId.value,
@@ -608,35 +668,35 @@ const sendMessage = async () => {
       },
     });
   } catch (sendError: any) {
-    maLogger.error('Error sending AI conversation message:', sendError);
+    maLogger.error("Error sending AI conversation message:", sendError);
     loading.value = false;
-    currentMessageId.value = '';
+    currentMessageId.value = "";
     disconnectCurrentPort();
 
     if (messages.value.length > 0) {
       messages.value.pop();
     }
 
-    const fallbackMessage = 'Sorry, the AI service is temporarily unavailable.';
+    const fallbackMessage = "Sorry, the AI service is temporarily unavailable.";
     error.value = fallbackMessage;
     messages.value.push({
-      role: 'assistant',
+      role: "assistant",
       content: fallbackMessage,
       timestamp: new Date(),
     });
 
     flushHistorySave();
-    scheduleScrollToBottom('auto');
-    emit('error', sendError?.message || fallbackMessage);
+    scheduleScrollToBottom("auto");
+    emit("error", sendError?.message || fallbackMessage);
   }
 };
 
 const clearConversation = async () => {
   disconnectCurrentPort();
   loading.value = false;
-  currentMessageId.value = '';
-  input.value = '';
-  error.value = '';
+  currentMessageId.value = "";
+  input.value = "";
+  error.value = "";
   copiedIndex.value = null;
   clearHistorySaveTimer();
 
@@ -644,23 +704,23 @@ const clearConversation = async () => {
     messages.value = [];
     resizeMessageInput();
 
-    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+    if (typeof chrome !== "undefined" && chrome.storage?.local) {
       await chrome.storage.local.remove([getStorageKey()]);
     }
 
-    if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
       chrome.runtime.sendMessage({
-        type: 'CLEAR_AI_SESSION',
+        type: "CLEAR_AI_SESSION",
         payload: {
           role: selectedRole.value,
         },
       });
     }
 
-    emit('conversationCleared');
+    emit("conversationCleared");
   } catch (clearError) {
-    maLogger.error('Error clearing AI conversation:', clearError);
-    error.value = 'Unable to clear the current conversation.';
+    maLogger.error("Error clearing AI conversation:", clearError);
+    error.value = "Unable to clear the current conversation.";
   }
 };
 
@@ -675,7 +735,7 @@ const copyMessage = async (content: string, index: number) => {
       }
     }, 1600);
   } catch (copyError) {
-    maLogger.error('Failed to copy AI conversation message:', copyError);
+    maLogger.error("Failed to copy AI conversation message:", copyError);
   }
 };
 
@@ -686,8 +746,8 @@ watch(selectedRole, async (newRole, oldRole) => {
 
   disconnectCurrentPort();
   loading.value = false;
-  currentMessageId.value = '';
-  error.value = '';
+  currentMessageId.value = "";
+  error.value = "";
   copiedIndex.value = null;
   clearHistorySaveTimer();
 
@@ -757,7 +817,7 @@ onUnmounted(() => {
 }
 
 .toolbar-select-shell::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   right: 9px;
@@ -928,7 +988,11 @@ onUnmounted(() => {
   width: 48px;
   height: 1px;
   margin-left: 10px;
-  background: linear-gradient(90deg, rgba(82, 169, 255, 0.48), rgba(255, 255, 255, 0));
+  background: linear-gradient(
+    90deg,
+    rgba(82, 169, 255, 0.48),
+    rgba(255, 255, 255, 0)
+  );
 }
 
 .welcome-copy {
@@ -980,7 +1044,11 @@ onUnmounted(() => {
   margin-top: 1px;
   border-radius: 9px;
   background:
-    linear-gradient(145deg, rgba(82, 169, 255, 0.14), rgba(255, 255, 255, 0.03)),
+    linear-gradient(
+      145deg,
+      rgba(82, 169, 255, 0.14),
+      rgba(255, 255, 255, 0.03)
+    ),
     rgba(255, 255, 255, 0.025);
   color: rgba(255, 255, 255, 0.88);
   font-size: 9px;
@@ -1020,7 +1088,11 @@ onUnmounted(() => {
   white-space: pre-wrap;
   color: rgba(248, 251, 255, 0.88);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.018)
+    ),
     rgba(255, 255, 255, 0.02);
   box-shadow:
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.05),

@@ -12,7 +12,7 @@
 
     <!-- 仅预览模式 -->
     <div v-else-if="mode === 'preview'" class="preview-only">
-      <div v-html="previewHtml"></div>
+      <div class="preview-content" v-html="previewHtml"></div>
     </div>
 
     <!-- 仅编辑模式 -->

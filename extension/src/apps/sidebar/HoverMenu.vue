@@ -2,6 +2,7 @@
   <!-- 只在expanded为true时显示整个菜单容器 -->
   <div class="dock" ref="dockRef">
     <button
+      v-if="!mikuChatVisible"
       class="miku-trigger"
       type="button"
       aria-label="打开 Miku 对话"
@@ -9,7 +10,6 @@
     >
       <img :src="mikuSrc" alt="" aria-hidden="true" />
     </button>
-    <MikuChatWindow v-if="mikuChatVisible" @close="mikuChatVisible = false" />
     <!-- <li
       v-for="(it, i) in items"
       :key="it.id"
@@ -29,6 +29,7 @@
       <div v-if="hoverIdx === i && it.label" class="tip">{{ it.label }}</div>
     </li> -->
   </div>
+  <MikuChatWindow v-if="mikuChatVisible" @close="mikuChatVisible = false" />
 </template>
 
 <script setup lang="ts">
