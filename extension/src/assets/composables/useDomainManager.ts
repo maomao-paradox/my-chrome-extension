@@ -29,7 +29,7 @@ export const useDomainManager = () => {
                 configs = contentModules.values().reduce((acc, script: ModuleOption) => {
                     acc[script.domainKey!] = {
                         enabled: true,
-                        domains: script.domainKey === 'contentTextareaAiDomains' ? '*:*' : ""
+                        domains: ""
                     };
                     return acc;
                 }, {} as DomainConfigs);

@@ -35,7 +35,7 @@ export async function genDomainPermissionChecker(): Promise<(configKey: string) 
 
         domainConfigs[script.domainKey] = {
             enabled: true,
-            domains: script.domainKey === 'contentTextareaAiDomains' ? '*:*' : ''
+            domains: ''
         };
         shouldPersist = true;
     }
