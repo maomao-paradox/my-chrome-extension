@@ -62,6 +62,7 @@ export default defineManifest({
         'static/wasm/*.wasm',
         'static/icons/*.ico',
         'static/icons/*.png',
+        'static/img/*.png',
         'static/keytone/Piano/*.wav',
         'static/fonts/*',
         'static/css/*.css',

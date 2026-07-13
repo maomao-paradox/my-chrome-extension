@@ -1,6 +1,6 @@
 <template>
   <div class="ai-conversation">
-    <div class="conversation-toolbar">
+    <div v-if="showToolbar" class="conversation-toolbar">
       <div class="toolbar-select-group">
         <label class="toolbar-select-shell">
           <span class="sr-only">Role</span>
@@ -160,6 +160,7 @@
 
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import type { PropType } from 'vue';
 import {MaMarkdown} from '@components/index';
 import { loadAIConfig } from '@/utils/ai-config';
 
@@ -167,6 +168,13 @@ type ChatMessage = {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+};
+
+type AiRoleOption = {
+  value: string;
+  label: string;
+  avatar?: string;
+  systemPrompt?: string;
 };
 
 const props = defineProps({
@@ -210,19 +218,31 @@ const props = defineProps({
     type: String,
     default: 'Enter to send. Shift + Enter for a new line.',
   },
+  defaultRole: {
+    type: String,
+    default: '',
+  },
+  systemPrompt: {
+    type: String,
+    default: '',
+  },
+  showToolbar: {
+    type: Boolean,
+    default: true,
+  },
+  roleOptions: {
+    type: Array as PropType<AiRoleOption[]>,
+    default: () => [
+      { value: '', label: 'AI Assistant' },
+      { value: 'Fuka Shikuzaki', label: 'Fuka Shikuzaki', avatar: 'FS' },
+    ],
+  },
 });
 
 const emit = defineEmits(['messageSent', 'messageReceived', 'error', 'conversationCleared']);
 
 const aiModels = [{ value: 'deepseek', label: 'DeepSeek' }];
-const aiRoles = [
-  { value: '', label: 'AI Assistant' },
-  { value: 'Fuka Shikuzaki', label: 'Fuka Shikuzaki' },
-];
-const roleAvatars: Record<string, string> = {
-  '': props.aiIcon,
-  'Fuka Shikuzaki': 'FS',
-};
+const aiRoles = computed(() => props.roleOptions);
 
 const input = ref('');
 const messages = ref<ChatMessage[]>([]);
@@ -231,14 +251,16 @@ const error = ref('');
 const conversationBody = ref<HTMLElement | null>(null);
 const messageInput = ref<HTMLTextAreaElement | null>(null);
 const selectedModel = ref('deepseek');
-const selectedRole = ref('');
+const selectedRole = ref(props.defaultRole);
 const copiedIndex = ref<number | null>(null);
 const autoScrollEnabled = ref(true);
 const isInputFocused = ref(false);
 const currentMessageId = ref('');
 const currentPort = ref<chrome.runtime.Port | null>(null);
 
-const currentAssistantIcon = computed(() => roleAvatars[selectedRole.value] || props.aiIcon);
+const currentRoleOption = computed(() => aiRoles.value.find((role) => role.value === selectedRole.value));
+const currentAssistantIcon = computed(() => currentRoleOption.value?.avatar || props.aiIcon);
+const currentSystemPrompt = computed(() => currentRoleOption.value?.systemPrompt || props.systemPrompt);
 const showSendButton = computed(() => isInputFocused.value || !!input.value.trim() || loading.value);
 const showTypingIndicator = computed(() => {
   if (!loading.value) {
@@ -582,6 +604,7 @@ const sendMessage = async () => {
         apiKey: config.apiKey,
         apiBaseUrl: config.apiBaseUrl,
         role: selectedRole.value,
+        systemPrompt: currentSystemPrompt.value,
       },
     });
   } catch (sendError: any) {
