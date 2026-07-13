@@ -4,6 +4,8 @@
 
 - 文本翻译使用当前页面 `hostname` 生成独立的 AI session role，例如 `translator_example.com`。
 - 不同域名的翻译上下文互相隔离，避免跨站点翻译历史污染当前页面的解释结果。
+- 启用后会在可见、可编辑且带 `placeholder` 的 `textarea` 右上角显示 AI 小圆点；点击小圆点后调用 textarea AI 填入能力，并在生成、成功或失败时更新小圆点状态。
+- 可通过 `textSelectionToolbar.options.textareaAI = false` 关闭 textarea AI 小圆点，保留原文本选择工具栏能力。
 
 ## popup
 

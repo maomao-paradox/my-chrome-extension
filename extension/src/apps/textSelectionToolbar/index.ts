@@ -27,6 +27,7 @@ import { getAssetsAbstractPathSync } from "@/utils/common";
 import { generateId } from "@/utils/base";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
 import { loadAIConfig } from "@/utils/ai-config";
+import { fillTextareaElementByAI } from "./textarea-ai";
 
 const appName = "textSelectionToolbar";
 
@@ -88,6 +89,7 @@ declare interface TextSelectionToolbarOptions {
   enabled?: boolean;
   tools?: TextTool[];
   brandColor?: string;
+  textareaAI?: boolean;
 }
 
 type TranslationPanelStatus = "loading" | "success" | "error";
@@ -104,6 +106,8 @@ interface TranslationPanelPayload {
   position?: TranslationPanelPosition;
   sourceText?: string;
 }
+
+type TextareaAIDotState = "idle" | "generating" | "filled" | "error";
 
 // 文本选择工具栏模块
 class TextSelectionToolbarModule implements AppModule {
@@ -122,6 +126,13 @@ class TextSelectionToolbarModule implements AppModule {
   private selectedText: string = "";
   private selectionRange: Range | null = null;
   private brandColor: string = "#ff0dc5";
+  private textareaAIEnabled: boolean = true;
+  private textareaAIButtons = new Map<HTMLTextAreaElement, HTMLButtonElement>();
+  private textareaAIObserver: MutationObserver | null = null;
+  private textareaAIPositionTimer: ReturnType<typeof setTimeout> | null = null;
+  private activeTextareaAI: HTMLTextAreaElement | null = null;
+  private readonly textareaAIStyleId =
+    "text-selection-toolbar-textarea-ai-style";
 
   private clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
@@ -321,6 +332,284 @@ class TextSelectionToolbarModule implements AppModule {
     showSuccessMessage("书签保存成功！");
   }
 
+  private isTextareaAICandidate(textarea: HTMLTextAreaElement): boolean {
+    if (
+      textarea.disabled ||
+      textarea.readOnly ||
+      !textarea.placeholder?.trim()
+    ) {
+      return false;
+    }
+
+    const style = window.getComputedStyle(textarea);
+    if (
+      style.display === "none" ||
+      style.visibility === "hidden" ||
+      Number(style.opacity) === 0
+    ) {
+      return false;
+    }
+
+    const rect = textarea.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  private ensureTextareaAIStyle(): void {
+    if (
+      !this.shadowRoot ||
+      this.shadowRoot.getElementById(this.textareaAIStyleId)
+    ) {
+      return;
+    }
+
+    const style = document.createElement("style");
+    style.id = this.textareaAIStyleId;
+    style.textContent = `
+      .textarea-ai-dot {
+        position: fixed;
+        width: 16px;
+        height: 16px;
+        padding: 0;
+        border: 2px solid rgba(255, 255, 255, 0.96);
+        border-radius: 999px;
+        background: linear-gradient(135deg, #2563eb, #0d9488);
+        box-shadow:
+          0 6px 14px rgba(15, 23, 42, 0.2),
+          0 0 0 4px rgba(37, 99, 235, 0.12);
+        cursor: pointer;
+        pointer-events: auto;
+        z-index: 2147483647;
+        transition:
+          background 0.2s ease,
+          box-shadow 0.2s ease,
+          opacity 0.2s ease;
+      }
+
+      .textarea-ai-dot:hover {
+        box-shadow:
+          0 8px 18px rgba(15, 23, 42, 0.24),
+          0 0 0 5px rgba(13, 148, 136, 0.16);
+      }
+
+      .textarea-ai-dot:focus-visible {
+        outline: 2px solid rgba(249, 115, 22, 0.85);
+        outline-offset: 3px;
+      }
+
+      .textarea-ai-dot[data-state="generating"] {
+        cursor: progress;
+        opacity: 0.86;
+        background: linear-gradient(135deg, #f97316, #2563eb);
+        animation: textarea-ai-pulse 1.2s ease-in-out infinite;
+      }
+
+      .textarea-ai-dot[data-state="filled"] {
+        background: linear-gradient(135deg, #16a34a, #0d9488);
+      }
+
+      .textarea-ai-dot[data-state="error"] {
+        background: linear-gradient(135deg, #dc2626, #f97316);
+      }
+
+      @keyframes textarea-ai-pulse {
+        0% {
+          box-shadow:
+            0 6px 14px rgba(15, 23, 42, 0.2),
+            0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+        50% {
+          box-shadow:
+            0 8px 18px rgba(15, 23, 42, 0.24),
+            0 0 0 8px rgba(249, 115, 22, 0.14);
+        }
+        100% {
+          box-shadow:
+            0 6px 14px rgba(15, 23, 42, 0.2),
+            0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .textarea-ai-dot {
+          transition: none;
+        }
+
+        .textarea-ai-dot[data-state="generating"] {
+          animation: none;
+        }
+      }
+    `;
+    this.shadowRoot.appendChild(style);
+  }
+
+  private setTextareaAIDotState(
+    button: HTMLButtonElement,
+    state: TextareaAIDotState,
+    message?: string,
+  ): void {
+    button.dataset.state = state;
+    const labels: Record<TextareaAIDotState, string> = {
+      idle: "使用 AI 填写此 textarea",
+      generating: "AI 正在填写此 textarea",
+      filled: "AI 已填写此 textarea",
+      error: "AI 填写失败，点击重试",
+    };
+    button.setAttribute("aria-label", message || labels[state]);
+    button.title = message || labels[state];
+  }
+
+  private positionTextareaAIDot(
+    textarea: HTMLTextAreaElement,
+    button: HTMLButtonElement,
+  ): void {
+    const rect = textarea.getBoundingClientRect();
+    const offset = 6;
+    button.style.left = `${Math.round(rect.right - button.offsetWidth - offset)}px`;
+    button.style.top = `${Math.round(rect.top + offset)}px`;
+  }
+
+  private createTextareaAIDot(
+    textarea: HTMLTextAreaElement,
+  ): HTMLButtonElement | null {
+    if (!this.shadowRoot) {
+      return null;
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "textarea-ai-dot";
+    this.setTextareaAIDotState(button, "idle");
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      this.handleTextareaAIClick(textarea, button);
+    });
+
+    this.shadowRoot.appendChild(button);
+    return button;
+  }
+
+  private syncTextareaAIDots = (): void => {
+    if (!this.textareaAIEnabled || !this.shadowRoot || !document.body) {
+      return;
+    }
+
+    this.ensureTextareaAIStyle();
+
+    const candidates = new Set(
+      Array.from(
+        document.querySelectorAll<HTMLTextAreaElement>("textarea"),
+      ).filter((textarea) => this.isTextareaAICandidate(textarea)),
+    );
+
+    for (const [textarea, button] of this.textareaAIButtons) {
+      if (!candidates.has(textarea) || !textarea.isConnected) {
+        button.remove();
+        this.textareaAIButtons.delete(textarea);
+      }
+    }
+
+    for (const textarea of candidates) {
+      let button = this.textareaAIButtons.get(textarea);
+      if (!button) {
+        button = this.createTextareaAIDot(textarea) || undefined;
+        if (!button) {
+          continue;
+        }
+        this.textareaAIButtons.set(textarea, button);
+      }
+      this.positionTextareaAIDot(textarea, button);
+    }
+  };
+
+  private scheduleTextareaAIDotSync = (): void => {
+    if (this.textareaAIPositionTimer) {
+      clearTimeout(this.textareaAIPositionTimer);
+    }
+    //@ts-ignore
+    this.textareaAIPositionTimer = window.setTimeout(() => {
+      this.textareaAIPositionTimer = null;
+      this.syncTextareaAIDots();
+    }, 80);
+  };
+
+  private async handleTextareaAIClick(
+    textarea: HTMLTextAreaElement,
+    button: HTMLButtonElement,
+  ): Promise<void> {
+    if (this.activeTextareaAI) {
+      return;
+    }
+
+    this.activeTextareaAI = textarea;
+    this.setTextareaAIDotState(button, "generating");
+    textarea.focus();
+
+    try {
+      const result = await fillTextareaElementByAI(textarea);
+      if (result.success) {
+        this.setTextareaAIDotState(button, "filled", result.msg);
+        showSuccessMessage(result.msg);
+      } else {
+        this.setTextareaAIDotState(button, "error", result.msg);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.setTextareaAIDotState(button, "error", message);
+      maLogger.warn("[TextSelectionToolbar] textarea AI 填写失败:", message);
+    } finally {
+      this.activeTextareaAI = null;
+      this.scheduleTextareaAIDotSync();
+    }
+  }
+
+  private enableTextareaAI(): void {
+    if (!this.textareaAIEnabled) {
+      return;
+    }
+
+    this.ensureTextareaAIStyle();
+    this.syncTextareaAIDots();
+
+    if (!this.textareaAIObserver && document.body) {
+      this.textareaAIObserver = new MutationObserver(
+        this.scheduleTextareaAIDotSync,
+      );
+      this.textareaAIObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: [
+          "class",
+          "style",
+          "placeholder",
+          "disabled",
+          "readonly",
+        ],
+      });
+    }
+
+    window.addEventListener("resize", this.scheduleTextareaAIDotSync);
+    window.addEventListener("scroll", this.scheduleTextareaAIDotSync, true);
+    document.addEventListener("focusin", this.scheduleTextareaAIDotSync);
+  }
+
+  private disableTextareaAI(): void {
+    if (this.textareaAIPositionTimer) {
+      clearTimeout(this.textareaAIPositionTimer);
+      this.textareaAIPositionTimer = null;
+    }
+
+    this.textareaAIObserver?.disconnect();
+    this.textareaAIObserver = null;
+    window.removeEventListener("resize", this.scheduleTextareaAIDotSync);
+    window.removeEventListener("scroll", this.scheduleTextareaAIDotSync, true);
+    document.removeEventListener("focusin", this.scheduleTextareaAIDotSync);
+    this.textareaAIButtons.forEach((button) => button.remove());
+    this.textareaAIButtons.clear();
+    this.activeTextareaAI = null;
+  }
+
   constructor(options?: TextSelectionToolbarOptions) {
     //@ts-ignore 初始化自定义工具配置
     this.customTools = options?.tools || [
@@ -428,6 +717,7 @@ class TextSelectionToolbarModule implements AppModule {
     ];
 
     this.brandColor = options?.brandColor || "#007bff";
+    this.textareaAIEnabled = options?.textareaAI !== false;
   }
 
   /**
@@ -772,8 +1062,11 @@ class TextSelectionToolbarModule implements AppModule {
           maLogger.error("注入文本选择工具栏失败:", error);
         });
       }
-      maLogger.log("设置品牌颜色:", options.brandColor);
-      this.brandColor = options.brandColor;
+      maLogger.log("设置品牌颜色:", options?.brandColor);
+      this.brandColor = options?.brandColor || this.brandColor;
+      if (Object.prototype.hasOwnProperty.call(options || {}, "textareaAI")) {
+        this.textareaAIEnabled = options?.textareaAI !== false;
+      }
       document.body.style.setProperty("--kria-brand-color", this.brandColor);
       document.addEventListener(
         "selectionchange",
@@ -786,6 +1079,11 @@ class TextSelectionToolbarModule implements AppModule {
         "iframe-selectionchange",
         this.handleIframeSelectionChange as EventListener,
       );
+      if (this.textareaAIEnabled) {
+        this.enableTextareaAI();
+      } else {
+        this.disableTextareaAI();
+      }
 
       this.isEnabled = true;
       maLogger.log("文本选择工具栏已启用");
@@ -814,6 +1112,7 @@ class TextSelectionToolbarModule implements AppModule {
 
       // 隐藏组件
       this.hideComponent();
+      this.disableTextareaAI();
 
       // 清理组件资源
       this.cleanupComponent();

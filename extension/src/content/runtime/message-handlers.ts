@@ -4,7 +4,6 @@ import type { PageTools } from "./page-tools";
 import { calculatePOW } from "./pow-service";
 import { applyWebpageMouseTrail } from "./mouse-trail";
 import { getAssetsAbstractPathSync } from "@/utils";
-import { fillTextareaByAI } from "./textarea-ai";
 
 export type ContentMessageHandler = (
   data: any,
@@ -102,11 +101,6 @@ export const createMessageHandlers = (
   TOGGLE_CONTENT_EDITABLE: (data, sendResponse) => {
     sendResponse(pageTools.toggleContentEditable(data.enabled));
     return false;
-  },
-
-  TEXTAREA_AI_FILL: async (data, sendResponse) => {
-    sendResponse(await fillTextareaByAI(data));
-    return true;
   },
 
   UPDATE_SIDEBAR_TOOLS: async (data, sendResponse) => {

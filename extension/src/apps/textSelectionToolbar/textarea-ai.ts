@@ -430,3 +430,24 @@ export const fillTextareaByAI = async (
     },
   };
 };
+
+export const fillTextareaElementByAI = async (
+  textarea: HTMLTextAreaElement,
+) => {
+  if (!isTextareaCandidate(textarea)) {
+    return { success: false, msg: "textarea 当前不可填入 AI 内容" };
+  }
+
+  if (!shouldFillTextarea(textarea)) {
+    return { success: false, msg: "textarea 正在生成中" };
+  }
+
+  await fillTextarea(textarea);
+  return {
+    success: getTextareaState(textarea) !== "error",
+    msg: textarea.getAttribute(ERROR_ATTR) || "textarea AI 填入完成",
+    result: {
+      state: getTextareaState(textarea),
+    },
+  };
+};
