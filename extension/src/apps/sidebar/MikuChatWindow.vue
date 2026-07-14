@@ -15,6 +15,35 @@
     >
       <div class="chat-stage">
         <div class="character-panel">
+          <div
+            class="music-player"
+            role="group"
+            aria-label="Miku 音乐播放器"
+          >
+            <button
+              v-for="control in musicControls"
+              :key="control.action"
+              type="button"
+              class="music-control-button"
+              :class="{ 'is-primary': control.action === 'toggle' }"
+              :aria-label="control.label"
+              :aria-pressed="control.action === 'toggle' ? isMusicPlaying : undefined"
+              @click="handleMusicControl(control.action)"
+            >
+              <component :is="control.icon" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div
+            class="music-disc"
+            :class="{ 'is-playing': isMusicPlaying }"
+            aria-hidden="true"
+          >
+            <span class="disc-ring"></span>
+            <span class="disc-label"></span>
+            <span class="disc-hole"></span>
+          </div>
+
           <img
             :src="mikuSrc"
             alt=""
@@ -74,8 +103,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { Draggable } from "@components/index";
+import {
+  IconNextMusic,
+  IconPause,
+  IconPlay,
+  IconPreviousMusic,
+} from "@icons/index";
 import AIConversation from "../floatingball/views/AIConversation.vue";
 
 defineEmits<{
@@ -83,11 +118,38 @@ defineEmits<{
 }>();
 
 const mikuSrc = chrome.runtime.getURL("static/img/miku.png");
+const isMusicPlaying = ref(false);
 
 const draggableContainerStyle = computed<Record<string, string>>(() => ({
   "--z-index": "10000",
   cursor: "default",
 }));
+
+type MusicControlAction = "previous" | "toggle" | "next";
+
+const musicControls = computed(() => [
+  {
+    action: "previous" as const,
+    label: "上一首",
+    icon: IconPreviousMusic,
+  },
+  {
+    action: "toggle" as const,
+    label: isMusicPlaying.value ? "暂停" : "播放",
+    icon: isMusicPlaying.value ? IconPause : IconPlay,
+  },
+  {
+    action: "next" as const,
+    label: "下一首",
+    icon: IconNextMusic,
+  },
+]);
+
+const handleMusicControl = (action: MusicControlAction) => {
+  if (action === "toggle") {
+    isMusicPlaying.value = !isMusicPlaying.value;
+  }
+};
 
 const mikuSystemPrompt = [
   "你正在进行角色扮演：你是初音未来风格的虚拟歌姬 Miku，在一个安静、温暖的酒馆式对话窗口里和用户聊天。",
@@ -158,6 +220,167 @@ const mikuRoles = [
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   pointer-events: none;
+}
+
+.music-player {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(94, 234, 212, 0.2);
+  border-radius: 8px;
+  background: rgba(3, 7, 18, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 26px rgba(2, 6, 23, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+.music-control-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #5eead4;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.music-control-button:hover,
+.music-control-button:focus-visible {
+  color: rgba(236, 254, 255, 0.96);
+  background: rgba(94, 234, 212, 0.16);
+  box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.1);
+}
+
+.music-control-button:focus-visible {
+  outline: 0;
+}
+
+.music-control-button.is-primary {
+  background: rgba(94, 234, 212, 0.18);
+  color: rgba(236, 254, 255, 0.98);
+  box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.22);
+}
+
+.music-control-button :deep(svg) {
+  width: 18px;
+  height: 18px;
+}
+
+.music-disc {
+  position: absolute;
+  top: 92px;
+  left: 50%;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, rgba(3, 7, 18, 0.98) 0 9px, transparent 10px),
+    conic-gradient(
+      from 18deg,
+      rgba(236, 254, 255, 0.22),
+      rgba(34, 211, 238, 0.14),
+      rgba(15, 23, 42, 0.88),
+      rgba(94, 234, 212, 0.24),
+      rgba(236, 254, 255, 0.2)
+    );
+  box-shadow:
+    0 16px 28px rgba(2, 6, 23, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    inset 0 0 22px rgba(3, 7, 18, 0.84);
+  opacity: 0.9;
+  transform: translateX(-50%);
+  animation: miku-disc-spin 3.8s linear infinite;
+  animation-play-state: paused;
+}
+
+.music-disc.is-playing {
+  animation-play-state: running;
+}
+
+.music-disc::before,
+.music-disc::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.music-disc::before {
+  inset: 8px;
+  border: 1px solid rgba(94, 234, 212, 0.18);
+  box-shadow:
+    inset 0 0 0 12px rgba(255, 255, 255, 0.025),
+    inset 0 0 0 24px rgba(255, 255, 255, 0.018);
+}
+
+.music-disc::after {
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 8%,
+    rgba(255, 255, 255, 0.2) 18%,
+    transparent 30%
+  );
+  mix-blend-mode: screen;
+}
+
+.disc-ring {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(94, 234, 212, 0.16);
+  box-shadow:
+    inset 0 0 0 1px rgba(94, 234, 212, 0.28),
+    0 0 18px rgba(94, 234, 212, 0.18);
+}
+
+.disc-label,
+.disc-hole {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.disc-label {
+  width: 28px;
+  height: 28px;
+  background:
+    radial-gradient(circle, rgba(236, 254, 255, 0.82) 0 2px, transparent 3px),
+    linear-gradient(135deg, rgba(34, 211, 238, 0.9), rgba(20, 184, 166, 0.76));
+  box-shadow: inset 0 0 0 1px rgba(236, 254, 255, 0.26);
+}
+
+.disc-hole {
+  width: 7px;
+  height: 7px;
+  background: rgba(3, 7, 18, 0.9);
+}
+
+@keyframes miku-disc-spin {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
 }
 
 .character-image {
@@ -293,9 +516,47 @@ const mikuRoles = [
   .character-panel {
     min-height: 132px;
     align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
     padding: 14px 78px 14px 14px;
     border-right: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .music-player {
+    position: static;
+    width: min(180px, 100%);
+    max-width: 180px;
+    padding: 7px;
+  }
+
+  .music-control-button :deep(svg) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .music-disc {
+    position: static;
+    width: 58px;
+    height: 58px;
+    transform: none;
+    animation: miku-disc-spin-mobile 3.8s linear infinite;
+    animation-play-state: paused;
+  }
+
+  .music-disc.is-playing {
+    animation-play-state: running;
+  }
+
+  .disc-ring {
+    width: 24px;
+    height: 24px;
+  }
+
+  .disc-label {
+    width: 18px;
+    height: 18px;
   }
 
   .character-image {
@@ -313,8 +574,23 @@ const mikuRoles = [
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .close-button {
+  .close-button,
+  .music-control-button {
     transition-duration: 0.01ms;
+  }
+
+  .music-disc {
+    animation: none;
+  }
+}
+
+@keyframes miku-disc-spin-mobile {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>

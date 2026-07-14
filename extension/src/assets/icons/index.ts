@@ -30,6 +30,10 @@ export { default as IconOffScreen } from './off-screen.svg?component';
 export { default as IconClose } from './close.svg?component';
 export { default as IconTime } from './time.svg?component';
 export { default as IconCapture } from './capture.svg?component';
+export { default as IconPreviousMusic } from './previous-music.svg?component';
+export { default as IconPlay } from './play.svg?component';
+export { default as IconPause } from './pause.svg?component';
+export { default as IconNextMusic } from './next-music.svg?component';
 export { default as GlowingArrow } from './GlowingArrow.vue'
 export { default as IconConfirm } from './confirm.svg?component'
 export { default as IconAIChat } from './ai-chat.svg?component'
