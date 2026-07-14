@@ -1,15 +1,15 @@
 <template>
   <!-- 只在expanded为true时显示整个菜单容器 -->
-  <div class="dock" ref="dockRef">
-    <button
-      v-if="!mikuChatVisible"
+  <div class="dock" ref="dockRef" style="position: fixed; right: 0;top:50%;">
+    <div
+      v-show="mikuTriggerVisible"
       class="miku-trigger"
-      type="button"
       aria-label="打开 Miku 对话"
       @click.stop="toggleMikuChat"
+      style="position: absolute; right: -84px; width: 126px; height: auto"
     >
-      <img :src="mikuSrc" alt="" aria-hidden="true" />
-    </button>
+      <img :src="mikuSrc" alt="Miku trigger" aria-hidden="true" width="100%"/>
+    </div>
     <!-- <li
       v-for="(it, i) in items"
       :key="it.id"
@@ -29,11 +29,11 @@
       <div v-if="hoverIdx === i && it.label" class="tip">{{ it.label }}</div>
     </li> -->
   </div>
-  <MikuChatWindow v-if="mikuChatVisible" @close="mikuChatVisible = false" />
+  <MikuChatWindow v-if="mikuChatVisible" @close="toggleMikuChat" />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
 import { Tool } from "@/types";
 import { IconCommunity } from "@icons/index";
 import { eventManager } from "@/event";
@@ -64,7 +64,10 @@ const getRainbowColor = (index: number) => {
 };
 
 const hoverIdx = ref<number>(-1); // 用于控制悬浮效果和提示文本
+const mikuTriggerVisible = ref(false);
 const mikuChatVisible = ref(false);
+
+const mikuSrc = chrome.runtime.getURL("static/img/miku.png");
 
 // 鼠标进入一级菜单 - 控制悬浮效果和提示文本
 const onMouseEnter = (i: number) => {
@@ -79,9 +82,8 @@ const emit = defineEmits<{
   click: [item: Tool];
 }>();
 
-const mikuSrc = chrome.runtime.getURL("static/img/miku.png");
-
 const toggleMikuChat = () => {
+  mikuTriggerVisible.value = !mikuTriggerVisible.value;
   mikuChatVisible.value = !mikuChatVisible.value;
 };
 
@@ -100,12 +102,12 @@ const dockRef = ref<HTMLDivElement>();
 
 // 显示整个菜单
 const show = () => {
-  dockRef.value?.classList.add("hover");
+  dockRef.value?.classList.add("active");
 };
 
 // 隐藏整个菜单
 const hide = () => {
-  dockRef.value?.classList.remove("hover");
+  dockRef.value?.classList.remove("active");
 };
 
 // 处理键盘事件 - 监听Ctrl+Q快捷键
@@ -126,7 +128,11 @@ eventManager.useListener("keydown", handleKeyDown);
 
 // 组件生命周期
 onMounted(() => {
-  show();
+  mikuTriggerVisible.value = true;
+  setTimeout(() => {
+    show();
+  }, 100);
+
   setTimeout(() => {
     hide();
   }, 500);
@@ -134,6 +140,13 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+$dock-z-index: 9999;
+$dock-border-radius: 10px;
+$icon-size: 40px;
+$icon-border-radius: 20px;
+$trigger-width: 126px;
+$trigger-offset: 84px;
+
 .dock {
   position: fixed;
   right: 0;
@@ -142,42 +155,34 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  visibility: hidden;
-  opacity: 0;
-  transition:
-    visibility 0.6s ease,
-    opacity 0.6s ease;
-  z-index: 9999;
-  visibility: visible;
+  z-index: $dock-z-index;
   opacity: 1;
-  transition:
-    visibility 0s,
-    opacity 0.6s ease;
-}
+  transition: opacity 0.6s ease;
 
-.dock::before {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  min-height: 144px;
-  height: calc(100% + 32px);
-  background: transparent;
-  border-radius: 10px 0 0 10px;
-  cursor: pointer;
-  z-index: 1;
+  &::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    min-height: 144px;
+    height: calc(100% + 32px);
+    background: transparent;
+    border-radius: $dock-border-radius 0 0 $dock-border-radius;
+    cursor: pointer;
+    z-index: 1;
+  }
 }
 
 .miku-trigger {
   position: absolute;
-  right: -84px;
+  right: -$trigger-offset;
   top: 50%;
   width: 126px;
   height: auto;
   padding: 0;
-  border: 0;
+  border: none;
   background: transparent;
   transform: translateY(-50%);
   transition:
@@ -186,26 +191,27 @@ onMounted(() => {
   cursor: pointer;
   z-index: 2;
   filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.24));
-}
+  will-change: transform, opacity;
 
-.miku-trigger img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
+  img {
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    -webkit-user-drag: none;
+    object-fit: cover; /* 或 contain，按需调整 */
+    display: block;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(37, 99, 235, 0.85);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
 }
 
 .dock:hover .miku-trigger,
-.dock.hover .miku-trigger {
-  transform: translate(-83px, -50%);
-}
-
-.miku-trigger:focus-visible {
-  outline: 2px solid rgba(37, 99, 235, 0.85);
-  outline-offset: 3px;
-  border-radius: 8px;
+.dock.active .miku-trigger {
+  transform: translate(calc(-#{$trigger-offset} + 1px), -50%);
 }
 
 .dock-cell {
@@ -224,14 +230,13 @@ onMounted(() => {
 }
 
 .dock:hover .dock-cell,
-.dock.hover .dock-cell {
+.dock.active .dock-cell {
   transform: translateX(-120%);
-  opacity: 1;
 }
 
 .dock-icon {
-  width: 40px;
-  height: 40px;
+  width: $icon-size;
+  height: $icon-size;
   background: var(--c, #409eff);
   color: #fff;
   display: flex;
@@ -243,13 +248,17 @@ onMounted(() => {
     filter 0.25s;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
   position: relative;
-  border-radius: 20px 0 0 20px;
-}
+  border-radius: $icon-border-radius 0 0 $icon-border-radius;
 
-.dock-icon.hover,
-.dock-icon:hover {
-  transform: scaleX(1.35) scaleY(1.15);
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+  &.active,
+  &:hover {
+    transform: scaleX(1.35) scaleY(1.15);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+
+    + .tip {
+      opacity: 1;
+    }
+  }
 }
 
 .ic {
@@ -271,11 +280,6 @@ onMounted(() => {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s ease;
-}
-
-.dock-icon:hover + .tip,
-.dock-icon.hover + .tip {
-  opacity: 1;
 }
 
 .arr {
