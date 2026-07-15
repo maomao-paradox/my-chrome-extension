@@ -1,33 +1,32 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import { crx } from '@crxjs/vite-plugin'
-import manifest from './src/manifest.config'
-import path from 'path'
-import encryptFileMapPlugin from './plugins/encrypt-file-map'
-import removeConsole from 'vite-plugin-remove-console'
-import scanFiles from './plugins/scan-input-file'
-import generateFileMapPlugin from './plugins/generate-file-map'
-import svgLoader from 'vite-svg-loader'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+import { crx } from "@crxjs/vite-plugin";
+import manifest from "./src/manifest.config";
+import path from "path";
+import encryptFileMapPlugin from "./plugins/encrypt-file-map";
+import removeConsole from "vite-plugin-remove-console";
+import scanFiles from "./plugins/scan-input-file";
+import generateFileMapPlugin from "./plugins/generate-file-map";
+import svgLoader from "vite-svg-loader";
 
-const isProduction = process.env.NODE_ENV === 'production'
-const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === 'true'
+const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
 
 export default defineConfig({
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      "@components": path.resolve(__dirname, './src/assets/components'),
-      '@icons': path.resolve(__dirname, './src/assets/icons'),
-      '@types': path.resolve(__dirname, './src/assets/types'),
+      "@": path.resolve(__dirname, "./src"),
+      "@components": path.resolve(__dirname, "./src/assets/components"),
+      "@icons": path.resolve(__dirname, "./src/assets/icons"),
+      "@types": path.resolve(__dirname, "./src/assets/types"),
     },
   },
-  root: 'src/',
-  publicDir: '../public',
-  envDir: '../',
-  cacheDir: '../node_modules/.vite',
+  root: "src/",
+  publicDir: "../public",
+  envDir: "../",
+  cacheDir: "../node_modules/.vite",
   plugins: [
     vue(),
     svgLoader(),
@@ -42,12 +41,12 @@ export default defineConfig({
     crx({
       manifest,
       contentScripts: {
-        injectCss: false
-      }
+        injectCss: false,
+      },
     }),
     removeConsole({
       // 保留指定的 console 方法
-      external: ['error', 'warn']  // 保留 console.error 和 console.warn
+      external: ["error", "warn"], // 保留 console.error 和 console.warn
     }),
     generateFileMapPlugin(),
     isEncryptEnabled ? encryptFileMapPlugin() : undefined,
@@ -59,10 +58,10 @@ export default defineConfig({
     mangleQuoted: true,
   },
   build: {
-    outDir: path.resolve(__dirname, 'dist'),
+    outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
     modulePreload: false,
-    minify: 'esbuild',
+    minify: "esbuild",
     manifest: true,
 
     chunkSizeWarningLimit: 1024,
@@ -70,93 +69,110 @@ export default defineConfig({
     cssCodeSplit: true,
     rollupOptions: {
       input: {
-        'pages/profile': path.resolve(__dirname, 'src/pages/profile.html'),
-        ...(isProduction ? {
-          ...scanFiles({
-            dirPath: 'src/apps',
-            prefix: 'apps',
-            useIndexFile: true,
-            recursive: true
-          }),
-          ...scanFiles({
-            dirPath: 'src/content',
-            prefix: 'content',
-            exclude: ['main.ts']
-          }),
-          ...scanFiles({
-            dirPath: 'src/pages/devtools',
-            prefix: 'devtools',
-            extFilter: '.html'
-          }),
-          ...scanFiles({
-            dirPath: 'src/runtime',
-            prefix: 'runtime',
-            useIndexFile: true,
-            recursive: true
-          }),
-          ...scanFiles({
-            dirPath: 'src/workers',
-            prefix: 'workers',
-            useIndexFile: true,
-            recursive: true
-          })
-        } : {}),
+        "pages/profile": path.resolve(__dirname, "src/pages/profile.html"),
+        ...scanFiles({
+          dirPath: "src/apps",
+          prefix: "apps",
+          useIndexFile: true,
+          recursive: true,
+        }),
+        ...scanFiles({
+          dirPath: "src/content",
+          prefix: "content",
+          exclude: ["main.ts"],
+        }),
+        ...scanFiles({
+          dirPath: "src/pages/devtools",
+          prefix: "devtools",
+          extFilter: ".html",
+        }),
+        ...scanFiles({
+          dirPath: "src/runtime",
+          prefix: "runtime",
+          useIndexFile: true,
+          recursive: true,
+        }),
+        ...scanFiles({
+          dirPath: "src/workers",
+          prefix: "workers",
+          useIndexFile: true,
+          recursive: true,
+        }),
       },
       output: {
-        manualChunks: isProduction ? {
-          'vue': ['vue', 'vue-router', 'pinia'],
-          'element-plus': ['element-plus', '@element-plus/icons-vue'],
+        manualChunks: {
+          vue: ["vue", "vue-router", "pinia"],
+          "element-plus": ["element-plus", "@element-plus/icons-vue"],
           // 基础设施 - 纯函数工具，可在 Service Worker 中使用
-          'infrastructure-pure': ['@/utils/pure-utils'],
+          "infrastructure-pure": ["@/utils/pure-utils"],
           // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
-          'infrastructure-dom': ['@/utils/dom-utils'],
-          'message': ['@/message'],
-          'content-runtime': ['@/content/runtime'],
-          'components': ['@/assets/components']
-        } : undefined,
-        chunkFileNames: `assets/js/chunks/chunk-[${isProduction ? 'hash' : 'name'}].js`,
+          "infrastructure-dom": ["@/utils/dom-utils"],
+          message: ["@/message"],
+          "content-runtime": ["@/content/runtime"],
+          components: ["@/assets/components"],
+          jsqr: ["jsqr"],
+        },
+        chunkFileNames: `assets/js/chunks/chunk-[hash].js`,
         assetFileNames: (assetInfo) => {
-          const fileExtname = path.extname(assetInfo.name || '');
-          if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.mp3', '.wav', '.ogg', '.mp4', '.webm', '.ttf', '.woff', '.woff2', '.eot'].includes(fileExtname)) {
+          const fileExtname = path.extname(assetInfo.name || "");
+          if (
+            [
+              ".png",
+              ".jpg",
+              ".jpeg",
+              ".gif",
+              ".svg",
+              ".webp",
+              ".mp3",
+              ".wav",
+              ".ogg",
+              ".mp4",
+              ".webm",
+              ".ttf",
+              ".woff",
+              ".woff2",
+              ".eot",
+            ].includes(fileExtname)
+          ) {
             return `static/[hash].[ext]`;
           }
-          if (fileExtname === '.css') {
+          if (fileExtname === ".css") {
             return `assets/css/[hash].[ext]`;
           }
           return `assets/[hash].[ext]`;
         },
         entryFileNames: (chunkInfo) => {
-          const chunkName = chunkInfo.name || '';
-          if (chunkName.startsWith('content/')) {
+          const chunkName = chunkInfo.name || "";
+          if (chunkName.startsWith("content/")) {
             return `assets/js/content/[hash].js`;
-          } else if (chunkName.startsWith('runtime/')) {
+          } else if (chunkName.startsWith("runtime/")) {
             return `assets/js/runtime/[hash].js`;
-          } else if (chunkName.startsWith('apps/')) {
+          } else if (chunkName.startsWith("apps/")) {
             return `assets/js/apps/[hash].js`;
-          } else if (chunkName.startsWith('devtools/')) {
+          } else if (chunkName.startsWith("devtools/")) {
             return `pages/devtools/[hash].js`;
-          } else if (chunkName.startsWith('workers/')) {
+          } else if (chunkName.startsWith("workers/")) {
             return `static/js/[name].js`;
           } else {
             return `assets/js/[hash].js`;
           }
-        }
+        },
       },
     },
   },
   optimizeDeps: {
     include: [
-      'vue',
-      'pinia',
-      'vue-router',
-      'element-plus',
-      // 'pinyin-pro',
-      'jszip',
-      'file-saver',
-      'crypto-js'
+      "vue",
+      "pinia",
+      "vue-router",
+      "element-plus",
+      "jsqr",
+      "jszip",
+      "file-saver",
+      "crypto-js",
     ],
     esbuildOptions: {
-      target: 'es2022',
-    }
-  }
+      target: "es2022",
+    },
+  },
 });

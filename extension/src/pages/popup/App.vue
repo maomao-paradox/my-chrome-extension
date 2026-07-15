@@ -52,7 +52,8 @@ import { computed, onMounted, ref } from 'vue';
 import BookmarkPage from './views/BookmarkPage.vue';
 import SettingPage from './views/SettingPage.vue';
 import CapturePage from './views/CapturePage.vue';
-import { IconSetting, IconCapture, IconBookmark } from '@icons/index';
+import TOTPTokenPage from './views/TOTPTokenPage.vue';
+import { IconSetting, IconCapture, IconBookmark, IconTime } from '@icons/index';
 import { useDomainState } from './composables/useDomainState.js';
 import { usePopupTheme } from './composables/usePopupTheme.js';
 import { usePopupMouseTrail } from './composables/usePopupMouseTrail.js';
@@ -77,6 +78,13 @@ const tabs = [
     hint: '从当前页面拾取组件，结果同步到开发者工具。',
     icon: IconCapture,
     tabPage: CapturePage,
+  },
+  {
+    key: 'tokens',
+    label: '令牌',
+    hint: '查看后端生成的动态验证码。',
+    icon: IconTime,
+    tabPage: TOTPTokenPage,
   },
   // {
   //   key: 'accessibility',

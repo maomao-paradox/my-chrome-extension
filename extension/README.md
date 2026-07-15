@@ -55,6 +55,13 @@ npm run build:enc
 - 锚点页使用紧凑布局，搜索、导入、导出和列表操作都适配浏览器扩展的小窗口宽度
 - `src/pages/popup/views/TableContainer.vue` 支持 `density`、`sectionGap`、`contentGap`、`heroGap`、`rightMaxWidth` 等公共布局参数，页面可按需要复用同一头部/内容容器
 
+### Popup 动态令牌
+- Popup 新增“令牌”标签页，在扩展本地生成 TOTP 动态码，不依赖后端服务
+- 令牌数据保存到 `chrome.storage.local`；新增表单提交后会清空输入框
+- 支持粘贴 `otpauth://totp/...` 链接，也支持手动填写发行方、账户和 Base32 secret
+- 支持上传二维码图片，通过 `jsqr` 解析出 `otpauth://totp/...` 后填入表单
+- 倒计时每秒刷新，到达周期边界后自动生成新动态码
+
 ### 后台页签脚本执行
 - 后台脚本监听 `CREATE_TAB_WITH_SCRIPT` 消息，可新建页签并在目标页面开始加载后立即注入扩展内脚本
 - `payload.url` 仅支持 `http` / `https` 页面，`payload.scriptPath` 建议使用 `file-map` key，例如 `js/runtime/bookmark-highlight`
