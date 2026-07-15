@@ -68,6 +68,17 @@ export default defineConfig({
     sourcemap: false,
     cssCodeSplit: true,
     rollupOptions: {
+       onwarn(warning, warn) {
+        // 过滤所有提到的警告
+        const ignored = [
+          'contains an annotation that Rollup cannot interpret',
+          // 'Use of eval'
+        ];
+        if (ignored.some(msg => warning.message.includes(msg))) {
+          return;
+        }
+        warn(warning);
+      },
       input: {
         "pages/profile": path.resolve(__dirname, "src/pages/profile.html"),
         ...scanFiles({
