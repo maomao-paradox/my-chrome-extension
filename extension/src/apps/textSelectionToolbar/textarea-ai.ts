@@ -53,33 +53,6 @@ const normalizeForCompare = (value: string): string =>
     .replace(/[，。！？、；：,.!?;:\-—'"“”‘’`]/g, "")
     .toLowerCase();
 
-const mergeStreamContent = (current: string, chunk: string): string => {
-  if (!chunk) {
-    return current;
-  }
-
-  if (!current) {
-    return chunk;
-  }
-
-  if (chunk === current || current.endsWith(chunk)) {
-    return current;
-  }
-
-  if (chunk.startsWith(current)) {
-    return chunk;
-  }
-
-  const maxOverlap = Math.min(current.length, chunk.length);
-  for (let overlap = maxOverlap; overlap > 0; overlap -= 1) {
-    if (current.endsWith(chunk.slice(0, overlap))) {
-      return current + chunk.slice(overlap);
-    }
-  }
-
-  return current + chunk;
-};
-
 const removeRepeatedWholeContent = (value: string): string => {
   const text = value.trim();
   if (text.length < 24) {
@@ -243,6 +216,7 @@ const setNativeTextareaValue = (
 
 const generateTextareaContent = async (
   textarea: HTMLTextAreaElement,
+  onContent?: (content: string) => void,
 ): Promise<string> => {
   const messageId = createMessageId();
   const config = await loadAIConfig();
@@ -278,7 +252,13 @@ const generateTextareaContent = async (
       }
 
       if (message.type === "AI_CONVERSATION_STREAM_DATA") {
-        content = mergeStreamContent(content, message.payload.content || "");
+        const chunk = message.payload.content || "";
+        if (!chunk) {
+          return;
+        }
+
+        content += chunk;
+        onContent?.(content);
         return;
       }
 
@@ -326,23 +306,47 @@ const fillTextarea = async (textarea: HTMLTextAreaElement): Promise<void> => {
 
   const valueBeforeGeneration = textarea.value;
   const shouldReplaceExistingValue = Boolean(valueBeforeGeneration.trim());
+  let lastStreamedValue = "";
+  let userEditedDuringGeneration = false;
+
+  const writeStreamContent = (content: string): void => {
+    if (userEditedDuringGeneration) {
+      return;
+    }
+
+    if (textarea.value !== lastStreamedValue) {
+      userEditedDuringGeneration = true;
+      return;
+    }
+
+    lastStreamedValue = content;
+    setNativeTextareaValue(textarea, content);
+  };
+
   setTextareaState(textarea, "generating");
   if (shouldReplaceExistingValue) {
     setNativeTextareaValue(textarea, "");
   }
 
   try {
-    const generated = await generateTextareaContent(textarea);
-    if (textarea.value.trim()) {
+    const generated = await generateTextareaContent(textarea, writeStreamContent);
+    if (userEditedDuringGeneration || textarea.value !== lastStreamedValue) {
       setTextareaState(textarea, "skipped");
       return;
     }
 
-    setNativeTextareaValue(textarea, generated);
+    if (generated !== lastStreamedValue) {
+      lastStreamedValue = generated;
+      setNativeTextareaValue(textarea, generated);
+    }
     setTextareaState(textarea, "filled");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (shouldReplaceExistingValue && !textarea.value.trim()) {
+    if (
+      shouldReplaceExistingValue &&
+      !userEditedDuringGeneration &&
+      textarea.value === lastStreamedValue
+    ) {
       setNativeTextareaValue(textarea, valueBeforeGeneration);
     }
     setTextareaState(textarea, "error", message);
