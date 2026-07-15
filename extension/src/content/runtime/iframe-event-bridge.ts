@@ -316,14 +316,5 @@ export const installTopFrameEventBridge = (ctx: AppContext): void => {
         if (event.data.target !== 'content') {
             return;
         }
-
-        if (event.data.type === 'SCRIPT_INJECTION_SUCCESS') {
-            maLogger.log('脚本注入成功：', event.data.payload);
-            ctx.message?.success?.('脚本注入成功', { duration: 3000 });
-        } else if (event.data.type === 'SCRIPT_INJECTION_ERROR') {
-            maLogger.error('脚本注入失败：', event.data.payload);
-            const errorMsg = event.data.payload.error || '脚本注入失败';
-            ctx.message?.error?.(`脚本注入失败：${errorMsg}`, { duration: 3000 });
-        }
     });
 };

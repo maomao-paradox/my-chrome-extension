@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.698Z
  */
 
-import { createApp, App } from 'vue';
+import { createApp, App } from "vue";
 import type {
   StyleObject,
   AttributeObject,
@@ -16,8 +16,8 @@ import type {
   CloneElemOpts,
   AddElemOpts,
   WaitForSelectorOptions,
-} from '@/types';
-import { getAssetsAbstractPath, getRuntimeScript } from '@/utils/common';
+} from "@/types";
+import { getAssetsAbstractPath, getRuntimeScript } from "@/utils/common";
 
 export const $id = document.getElementById.bind(document);
 export const $query = document.querySelectorAll.bind(document);
@@ -26,9 +26,13 @@ export function whenDomReady(callback: () => void) {
   if (document.body) {
     callback();
   } else {
-    window.addEventListener('load', function () {
-      callback();
-    }, { once: true });
+    window.addEventListener(
+      "load",
+      function () {
+        callback();
+      },
+      { once: true },
+    );
   }
 }
 
@@ -84,7 +88,7 @@ export function setElAttributes(el: HTMLElement, attrs: AttributeObject): void {
     for (const [k, v] of Object.entries(attrs)) {
       try {
         // maLogger.log(k, v);
-        k === 'class' ? el.className = v as string : (el as any)[k] = v;
+        k === "class" ? (el.className = v as string) : ((el as any)[k] = v);
       } catch (error) {
         maLogger.error(`setElAttributes ${k} error: ${error}`);
       }
@@ -93,7 +97,10 @@ export function setElAttributes(el: HTMLElement, attrs: AttributeObject): void {
   // maLogger.log("设置之后的:", el);
 }
 
-export function setElEventListeners(el: HTMLElement, events: EventListenerObject): void {
+export function setElEventListeners(
+  el: HTMLElement,
+  events: EventListenerObject,
+): void {
   if (typeof events === "object" && Object.keys(events).length > 0) {
     for (const i in events) {
       try {
@@ -115,7 +122,8 @@ export function createEl(options: CreateElemOpts): HTMLElement {
   } else if (tag instanceof HTMLElement) {
     el = tag as HTMLElement;
   }
-  if (!el) throw new Error("createEl error: tag is not a string or HTMLElement");
+  if (!el)
+    throw new Error("createEl error: tag is not a string or HTMLElement");
 
   if (tag === "button") {
     (el as HTMLButtonElement).type = "button";
@@ -124,7 +132,7 @@ export function createEl(options: CreateElemOpts): HTMLElement {
   if (style) setElStyle(el, style);
   if (eventlistener) setElEventListeners(el, eventlistener);
   if (children && Array.isArray(children) && children.length > 0) {
-    children.forEach(child => {
+    children.forEach((child) => {
       el.appendChild(child instanceof HTMLElement ? child : createEl(child));
     });
   }
@@ -139,17 +147,34 @@ export function cloneEl(options: CloneElemOpts): HTMLElement {
 }
 
 const setupAutoRemove = ($el: HTMLElement, delay: number): void => {
-  $el.onload = () => setTimeout(() => {
-    try { $el.remove(); } catch (e) { maLogger.error('Failed to auto remove element:', e); }
-  }, delay);
+  $el.onload = () =>
+    setTimeout(() => {
+      try {
+        $el.remove();
+      } catch (e) {
+        maLogger.error("Failed to auto remove element:", e);
+      }
+    }, delay);
 };
 
-const insertElementIntoDom = ($el: HTMLElement, refEl: Element | ShadowRoot, position?: string): void => {
-  if ('insertAdjacentElement' in refEl) {
-    const positions: InsertPosition[] = ["beforebegin", "afterbegin", "beforeend", "afterend"];
-    const pos = position && positions.includes(position as InsertPosition) ? position : "beforeend";
+const insertElementIntoDom = (
+  $el: HTMLElement,
+  refEl: Element | ShadowRoot,
+  position?: string,
+): void => {
+  if ("insertAdjacentElement" in refEl) {
+    const positions: InsertPosition[] = [
+      "beforebegin",
+      "afterbegin",
+      "beforeend",
+      "afterend",
+    ];
+    const pos =
+      position && positions.includes(position as InsertPosition)
+        ? position
+        : "beforeend";
     refEl.insertAdjacentElement(pos as InsertPosition, $el);
-  } else if (["start", "begin", "first"].includes(position || '')) {
+  } else if (["start", "begin", "first"].includes(position || "")) {
     refEl.prepend($el);
   } else {
     refEl.appendChild($el);
@@ -158,8 +183,19 @@ const insertElementIntoDom = ($el: HTMLElement, refEl: Element | ShadowRoot, pos
 
 const createDomElement = (opts: AddElemOpts): HTMLElement => {
   const { tag, attrs, style, eventlistener, children } = opts;
-  if (typeof tag === 'object' && 'nodeType' in tag && (tag as HTMLElement).nodeType === 1) {
-    return cloneEl({ deep: true, el: tag as HTMLElement, attrs, style, eventlistener, children });
+  if (
+    typeof tag === "object" &&
+    "nodeType" in tag &&
+    (tag as HTMLElement).nodeType === 1
+  ) {
+    return cloneEl({
+      deep: true,
+      el: tag as HTMLElement,
+      attrs,
+      style,
+      eventlistener,
+      children,
+    });
   }
   return createEl({ tag, attrs, style, eventlistener, children });
 };
@@ -169,10 +205,14 @@ const createDomElement = (opts: AddElemOpts): HTMLElement => {
  * @param opts 元素添加选项
  * @returns 一个函数，用于将元素添加到指定的 DOM 元素中，通常配合waitForElement使用
  */
-export function addElementToDom(opts: AddElemOpts): (referElement?: Element | ShadowRoot, position?: string) => HTMLElement {
-  if (typeof document === 'undefined') {
-    maLogger.warn('Document object is not available in current context');
-    return () => { throw new Error('Cannot create DOM element: document is not available'); };
+export function addElementToDom(
+  opts: AddElemOpts,
+): (referElement?: Element | ShadowRoot, position?: string) => HTMLElement {
+  if (typeof document === "undefined") {
+    maLogger.warn("Document object is not available in current context");
+    return () => {
+      throw new Error("Cannot create DOM element: document is not available");
+    };
   }
 
   const { tag, attrs, style, eventlistener, children, autoRemoveDelay } = opts;
@@ -181,8 +221,11 @@ export function addElementToDom(opts: AddElemOpts): (referElement?: Element | Sh
   if (elemId) {
     const existing = $id(elemId) as HTMLElement;
     if (existing) {
-      try { eventlistener && setElEventListeners(existing, eventlistener); }
-      catch (e) { maLogger.error(`Failed setting listeners on #${elemId}:`, e); }
+      try {
+        eventlistener && setElEventListeners(existing, eventlistener);
+      } catch (e) {
+        maLogger.error(`Failed setting listeners on #${elemId}:`, e);
+      }
       return () => existing;
     }
   }
@@ -192,9 +235,12 @@ export function addElementToDom(opts: AddElemOpts): (referElement?: Element | Sh
     setupAutoRemove($el, autoRemoveDelay);
   }
 
-  return (referElement?: Element | ShadowRoot, position?: string): HTMLElement => {
+  return (
+    referElement?: Element | ShadowRoot,
+    position?: string,
+  ): HTMLElement => {
     const refEl = referElement || document.body;
-    if (!refEl || typeof refEl !== 'object' || !('nodeType' in refEl)) {
+    if (!refEl || typeof refEl !== "object" || !("nodeType" in refEl)) {
       throw new Error(`Invalid DOM element: ${String(refEl)}`);
     }
     insertElementIntoDom($el, refEl, position);
@@ -202,31 +248,30 @@ export function addElementToDom(opts: AddElemOpts): (referElement?: Element | Sh
   };
 }
 
-const sendScriptMessage = (messageType: 'SCRIPT_INJECTION_SUCCESS' | 'SCRIPT_INJECTION_ERROR', payload: any): void => {
-  if (typeof window === 'undefined' || !window.postMessage) return;
-  window.postMessage({ type: messageType, payload, target: 'content' }, '*');
-};
-
-const createScriptElement = async (type: 'file' | 'code', content: string): Promise<HTMLScriptElement> => {
+const createScriptElement = async (
+  type: "file" | "code",
+  content: string,
+): Promise<HTMLScriptElement> => {
   if (!["file", "code"].includes(type) || content.length === 0) {
     throw new Error("injectScript: type must be 'file' or 'code'.");
   }
 
-  const scriptSrc = type === "code"
-    ? (sessionStorage.setItem('js-code', content), getRuntimeScript("inject"))
-    : content;
+  const scriptSrc =
+    type === "code"
+      ? (sessionStorage.setItem("js-code", content), getRuntimeScript("inject"))
+      : content;
 
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   script.src = scriptSrc;
   script.id = "inject-script";
 
-  script.onload = (e: Event) => {
-    (e.target as HTMLElement)?.remove();
-    sendScriptMessage('SCRIPT_INJECTION_SUCCESS', { type, content, scriptSrc });
+  script.onload = (evt: Event) => {
+    (evt.target as HTMLElement)?.remove();
+    showSuccessMessage("脚本已生效!");
   };
 
-  script.onerror = (e: Event | any) => {
-    sendScriptMessage('SCRIPT_INJECTION_ERROR', { type, content, scriptSrc, error: typeof e === 'string' ? e : e.message });
+  script.onerror = (evt: Event | any) => {
+    maLogger.error(`${content}脚本注入失败：`, evt.message);
   };
 
   return script;
@@ -238,62 +283,62 @@ interface InjectScriptOptions {
   root?: HTMLElement;
 }
 
-export async function injectScriptToActivateTab(opts: InjectScriptOptions): Promise<void> {
+export async function injectScriptToActivateTab(
+  opts: InjectScriptOptions,
+): Promise<void> {
   const { file, scriptStr, root } = opts;
   if (!file && !scriptStr) {
-    throw new Error('Either file or scriptStr is required.');
+    throw new Error("Either file or scriptStr is required.");
   }
 
-  const type = file ? 'file' : 'code';
+  const type = file ? "file" : "code";
   const content = file || scriptStr;
 
   try {
     const script = await createScriptElement(type, content!);
     (root ?? document.body).appendChild(script);
-  } catch (error) {
-    maLogger.error("脚本注入失败：", error);
-    sendScriptMessage('SCRIPT_INJECTION_ERROR', {
-      type,
-      content,
-      error: error instanceof Error ? error.message : '未知错误'
-    });
-    throw error;
+  } catch (err: any) {
+    maLogger.error(`${content}脚本注入失败：`, err.message);
+    throw err;
   }
 }
 
-export function addFileInput(fileChangeFunc: (file: File) => Promise<void>): HTMLInputElement {
+export function addFileInput(
+  fileChangeFunc: (file: File) => Promise<void>,
+): HTMLInputElement {
   try {
     if (fileChangeFunc === undefined || typeof fileChangeFunc !== "function") {
-      throw new Error('The fileChangeFunc is not a function.');
+      throw new Error("The fileChangeFunc is not a function.");
     }
 
     const addUploadEl = addElementToDom({
-      tag: 'input',
-      attrs: { id: 'upload-files', type: 'file' },
+      tag: "input",
+      attrs: { id: "upload-files", type: "file" },
       style: { display: "none" },
       autoRemoveDelay: 1000,
       eventlistener: {
-        "change": async () => {
+        change: async () => {
           try {
-            const selectedFile = ($id("upload-files") as HTMLInputElement).files![0];
+            const selectedFile = ($id("upload-files") as HTMLInputElement)
+              .files![0];
             const { name, size } = selectedFile;
             await fileChangeFunc(selectedFile);
           } catch (error) {
             maLogger.error(error);
             throw error;
           }
-        }
-      }
-    }
-    );
+        },
+      },
+    });
 
-    return (typeof addUploadEl === 'function' ? addUploadEl.call(null) : addUploadEl) as HTMLInputElement;
+    return (
+      typeof addUploadEl === "function" ? addUploadEl.call(null) : addUploadEl
+    ) as HTMLInputElement;
   } catch (error) {
     maLogger.error(error);
     throw error;
   }
 }
-
 
 /* -------------------- 状态机 -------------------- */
 class SearchState {
@@ -302,17 +347,23 @@ class SearchState {
   /** 已触发回调的元素（WeakSet 不阻碍 GC） */
   private readonly called = new WeakSet<Element>();
 
-  stopReason: 'first' | 'count' | 'times' | 'timeout' | 'abort' | null = null;
+  stopReason: "first" | "count" | "times" | "timeout" | "abort" | null = null;
   checkTimes = 0;
 
-  constructor(public opts: WaitForSelectorOptions) { }
+  constructor(public opts: WaitForSelectorOptions) {}
 
   /** 是否该停下来了 */
   shouldStop(): boolean {
     const { once, maxWaitTimes } = this.opts;
     // maLogger.table({ once, maxWaitTimes, foundSize: this.found.size, checkTimes: this.checkTimes });
-    if (once && this.found.size >= 1) { this.stopReason = 'first'; return true; }
-    if (maxWaitTimes && this.checkTimes >= maxWaitTimes) { this.stopReason = 'times'; return true; }
+    if (once && this.found.size >= 1) {
+      this.stopReason = "first";
+      return true;
+    }
+    if (maxWaitTimes && this.checkTimes >= maxWaitTimes) {
+      this.stopReason = "times";
+      return true;
+    }
     return false;
   }
 
@@ -339,7 +390,7 @@ class ElementSearcher {
     state: SearchState,
     private resolve: (els: Element[]) => void,
     private reject: (err: Error) => void,
-    private signal: AbortSignal
+    private signal: AbortSignal,
   ) {
     this.state = state;
     this.root = this.pickRoot(); // 主文档或 iframe document
@@ -349,7 +400,7 @@ class ElementSearcher {
   /** 开始第一次查找 */
   start(): void {
     // 初始化回调
-    if (typeof this.opts.initCallback === 'function') {
+    if (typeof this.opts.initCallback === "function") {
       this.opts.initCallback();
     }
 
@@ -369,15 +420,15 @@ class ElementSearcher {
 
     const handleLoad = () => {
       // iframe 加载完成后，主动检查根节点
-      maLogger.log('[waitForSelector] iframe loaded, checking root node');
+      maLogger.log("[waitForSelector] iframe loaded, checking root node");
       this.searchOnce();
     };
 
-    iframe.addEventListener('load', handleLoad);
+    iframe.addEventListener("load", handleLoad);
 
     // 保存清理函数
     this.cleanupFunctions.push(() => {
-      iframe.removeEventListener('load', handleLoad);
+      iframe.removeEventListener("load", handleLoad);
     });
   }
 
@@ -390,25 +441,38 @@ class ElementSearcher {
     if (!iframe) return document; // 找不到 iframe 就退回主文档
     try {
       const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!doc) throw new Error('cannot access iframe document');
+      if (!doc) throw new Error("cannot access iframe document");
       // maLogger.log("已定位到Iframe的dom文档：", doc);
       return doc;
     } catch (e) {
-      maLogger.warn('[waitForSelector] iframe access error, fallback to main document');
+      maLogger.warn(
+        "[waitForSelector] iframe access error, fallback to main document",
+      );
       return document;
     }
   }
 
   private bindAbort(): void {
-    if (this.signal.aborted) { this.cleanup(); this.reject(new Error('aborted')); return; }
-    this.signal.addEventListener('abort', () => { this.cleanup(); this.reject(new Error('aborted')); }, { once: true });
+    if (this.signal.aborted) {
+      this.cleanup();
+      this.reject(new Error("aborted"));
+      return;
+    }
+    this.signal.addEventListener(
+      "abort",
+      () => {
+        this.cleanup();
+        this.reject(new Error("aborted"));
+      },
+      { once: true },
+    );
   }
 
   private scheduleTimeout(): void {
     const { timeout = 30000 } = this.opts;
     if (timeout <= 0) return;
     this.timeoutId = setTimeout(() => {
-      this.state.stopReason = 'timeout';
+      this.state.stopReason = "timeout";
       this.resolve(Array.from(this.state.found));
     }, timeout);
   }
@@ -426,7 +490,10 @@ class ElementSearcher {
       // 如果有observer，重新设置观察
       if (this.observer) {
         this.observer.disconnect();
-        const opts = this.opts.observerOptions || { childList: true, subtree: true };
+        const opts = this.opts.observerOptions || {
+          childList: true,
+          subtree: true,
+        };
         this.observer.observe(this.root, opts);
       }
     }
@@ -436,8 +503,10 @@ class ElementSearcher {
     try {
       if (Array.isArray(selector)) {
         // 处理选择器数组
-        selector.forEach(selector => {
-          const elements = Array.from(this.root.querySelectorAll<HTMLElement>(selector));
+        selector.forEach((selector) => {
+          const elements = Array.from(
+            this.root.querySelectorAll<HTMLElement>(selector),
+          );
           list = [...list, ...elements];
         });
       } else {
@@ -445,7 +514,7 @@ class ElementSearcher {
         list = Array.from(this.root.querySelectorAll<HTMLElement>(selector));
       }
     } catch (e) {
-      maLogger.warn('[waitForSelector] invalid selector:', e);
+      maLogger.warn("[waitForSelector] invalid selector:", e);
       // 非法选择器直接停掉，避免死循环
       this.cleanup();
       this.reject(new Error(`invalid selector "${selector}"`));
@@ -469,7 +538,10 @@ class ElementSearcher {
 
     // 没使用 observer 时靠轮询
     if (!this.observer) {
-      this.intervalId = setTimeout(() => this.searchOnce(), this.opts.interval || 100);
+      this.intervalId = setTimeout(
+        () => this.searchOnce(),
+        this.opts.interval || 100,
+      );
     }
   }
 
@@ -477,8 +549,11 @@ class ElementSearcher {
   private fireCallback(el: HTMLElement): void {
     const { callback, callbackArgs = [] } = this.opts;
     if (callback) {
-      try { callback(el, ...callbackArgs); }
-      catch (e) { maLogger.error('[waitForSelector] callback error:', e); }
+      try {
+        callback(el, ...callbackArgs);
+      } catch (e) {
+        maLogger.error("[waitForSelector] callback error:", e);
+      }
     }
   }
 
@@ -486,15 +561,22 @@ class ElementSearcher {
   private passesFilter(el: Element): boolean {
     const { filter } = this.opts;
     if (!filter) return true;
-    try { return filter(el); }
-    catch (e) { maLogger.error('[waitForSelector] filter error:', e); return false; }
+    try {
+      return filter(el);
+    } catch (e) {
+      maLogger.error("[waitForSelector] filter error:", e);
+      return false;
+    }
   }
 
   /** 建立 MutationObserver */
   private buildObserver(): void {
     if (this.signal.aborted) return;
     try {
-      const opts = this.opts.observerOptions || { childList: true, subtree: true };
+      const opts = this.opts.observerOptions || {
+        childList: true,
+        subtree: true,
+      };
       let tick = 0;
       this.observer = new MutationObserver(() => {
         tick++;
@@ -508,30 +590,50 @@ class ElementSearcher {
       });
       this.observer.observe(this.root, opts);
     } catch (e) {
-      maLogger.warn('[waitForSelector] MutationObserver failed, fallback to polling:', e);
+      maLogger.warn(
+        "[waitForSelector] MutationObserver failed, fallback to polling:",
+        e,
+      );
       this.observer = null;
     }
   }
 
   /** 清理所有资源 */
   private cleanup(): void {
-    this.observer?.disconnect(); this.observer = null;
-    if (this.intervalId) { clearTimeout(this.intervalId); this.intervalId = null; }
-    if (this.timeoutId) { clearTimeout(this.timeoutId); this.timeoutId = null; }
+    this.observer?.disconnect();
+    this.observer = null;
+    if (this.intervalId) {
+      clearTimeout(this.intervalId);
+      this.intervalId = null;
+    }
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
     // 执行所有清理函数
-    this.cleanupFunctions.forEach(fn => fn());
+    this.cleanupFunctions.forEach((fn) => fn());
     this.cleanupFunctions = [];
   }
 }
 
 /* -------------------- 对外唯一入口 -------------------- */
-export function waitForSelector(options: WaitForSelectorOptions): Promise<Element[]> {
-  if (!options.selector) return Promise.reject(new Error('selector is required'));
-  if (Array.isArray(options.selector) && options.selector.length === 0) return Promise.reject(new Error('selector array cannot be empty'));
+export function waitForSelector(
+  options: WaitForSelectorOptions,
+): Promise<Element[]> {
+  if (!options.selector)
+    return Promise.reject(new Error("selector is required"));
+  if (Array.isArray(options.selector) && options.selector.length === 0)
+    return Promise.reject(new Error("selector array cannot be empty"));
 
   return new Promise<Element[]>((resolve, reject) => {
     const state = new SearchState(options);
-    const searcher = new ElementSearcher(options, state, resolve, reject, options.signal || new AbortController().signal);
+    const searcher = new ElementSearcher(
+      options,
+      state,
+      resolve,
+      reject,
+      options.signal || new AbortController().signal,
+    );
     searcher.start();
   });
 }
@@ -539,16 +641,16 @@ export function waitForSelector(options: WaitForSelectorOptions): Promise<Elemen
 export function injectVueComponent(
   component: any,
   props?: Record<string, any> | null,
-  emitFunc?: Function
+  emitFunc?: Function,
 ): (byElement?: HTMLElement, position?: string) => void {
   const duration = props?.duration ? props.duration + 1000 : null;
 
   return function (byElement?: HTMLElement, position?: string) {
     const container = addElementToDom({
-      tag: 'div',
+      tag: "div",
       attrs: { id: `vue-container-${Date.now()}` },
-      style: { zIndex: '9999' },
-      autoRemoveDelay: duration
+      style: { zIndex: "9999" },
+      autoRemoveDelay: duration,
     })(byElement, position);
 
     const app: App = createApp(component, props);
@@ -560,11 +662,11 @@ export function injectVueComponent(
 export function saveToLocal(blob: Blob, fileName: string): void {
   try {
     const downloadLink = addElementToDom({
-      tag: 'a',
+      tag: "a",
       attrs: {
-        id: 'download-link',
+        id: "download-link",
         href: window.URL.createObjectURL(blob),
-        download: fileName
+        download: fileName,
       },
       style: { display: "none" },
       eventlistener: {
@@ -573,29 +675,28 @@ export function saveToLocal(blob: Blob, fileName: string): void {
             window.URL.revokeObjectURL(this.href);
             this.remove();
           }, 100);
-        }
-      }
+        },
+      },
     })();
 
     (downloadLink as HTMLAnchorElement).click();
     maLogger.log("文件下载成功:", fileName);
   } catch (error) {
-    maLogger.error('文件下载出错:', error);
+    maLogger.error("文件下载出错:", error);
     throw error;
   }
 }
 
-
 export enum PositionStrategy {
-  Top = 'top',
-  Down = 'down',
-  Left = 'left',
-  Right = 'right',
-  Center = 'center',
-  TopLeft = 'top-left',
-  TopRight = 'top-right',
-  LeftDown = 'left-down',
-  RightDown = 'right-down'
+  Top = "top",
+  Down = "down",
+  Left = "left",
+  Right = "right",
+  Center = "center",
+  TopLeft = "top-left",
+  TopRight = "top-right",
+  LeftDown = "left-down",
+  RightDown = "right-down",
 }
 
 /**
@@ -603,7 +704,6 @@ export enum PositionStrategy {
  * 封装元素的绝对位置信息和相关操作方法
  */
 export class ElementPositionInfo {
-
   public element: HTMLElement | null;
   // 视口相对位置
   public top: number;
@@ -630,13 +730,13 @@ export class ElementPositionInfo {
   };
 
   constructor(options: {
-    element?: HTMLElement | null,
-    rect: DOMRect,
-    zIndex: number,
-    scrollX: number,
-    scrollY: number,
-    viewportWidth: number,
-    viewportHeight: number
+    element?: HTMLElement | null;
+    rect: DOMRect;
+    zIndex: number;
+    scrollX: number;
+    scrollY: number;
+    viewportWidth: number;
+    viewportHeight: number;
   }) {
     this.element = options.element || null;
     // 视口相对位置
@@ -653,14 +753,14 @@ export class ElementPositionInfo {
     this.absoluteLeft = options.rect.left + options.scrollX;
 
     // 元素属性
-    this.id = options.element?.id || '';
-    this.className = options.element?.className || '';
-    this.tagName = options.element?.tagName || '';
+    this.id = options.element?.id || "";
+    this.className = options.element?.className || "";
+    this.tagName = options.element?.tagName || "";
 
     // 视口信息
     this.viewport = {
       width: options.viewportWidth,
-      height: options.viewportHeight
+      height: options.viewportHeight,
     };
   }
 
@@ -681,25 +781,27 @@ export class ElementPositionInfo {
     } else if (shadowHostId) {
       const shadowHost = document.getElementById(shadowHostId);
       if (!shadowHost || !shadowHost.shadowRoot) {
-        throw new Error(`Shadow host with id "${shadowHostId}" not found or has no shadow root`);
+        throw new Error(
+          `Shadow host with id "${shadowHostId}" not found or has no shadow root`,
+        );
       }
       targetShadowRoot = shadowHost.shadowRoot;
     } else {
-      throw new Error('Either shadowRoot or shadowHostId must be provided');
+      throw new Error("Either shadowRoot or shadowHostId must be provided");
     }
 
     // 创建容器元素
-    const container = document.createElement('div');
+    const container = document.createElement("div");
 
     // 设置位置样式
     const positionStyle = {
-      position: 'fixed',
+      position: "fixed",
       top: `${this.top}px`,
       left: `${this.left}px`,
       width: `${this.width}px`,
       height: `${this.height}px`,
-      zIndex: '9999',
-      ...style
+      zIndex: "9999",
+      ...style,
     };
 
     // 应用样式
@@ -714,7 +816,7 @@ export class ElementPositionInfo {
 
     // 添加内容
     if (content) {
-      if (typeof content === 'string') {
+      if (typeof content === "string") {
         container.innerHTML = content;
       } else if (content instanceof HTMLElement) {
         container.appendChild(content);
@@ -730,33 +832,52 @@ export class ElementPositionInfo {
   public positionElement(options: {
     targetElement: { _observers?: any } & HTMLElement;
     strategy?: PositionStrategy;
-    alignment?: 'start' | 'center' | 'end';
+    alignment?: "start" | "center" | "end";
     offset?: { x?: number; y?: number };
     observeReference?: boolean;
     pinned?: boolean;
-    containment?: 'inside' | 'outside';
+    containment?: "inside" | "outside";
   }): HTMLElement {
-    const { targetElement, strategy = PositionStrategy.Down, alignment = "start", offset, observeReference = false, pinned = false, containment = 'outside' } = options;
-    const offsetX = offset?.x ?? 0, offsetY = offset?.y ?? 0, inside = containment === 'inside';
-    const elemW = targetElement.offsetWidth, elemH = targetElement.offsetHeight;
+    const {
+      targetElement,
+      strategy = PositionStrategy.Down,
+      alignment = "start",
+      offset,
+      observeReference = false,
+      pinned = false,
+      containment = "outside",
+    } = options;
+    const offsetX = offset?.x ?? 0,
+      offsetY = offset?.y ?? 0,
+      inside = containment === "inside";
+    const elemW = targetElement.offsetWidth,
+      elemH = targetElement.offsetHeight;
 
-    if (pinned) Object.defineProperties(targetElement.style, { position: { value: 'fixed' }, zIndex: { value: '9999' } });
+    if (pinned)
+      Object.defineProperties(targetElement.style, {
+        position: { value: "fixed" },
+        zIndex: { value: "9999" },
+      });
 
     const positionMap: Record<string, { x?: number; y?: number }> = {
-      'top': { y: inside ? this.top + offsetY : this.top - elemH - offsetY },
-      'down': { y: inside ? this.bottom - elemH - offsetY : this.bottom + offsetY },
-      'left': { x: inside ? this.left + offsetX : this.left - elemW - offsetX },
-      'right': { x: inside ? this.right - elemW - offsetX : this.right + offsetX },
-      'top-left': inside
+      top: { y: inside ? this.top + offsetY : this.top - elemH - offsetY },
+      down: {
+        y: inside ? this.bottom - elemH - offsetY : this.bottom + offsetY,
+      },
+      left: { x: inside ? this.left + offsetX : this.left - elemW - offsetX },
+      right: {
+        x: inside ? this.right - elemW - offsetX : this.right + offsetX,
+      },
+      "top-left": inside
         ? { x: this.left + offsetX, y: this.top + offsetY }
         : { x: this.left - elemW - offsetX, y: this.top - elemH - offsetY },
-      'top-right': inside
+      "top-right": inside
         ? { x: this.right - elemW - offsetX, y: this.top + offsetY }
         : { x: this.right + offsetX, y: this.top - elemH - offsetY },
-      'left-down': inside
+      "left-down": inside
         ? { x: this.left + offsetX, y: this.bottom - elemH - offsetY }
         : { x: this.left - elemW - offsetX, y: this.bottom + offsetY },
-      'right-down': inside
+      "right-down": inside
         ? { x: this.right - elemW - offsetX, y: this.bottom - elemH - offsetY }
         : { x: this.right + offsetX, y: this.bottom + offsetY },
     };
@@ -765,20 +886,23 @@ export class ElementPositionInfo {
     x ??= this.left + (this.width - elemW) / 2 + offsetX;
     y ??= this.top + (this.height - elemH) / 2 + offsetY;
 
-    if (alignment === 'center') {
-      (strategy === 'top' || strategy === 'down')
-        ? x = this.left + (this.width - elemW) / 2 + offsetX
-        : y = this.top + (this.height - elemH) / 2 + offsetY;
-    } else if (alignment === 'end') {
-      (strategy === 'top' || strategy === 'down')
-        ? x = this.right - elemW + offsetX
-        : y = this.bottom - elemH + offsetY;
+    if (alignment === "center") {
+      strategy === "top" || strategy === "down"
+        ? (x = this.left + (this.width - elemW) / 2 + offsetX)
+        : (y = this.top + (this.height - elemH) / 2 + offsetY);
+    } else if (alignment === "end") {
+      strategy === "top" || strategy === "down"
+        ? (x = this.right - elemW + offsetX)
+        : (y = this.bottom - elemH + offsetY);
     }
 
     const finalX = Math.max(0, Math.min(x, this.viewport.width - elemW));
     const finalY = Math.max(0, Math.min(y, this.viewport.height - elemH));
 
-    Object.defineProperties(targetElement.style, { left: { value: `${finalX}px` }, top: { value: `${finalY}px` } });
+    Object.defineProperties(targetElement.style, {
+      left: { value: `${finalX}px` },
+      top: { value: `${finalY}px` },
+    });
 
     if (observeReference) setupReferenceObserver(this.element, targetElement);
 
@@ -786,47 +910,65 @@ export class ElementPositionInfo {
   }
 }
 
-const setupReferenceObserver = (referenceElement: Node | null, targetElement: HTMLElement): void => {
+const setupReferenceObserver = (
+  referenceElement: Node | null,
+  targetElement: HTMLElement,
+): void => {
   const observer = new MutationObserver(() => {
     let exists = false;
-    try { exists = document.contains(referenceElement); } catch { exists = false; }
+    try {
+      exists = document.contains(referenceElement);
+    } catch {
+      exists = false;
+    }
     if (exists) {
       const style = window.getComputedStyle(referenceElement as Element);
-      exists = style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+      exists =
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        style.opacity !== "0";
     }
     if (!exists) {
-      try { targetElement.remove(); } catch { }
+      try {
+        targetElement.remove();
+      } catch {}
       observer.disconnect();
     }
   });
   observer.observe(document.body, {
-    childList: true, subtree: true, attributes: true,
-    attributeFilter: ['style', 'class', 'display', 'visibility']
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["style", "class", "display", "visibility"],
   });
   (targetElement as any).__referenceObserver = observer;
 };
 
-export function getElementAbsolutePosition(element: HTMLElement | Node): ElementPositionInfo {
+export function getElementAbsolutePosition(
+  element: HTMLElement | Node,
+): ElementPositionInfo {
   // 检查元素是否有效
   if (!element || !(element instanceof HTMLElement)) {
-    throw new Error('Invalid HTML element provided');
+    throw new Error("Invalid HTML element provided");
   }
 
   // 获取元素的绝对位置
   const rect = element.getBoundingClientRect();
 
-  maLogger.log("元素的绝对位置：", rect)
+  maLogger.log("元素的绝对位置：", rect);
 
   // 计算视口滚动偏移
   const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
   const scrollY = window.pageYOffset || document.documentElement.scrollTop;
 
   // 获取视口尺寸
-  const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const viewportWidth =
+    window.innerWidth || document.documentElement.clientWidth;
+  const viewportHeight =
+    window.innerHeight || document.documentElement.clientHeight;
 
   // 获取元素的zIndex
-  const zIndex = getActualZIndex(element)
+  const zIndex = getActualZIndex(element);
 
   // 返回ElementPositionInfo类的实例
   return new ElementPositionInfo({
@@ -836,7 +978,7 @@ export function getElementAbsolutePosition(element: HTMLElement | Node): Element
     scrollX,
     scrollY,
     viewportWidth,
-    viewportHeight
+    viewportHeight,
   });
 }
 
@@ -845,7 +987,7 @@ export function getActualZIndex(element: HTMLElement | null) {
   let current = element;
   while (current && current !== document.documentElement) {
     const zIndex = window.getComputedStyle(current).zIndex;
-    if (zIndex !== 'auto' && !isNaN(parseInt(zIndex, 10))) {
+    if (zIndex !== "auto" && !isNaN(parseInt(zIndex, 10))) {
       return parseInt(zIndex, 10);
     }
     current = current.parentElement;
@@ -854,7 +996,7 @@ export function getActualZIndex(element: HTMLElement | null) {
 }
 
 export const showSuccessMessage = (message: string) => {
-  const successContainer = document.createElement('div')
+  const successContainer = document.createElement("div");
   successContainer.style.cssText = `
         background: rgba(255, 255, 255, 0.96);
         backdrop-filter: blur(12px);
@@ -872,8 +1014,8 @@ export const showSuccessMessage = (message: string) => {
             0 18px 42px rgba(15, 23, 42, 0.18),
             0 4px 12px rgba(13, 148, 136, 0.12),
             inset 0 1px 0 rgba(255, 255, 255, 0.84);
-        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    `
+        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    `;
 
   successContainer.innerHTML = `
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -882,9 +1024,9 @@ export const showSuccessMessage = (message: string) => {
             </svg>
             <span style="color: #134e4a; font-weight: 700;">${message}</span>
         </div>
-    `
+    `;
 
-  const style = document.createElement('style')
+  const style = document.createElement("style");
   style.textContent = `
         @keyframes slideIn {
             from {
@@ -896,20 +1038,32 @@ export const showSuccessMessage = (message: string) => {
                 opacity: 1;
             }
         }
-    `
-  document.head.appendChild(style)
 
-  document.body.appendChild(successContainer)
+        @keyframes slideOut {
+            from {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%) scale(0.95);
+                opacity: 0;
+            }
+        }
+    `;
+  document.head.appendChild(style);
+
+  document.body.appendChild(successContainer);
 
   setTimeout(() => {
-    successContainer.style.animation = 'slideIn 0.3s cubic-bezier(0.55, 0, 1, 1) reverse'
+    successContainer.style.animation =
+      "slideOut 0.3s cubic-bezier(0.55, 0, 1, 1) forwards";
     setTimeout(() => {
       try {
-        document.body.removeChild(successContainer)
-        document.head.removeChild(style)
+        document.body.removeChild(successContainer);
+        document.head.removeChild(style);
       } catch (error) {
         // 元素可能已经被移除
       }
-    }, 300)
-  }, 3500)
-}
+    }, 500);
+  }, 1500);
+};
