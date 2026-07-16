@@ -12,6 +12,7 @@ import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import svgLoader from "vite-svg-loader";
 
+const isProduction = process.env.NODE_ENV === "production";
 const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
 
 export default defineConfig({
@@ -52,9 +53,6 @@ export default defineConfig({
     isEncryptEnabled ? encryptFileMapPlugin() : undefined,
   ].filter(Boolean) as any,
   esbuild: {
-    include: /\.[jt]sx?$/,
-    exclude: [],
-    loader: "ts",
     minifyIdentifiers: true,
     minifySyntax: true,
     minifyWhitespace: true,
@@ -71,62 +69,67 @@ export default defineConfig({
     sourcemap: false,
     cssCodeSplit: true,
     rollupOptions: {
-      // onwarn(warning, warn) {
-      //   // 过滤所有提到的警告
-      //   const ignored = [
-      //     "contains an annotation that Rollup cannot interpret",
-      //     // 'Use of eval'
-      //   ];
-      //   if (ignored.some((msg) => warning.message.includes(msg))) {
-      //     return;
-      //   }
-      //   warn(warning);
-      // },
+      onwarn(warning, warn) {
+        // 过滤所有提到的警告
+        const ignored = [
+          "contains an annotation that Rollup cannot interpret",
+          // 'Use of eval'
+        ];
+        if (ignored.some((msg) => warning.message.includes(msg))) {
+          return;
+        }
+        warn(warning);
+      },
       input: {
         "pages/profile": path.resolve(__dirname, "src/pages/profile.html"),
-        ...scanFiles({
-          dirPath: "src/apps",
-          prefix: "apps",
-          useIndexFile: true,
-          recursive: true,
-        }),
-        ...scanFiles({
-          dirPath: "src/content",
-          prefix: "content",
-          exclude: ["main.ts"],
-        }),
-        ...scanFiles({
-          dirPath: "src/pages/devtools",
-          prefix: "devtools",
-          extFilter: ".html",
-        }),
-        ...scanFiles({
-          dirPath: "src/runtime",
-          prefix: "runtime",
-          useIndexFile: true,
-          recursive: true,
-        }),
-        ...scanFiles({
-          dirPath: "src/workers",
-          prefix: "workers",
-          useIndexFile: true,
-          recursive: true,
-        }),
+        ...(isProduction
+          ? {
+              ...scanFiles({
+                dirPath: "src/apps",
+                prefix: "apps",
+                useIndexFile: true,
+                recursive: true,
+              }),
+              ...scanFiles({
+                dirPath: "src/content",
+                prefix: "content",
+                exclude: ["main.ts"],
+              }),
+              ...scanFiles({
+                dirPath: "src/pages/devtools",
+                prefix: "devtools",
+                extFilter: ".html",
+              }),
+              ...scanFiles({
+                dirPath: "src/runtime",
+                prefix: "runtime",
+                useIndexFile: true,
+                recursive: true,
+              }),
+              ...scanFiles({
+                dirPath: "src/workers",
+                prefix: "workers",
+                useIndexFile: true,
+                recursive: true,
+              }),
+            }
+          : {}),
       },
       output: {
-        manualChunks: {
-          vue: ["vue", "vue-router", "pinia"],
-          "element-plus": ["element-plus", "@element-plus/icons-vue"],
-          // 基础设施 - 纯函数工具，可在 Service Worker 中使用
-          "infrastructure-pure": ["@/utils/pure-utils"],
-          // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
-          "infrastructure-dom": ["@/utils/dom-utils"],
-          message: ["@/message"],
-          "content-runtime": ["@/content/runtime"],
-          components: ["@/assets/components"],
-          jsqr: ["jsqr"],
-        },
-        chunkFileNames: `assets/js/chunks/chunk-[hash].js`,
+        manualChunks: isProduction
+          ? {
+              vue: ["vue", "vue-router", "pinia"],
+              "element-plus": ["element-plus", "@element-plus/icons-vue"],
+              // 基础设施 - 纯函数工具，可在 Service Worker 中使用
+              "infrastructure-pure": ["@/utils/pure-utils"],
+              // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
+              "infrastructure-dom": ["@/utils/dom-utils"],
+              message: ["@/message"],
+              "content-runtime": ["@/content/runtime"],
+              components: ["@/assets/components"],
+            }
+          : undefined,
+        chunkFileNames: `assets/js/chunks/chunk-[${isProduction ? "hash" : "name"}].js`,
         assetFileNames: (assetInfo) => {
           const fileExtname = path.extname(assetInfo.name || "");
           if (
@@ -174,28 +177,10 @@ export default defineConfig({
       },
     },
   },
-  server: {
-    host: "127.0.0.1",
-    port: 5173,
-    strictPort: true,
-  },
   optimizeDeps: {
-    include: [
-      "vue",
-      "pinia",
-      "vue-router",
-      "element-plus",
-      "jsqr",
-      "jszip",
-      "file-saver",
-      "crypto-js",
-    ],
+    include: ["vue", "pinia", "vue-router", "element-plus"],
     esbuildOptions: {
       target: "es2022",
-      loader: {
-        ".ts": "ts",
-        ".tsx": "tsx",
-      },
     },
   },
 });
