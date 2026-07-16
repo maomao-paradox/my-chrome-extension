@@ -1,10 +1,6 @@
 <template>
   <button
-    :class="[
-      'btn',
-      `btn-${type}`,
-      { 'btn-sm': size === 'small' }
-    ]"
+    :class="['btn', `btn-${type}`, { 'btn-sm': size === 'small' }]"
     :disabled="disabled"
     @click="$emit('click')"
   >
@@ -14,30 +10,29 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
-
 const props = defineProps({
   type: {
     type: String,
-    default: 'primary',
-    validator: (value: string) => ['primary', 'secondary', 'danger', 'outline'].includes(value)
+    default: "primary",
+    validator: (value: string) =>
+      ["primary", "secondary", "danger", "outline"].includes(value),
   },
   size: {
     type: String,
-    default: 'medium',
-    validator: (value: string) => ['small', 'medium'].includes(value)
+    default: "medium",
+    validator: (value: string) => ["small", "medium"].includes(value),
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   icon: {
     type: String,
-    default: ''
-  }
+    default: "",
+  },
 });
 
-const emit = defineEmits(['click']);
+const emit = defineEmits(["click"]);
 </script>
 
 <style scoped>
@@ -91,12 +86,12 @@ const emit = defineEmits(['click']);
 .btn-danger {
   background: rgba(255, 82, 82, 0.1);
   border-color: rgba(255, 82, 82, 0.3);
-  color: #FF5252;
+  color: #ff5252;
 }
 
 .btn-danger:hover:not(:disabled) {
   background: rgba(255, 82, 82, 0.2);
-  border-color: #FF5252;
+  border-color: #ff5252;
 }
 
 .btn-outline {

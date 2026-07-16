@@ -222,6 +222,15 @@ const loadBookmarks = async () => {
 };
 
 const openBookmark = (bookmark: Bookmark) => {
+  if (!chrome.runtime) {
+    console.warn("chrome.runtime is not available in this environment");
+    return;
+  }
+
+  if (!bookmark.url) {
+    console.warn("bookmark.url is not available");
+    return;
+  }
   chrome.runtime.sendMessage({
     type: "OPEN_BOOKMARK",
     payload: bookmark,
@@ -991,15 +1000,13 @@ $transition-base:
   box-shadow: 0 0 0 4px var(--popup-focus-ring);
 }
 
-@media (max-width: 360px) {
-  .filter-panel {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
+.filter-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
 
-  .filter-meta {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    max-width: none;
-  }
+.filter-meta {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  max-width: none;
 }
 </style>

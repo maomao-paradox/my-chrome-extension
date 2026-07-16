@@ -1,83 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <meta name="description" content="MRIA Extension - AI增强的浏览器扩展" />
+    <meta name="theme-color" content="#1e293b" />
+    <title>MRIA 控制面板</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="description" content="MRIA Extension - AI增强的浏览器扩展">
-  <meta name="theme-color" content="#1e293b">
-  <title>MRIA 控制面板</title>
-  
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      width: var(--popup-width);
-      height: 100%;
-      min-height: 300px;
-      max-height: var(--popup-max-height);
-      font-family: 'Avenir Next', 'Segoe UI Variable', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      background: var(--popup-page-background, #040b15);
-      color: var(--popup-text-secondary, #e2e8f0);
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    #app {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    /* 动画效果 */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+
+      html,
+      body {
+        width: var(--popup-width);
+        height: 100%;
+        min-height: 300px;
+        max-height: var(--popup-max-height);
+        font-family:
+          "Avenir Next", "Segoe UI Variable", "PingFang SC", "Microsoft YaHei",
+          sans-serif;
+        font-size: 75%;
+        background: var(--popup-page-background, #040b15);
+        color: var(--popup-text-secondary, #e2e8f0);
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
-    }
 
-    .fade-in {
-      animation: fadeIn 0.3s ease-out;
-    }
+      #app {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
 
-    /* 滚动条美化 */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
+      /* 动画效果 */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    ::-webkit-scrollbar-track {
-      background: var(--popup-scrollbar-track, rgba(15, 23, 42, 0.46));
-    }
+      .fade-in {
+        animation: fadeIn 0.3s ease-out;
+      }
 
-    ::-webkit-scrollbar-thumb {
-      background: var(--popup-scrollbar-thumb, rgba(103, 232, 249, 0.22));
-      border-radius: 3px;
-    }
+      /* 滚动条美化 */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--popup-scrollbar-thumb-hover, rgba(103, 232, 249, 0.36));
-    }
+      ::-webkit-scrollbar-track {
+        background: var(--popup-scrollbar-track, rgba(15, 23, 42, 0.46));
+      }
 
-    ::selection {
-      background: var(--popup-selection-bg, rgba(56, 189, 248, 0.24));
-      color: var(--popup-selection-text, #f8fafc);
-    }
-  </style>
-</head>
+      ::-webkit-scrollbar-thumb {
+        background: var(--popup-scrollbar-thumb, rgba(103, 232, 249, 0.22));
+        border-radius: 3px;
+      }
 
-<body class="fade-in">
-  <div id="app"> </div>
-  <script type="module" src="./popup/main.ts"></script>
-</body>
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(
+          --popup-scrollbar-thumb-hover,
+          rgba(103, 232, 249, 0.36)
+        );
+      }
 
+      ::selection {
+        background: var(--popup-selection-bg, rgba(56, 189, 248, 0.24));
+        color: var(--popup-selection-text, #f8fafc);
+      }
+    </style>
+  </head>
+
+  <body class="fade-in">
+    <div id="app"></div>
+    <script type="module" src="./popup/main.ts"></script>
+  </body>
 </html>

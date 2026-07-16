@@ -1,8 +1,8 @@
-import { appConfigKey } from '@/config';
-import { storage } from '@/stores';
-import { ref } from 'vue';
-import { PluginConfigMap } from '@/types';
-import { defaultPluginConfigs } from '@/apps';
+import { appConfigKey } from "@/config";
+import { storage } from "@/stores";
+import { ref } from "vue";
+import { PluginConfigMap } from "@/types";
+import { defaultPluginConfigs } from "@/apps";
 
 export const usePluginManager = () => {
   // 插件配置数据
@@ -11,6 +11,11 @@ export const usePluginManager = () => {
   // 加载插件配置
   const loadPluginConfigs = async () => {
     try {
+      if (!chrome.storage) {
+        console.warn("local storage not available, use test data");
+        pluginConfigs.value = defaultPluginConfigs;
+        return;
+      }
       const configs = await storage.ext.local.get(appConfigKey, null);
       pluginConfigs.value = configs;
       if (!configs) {
@@ -19,11 +24,11 @@ export const usePluginManager = () => {
         pluginConfigs.value = defaultPluginConfigs;
       }
     } catch (error) {
-      maLogger.error('加载插件配置失败:', error);
+      maLogger.error("加载插件配置失败:", error);
     }
   };
   return {
     pluginConfigs,
-    loadPluginConfigs
+    loadPluginConfigs,
   };
 };

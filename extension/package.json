@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "dev:study": "vite --open /pages/study.html",
+    "dev:popup": "vite --open /pages/popup/popup.html",
     "dev:options": "vite --open /pages/options.html",
     "dp": "npx depcruise --output-type json src > src/deps.json && vite --open /interactive-graph.html",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",

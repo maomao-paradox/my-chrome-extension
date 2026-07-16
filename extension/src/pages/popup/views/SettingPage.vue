@@ -235,7 +235,7 @@ import {
   useDomainManager,
   type DomainConfigItem,
 } from "@/assets/composables/useDomainManager";
-import { usePluginManager } from "@/assets/composables/usePluginManager";
+import { usePluginManager } from "@/pages/popup/composables/usePluginManager.js";
 
 const { extractDomain } = useDomainState();
 const { activeTheme, setPopupTheme } = usePopupTheme();

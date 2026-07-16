@@ -18,7 +18,7 @@ export const domainConfigsKey = 'domainConfigs';
 const getContentScriptUrl = async (domain: string) => await getAssetsAbstractPath(`js/content/content-${domain}`);
 const getAppEntryUrl = async (appName: string) => await getAssetsAbstractPath(`js/apps/${appName}`);
 
-const contentDomains = ['Radius', 'Zentao', 'Mria', 'Qapro', 'Teach', 'Lanhuapp', 'Portainer'];
+export const contentDomains = ['Radius', 'Zentao', 'Mria', 'Qapro', 'Teach', 'Lanhuapp', 'Portainer'];
 
 export const contentModules = contentDomains.reduce((acc, domain) => acc.set(domain, {
   domainKey: `content${domain}Domains`,

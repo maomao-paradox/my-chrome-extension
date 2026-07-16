@@ -244,10 +244,10 @@
   --popup-card-bg-muted: #101010;
   --popup-control-bg: #000000;
   --popup-control-bg-strong: #0d0d0d;
-  --popup-control-hover-bg: #ffffff;
+  --popup-control-hover-bg: #ffffff80;
   --popup-tab-bg: #000000;
   --popup-tab-hover-bg: #111111;
-  --popup-tab-active-bg: #ffffff;
+  --popup-tab-active-bg: #111111;
   --popup-button-bg: #ffffff;
   --popup-button-border: #ffffff;
   --popup-danger-button-bg: #ffffff;
@@ -255,7 +255,7 @@
   --popup-orb-left: transparent;
   --popup-orb-right: transparent;
   --popup-divider-gradient: #ffffff;
-  --popup-accent-gradient: #ffffff;
+  --popup-accent-gradient: #000000;
   --popup-accent-line-gradient: #ffffff;
   --popup-text-primary: #ffffff;
   --popup-text-secondary: #f2f2f2;

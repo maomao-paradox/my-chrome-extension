@@ -1,17 +1,17 @@
-import { contentModules, domainConfigsKey } from '@/config';
-import { storage } from '@/stores';
-import { ModuleOption } from '@/utils';
-import { ref } from 'vue';
+import { contentDomains, contentModules, domainConfigsKey } from "@/config";
+import { storage } from "@/stores";
+import { ModuleOption } from "@/utils";
+import { ref } from "vue";
 
 // 定义域名配置项类型
 export interface DomainConfigItem {
-    enabled: boolean;
-    domains: string;
+  enabled: boolean;
+  domains: string;
 }
 
 // 定义域名配置类型
 export interface DomainConfigs {
-    [key: string]: DomainConfigItem; // 支持旧格式（字符串）和新格式（对象）
+  [key: string]: DomainConfigItem; // 支持旧格式（字符串）和新格式（对象）
 }
 
 export const useDomainManager = () => {
@@ -21,28 +21,39 @@ export const useDomainManager = () => {
   // 加载域名配置
   const loadDomainConfigs = async () => {
     try {
-      let configs = await storage.ext.local.get(domainConfigsKey, null);
-      maLogger.log('原始域名配置:', configs);
-      if (!configs) {
-        maLogger.log('未找到域名配置，使用默认配置');
-        // 默认配置：全部启用，content-main 允许所有域名
-        configs = contentModules.values().reduce((acc, script: ModuleOption) => {
-          acc[script.domainKey!] = {
+      if (!chrome.storage) {
+        console.warn("local storage not available, use test data");
+        domainConfigs.value = contentDomains.reduce((acc, domain: string) => {
+          acc[domain] = {
             enabled: true,
-            domains: ''
+            domains: "",
           };
           return acc;
         }, {} as DomainConfigs);
-        configs['Eve'] = { enabled: true, domains: '*:*' };
+        return;
+      }
+      let configs = await storage.ext.local.get(domainConfigsKey, null);
+      maLogger.log("原始域名配置:", configs);
+      if (!configs) {
+        maLogger.log("未找到域名配置，使用默认配置");
+        // 默认配置：全部启用，content-main 允许所有域名
+        configs = contentDomains.reduce((acc, domain: string) => {
+          acc[domain] = {
+            enabled: true,
+            domains: "",
+          };
+          return acc;
+        }, {} as DomainConfigs);
+        configs["Eve"] = { enabled: true, domains: "*:*" };
         await storage.ext.local.set(domainConfigsKey, configs);
       }
       domainConfigs.value = configs;
     } catch (error) {
-      maLogger.error('加载域名配置失败:', error);
+      maLogger.error("加载域名配置失败:", error);
     }
   };
   return {
     domainConfigs,
-    loadDomainConfigs
+    loadDomainConfigs,
   };
 };
