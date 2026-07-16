@@ -259,6 +259,7 @@ export const createMessageHandlers = (
   extractAccessibilityTree: async (_data, sendResponse) => {
     try {
       const utilsModule = await import(
+        /* @vite-ignore */
         getAssetsAbstractPathSync('js/runtime/accessibility-utils')
       );
       const utils = utilsModule.default || utilsModule;
