@@ -11,9 +11,6 @@ import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import svgLoader from "vite-svg-loader";
-import typescript from "@rollup/plugin-typescript";
-import babel from '@rollup/plugin-babel';
-
 
 const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
 
@@ -31,10 +28,6 @@ export default defineConfig({
   envDir: "../",
   cacheDir: "../node_modules/.vite",
   plugins: [
-    babel({
-      presets: ["@babel/preset-typescript"],
-      babelHelpers: "bundled",
-    }),
     vue(),
     svgLoader(),
     AutoImport({
@@ -59,6 +52,9 @@ export default defineConfig({
     isEncryptEnabled ? encryptFileMapPlugin() : undefined,
   ].filter(Boolean) as any,
   esbuild: {
+    include: /\.[jt]sx?$/,
+    exclude: [],
+    loader: "ts",
     minifyIdentifiers: true,
     minifySyntax: true,
     minifyWhitespace: true,
@@ -75,17 +71,17 @@ export default defineConfig({
     sourcemap: false,
     cssCodeSplit: true,
     rollupOptions: {
-      onwarn(warning, warn) {
-        // 过滤所有提到的警告
-        const ignored = [
-          "contains an annotation that Rollup cannot interpret",
-          // 'Use of eval'
-        ];
-        if (ignored.some((msg) => warning.message.includes(msg))) {
-          return;
-        }
-        warn(warning);
-      },
+      // onwarn(warning, warn) {
+      //   // 过滤所有提到的警告
+      //   const ignored = [
+      //     "contains an annotation that Rollup cannot interpret",
+      //     // 'Use of eval'
+      //   ];
+      //   if (ignored.some((msg) => warning.message.includes(msg))) {
+      //     return;
+      //   }
+      //   warn(warning);
+      // },
       input: {
         "pages/profile": path.resolve(__dirname, "src/pages/profile.html"),
         ...scanFiles({
@@ -178,6 +174,11 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    host: "127.0.0.1",
+    port: 5173,
+    strictPort: true,
+  },
   optimizeDeps: {
     include: [
       "vue",
@@ -191,6 +192,10 @@ export default defineConfig({
     ],
     esbuildOptions: {
       target: "es2022",
+      loader: {
+        ".ts": "ts",
+        ".tsx": "tsx",
+      },
     },
   },
 });

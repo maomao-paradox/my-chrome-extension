@@ -230,75 +230,76 @@
 
 :root[data-popup-theme='retro-terminal'] {
   color-scheme: dark;
-  --popup-bg-primary: #030803;
-  --popup-bg-secondary: #061106;
-  --popup-page-background:
-    linear-gradient(180deg, rgba(126, 255, 99, 0.055) 0 1px, transparent 1px 5px),
-    radial-gradient(circle at 14% 0%, rgba(126, 255, 99, 0.18), transparent 32%),
-    linear-gradient(180deg, #030803 0%, #071207 50%, #020502 100%);
-  --popup-header-bg: linear-gradient(180deg, rgba(6, 17, 6, 0.98) 0%, rgba(3, 8, 3, 0.94) 100%);
-  --popup-footer-bg: rgba(3, 8, 3, 0.86);
-  --popup-panel-bg: linear-gradient(180deg, rgba(5, 18, 5, 0.96) 0%, rgba(3, 9, 3, 0.96) 100%);
-  --popup-card-bg: linear-gradient(180deg, rgba(8, 28, 8, 0.9) 0%, rgba(3, 10, 3, 0.92) 100%);
-  --popup-card-bg-muted: rgba(5, 17, 5, 0.78);
-  --popup-control-bg: rgba(126, 255, 99, 0.055);
-  --popup-control-bg-strong: rgba(126, 255, 99, 0.095);
-  --popup-control-hover-bg: rgba(126, 255, 99, 0.13);
-  --popup-tab-bg: rgba(3, 8, 3, 0.7);
-  --popup-tab-hover-bg: rgba(126, 255, 99, 0.1);
-  --popup-tab-active-bg: linear-gradient(180deg, rgba(126, 255, 99, 0.18) 0%, rgba(5, 18, 5, 0.94) 100%);
-  --popup-button-bg: linear-gradient(180deg, #7eff63 0%, #2ea043 100%);
-  --popup-button-border: rgba(126, 255, 99, 0.68);
-  --popup-danger-button-bg: linear-gradient(180deg, #ffbf3f, #c2410c);
-  --popup-dialog-bg: linear-gradient(180deg, rgba(18, 15, 4, 0.98) 0%, rgba(3, 8, 3, 0.98) 100%);
-  --popup-orb-left: radial-gradient(circle, rgba(126, 255, 99, 0.2) 0%, rgba(126, 255, 99, 0) 70%);
-  --popup-orb-right: radial-gradient(circle, rgba(255, 191, 63, 0.14) 0%, rgba(255, 191, 63, 0) 70%);
-  --popup-divider-gradient: linear-gradient(90deg, transparent, rgba(126, 255, 99, 0.72), transparent);
-  --popup-accent-gradient: linear-gradient(180deg, rgba(126, 255, 99, 0.16), rgba(255, 191, 63, 0.08));
-  --popup-accent-line-gradient: linear-gradient(180deg, #7eff63, #ffbf3f);
-  --popup-text-primary: #eaffdf;
-  --popup-text-secondary: #c9ffb5;
-  --popup-text-muted: rgba(201, 255, 181, 0.78);
-  --popup-text-subtle: rgba(144, 199, 132, 0.86);
-  --popup-text-on-accent: #021002;
-  --popup-accent: #7eff63;
-  --popup-accent-strong: #a6ff8a;
-  --popup-accent-alt: #ffbf3f;
-  --popup-accent-soft: rgba(126, 255, 99, 0.14);
-  --popup-border: rgba(126, 255, 99, 0.22);
-  --popup-border-muted: rgba(126, 255, 99, 0.14);
-  --popup-border-strong: rgba(126, 255, 99, 0.56);
-  --popup-focus-ring: rgba(126, 255, 99, 0.22);
-  --popup-shadow-soft: 0 0 0 1px rgba(126, 255, 99, 0.08), 0 12px 24px rgba(0, 0, 0, 0.42);
-  --popup-shadow-panel: 0 0 0 1px rgba(126, 255, 99, 0.12), 0 18px 34px rgba(0, 0, 0, 0.48);
-  --popup-shadow-strong: 0 0 0 1px rgba(126, 255, 99, 0.16), 0 28px 56px rgba(0, 0, 0, 0.62);
-  --popup-shadow-accent: 0 0 18px rgba(126, 255, 99, 0.22);
-  --popup-inset-highlight: inset 0 1px 0 rgba(234, 255, 223, 0.08);
-  --popup-success-text: #eaffdf;
-  --popup-success-bg: rgba(46, 160, 67, 0.18);
-  --popup-success-border: rgba(126, 255, 99, 0.34);
-  --popup-success-dot: #7eff63;
-  --popup-info-text: #eaffdf;
-  --popup-info-bg: rgba(126, 255, 99, 0.12);
-  --popup-info-border: rgba(126, 255, 99, 0.24);
-  --popup-info-dot: #a6ff8a;
-  --popup-danger-text: #fff4cf;
-  --popup-danger-strong: #ffcf66;
-  --popup-danger-bg: rgba(255, 191, 63, 0.14);
-  --popup-danger-border: rgba(255, 191, 63, 0.32);
-  --popup-danger-dot: #ffbf3f;
-  --popup-selection-bg: rgba(126, 255, 99, 0.28);
-  --popup-selection-text: #021002;
-  --popup-scrollbar-track: rgba(3, 8, 3, 0.72);
-  --popup-scrollbar-thumb: rgba(126, 255, 99, 0.32);
-  --popup-scrollbar-thumb-hover: rgba(126, 255, 99, 0.5);
-  --popup-switch-track-bg: linear-gradient(180deg, rgba(5, 18, 5, 0.98) 0%, rgba(3, 8, 3, 0.96) 100%);
-  --popup-switch-thumb-bg: linear-gradient(180deg, #425b3c, #9bcf8c);
-  --popup-switch-active-bg: linear-gradient(180deg, rgba(126, 255, 99, 0.92) 0%, rgba(46, 160, 67, 0.9) 100%);
-  --popup-switch-active-border: rgba(126, 255, 99, 0.58);
-  --popup-switch-active-thumb-bg: linear-gradient(180deg, #f5ffe8, #a6ff8a);
-  --popup-theme-option-bg: rgba(126, 255, 99, 0.055);
-  --popup-theme-option-active-bg: linear-gradient(180deg, rgba(126, 255, 99, 0.18), rgba(255, 191, 63, 0.08));
+  --popup-radius-sm: 0;
+  --popup-radius-md: 0;
+  --popup-radius-lg: 0;
+  --popup-radius-xl: 0;
+  --popup-bg-primary: #000000;
+  --popup-bg-secondary: #0a0a0a;
+  --popup-page-background: #000000;
+  --popup-header-bg: #000000;
+  --popup-footer-bg: #000000;
+  --popup-panel-bg: #050505;
+  --popup-card-bg: #080808;
+  --popup-card-bg-muted: #101010;
+  --popup-control-bg: #000000;
+  --popup-control-bg-strong: #0d0d0d;
+  --popup-control-hover-bg: #ffffff;
+  --popup-tab-bg: #000000;
+  --popup-tab-hover-bg: #111111;
+  --popup-tab-active-bg: #ffffff;
+  --popup-button-bg: #ffffff;
+  --popup-button-border: #ffffff;
+  --popup-danger-button-bg: #ffffff;
+  --popup-dialog-bg: #050505;
+  --popup-orb-left: transparent;
+  --popup-orb-right: transparent;
+  --popup-divider-gradient: #ffffff;
+  --popup-accent-gradient: #ffffff;
+  --popup-accent-line-gradient: #ffffff;
+  --popup-text-primary: #ffffff;
+  --popup-text-secondary: #f2f2f2;
+  --popup-text-muted: #d8d8d8;
+  --popup-text-subtle: #b5b5b5;
+  --popup-text-on-accent: #000000;
+  --popup-accent: #ffffff;
+  --popup-accent-strong: #ffffff;
+  --popup-accent-alt: #cfcfcf;
+  --popup-accent-soft: #1a1a1a;
+  --popup-border: #4a4a4a;
+  --popup-border-muted: #2f2f2f;
+  --popup-border-strong: #ffffff;
+  --popup-focus-ring: rgba(255, 255, 255, 0.28);
+  --popup-shadow-soft: none;
+  --popup-shadow-panel: none;
+  --popup-shadow-strong: none;
+  --popup-shadow-accent: none;
+  --popup-inset-highlight: none;
+  --popup-success-text: #ffffff;
+  --popup-success-bg: #000000;
+  --popup-success-border: #ffffff;
+  --popup-success-dot: #ffffff;
+  --popup-info-text: #ffffff;
+  --popup-info-bg: #000000;
+  --popup-info-border: #ffffff;
+  --popup-info-dot: #ffffff;
+  --popup-danger-text: #ffffff;
+  --popup-danger-strong: #ffffff;
+  --popup-danger-bg: #000000;
+  --popup-danger-border: #ffffff;
+  --popup-danger-dot: #ffffff;
+  --popup-selection-bg: #ffffff;
+  --popup-selection-text: #000000;
+  --popup-scrollbar-track: #000000;
+  --popup-scrollbar-thumb: #ffffff;
+  --popup-scrollbar-thumb-hover: #d8d8d8;
+  --popup-switch-track-bg: #000000;
+  --popup-switch-thumb-bg: #ffffff;
+  --popup-switch-active-bg: #ffffff;
+  --popup-switch-active-border: #ffffff;
+  --popup-switch-active-thumb-bg: #000000;
+  --popup-theme-option-bg: #000000;
+  --popup-theme-option-active-bg: #ffffff;
 }
 
 .theme-option--midnight {
@@ -321,10 +322,8 @@
 }
 
 .theme-option--retro-terminal {
-  --theme-preview-bg:
-    linear-gradient(180deg, rgba(126, 255, 99, 0.18) 0 2px, transparent 2px 6px),
-    linear-gradient(135deg, #030803, #071207);
-  --theme-preview-accent: #ffbf3f;
+  --theme-preview-bg: #000000;
+  --theme-preview-accent: #ffffff;
 }
 
 :root[data-popup-theme='jungle-knot'] .popup-shell::before {
@@ -360,39 +359,35 @@
 }
 
 :root[data-popup-theme='retro-terminal'] .popup-shell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background:
-    repeating-linear-gradient(180deg, rgba(126, 255, 99, 0.06) 0 1px, transparent 1px 4px),
-    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.18) 74%, rgba(0, 0, 0, 0.38) 100%);
+  content: none;
 }
 
 :root[data-popup-theme='retro-terminal'] .popup-container {
   z-index: 2;
 }
 
-:root[data-popup-theme='retro-terminal'] .popup-header,
-:root[data-popup-theme='retro-terminal'] .tab-navigation,
-:root[data-popup-theme='retro-terminal'] .settings-panel,
-:root[data-popup-theme='retro-terminal'] .theme-option,
-:root[data-popup-theme='retro-terminal'] .switch-row,
-:root[data-popup-theme='retro-terminal'] .primary-btn {
-  border-radius: 4px;
+:root[data-popup-theme='retro-terminal'] .popup-orb {
+  display: none;
 }
 
-:root[data-popup-theme='retro-terminal'] .logo,
-:root[data-popup-theme='retro-terminal'] .section-title,
-:root[data-popup-theme='retro-terminal'] .card-title {
-  text-shadow: 0 0 10px rgba(126, 255, 99, 0.42);
+:root[data-popup-theme='retro-terminal'] *,
+:root[data-popup-theme='retro-terminal'] *::before,
+:root[data-popup-theme='retro-terminal'] *::after {
+  border-radius: 0 !important;
+  text-shadow: none !important;
 }
 
 :root[data-popup-theme='retro-terminal'] .tab-btn.active,
 :root[data-popup-theme='retro-terminal'] .primary-btn {
-  box-shadow:
-    0 0 0 1px rgba(126, 255, 99, 0.48),
-    0 0 18px rgba(126, 255, 99, 0.2),
-    var(--popup-inset-highlight);
+  color: #000000;
+  box-shadow: none;
+}
+
+:root[data-popup-theme='retro-terminal'] .theme-option--active,
+:root[data-popup-theme='retro-terminal'] .theme-option--active .theme-copy strong,
+:root[data-popup-theme='retro-terminal'] .theme-option--active .theme-copy small,
+:root[data-popup-theme='retro-terminal'] .primary-btn *,
+:root[data-popup-theme='retro-terminal'] .switch-input:checked + .switch-control .switch-status,
+:root[data-popup-theme='retro-terminal'] .switch-input:checked + .switch-control .switch-label {
+  color: #000000 !important;
 }

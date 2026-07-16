@@ -185,7 +185,7 @@ onMounted(async () => {
   justify-content: center;
   min-height: 5vh;
   padding: 0 8px;
-  border-radius: 999px;
+  border-radius: var(--popup-radius-sm);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -234,7 +234,7 @@ onMounted(async () => {
   gap: 6px;
   min-height: 5vh;
   padding: 0 10px;
-  border-radius: 12px;
+  border-radius: var(--popup-radius-sm);
   font-size: 11px;
   font-weight: 600;
   border: 1px solid transparent;
@@ -266,7 +266,7 @@ onMounted(async () => {
 .status-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--popup-radius-sm);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
@@ -277,7 +277,7 @@ onMounted(async () => {
   margin: 8px 12px 0;
   padding: 4px;
   border: 1px solid var(--popup-border);
-  border-radius: 14px;
+  border-radius: var(--popup-radius-md);
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--popup-control-bg-strong) 84%, transparent), var(--popup-tab-bg));
   box-shadow: var(--popup-inset-highlight);
@@ -294,7 +294,7 @@ onMounted(async () => {
   gap: 5px;
   min-height: 34px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--popup-radius-sm);
   background-color: transparent;
   color: var(--popup-text-muted);
   cursor: pointer;
@@ -342,7 +342,7 @@ onMounted(async () => {
   justify-content: center;
   width: 20px;
   height: 20px;
-  border-radius: 8px;
+  border-radius: var(--popup-radius-sm);
   color: var(--popup-text-subtle);
   background: transparent;
 
@@ -387,7 +387,7 @@ onMounted(async () => {
 .footer-signal {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--popup-radius-sm);
   background: var(--popup-accent-line-gradient);
   box-shadow: 0 0 12px color-mix(in srgb, var(--popup-accent-strong) 45%, transparent);
 }
@@ -425,5 +425,16 @@ onMounted(async () => {
 .tab-fade-leave-to {
   opacity: 0;
   transform: translateY(4px);
+}
+
+:global(:root[data-popup-theme='retro-terminal']) {
+  .tab-btn.active {
+    color: var(--popup-text-on-accent);
+
+    .tab-icon,
+    .tab-label {
+      color: var(--popup-text-on-accent);
+    }
+  }
 }
 </style>

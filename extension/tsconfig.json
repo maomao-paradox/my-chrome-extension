@@ -2,10 +2,10 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2015",
+    "target": "es2020",
     "module": "esnext",
     "baseUrl": ".",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "isolatedModules": true,
     "strict": true,
     "paths": {
@@ -23,7 +23,7 @@
       ]
     },
     "lib": [
-      "esnext",
+      "es2020",
       "dom",
       "dom.iterable",
       "scripthost"

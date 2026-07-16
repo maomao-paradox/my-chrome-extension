@@ -20,8 +20,8 @@ export const popupThemes = [
   },
   {
     key: 'retro-terminal',
-    label: '绿屏',
-    description: '80s 极简终端'
+    label: '黑白',
+    description: '极简强对比'
   }
 ] as const;
 
