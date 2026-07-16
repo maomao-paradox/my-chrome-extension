@@ -3,7 +3,9 @@
     <template #head__left>
       <p class="section-kicker">Visual Inspector</p>
       <h2 class="section-title">组件捕获</h2>
-      <p class="section-subtitle">从当前页面拾取任意组件，结构信息会同步显示到开发者工具。</p>
+      <p class="section-subtitle">
+        从当前页面拾取任意组件，结构信息会同步显示到开发者工具。
+      </p>
     </template>
     <template #head__right>
       <div class="capture-status" :class="captureStatusClass">
@@ -12,7 +14,11 @@
       </div>
     </template>
     <template #default>
-      <button class="capture-btn" :disabled="isCaptureDisabled" @click="triggerComponentCapture">
+      <button
+        class="capture-btn"
+        :disabled="isCaptureDisabled"
+        @click="triggerComponentCapture"
+      >
         <span class="capture-icon">
           <IconCapture />
         </span>
@@ -41,11 +47,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import type { ExtMessage } from '@/types';
-import { useDomainState } from '../composables/useDomainState';
-import TableContainer from './TableContainer.vue';
-import { IconCapture } from '@icons/index';
+import { computed, onMounted, ref } from "vue";
+import type { ExtMessage } from "@/types";
+import { useDomainState } from "../composables/useDomainState";
+import TableContainer from "./TableContainer.vue";
+import { IconCapture } from "@icons/index";
 
 const { isDomainDisabled, checkDomainStatus } = useDomainState();
 const isCheckingSiteReadiness = ref(false);
@@ -53,64 +59,76 @@ const isContentScriptReady = ref<boolean | null>(null);
 
 const captureStatusText = computed(() => {
   if (isDomainDisabled.value) {
-    return '已禁止';
+    return "已禁止";
   }
 
   if (isCheckingSiteReadiness.value) {
-    return '连接中';
+    return "连接中";
   }
 
   if (isContentScriptReady.value) {
-    return '已就绪';
+    return "已就绪";
   }
 
-  return '未就绪';
+  return "未就绪";
 });
 
 const captureStatusClass = computed(() => {
   if (isDomainDisabled.value) {
-    return 'capture-status--off';
+    return "capture-status--off";
   }
 
   if (isCheckingSiteReadiness.value) {
-    return 'capture-status--pending';
+    return "capture-status--pending";
   }
 
-  return isContentScriptReady.value ? 'capture-status--on' : 'capture-status--off';
+  return isContentScriptReady.value
+    ? "capture-status--on"
+    : "capture-status--off";
 });
 
 const isCaptureDisabled = computed(() => {
-  return isDomainDisabled.value || isCheckingSiteReadiness.value || isContentScriptReady.value !== true;
+  return (
+    isDomainDisabled.value ||
+    isCheckingSiteReadiness.value ||
+    isContentScriptReady.value !== true
+  );
 });
 
-const sendMessageToActiveContentScript = async (message: ExtMessage): Promise<any> => {
+const sendMessageToActiveContentScript = async (
+  message: ExtMessage,
+): Promise<any> => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  maLogger.log('当前活动标签页:', tab);
+  maLogger.log("当前活动标签页:", tab);
 
   if (!tab?.id) {
-    throw new Error('未找到当前活动标签页');
+    throw new Error("未找到当前活动标签页");
   }
 
   return new Promise((resolve, reject) => {
-    chrome.tabs.sendMessage(tab.id!, { ...message, target: 'content' }, (response: any) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
+    chrome.tabs.sendMessage(
+      tab.id!,
+      { ...message, target: "content" },
+      (response: any) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
 
-      resolve(response);
-    });
+        resolve(response);
+      },
+    );
   });
 };
 
 const checkContentScriptReady = async (): Promise<void> => {
   try {
     const response = await sendMessageToActiveContentScript({
-      type: 'POPUP_CAPTURE_HANDSHAKE'
+      type: "POPUP_CAPTURE_HANDSHAKE",
     });
     isContentScriptReady.value = response?.success === true;
   } catch (error) {
-    maLogger.log('当前站点内容脚本未就绪:', error);
+    maLogger.log("当前站点内容脚本未就绪:", error);
     isContentScriptReady.value = false;
   }
 };
@@ -120,10 +138,7 @@ const refreshCaptureStatus = async (): Promise<void> => {
   isContentScriptReady.value = null;
 
   try {
-    await Promise.allSettled([
-      checkDomainStatus(),
-      checkContentScriptReady()
-    ]);
+    await Promise.allSettled([checkDomainStatus(), checkContentScriptReady()]);
   } finally {
     isCheckingSiteReadiness.value = false;
   }
@@ -135,14 +150,14 @@ const triggerComponentCapture = async (): Promise<void> => {
   }
 
   try {
-    maLogger.log('从popup触发组件捕获...');
+    maLogger.log("从popup触发组件捕获...");
     const res = await sendMessageToActiveContentScript({
-      type: 'TRIGGER_COMPONENT_CAPTURE'
+      type: "TRIGGER_COMPONENT_CAPTURE",
     });
-    maLogger.log('组件捕获响应:', res);
+    maLogger.log("组件捕获响应:", res);
     window.close();
   } catch (error) {
-    maLogger.error('触发组件捕获失败:', error);
+    maLogger.error("触发组件捕获失败:", error);
   }
 };
 
@@ -199,7 +214,8 @@ onMounted(() => {
 
     .status-dot {
       background: var(--popup-success-dot);
-      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-success-dot) 16%, transparent);
+      box-shadow: 0 0 0 5px
+        color-mix(in srgb, var(--popup-success-dot) 16%, transparent);
     }
   }
 
@@ -210,7 +226,8 @@ onMounted(() => {
 
     .status-dot {
       background: var(--popup-info-dot);
-      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-info-dot) 16%, transparent);
+      box-shadow: 0 0 0 5px
+        color-mix(in srgb, var(--popup-info-dot) 16%, transparent);
     }
   }
 
@@ -221,7 +238,8 @@ onMounted(() => {
 
     .status-dot {
       background: var(--popup-danger-dot);
-      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-danger-dot) 16%, transparent);
+      box-shadow: 0 0 0 5px
+        color-mix(in srgb, var(--popup-danger-dot) 16%, transparent);
     }
   }
 }
@@ -232,7 +250,6 @@ onMounted(() => {
   height: 6px;
   border-radius: 50%;
 }
-
 
 .capture-btn {
   display: flex;

@@ -7,13 +7,13 @@
  * @date 2026-02-05T02:38:01.696Z
  */
 
-import { type XhrRulesMap } from '@/types';
-import { rules as mriaRules } from './mria';
-import {rules as qaproRules } from './qapro';
+import { type XhrRulesMap } from "@/types";
+import { rules as mriaRules } from "./mria";
+import { rules as qaproRules } from "./qapro";
 
 const rules: Record<string, XhrRulesMap> = {
   mria: mriaRules,
-  qapro: qaproRules
+  qapro: qaproRules,
 };
 
 export default rules;
