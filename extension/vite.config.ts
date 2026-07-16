@@ -11,6 +11,9 @@ import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import svgLoader from "vite-svg-loader";
+import typescript from "@rollup/plugin-typescript";
+import babel from '@rollup/plugin-babel';
+
 
 const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
 
@@ -28,6 +31,10 @@ export default defineConfig({
   envDir: "../",
   cacheDir: "../node_modules/.vite",
   plugins: [
+    babel({
+      presets: ["@babel/preset-typescript"],
+      babelHelpers: "bundled",
+    }),
     vue(),
     svgLoader(),
     AutoImport({
@@ -44,10 +51,10 @@ export default defineConfig({
         injectCss: false,
       },
     }),
-    // removeConsole({
-    //   // 保留指定的 console 方法
-    //   external: ["error", "warn"], // 保留 console.error 和 console.warn
-    // }),
+    removeConsole({
+      // 保留指定的 console 方法
+      external: ["error", "warn"], // 保留 console.error 和 console.warn
+    }),
     generateFileMapPlugin(),
     isEncryptEnabled ? encryptFileMapPlugin() : undefined,
   ].filter(Boolean) as any,
@@ -68,13 +75,13 @@ export default defineConfig({
     sourcemap: false,
     cssCodeSplit: true,
     rollupOptions: {
-       onwarn(warning, warn) {
+      onwarn(warning, warn) {
         // 过滤所有提到的警告
         const ignored = [
-          'contains an annotation that Rollup cannot interpret',
+          "contains an annotation that Rollup cannot interpret",
           // 'Use of eval'
         ];
-        if (ignored.some(msg => warning.message.includes(msg))) {
+        if (ignored.some((msg) => warning.message.includes(msg))) {
           return;
         }
         warn(warning);

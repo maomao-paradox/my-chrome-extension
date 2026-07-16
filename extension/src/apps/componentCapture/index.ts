@@ -5,23 +5,20 @@
  * @file src/apps/componentCapture/index.ts
  */
 
+import { AppModule } from "@/types/index";
+import { shadowHostId } from "@/config";
+import ComponentCaptureApp from "./App.vue";
+import { createShadowHost, injectCssDom } from "@/utils/shadow-dom";
+import { createApp } from "vue";
+import { pinia } from "@/stores";
+import { getAssetsAbstractPathSync } from "@/utils/common";
+import { addElementToDom } from "@/utils/element-control";
+import { bus } from "@/event";
 
-
-import { AppModule } from '@/types/index.js';
-import { shadowHostId } from '@/config';
-import ComponentCaptureApp from './App.vue';
-import { createShadowHost, injectCssDom } from '@/utils/shadow-dom';
-import { createApp } from 'vue';
-import { pinia } from '@/stores';
-import { getAssetsAbstractPath, getAssetsAbstractPathSync } from '@/utils/common';
-import { addElementToDom } from '@/utils/element-control';
-import { bus } from '@/event';
-
-
-const pluginName = 'componentCapture';
+const pluginName = "componentCapture";
 
 class ComponentCaptureModule implements AppModule {
-  _context: any = null;
+  _ctx: any = null;
   shadowHostId: string = shadowHostId;
   isInjected: boolean = false;
   vueContainer: HTMLElement | null = null;
@@ -31,7 +28,7 @@ class ComponentCaptureModule implements AppModule {
   isEnabled: boolean = false;
 
   constructor() {
-    maLogger.log('ComponentCaptureModule initialized');
+    maLogger.log("ComponentCaptureModule initialized");
   }
 
   /**
@@ -40,12 +37,12 @@ class ComponentCaptureModule implements AppModule {
   async inject(): Promise<void> {
     try {
       if (window.self !== window.top) {
-        maLogger.log('不是主页面，不注入组件捕获模块');
+        maLogger.log("不是主页面，不注入组件捕获模块");
         return;
       }
 
       if (!document.body) {
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           const checkBody = () => {
             if (document.body) {
               resolve(null);
@@ -57,27 +54,38 @@ class ComponentCaptureModule implements AppModule {
         });
       }
 
-      if (this.isInjected && this.appInstance && this.vueContainer && this.shadowRoot) {
+      if (
+        this.isInjected &&
+        this.appInstance &&
+        this.vueContainer &&
+        this.shadowRoot
+      ) {
         return;
       }
 
       if (!this.shadowRoot) {
-        const { shadowRoot } = createShadowHost(this.shadowHostId, 'open');
+        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
         this.shadowRoot = shadowRoot;
       }
 
       if (!this.isInjected) {
-        injectCssDom(this.shadowRoot as ShadowRoot, getAssetsAbstractPathSync(`css/${pluginName}`));
+        injectCssDom(
+          this.shadowRoot as ShadowRoot,
+          getAssetsAbstractPathSync(`css/${pluginName}`),
+        );
         this.isInjected = true;
       }
 
-      if (!this.vueContainer && !this.shadowRoot?.getElementById(`shadow-app-${pluginName}`)) {
+      if (
+        !this.vueContainer &&
+        !this.shadowRoot?.getElementById(`shadow-app-${pluginName}`)
+      ) {
         this.vueContainer = addElementToDom({
-          tag: 'div',
+          tag: "div",
           attrs: {
-            id: `shadow-app-${pluginName}`
+            id: `shadow-app-${pluginName}`,
           },
-          style: 'position: fixed; z-index: var(--z-index);'
+          style: "position: fixed; z-index: var(--z-index);",
         })(this.shadowRoot as ShadowRoot);
       }
 
@@ -89,9 +97,8 @@ class ComponentCaptureModule implements AppModule {
       this.appInstance = createApp(ComponentCaptureApp);
       this.appInstance.use(pinia);
       this.appInstance.mount(this.vueContainer!);
-
     } catch (error) {
-      maLogger.error('注入组件捕获模块失败:', error);
+      maLogger.error("注入组件捕获模块失败:", error);
     }
   }
 
@@ -99,8 +106,8 @@ class ComponentCaptureModule implements AppModule {
    * 启用模块
    */
   enable(): void {
-    this.inject().catch(error => {
-      maLogger.error('启用组件捕获模块失败:', error);
+    this.inject().catch((error) => {
+      maLogger.error("启用组件捕获模块失败:", error);
     });
   }
 
@@ -117,18 +124,18 @@ class ComponentCaptureModule implements AppModule {
    */
   async triggerComponentCapture(): Promise<void> {
     try {
-      maLogger.log('开始组件捕获...');
+      maLogger.log("开始组件捕获...");
       await this.inject();
 
       // 显示Vue容器
       if (this.vueContainer) {
-        this.vueContainer.style.display = 'block';
+        this.vueContainer.style.display = "block";
       }
 
       // 通过事件总线启动捕获
-      bus.emit('start-component-capture');
+      bus.emit("start-component-capture");
     } catch (error) {
-      maLogger.error('触发组件捕获失败:', error);
+      maLogger.error("触发组件捕获失败:", error);
     }
   }
 
@@ -144,9 +151,9 @@ class ComponentCaptureModule implements AppModule {
    */
   private hide(): void {
     if (this.vueContainer) {
-      this.vueContainer.style.display = 'none';
+      this.vueContainer.style.display = "none";
       this.isCapturing = false;
-      maLogger.log('组件捕获界面已隐藏');
+      maLogger.log("组件捕获界面已隐藏");
     }
   }
 
@@ -175,8 +182,8 @@ class ComponentCaptureModule implements AppModule {
    * 初始化
    */
   async init(context?: any): Promise<void> {
-    this._context = context;
-    maLogger.log('ComponentCaptureModule initialized with context');
+    this._ctx = context;
+    maLogger.log("ComponentCaptureModule initialized with context");
   }
 }
 

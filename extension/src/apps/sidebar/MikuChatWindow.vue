@@ -15,11 +15,7 @@
     >
       <div class="chat-stage">
         <div class="character-panel">
-          <div
-            class="music-player"
-            role="group"
-            aria-label="Miku 音乐播放器"
-          >
+          <div class="music-player" role="group" aria-label="Miku 音乐播放器">
             <button
               v-for="control in musicControls"
               :key="control.action"
@@ -27,7 +23,9 @@
               class="music-control-button"
               :class="{ 'is-primary': control.action === 'toggle' }"
               :aria-label="control.label"
-              :aria-pressed="control.action === 'toggle' ? isMusicPlaying : undefined"
+              :aria-pressed="
+                control.action === 'toggle' ? isMusicPlaying : undefined
+              "
               @click="handleMusicControl(control.action)"
             >
               <component :is="control.icon" aria-hidden="true" />
@@ -103,69 +101,70 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { Draggable } from '@components/index';
+import { computed, ref } from "vue";
+import { Draggable } from "@components/index";
 import {
   IconNextMusic,
   IconPause,
   IconPlay,
-  IconPreviousMusic
-} from '@icons/index';
-import AIConversation from '../floatingball/views/AIConversation.vue';
+  IconPreviousMusic,
+} from "@icons/index";
+import AIConversation from "../floatingball/views/AIConversation.vue";
 
 defineEmits<{
   close: [];
 }>();
 
-const mikuSrc = chrome.runtime.getURL('static/img/miku.png');
-const isMusicPlaying = ref(false);
+const mikuSrc = chrome.runtime.getURL("static/img/miku.png");
+// 默认自动播放
+const isMusicPlaying = ref(true);
 
 const draggableContainerStyle = computed<Record<string, string>>(() => ({
-  '--z-index': '10000',
-  cursor: 'default'
+  "--z-index": "10000",
+  cursor: "default",
 }));
 
-type MusicControlAction = 'previous' | 'toggle' | 'next';
+type MusicControlAction = "previous" | "toggle" | "next";
 
 const musicControls = computed(() => [
   {
-    action: 'previous' as const,
-    label: '上一首',
-    icon: IconPreviousMusic
+    action: "previous" as const,
+    label: "上一首",
+    icon: IconPreviousMusic,
   },
   {
-    action: 'toggle' as const,
-    label: isMusicPlaying.value ? '暂停' : '播放',
-    icon: isMusicPlaying.value ? IconPause : IconPlay
+    action: "toggle" as const,
+    label: isMusicPlaying.value ? "暂停" : "播放",
+    icon: isMusicPlaying.value ? IconPause : IconPlay,
   },
   {
-    action: 'next' as const,
-    label: '下一首',
-    icon: IconNextMusic
-  }
+    action: "next" as const,
+    label: "下一首",
+    icon: IconNextMusic,
+  },
 ]);
 
 const handleMusicControl = (action: MusicControlAction) => {
-  if (action === 'toggle') {
+  if (action === "toggle") {
     isMusicPlaying.value = !isMusicPlaying.value;
   }
 };
 
 const mikuSystemPrompt = [
-  '你正在进行角色扮演：你是初音未来风格的虚拟歌姬 Miku，在一个安静、温暖的酒馆式对话窗口里和用户聊天。',
-  '用中文为主回应，语气轻快、亲切、有一点舞台感，但不要过度卖萌，不要刷屏。',
-  '你可以谈音乐、创作、日常陪伴、学习和编程想法；当用户需要严肃帮助时，保持清晰、实用、可靠。',
-  '不要声称自己是真实人物或真人偶像；你是一个由 AI 模拟的角色。',
-  '回答尽量自然，短句优先。需要步骤时用简洁列表。'
-].join('\n');
+  "你正在进行角色扮演：你是初音未来风格的虚拟歌姬 Miku，在一个安静、温暖的酒馆式对话窗口里和用户聊天。",
+  "用中文为主回应，语气轻快、亲切、有一点舞台感，但不要过度卖萌，不要刷屏。",
+  "你可以谈音乐、创作、日常陪伴、学习和编程想法；当用户需要严肃帮助时，保持清晰、实用、可靠。",
+  "不要声称自己是真实人物或真人偶像；你是一个由 AI 模拟的角色。",
+  "回答尽量自然，短句优先。需要步骤时用简洁列表。",
+].join("\n");
 
 const mikuRoles = [
   {
-    value: 'hatsune_miku_tavern',
-    label: 'Hatsune Miku',
-    avatar: 'MK',
-    systemPrompt: mikuSystemPrompt
-  }
+    value: "hatsune_miku_tavern",
+    label: "Hatsune Miku",
+    avatar: "MK",
+    systemPrompt: mikuSystemPrompt,
+  },
 ];
 </script>
 
@@ -211,15 +210,15 @@ const mikuRoles = [
     ),
     linear-gradient(180deg, rgba(15, 118, 110, 0.2), rgba(15, 23, 42, 0.28));
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-}
 
-.character-panel::before {
-  content: "";
-  position: absolute;
-  inset: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  pointer-events: none;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    pointer-events: none;
+  }
 }
 
 .music-player {
@@ -257,28 +256,28 @@ const mikuRoles = [
     background 180ms ease,
     color 180ms ease,
     box-shadow 180ms ease;
-}
 
-.music-control-button:hover,
-.music-control-button:focus-visible {
-  color: rgba(236, 254, 255, 0.96);
-  background: rgba(94, 234, 212, 0.16);
-  box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.1);
-}
+  &:hover,
+  &:focus-visible {
+    color: rgba(236, 254, 255, 0.96);
+    background: rgba(94, 234, 212, 0.16);
+    box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.1);
+  }
 
-.music-control-button:focus-visible {
-  outline: 0;
-}
+  &:focus-visible {
+    outline: 0;
+  }
 
-.music-control-button.is-primary {
-  background: rgba(94, 234, 212, 0.18);
-  color: rgba(236, 254, 255, 0.98);
-  box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.22);
-}
+  &.is-primary {
+    background: rgba(94, 234, 212, 0.18);
+    color: rgba(236, 254, 255, 0.98);
+    box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.22);
+  }
 
-.music-control-button :deep(svg) {
-  width: 18px;
-  height: 18px;
+  & :deep(svg) {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .music-disc {
@@ -292,7 +291,11 @@ const mikuRoles = [
   height: 88px;
   border-radius: 999px;
   background:
-    radial-gradient(circle at center, rgba(3, 7, 18, 0.98) 0 9px, transparent 10px),
+    radial-gradient(
+      circle at center,
+      rgba(3, 7, 18, 0.98) 0 9px,
+      transparent 10px
+    ),
     conic-gradient(
       from 18deg,
       rgba(236, 254, 255, 0.22),
@@ -309,39 +312,38 @@ const mikuRoles = [
   transform: translateX(-50%);
   animation: miku-disc-spin 3.8s linear infinite;
   animation-play-state: paused;
-}
 
-.music-disc.is-playing {
-  animation-play-state: running;
-}
+  &.is-playing {
+    animation-play-state: running;
+  }
 
-.music-disc::before,
-.music-disc::after {
-  content: "";
-  position: absolute;
-  border-radius: inherit;
-  pointer-events: none;
-}
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    border-radius: inherit;
+    pointer-events: none;
+  }
 
-.music-disc::before {
-  inset: 8px;
-  border: 1px solid rgba(94, 234, 212, 0.18);
-  box-shadow:
-    inset 0 0 0 12px rgba(255, 255, 255, 0.025),
-    inset 0 0 0 24px rgba(255, 255, 255, 0.018);
-}
+  &::before {
+    inset: 8px;
+    border: 1px solid rgba(94, 234, 212, 0.18);
+    box-shadow:
+      inset 0 0 0 12px rgba(255, 255, 255, 0.025),
+      inset 0 0 0 24px rgba(255, 255, 255, 0.018);
+  }
 
-.music-disc::after {
-  inset: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 8%,
-    rgba(255, 255, 255, 0.2) 18%,
-    transparent 30%
-  );
-  mix-blend-mode: screen;
+  &::after {
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 8%,
+      rgba(255, 255, 255, 0.2) 18%,
+      transparent 30%
+    );
+    mix-blend-mode: screen;
+  }
 }
-
 .disc-ring {
   width: 36px;
   height: 36px;
@@ -438,10 +440,10 @@ const mikuRoles = [
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   cursor: grab;
   user-select: none;
-}
 
-.dialog-header:active {
-  cursor: grabbing;
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .dialog-title-group {
@@ -482,20 +484,19 @@ const mikuRoles = [
     background 180ms ease,
     color 180ms ease,
     box-shadow 180ms ease;
-}
 
-.close-button:hover,
-.close-button:focus-visible {
-  color: rgba(255, 255, 255, 0.94);
-  background: rgba(248, 113, 113, 0.16);
-  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
-}
+  &:hover,
+  &:focus-visible {
+    color: rgba(255, 255, 255, 0.94);
+    background: rgba(248, 113, 113, 0.16);
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
+  }
 
-.close-button svg {
-  width: 18px;
-  height: 18px;
+  & svg {
+    width: 18px;
+    height: 18px;
+  }
 }
-
 .miku-conversation {
   overflow-x: hidden;
   overflow-y: auto;
