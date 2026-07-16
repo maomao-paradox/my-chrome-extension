@@ -11,16 +11,16 @@
 // import Brute from './PasswordBrute.vue'
 // import Crypto from './MACrypto.vue'
 // import JsonFmt from './JsonFormater.vue'
-import ImageDownload from './ImageDownload.vue'
-import ScriptRunner from './ScriptRunner.vue'
+import ImageDownload from './ImageDownload.vue';
+import ScriptRunner from './ScriptRunner.vue';
 
 const toolMap = {
-    // mock: NotFound,
-    // brute: NotFound,
-    // crypto: NotFound,
-    // json: NotFound,
-    image: ImageDownload,
-    script: ScriptRunner
-}
+  // mock: NotFound,
+  // brute: NotFound,
+  // crypto: NotFound,
+  // json: NotFound,
+  image: ImageDownload,
+  script: ScriptRunner
+};
 
 export default toolMap;

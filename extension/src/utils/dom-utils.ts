@@ -32,7 +32,7 @@ export const domUtils = {
   ...EsmModuleLoaderExports,
   ...ImageZipDownloadExports,
   ...AiConfigExports,
-  ...AuthExports,
+  ...AuthExports
 };
 
 export type DomUtils = typeof domUtils;

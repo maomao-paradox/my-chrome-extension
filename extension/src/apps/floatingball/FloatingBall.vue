@@ -1,8 +1,8 @@
 <!-- src/floatingball/FloatingBall.vue -->
 <template>
   <div class="constraints">
-    <Draggable ref="draggableRef" v-bind="draggableProps" @click="handleIconClick" @dragging="handleDragging"
-      @move="handleMove" width="45" height="45">
+    <Draggable ref="draggableRef" v-bind="draggableProps" width="45" height="45"
+      @click="handleIconClick" @dragging="handleDragging" @move="handleMove">
       <!-- 悬浮球图标 -->
       <div class="icon" draggable="false">
         <slot name="icon">
@@ -20,17 +20,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { getStaticAbstractPath } from '@/utils/common'
-import { shadowHostId } from "@/config"
-import { Draggable, type DraggableProps } from '@components/index'
+import { ref } from 'vue';
+import { getStaticAbstractPath } from '@/utils/common';
+import { shadowHostId } from '@/config';
+import { Draggable, type DraggableProps } from '@components/index';
 
 const draggableProps: DraggableProps = {
   initialPosition: 'bottom-right',
   edgeDistance: 50,
   adsorbMargin: 15,
-  enableAdsorption: true,
-}
+  enableAdsorption: true
+};
 
 // 悬浮球位置状态 
 const position = ref<{ x: number, y: number }>({ x: 2000, y: 1200 });
@@ -42,23 +42,23 @@ const props = withDefaults(defineProps<{
   theam?: string
   handleClick?: Function
 }>(), {
-  icon: getStaticAbstractPath("icons/floatingball.png"),
-  handleClick: () => { maLogger.log("我被点击了！") },
-})
+  icon: getStaticAbstractPath('icons/floatingball.png'),
+  handleClick: () => { maLogger.log('我被点击了！'); }
+});
 
 const emit = defineEmits<{
   /** 点击事件（非拖拽） */
   (e: 'click', event: MouseEvent | TouchEvent): void;
-}>()
+}>();
 
 /**
  * 处理悬浮球点击事件
  */
 function handleIconClick(event: MouseEvent | TouchEvent) {
-  if (!event.target) return
+  if (!event.target) {return;}
   // 检查点击是否在阴影DOM内
   if ((event.target as HTMLElement).closest(`#${shadowHostId}`)) {
-    emit('click', event)
+    emit('click', event);
     // 切换卫星圆环的显示状态
     // showOrbit.value = !showOrbit.value
   }
@@ -69,7 +69,7 @@ function handleIconClick(event: MouseEvent | TouchEvent) {
  */
 function handleDragging(event: MouseEvent | TouchEvent, x: number, y: number) {
   // 实时更新位置状态
-  if (!showOrbit.value) return
+  if (!showOrbit.value) {return;}
   // 调整位置，使图标中心对齐
   position.value = { x: x + 22.5, y: y + 22.5 };
 }

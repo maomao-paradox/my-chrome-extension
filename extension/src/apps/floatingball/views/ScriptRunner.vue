@@ -16,7 +16,7 @@
           <el-button @click="clearScript">
             <el-icon class="el-icon-delete"></el-icon> 清空
           </el-button>
-          <el-button @click="copyResult" :disabled="!outputText">
+          <el-button :disabled="!outputText" @click="copyResult">
             <el-icon class="el-icon-copy-document"></el-icon> 复制结果
           </el-button>
         </div>
@@ -71,7 +71,7 @@
               <div class="url-input-area">
                 <el-input v-model="scriptUrl" placeholder="输入网络脚本URL..." :disabled="running">
                   <template #append>
-                    <el-button @click="loadUrlScript" :disabled="!scriptUrl || running">
+                    <el-button :disabled="!scriptUrl || running" @click="loadUrlScript">
                       <el-icon class="el-icon-download"></el-icon> 加载
                     </el-button>
                   </template>
@@ -109,97 +109,97 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { injectScriptToActivateTab } from '@/utils/element-control'
-import { TabPaneName } from 'element-plus'
+import { ref } from 'vue';
+import { injectScriptToActivateTab } from '@/utils/element-control';
+import { TabPaneName } from 'element-plus';
 import message from '@/message/index.js';
 
 const ext = message.ext;
 
 // 响应式数据
-const activeTab = ref<TabPaneName>('code') // 标签页：code, file, url
-const scriptCode = ref('')
-const outputText = ref('')
-const running = ref(false)
-const scriptUrl = ref('')
-const fileInfo = ref<{ name: string; size: number } | null>(null)
-const urlInfo = ref<{ url: string } | null>(null)
+const activeTab = ref<TabPaneName>('code'); // 标签页：code, file, url
+const scriptCode = ref('');
+const outputText = ref('');
+const running = ref(false);
+const scriptUrl = ref('');
+const fileInfo = ref<{ name: string; size: number } | null>(null);
+const urlInfo = ref<{ url: string } | null>(null);
 
-const emit = defineEmits(['add-message'])
+const emit = defineEmits(['add-message']);
 
 // 执行脚本
 async function executeScript() {
-  let codeToExecute = ''
+  let codeToExecute = '';
 
   switch (activeTab.value) {
     case 'code':
       if (!scriptCode.value.trim()) {
         emit('add-message', {
           message: '请输入JavaScript代码',
-          type: "warning"
-        })
-        return
+          type: 'warning'
+        });
+        return;
       }
-      codeToExecute = scriptCode.value
-      break
+      codeToExecute = scriptCode.value;
+      break;
     case 'file':
       if (!fileInfo.value) {
         emit('add-message', {
           message: '请选择本地JavaScript文件',
-          type: "warning"
-        })
-        return
+          type: 'warning'
+        });
+        return;
       }
-      codeToExecute = scriptCode.value
-      break
+      codeToExecute = scriptCode.value;
+      break;
     case 'url':
       if (!urlInfo.value) {
         emit('add-message', {   
           message: '请加载网络脚本',
-          type: "warning"
-        })
-        return
+          type: 'warning'
+        });
+        return;
       }
-      codeToExecute = scriptCode.value
-      break
+      codeToExecute = scriptCode.value;
+      break;
   }
 
-  running.value = true
-  outputText.value = ''
+  running.value = true;
+  outputText.value = '';
 
   try {
     // 直接执行脚本
     injectScriptToActivateTab({scriptStr: codeToExecute});
 
     // 显示执行成功信息
-    outputText.value = '脚本已开始执行，请在控制台查看输出'
+    outputText.value = '脚本已开始执行，请在控制台查看输出';
     emit('add-message', {
-      type: "success",
-      message: '脚本执行开始',
-    })
+      type: 'success',
+      message: '脚本执行开始'
+    });
   } catch (error: any) {
     // 捕获执行错误
-    outputText.value = `执行错误: ${error.message}\n${error.stack || ''}`
+    outputText.value = `执行错误: ${error.message}\n${error.stack || ''}`;
     emit('add-message', {
-      type: "error",
-      message: '脚本执行出错',
-    })
+      type: 'error',
+      message: '脚本执行出错'
+    });
   } finally {
-    running.value = false
+    running.value = false;
   }
 }
 
 // 清空脚本
 function clearScript() {
-  scriptCode.value = ''
-  outputText.value = ''
-  fileInfo.value = null
-  urlInfo.value = null
-  scriptUrl.value = ''
+  scriptCode.value = '';
+  outputText.value = '';
+  fileInfo.value = null;
+  urlInfo.value = null;
+  scriptUrl.value = '';
   emit('add-message', {
-    type: "info",
-    message: '已清空',
-  })
+    type: 'info',
+    message: '已清空'
+  });
 }
 
 // 复制结果
@@ -207,66 +207,66 @@ function copyResult() {
   if (outputText.value) {
     navigator.clipboard.writeText(outputText.value).then(() => {
       emit('add-message', {
-        type: "success",
-        message: '结果已复制到剪贴板',
-      })
+        type: 'success',
+        message: '结果已复制到剪贴板'
+      });
     }).catch(() => {
       emit('add-message', {
-        type: "error",
-        message: '复制失败',
-      })
-    })
+        type: 'error',
+        message: '复制失败'
+      });
+    });
   }
 }
 
 // 标签页切换
 function handleTabChange(name: TabPaneName) {
-  activeTab.value = name
+  activeTab.value = name;
 }
 
 // 处理文件选择
 function handleFileChange(file: any) {
-  const selectedFile = file.raw
+  const selectedFile = file.raw;
   if (selectedFile) {
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
-      scriptCode.value = e.target?.result as string
+      scriptCode.value = e.target?.result as string;
       fileInfo.value = {
         name: selectedFile.name,
         size: selectedFile.size
-      }
+      };
       emit('add-message', {
-        type: "success",
-        message: '文件读取成功',
-      })
-    }
+        type: 'success',
+        message: '文件读取成功'
+      });
+    };
     reader.onerror = () => {
       emit('add-message', {
-        type: "error",
-        message: '文件读取失败',
-      })
-    }
-    reader.readAsText(selectedFile)
+        type: 'error',
+        message: '文件读取失败'
+      });
+    };
+    reader.readAsText(selectedFile);
   }
 }
 
 // 清除文件
 function clearFile() {
-  fileInfo.value = null
-  scriptCode.value = ''
+  fileInfo.value = null;
+  scriptCode.value = '';
 }
 
 // 加载网络脚本
 async function loadUrlScript() {
   if (!scriptUrl.value.trim()) {
     emit('add-message', {
-      type: "warning",
-      message: '请输入网络脚本URL',
-    })
-    return
+      type: 'warning',
+      message: '请输入网络脚本URL'
+    });
+    return;
   }
 
-  running.value = true
+  running.value = true;
 
   try {
     // 使用脚本执行服务加载网络脚本，绕过 CORS 限制
@@ -282,30 +282,30 @@ async function loadUrlScript() {
 
     const scriptContent = response.result;
 
-    maLogger.log('加载的网络脚本内容:', scriptContent)
-    scriptCode.value = scriptContent
+    maLogger.log('加载的网络脚本内容:', scriptContent);
+    scriptCode.value = scriptContent;
     urlInfo.value = {
       url: scriptUrl.value
-    }
+    };
     emit('add-message', {
-      type: "success",
-      message: '网络脚本加载成功',
-    })
+      type: 'success',
+      message: '网络脚本加载成功'
+    });
   } catch (error: any) {
     emit('add-message', {
-      type: "error",
-      message: `网络脚本加载失败: ${error.message}`,
-    })
+      type: 'error',
+      message: `网络脚本加载失败: ${error.message}`
+    });
   } finally {
-    running.value = false
+    running.value = false;
   }
 }
 
 // 清除URL
 function clearUrl() {
-  urlInfo.value = null
-  scriptUrl.value = ''
-  scriptCode.value = ''
+  urlInfo.value = null;
+  scriptUrl.value = '';
+  scriptCode.value = '';
 }
 </script>
 

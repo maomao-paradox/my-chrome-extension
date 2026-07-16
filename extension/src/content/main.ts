@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.694Z
  */
 
-import { installGlobalLogger } from "@/utils/logger";
+import { installGlobalLogger } from '@/utils/logger';
 
 type DomainConfig = {
   enabled?: boolean;
@@ -16,11 +16,11 @@ type DomainConfig = {
 
 type DomainConfigs = Record<string, DomainConfig | string | undefined>;
 
-const DISABLED_DOMAINS_KEY = "disabledDomains";
-const DOMAIN_CONFIGS_KEY = "domainConfigs";
-const EXTENSION_CONFIGS_KEY = "extensionSettings";
-const ROOT_PERMISSION_KEY = "Eve";
-const LOGGER_TITLE = "ZERO DEBUG";
+const DISABLED_DOMAINS_KEY = 'disabledDomains';
+const DOMAIN_CONFIGS_KEY = 'domainConfigs';
+const EXTENSION_CONFIGS_KEY = 'extensionSettings';
+const ROOT_PERMISSION_KEY = 'Eve';
+const LOGGER_TITLE = 'ZERO DEBUG';
 
 installGlobalLogger({ title: LOGGER_TITLE, enabled: false });
 
@@ -30,17 +30,17 @@ const parseDomains = (domainsString: string): [string, string][] => {
   }
 
   return domainsString
-    .split(",")
+    .split(',')
     .map((domain) => {
-      const parts = domain.trim().split(":");
-      return (parts.length === 1 ? [parts[0], "*"] : parts) as [string, string];
+      const parts = domain.trim().split(':');
+      return (parts.length === 1 ? [parts[0], '*'] : parts) as [string, string];
     })
     .filter(([hostname]) => Boolean(hostname));
 };
 
 const getDomainConfig = (
   domainConfigs: DomainConfigs,
-  key: string,
+  key: string
 ): DomainConfig | null => {
   const config = domainConfigs[key];
 
@@ -48,10 +48,10 @@ const getDomainConfig = (
     return null;
   }
 
-  if (typeof config === "string") {
+  if (typeof config === 'string') {
     return {
       enabled: true,
-      domains: config,
+      domains: config
     };
   }
 
@@ -60,7 +60,7 @@ const getDomainConfig = (
 
 const isDomainAllowed = (
   domainConfigs: DomainConfigs,
-  key: string,
+  key: string
 ): boolean => {
   const config = getDomainConfig(domainConfigs, key);
 
@@ -68,7 +68,7 @@ const isDomainAllowed = (
     return false;
   }
 
-  const allowedDomains = parseDomains(config.domains || "");
+  const allowedDomains = parseDomains(config.domains || '');
   if (allowedDomains.length === 0) {
     return false;
   }
@@ -76,41 +76,41 @@ const isDomainAllowed = (
   const currentUrl = new URL(window.location.origin);
   const currentHostname = currentUrl.hostname;
   const currentPort =
-    currentUrl.port || (currentUrl.protocol === "https:" ? "443" : "80");
+    currentUrl.port || (currentUrl.protocol === 'https:' ? '443' : '80');
 
   return allowedDomains.some(([hostname, port]) => {
     return (
-      (hostname === "*" || hostname === currentHostname) &&
-      (port === "*" || port === currentPort)
+      (hostname === '*' || hostname === currentHostname) &&
+      (port === '*' || port === currentPort)
     );
   });
 };
 
 const loadRuntime = async (): Promise<void> => {
   if (window.self === window.top) {
-    const { initializeContent } = await import("./runtime");
+    const { initializeContent } = await import('./runtime');
     await initializeContent(window as unknown as AppContext);
     return;
   }
 
   const { installIframeEventBridge } =
-    await import("./runtime/iframe-event-bridge");
+    await import('./runtime/iframe-event-bridge');
   installIframeEventBridge(window);
 };
 
 (async () => {
-  if (location.origin === "chrome://extensions") {
-    maLogger.log("Content bootstrap is not available in chrome://extensions");
+  if (location.origin === 'chrome://extensions') {
+    maLogger.log('Content bootstrap is not available in chrome://extensions');
     return;
   }
 
-  if (typeof document === "undefined") {
-    console.warn("Document object is not available in current context");
+  if (typeof document === 'undefined') {
+    console.warn('Document object is not available in current context');
     return;
   }
 
-  if (typeof chrome === "undefined" || !chrome.storage?.local) {
-    console.warn("Chrome storage is not available in current context");
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    console.warn('Chrome storage is not available in current context');
     return;
   }
 
@@ -120,7 +120,7 @@ const loadRuntime = async (): Promise<void> => {
     const snapshot = await chrome.storage.local.get([
       DISABLED_DOMAINS_KEY,
       DOMAIN_CONFIGS_KEY,
-      EXTENSION_CONFIGS_KEY,
+      EXTENSION_CONFIGS_KEY
     ]);
     const disabledDomains = snapshot[DISABLED_DOMAINS_KEY] || [];
     const domainConfigs = (snapshot[DOMAIN_CONFIGS_KEY] || {}) as DomainConfigs;
@@ -142,10 +142,10 @@ const loadRuntime = async (): Promise<void> => {
       return;
     }
   } catch (error) {
-    console.error("content bootstrap 检查失败，继续加载 runtime:", error);
+    console.error('content bootstrap 检查失败，继续加载 runtime:', error);
   }
 
   await loadRuntime();
 })().catch((error) => {
-  console.error("content bootstrap 初始化失败:", error);
+  console.error('content bootstrap 初始化失败:', error);
 });

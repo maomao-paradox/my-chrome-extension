@@ -1,10 +1,10 @@
 <template>
     <div class="ai-chat-container">
         <!-- 聊天记录区域 -->
-        <div class="chat-messages" ref="chatMessages">
+        <div ref="chatMessages" class="chat-messages">
             <!-- 顶部操作栏 -->
             <div v-if="messages.length > 0" class="chat-header-actions">
-                <button @click="clearConversation" class="clear-conversation-btn" :disabled="isTyping" title="清空对话">
+                <button class="clear-conversation-btn" :disabled="isTyping" title="清空对话" @click="clearConversation">
                     🗑️ 清空对话
                 </button>
             </div>
@@ -36,8 +36,8 @@
                         <!-- 消息元信息（时间戳和复制按钮） -->
                         <div class="message-meta">
                             <span class="message-time">{{ formatTime(msg.timestamp) }}</span>
-                            <button v-if="msg.role === 'assistant' && msg.content" @click="copyMessage(msg.content)"
-                                class="copy-button" title="复制消息">
+                            <button v-if="msg.role === 'assistant' && msg.content" class="copy-button"
+                                title="复制消息" @click="copyMessage(msg.content)">
                                 {{ copiedIndex === index ? '✓' : '📋' }}
                             </button>
                         </div>
@@ -63,7 +63,7 @@
         <div v-if="error" class="error-message">
             <span class="error-icon">⚠️</span>
             {{ error }}
-            <button @click="error = ''" class="close-error">×</button>
+            <button class="close-error" @click="error = ''">×</button>
         </div>
     </div>
 
@@ -87,12 +87,12 @@
         <div class="chat-input-area">
             <!-- AI模型选择 -->
             <textarea v-model="inputMessage" class="message-input" placeholder="请输入你的问题或指令..."
-                @keydown.enter.exact="sendMessage" @keydown.enter.shift="handleShiftEnter" rows="3"></textarea>
+                rows="3" @keydown.enter.exact="sendMessage" @keydown.enter.shift="handleShiftEnter"></textarea>
             <div class="input-actions">
                 <button class="btn-attach" @click="showToast('附件功能即将上线', 'info')">
                     附件
                 </button>
-                <button class="btn-send" @click="sendMessage" :disabled="!inputMessage.trim() || isTyping">
+                <button class="btn-send" :disabled="!inputMessage.trim() || isTyping" @click="sendMessage">
                     <span v-if="isTyping" class="loading-dots">...</span>
                     {{ isTyping ? '发送中' : '发送' }}
                 </button>
@@ -107,20 +107,20 @@ import messenger from '@/message';
 import {MaMarkdown} from '@components/index';
 
 const aiModels = [
-    { value: 'deepseek', label: 'DeepSeek' }
-    // 未来可以添加更多模型
+  { value: 'deepseek', label: 'DeepSeek' }
+  // 未来可以添加更多模型
 ];
 
 // 可用的AI角色列表
 const aiRoles = [
-    { value: '', label: 'AI助手' },
-    { value: 'Fuka Shikuzaki', label: 'Fuka Shikuzaki' }
+  { value: '', label: 'AI助手' },
+  { value: 'Fuka Shikuzaki', label: 'Fuka Shikuzaki' }
 ];
 
 // AI角色头像映射
 const roleAvatars: Record<string, string> = {
-    '': '🤖', // 默认AI助手
-    'Fuka Shikuzaki': '👧' // Fuka Shikuzaki角色
+  '': '🤖', // 默认AI助手
+  'Fuka Shikuzaki': '👧' // Fuka Shikuzaki角色
 };
 
 interface ChatMessage {
@@ -154,478 +154,478 @@ const selectedRole = ref(''); // 默认无角色
 // 对话持久化相关函数
 // 获取当前角色对应的存储键
 function getStorageKey(): string {
-    // 为AI助手角色生成一个默认存储键，确保所有角色都能保存和加载对话历史
-    const roleKey = selectedRole.value || 'default_ai_assistant';
-    // 所有角色使用相同的存储键命名规则，实现上下文互通
-    return `shared_chat_history_${roleKey}`;
+  // 为AI助手角色生成一个默认存储键，确保所有角色都能保存和加载对话历史
+  const roleKey = selectedRole.value || 'default_ai_assistant';
+  // 所有角色使用相同的存储键命名规则，实现上下文互通
+  return `shared_chat_history_${roleKey}`;
 }
 
 // 读取 ExtensionToolPrompt.md 文件
 async function loadExtensionToolPrompt(): Promise<string> {
-    try {
-        // 获取静态文件的 URL
-        const promptUrl = chrome.runtime.getURL('ExtensionToolPrompt.md');
-        // 使用 fetch 读取文件内容
-        const response = await fetch(promptUrl);
-        if (!response.ok) {
-            maLogger.error('Failed to load ExtensionToolPrompt.md');
-            return '';
-        }
-        return await response.text();
-    } catch (error) {
-        maLogger.error('Error loading ExtensionToolPrompt.md:', error);
-        return '';
+  try {
+    // 获取静态文件的 URL
+    const promptUrl = chrome.runtime.getURL('ExtensionToolPrompt.md');
+    // 使用 fetch 读取文件内容
+    const response = await fetch(promptUrl);
+    if (!response.ok) {
+      maLogger.error('Failed to load ExtensionToolPrompt.md');
+      return '';
     }
+    return await response.text();
+  } catch (error) {
+    maLogger.error('Error loading ExtensionToolPrompt.md:', error);
+    return '';
+  }
 }
 
 // 添加系统提示词到消息列表
 async function addSystemPrompt(): Promise<void> {
-    const promptContent = await loadExtensionToolPrompt();
-    if (promptContent) {
-        messages.value.unshift({
-            role: 'system',
-            content: promptContent,
-            timestamp: new Date()
-        });
-        maLogger.log('System prompt added successfully');
-    }
+  const promptContent = await loadExtensionToolPrompt();
+  if (promptContent) {
+    messages.value.unshift({
+      role: 'system',
+      content: promptContent,
+      timestamp: new Date()
+    });
+    maLogger.log('System prompt added successfully');
+  }
 }
 
 // 从浏览器存储加载历史对话
 async function loadChatHistory(): Promise<void> {
-    try {
-        const storageKey = getStorageKey();
-        // 所有角色都使用相同的逻辑，不再区分AI助手和其他角色
-        // 确保所有角色都能正常加载和保存对话历史
-        maLogger.log('Loading chat history for role:', selectedRole.value);
+  try {
+    const storageKey = getStorageKey();
+    // 所有角色都使用相同的逻辑，不再区分AI助手和其他角色
+    // 确保所有角色都能正常加载和保存对话历史
+    maLogger.log('Loading chat history for role:', selectedRole.value);
 
-        maLogger.log('Attempting to load chat history for role:', selectedRole.value);
-        const result = await chrome.storage.local.get([storageKey]);
-        maLogger.log('Storage result:', result);
+    maLogger.log('Attempting to load chat history for role:', selectedRole.value);
+    const result = await chrome.storage.local.get([storageKey]);
+    maLogger.log('Storage result:', result);
 
-        let loadedMessages: Array<{ role: 'user' | 'assistant' | 'system', content: string, timestamp: Date }> = [];
+    let loadedMessages: Array<{ role: 'user' | 'assistant' | 'system', content: string, timestamp: Date }> = [];
 
-        if (result[storageKey]) {
-            const storedData = result[storageKey];
+    if (result[storageKey]) {
+      const storedData = result[storageKey];
 
-            if (Array.isArray(storedData)) {
-                // 正常数组格式
-                loadedMessages = storedData.map((msg: any) => ({
-                    ...msg,
-                    role: msg.role as 'user' | 'assistant' | 'system',
-                    timestamp: new Date(msg.timestamp)
-                }));
-            } else if (typeof storedData === 'object') {
-                // 对象格式（数字键），转换为数组
-                maLogger.log('Found object format history, converting to array...');
-                // 获取所有键并按数字排序
-                const keys = Object.keys(storedData).map(Number).sort((a, b) => a - b);
-                // 转换为数组
-                loadedMessages = keys.map(key => {
-                    const msg = storedData[key];
-                    return {
-                        ...msg,
-                        role: msg.role as 'user' | 'assistant' | 'system',
-                        timestamp: new Date(msg.timestamp)
-                    };
-                });
-            }
-        }
-
-        if (loadedMessages.length > 0) {
-            messages.value = loadedMessages;
-            maLogger.log('Loaded chat history from storage:', messages.value.length, 'messages');
-            maLogger.log('Loaded messages:', messages.value);
-        } else {
-            // 没有历史消息，先清空当前消息列表，然后添加系统提示词
-            messages.value = [];
-            maLogger.log('No chat history found for role:', selectedRole.value);
-            // 添加系统提示词到新会话
-            await addSystemPrompt();
-        }
-    } catch (error) {
-        maLogger.error('Error loading chat history:', error);
-        messages.value = [];
-        // 添加系统提示词到新会话（即使加载失败也提供提示词）
-        await addSystemPrompt();
+      if (Array.isArray(storedData)) {
+        // 正常数组格式
+        loadedMessages = storedData.map((msg: any) => ({
+          ...msg,
+          role: msg.role as 'user' | 'assistant' | 'system',
+          timestamp: new Date(msg.timestamp)
+        }));
+      } else if (typeof storedData === 'object') {
+        // 对象格式（数字键），转换为数组
+        maLogger.log('Found object format history, converting to array...');
+        // 获取所有键并按数字排序
+        const keys = Object.keys(storedData).map(Number).sort((a, b) => a - b);
+        // 转换为数组
+        loadedMessages = keys.map(key => {
+          const msg = storedData[key];
+          return {
+            ...msg,
+            role: msg.role as 'user' | 'assistant' | 'system',
+            timestamp: new Date(msg.timestamp)
+          };
+        });
+      }
     }
+
+    if (loadedMessages.length > 0) {
+      messages.value = loadedMessages;
+      maLogger.log('Loaded chat history from storage:', messages.value.length, 'messages');
+      maLogger.log('Loaded messages:', messages.value);
+    } else {
+      // 没有历史消息，先清空当前消息列表，然后添加系统提示词
+      messages.value = [];
+      maLogger.log('No chat history found for role:', selectedRole.value);
+      // 添加系统提示词到新会话
+      await addSystemPrompt();
+    }
+  } catch (error) {
+    maLogger.error('Error loading chat history:', error);
+    messages.value = [];
+    // 添加系统提示词到新会话（即使加载失败也提供提示词）
+    await addSystemPrompt();
+  }
 }
 
 // 保存对话历史到浏览器存储
 async function saveChatHistory(): Promise<void> {
-    try {
-        // 只保存用户和助手的消息，不保存系统提示词
-        const userMessages = messages.value.filter(msg => msg.role !== 'system');
+  try {
+    // 只保存用户和助手的消息，不保存系统提示词
+    const userMessages = messages.value.filter(msg => msg.role !== 'system');
 
-        // 如果没有可保存的消息，直接跳过
-        if (userMessages.length === 0) {
-            maLogger.log('No user messages to save, skipping...');
-            return;
-        }
-
-        const storageKey = getStorageKey();
-        if (!storageKey) {
-            // AI助手角色 - 不保存对话历史
-            maLogger.log('AI assistant role selected, not saving chat history');
-            return;
-        }
-
-        maLogger.log('Saving chat history for role:', selectedRole.value);
-        maLogger.log('Messages to save:', userMessages);
-
-        // 准备保存的数据，确保timestamp是ISO字符串格式
-        const messagesToSave = userMessages.map(msg => {
-            let timestampStr: string;
-
-            try {
-                if (msg.timestamp instanceof Date) {
-                    // 如果是Date对象，转换为ISO字符串
-                    timestampStr = msg.timestamp.toISOString();
-                } else if (typeof msg.timestamp === 'string') {
-                    // 如果已经是字符串，直接使用
-                    timestampStr = msg.timestamp;
-                } else {
-                    // 其他情况，尝试转换为Date对象后再转换为字符串
-                    const dateObj = new Date(msg.timestamp);
-                    if (isNaN(dateObj.getTime())) {
-                        // 如果转换失败，使用当前时间
-                        timestampStr = new Date().toISOString();
-                    } else {
-                        timestampStr = dateObj.toISOString();
-                    }
-                }
-            } catch (error) {
-                // 捕获所有错误，使用当前时间作为fallback
-                maLogger.warn('Invalid timestamp, using current time:', msg.timestamp, error);
-                timestampStr = new Date().toISOString();
-            }
-
-            return {
-                ...msg,
-                timestamp: timestampStr
-            };
-        });
-
-        const saveData = {
-            [storageKey]: messagesToSave
-        };
-        await chrome.storage.local.set(saveData);
-        maLogger.log('Saved chat history to storage:', userMessages.length, 'messages');
-    } catch (error) {
-        maLogger.error('Error saving chat history:', error);
+    // 如果没有可保存的消息，直接跳过
+    if (userMessages.length === 0) {
+      maLogger.log('No user messages to save, skipping...');
+      return;
     }
+
+    const storageKey = getStorageKey();
+    if (!storageKey) {
+      // AI助手角色 - 不保存对话历史
+      maLogger.log('AI assistant role selected, not saving chat history');
+      return;
+    }
+
+    maLogger.log('Saving chat history for role:', selectedRole.value);
+    maLogger.log('Messages to save:', userMessages);
+
+    // 准备保存的数据，确保timestamp是ISO字符串格式
+    const messagesToSave = userMessages.map(msg => {
+      let timestampStr: string;
+
+      try {
+        if (msg.timestamp instanceof Date) {
+          // 如果是Date对象，转换为ISO字符串
+          timestampStr = msg.timestamp.toISOString();
+        } else if (typeof msg.timestamp === 'string') {
+          // 如果已经是字符串，直接使用
+          timestampStr = msg.timestamp;
+        } else {
+          // 其他情况，尝试转换为Date对象后再转换为字符串
+          const dateObj = new Date(msg.timestamp);
+          if (isNaN(dateObj.getTime())) {
+            // 如果转换失败，使用当前时间
+            timestampStr = new Date().toISOString();
+          } else {
+            timestampStr = dateObj.toISOString();
+          }
+        }
+      } catch (error) {
+        // 捕获所有错误，使用当前时间作为fallback
+        maLogger.warn('Invalid timestamp, using current time:', msg.timestamp, error);
+        timestampStr = new Date().toISOString();
+      }
+
+      return {
+        ...msg,
+        timestamp: timestampStr
+      };
+    });
+
+    const saveData = {
+      [storageKey]: messagesToSave
+    };
+    await chrome.storage.local.set(saveData);
+    maLogger.log('Saved chat history to storage:', userMessages.length, 'messages');
+  } catch (error) {
+    maLogger.error('Error saving chat history:', error);
+  }
 }
 
 /**
  * 清空当前角色的聊天会话
  */
 async function clearConversation(): Promise<void> {
-    try {
-        // 1. 清空当前消息列表
-        messages.value = [];
-        error.value = '';
+  try {
+    // 1. 清空当前消息列表
+    messages.value = [];
+    error.value = '';
 
-        // 2. 删除浏览器存储中当前角色的对话历史
-        const storageKey = getStorageKey();
-        maLogger.log('Clearing chat history for role:', selectedRole.value);
-        await chrome.storage.local.remove([storageKey]);
+    // 2. 删除浏览器存储中当前角色的对话历史
+    const storageKey = getStorageKey();
+    maLogger.log('Clearing chat history for role:', selectedRole.value);
+    await chrome.storage.local.remove([storageKey]);
 
-        // 3. 通知后台清除当前角色的sessionID，重新申请新的sessionID
-        // 向后台发送清除会话请求
-        chrome.runtime.sendMessage({
-            type: 'CLEAR_AI_SESSION',
-            payload: {
-                role: selectedRole.value
-            }
-        });
+    // 3. 通知后台清除当前角色的sessionID，重新申请新的sessionID
+    // 向后台发送清除会话请求
+    chrome.runtime.sendMessage({
+      type: 'CLEAR_AI_SESSION',
+      payload: {
+        role: selectedRole.value
+      }
+    });
 
-        // 4. 添加系统提示词到新会话
-        await addSystemPrompt();
+    // 4. 添加系统提示词到新会话
+    await addSystemPrompt();
 
-        maLogger.log('Chat session cleared successfully for role:', selectedRole.value);
-    } catch (error: any) {
-        maLogger.error('Error clearing chat session:', error);
-        error.value = '清空会话失败，请稍后重试';
-    }
+    maLogger.log('Chat session cleared successfully for role:', selectedRole.value);
+  } catch (error: any) {
+    maLogger.error('Error clearing chat session:', error);
+    error.value = '清空会话失败，请稍后重试';
+  }
 }
 
 // 监听角色变化，加载对应角色的对话历史
 watch(selectedRole, async (newRole, oldRole) => {
-    if (newRole !== oldRole) {
-        maLogger.log('Role changed from', oldRole, 'to', newRole);
-        maLogger.log('Starting to load chat history for new role...');
+  if (newRole !== oldRole) {
+    maLogger.log('Role changed from', oldRole, 'to', newRole);
+    maLogger.log('Starting to load chat history for new role...');
 
-        // 显示加载状态
-        isTyping.value = true;
+    // 显示加载状态
+    isTyping.value = true;
 
-        try {
-            // 加载新角色的对话历史
-            await loadChatHistory();
-            maLogger.log('Chat history loaded successfully for role:', newRole);
-        } catch (error) {
-            maLogger.error('Error loading chat history when role changed:', error);
-            // 如果加载失败，清空消息
-            messages.value = [];
-        } finally {
-            // 无论加载结果如何，都关闭加载状态
-            isTyping.value = false;
-        }
+    try {
+      // 加载新角色的对话历史
+      await loadChatHistory();
+      maLogger.log('Chat history loaded successfully for role:', newRole);
+    } catch (error) {
+      maLogger.error('Error loading chat history when role changed:', error);
+      // 如果加载失败，清空消息
+      messages.value = [];
+    } finally {
+      // 无论加载结果如何，都关闭加载状态
+      isTyping.value = false;
     }
+  }
 });
 
 // 监听messages变化，自动保存对话历史
 watch(messages, () => {
-    saveChatHistory().catch(maLogger.error);
+  saveChatHistory().catch(maLogger.error);
 }, { deep: true });
 
 /**
  * 发送消息到AI
  */
 async function sendMessage(): Promise<void> {
-    const content = inputMessage.value.trim();
-    if (!content || isTyping.value) return;
+  const content = inputMessage.value.trim();
+  if (!content || isTyping.value) {return;}
 
-    // 添加用户消息到列表
-    messages.value.push({
-        role: 'user',
-        content,
-        timestamp: new Date()
+  // 添加用户消息到列表
+  messages.value.push({
+    role: 'user',
+    content,
+    timestamp: new Date()
+  });
+
+  // 清空输入框
+  inputMessage.value = '';
+
+  // 滚动到底部
+  await scrollToBottom();
+
+  // 显示正在输入状态
+  isTyping.value = true;
+  error.value = '';
+
+  try {
+    // 先占位，之后逐字填充
+    const reply = {
+      role: 'assistant' as const,
+      content: '',
+      timestamp: new Date()
+    };
+    messages.value.push(reply);
+
+    // 生成唯一消息ID
+    const messageId = `ai-conversation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    currentMessageId.value = messageId;
+
+    // 建立与后台的端口连接
+    const port = chrome.runtime.connect({
+      name: `ai-conversation-${messageId}`
     });
+    currentPort.value = port;
 
-    // 清空输入框
-    inputMessage.value = '';
-
-    // 滚动到底部
-    await scrollToBottom();
-
-    // 显示正在输入状态
-    isTyping.value = true;
-    error.value = '';
-
-    try {
-        // 先占位，之后逐字填充
-        const reply = {
-            role: 'assistant' as const,
-            content: '',
-            timestamp: new Date()
-        };
-        messages.value.push(reply);
-
-        // 生成唯一消息ID
-        const messageId = `ai-conversation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        currentMessageId.value = messageId;
-
-        // 建立与后台的端口连接
-        const port = chrome.runtime.connect({
-            name: `ai-conversation-${messageId}`
-        });
-        currentPort.value = port;
-
-        // 监听端口消息
-        port.onMessage.addListener((message: any) => {
-            if (message.type === 'AI_CONVERSATION_STREAM_DATA' && message.payload?.messageId === messageId) {
-                const messageIndex = messages.value.length - 1;
-                if (messageIndex >= 0) {
-                    messages.value[messageIndex].content += message.payload.content;
-                    scrollToBottom();
-                }
-            } else if (message.type === 'AI_CONVERSATION_COMPLETE' && message.payload?.messageId === messageId) {
-                // 完成时的处理 - 修剪消息末尾的空白字符，解决空行问题
-                const messageIndex = messages.value.length - 1;
-                if (messageIndex >= 0) {
-                    // 修剪消息内容末尾的空白字符（包括换行符、空格等）
-                    messages.value[messageIndex].content = messages.value[messageIndex].content.trimEnd();
-                }
-                isTyping.value = false;
-                scrollToBottom();
-                // 清理端口
-                port.disconnect();
-                currentPort.value = null;
-            } else if (message.type === 'AI_CONVERSATION_ERROR' && message.payload?.messageId === messageId) {
-                // 错误处理
-                const errorMsg = `抱歉，处理您的请求时出错：${message.payload.error}`;
-                error.value = errorMsg;
-                const messageIndex = messages.value.length - 1;
-                if (messageIndex >= 0) {
-                    messages.value[messageIndex].content = errorMsg;
-                }
-                isTyping.value = false;
-                scrollToBottom();
-                // 清理端口
-                port.disconnect();
-                currentPort.value = null;
-            }
-        });
-
-        // 监听端口断开
-        port.onDisconnect.addListener(() => {
-            maLogger.log('与后台的端口连接已断开');
-            currentPort.value = null;
-            if (isTyping.value) {
-                isTyping.value = false;
-                error.value = '与后台的连接已断开';
-            }
-        });
-
-        // 向后台发送请求
-        port.postMessage({
-            type: 'START_AI_CONVERSATION',
-            payload: {
-                prompt: content,
-                messageId: messageId,
-                model: selectedModel.value,
-                role: selectedRole.value,
-                messages: messages.value.map(msg => ({
-                    role: msg.role,
-                    content: msg.content
-                }))
-            }
-        });
-
-        maLogger.log('发送消息成功，已建立端口连接:', messageId);
-    } catch (err: any) {
-        maLogger.error('发送消息失败:', err);
-        const errorMsg = '抱歉，暂时无法为您提供服务，请稍后重试。';
-        error.value = errorMsg;
-        // 移除占位消息
-        if (messages.value.length > 0) {
-            messages.value.pop();
+    // 监听端口消息
+    port.onMessage.addListener((message: any) => {
+      if (message.type === 'AI_CONVERSATION_STREAM_DATA' && message.payload?.messageId === messageId) {
+        const messageIndex = messages.value.length - 1;
+        if (messageIndex >= 0) {
+          messages.value[messageIndex].content += message.payload.content;
+          scrollToBottom();
         }
-        // 添加错误消息
-        messages.value.push({
-            role: 'assistant',
-            content: errorMsg,
-            timestamp: new Date()
-        });
+      } else if (message.type === 'AI_CONVERSATION_COMPLETE' && message.payload?.messageId === messageId) {
+        // 完成时的处理 - 修剪消息末尾的空白字符，解决空行问题
+        const messageIndex = messages.value.length - 1;
+        if (messageIndex >= 0) {
+          // 修剪消息内容末尾的空白字符（包括换行符、空格等）
+          messages.value[messageIndex].content = messages.value[messageIndex].content.trimEnd();
+        }
         isTyping.value = false;
         scrollToBottom();
+        // 清理端口
+        port.disconnect();
+        currentPort.value = null;
+      } else if (message.type === 'AI_CONVERSATION_ERROR' && message.payload?.messageId === messageId) {
+        // 错误处理
+        const errorMsg = `抱歉，处理您的请求时出错：${message.payload.error}`;
+        error.value = errorMsg;
+        const messageIndex = messages.value.length - 1;
+        if (messageIndex >= 0) {
+          messages.value[messageIndex].content = errorMsg;
+        }
+        isTyping.value = false;
+        scrollToBottom();
+        // 清理端口
+        port.disconnect();
+        currentPort.value = null;
+      }
+    });
+
+    // 监听端口断开
+    port.onDisconnect.addListener(() => {
+      maLogger.log('与后台的端口连接已断开');
+      currentPort.value = null;
+      if (isTyping.value) {
+        isTyping.value = false;
+        error.value = '与后台的连接已断开';
+      }
+    });
+
+    // 向后台发送请求
+    port.postMessage({
+      type: 'START_AI_CONVERSATION',
+      payload: {
+        prompt: content,
+        messageId: messageId,
+        model: selectedModel.value,
+        role: selectedRole.value,
+        messages: messages.value.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      }
+    });
+
+    maLogger.log('发送消息成功，已建立端口连接:', messageId);
+  } catch (err: any) {
+    maLogger.error('发送消息失败:', err);
+    const errorMsg = '抱歉，暂时无法为您提供服务，请稍后重试。';
+    error.value = errorMsg;
+    // 移除占位消息
+    if (messages.value.length > 0) {
+      messages.value.pop();
     }
+    // 添加错误消息
+    messages.value.push({
+      role: 'assistant',
+      content: errorMsg,
+      timestamp: new Date()
+    });
+    isTyping.value = false;
+    scrollToBottom();
+  }
 }
 
 /**
  * 处理Shift+Enter组合键（换行）
  */
 function handleShiftEnter(event: KeyboardEvent): void {
-    // 让浏览器默认处理Shift+Enter（即添加换行符）
+  // 让浏览器默认处理Shift+Enter（即添加换行符）
 }
 
 /**
  * 滚动聊天记录到底部
  */
 async function scrollToBottom(): Promise<void> {
-    await nextTick();
-    if (chatMessages.value) {
-        chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
-    }
+  await nextTick();
+  if (chatMessages.value) {
+    chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
+  }
 }
 
 /**
  * 格式化时间
  */
 function formatTime(date: Date): string {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 /**
  * 显示提示框
  */
 function showToast(message: string, type: 'success' | 'error' | 'info' = 'info', duration: number = 3000): void {
-    // 创建提示框元素
-    const toast = document.createElement('div');
-    toast.className = `toast show ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
+  // 创建提示框元素
+  const toast = document.createElement('div');
+  toast.className = `toast show ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
 
-    // 定时移除
+  // 定时移除
+  setTimeout(() => {
+    toast.className = 'toast';
     setTimeout(() => {
-        toast.className = 'toast';
-        setTimeout(() => {
-            if (document.body.contains(toast)) {
-                document.body.removeChild(toast);
-            }
-        }, 300);
-    }, duration);
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 300);
+  }, duration);
 }
 
 /**
  * 复制消息
  */
 async function copyMessage(content: string) {
-    try {
-        await navigator.clipboard.writeText(content);
-        // 显示复制成功状态
-        const currentIndex = messages.value.findIndex(msg => msg.content === content && msg.role === 'assistant');
-        if (currentIndex !== -1) {
-            copiedIndex.value = currentIndex;
-            setTimeout(() => {
-                copiedIndex.value = null;
-            }, 2000);
-        }
-    } catch (err) {
-        maLogger.error('复制失败:', err);
-        showToast('复制失败，请手动复制', 'error');
+  try {
+    await navigator.clipboard.writeText(content);
+    // 显示复制成功状态
+    const currentIndex = messages.value.findIndex(msg => msg.content === content && msg.role === 'assistant');
+    if (currentIndex !== -1) {
+      copiedIndex.value = currentIndex;
+      setTimeout(() => {
+        copiedIndex.value = null;
+      }, 2000);
     }
+  } catch (err) {
+    maLogger.error('复制失败:', err);
+    showToast('复制失败，请手动复制', 'error');
+  }
 }
 
 /**
  * 设置消息监听器
  */
 const setupMessageListener = () => {
-    // 使用项目的messenger系统监听消息
-    messenger.ext.listen((message: any, sender: any, sendResponse: any) => {
-        if (message.type === 'AI_CONVERSATION_STREAM_DATA' && message.payload?.messageId === currentMessageId.value) {
-            const messageIndex = messages.value.length - 1;
-            if (messageIndex >= 0) {
-                messages.value[messageIndex].content += message.payload.content;
-                scrollToBottom();
-            }
-        } else if (message.type === 'AI_CONVERSATION_COMPLETE' && message.payload?.messageId === currentMessageId.value) {
-            // 完成时的处理
-            scrollToBottom();
-            isTyping.value = false;
-        } else if (message.type === 'AI_CONVERSATION_ERROR' && message.payload?.messageId === currentMessageId.value) {
-            // 错误处理
-            const errorMsg = `抱歉，处理您的请求时出错：${message.payload.error}`;
-            error.value = errorMsg;
-            const messageIndex = messages.value.length - 1;
-            if (messageIndex >= 0) {
-                messages.value[messageIndex].content = errorMsg;
-            }
-            scrollToBottom();
-            isTyping.value = false;
-        }
-        return true; // 保持消息通道开放
-    });
+  // 使用项目的messenger系统监听消息
+  messenger.ext.listen((message: any, sender: any, sendResponse: any) => {
+    if (message.type === 'AI_CONVERSATION_STREAM_DATA' && message.payload?.messageId === currentMessageId.value) {
+      const messageIndex = messages.value.length - 1;
+      if (messageIndex >= 0) {
+        messages.value[messageIndex].content += message.payload.content;
+        scrollToBottom();
+      }
+    } else if (message.type === 'AI_CONVERSATION_COMPLETE' && message.payload?.messageId === currentMessageId.value) {
+      // 完成时的处理
+      scrollToBottom();
+      isTyping.value = false;
+    } else if (message.type === 'AI_CONVERSATION_ERROR' && message.payload?.messageId === currentMessageId.value) {
+      // 错误处理
+      const errorMsg = `抱歉，处理您的请求时出错：${message.payload.error}`;
+      error.value = errorMsg;
+      const messageIndex = messages.value.length - 1;
+      if (messageIndex >= 0) {
+        messages.value[messageIndex].content = errorMsg;
+      }
+      scrollToBottom();
+      isTyping.value = false;
+    }
+    return true; // 保持消息通道开放
+  });
 };
 
 /**
  * 组件挂载时初始化
  */
 onMounted(async () => {
-    // 加载历史对话
-    maLogger.log('Component mounted, loading chat history...');
-    await loadChatHistory();
-    // 加载完成后滚动到底部
-    maLogger.log('Chat history loaded, scrolling to bottom...');
-    await nextTick();
-    scrollToBottom();
-    // 设置消息监听器
-    setupMessageListener();
-    maLogger.log('Component initialization completed');
+  // 加载历史对话
+  maLogger.log('Component mounted, loading chat history...');
+  await loadChatHistory();
+  // 加载完成后滚动到底部
+  maLogger.log('Chat history loaded, scrolling to bottom...');
+  await nextTick();
+  scrollToBottom();
+  // 设置消息监听器
+  setupMessageListener();
+  maLogger.log('Component initialization completed');
 });
 
 /**
  * 组件卸载时清理
  */
 onUnmounted(() => {
-    // 清理端口连接
-    if (currentPort.value) {
-        currentPort.value.disconnect();
-        currentPort.value = null;
-    }
-    // 项目的messenger系统会自动处理监听器清理
+  // 清理端口连接
+  if (currentPort.value) {
+    currentPort.value.disconnect();
+    currentPort.value = null;
+  }
+  // 项目的messenger系统会自动处理监听器清理
 });
 </script>
 

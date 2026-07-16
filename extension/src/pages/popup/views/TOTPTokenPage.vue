@@ -101,7 +101,7 @@ import {
   getTOTPCode,
   listTOTPAccounts,
   type TOTPAccount,
-  type TOTPCode,
+  type TOTPCode
 } from '@/services/api/totp-api';
 
 const accounts = ref<TOTPAccount[]>([]);
@@ -118,7 +118,7 @@ const form = reactive({
   issuer: '',
   accountName: '',
   secret: '',
-  otpauthUrl: '',
+  otpauthUrl: ''
 });
 
 let timer: number | undefined;
@@ -149,7 +149,7 @@ const handleQRUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = '';
-  if (!file) return;
+  if (!file) {return;}
 
   clearStatus();
   isScanningQR.value = true;
@@ -229,7 +229,7 @@ const submitAccount = async () => {
       issuer: form.issuer,
       accountName: form.accountName,
       secret: form.secret,
-      otpauthUrl: form.otpauthUrl,
+      otpauthUrl: form.otpauthUrl
     });
     resetForm();
     successMessage.value = '令牌已保存';
@@ -258,7 +258,7 @@ const removeAccount = async (accountId: string) => {
 
 const copyCode = async (accountId: string) => {
   const code = codes[accountId]?.code;
-  if (!code) return;
+  if (!code) {return;}
   clearStatus();
   try {
     await navigator.clipboard.writeText(code);
@@ -270,7 +270,7 @@ const copyCode = async (accountId: string) => {
 
 const remainingSeconds = (account: TOTPAccount) => {
   const code = codes[account.id];
-  if (!code) return account.period;
+  if (!code) {return account.period;}
   const expiresAt = new Date(code.expiresAt).getTime();
   return Math.max(0, Math.ceil((expiresAt - nowMs.value) / 1000));
 };
@@ -288,7 +288,7 @@ const remainingText = (account: TOTPAccount) => {
 const tick = async () => {
   nowMs.value = Date.now();
   const expiredAccounts = accounts.value.filter((account) => remainingSeconds(account) <= 0);
-  if (expiredAccounts.length === 0) return;
+  if (expiredAccounts.length === 0) {return;}
   try {
     await Promise.all(expiredAccounts.map((account) => refreshCode(account.id)));
   } catch (error) {

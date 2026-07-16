@@ -23,7 +23,7 @@
           <a href="#admin" class="btn btn-outline" @click.prevent="$emit('adminClick')">管理后台</a>
         </div>
         <div class="navbar-user">
-          <div class="avatar" @click="$emit('avatarClick')" :class="{ 'avatar-login': !isLoggedIn }">
+          <div class="avatar" :class="{ 'avatar-login': !isLoggedIn }" @click="$emit('avatarClick')">
             <template v-if="isLoggedIn">
               <img src="https://via.placeholder.com/40" alt="用户头像" class="avatar-img">
             </template>
@@ -103,7 +103,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useEventListener } from '@/event'
+import { useEventListener } from '@/event';
 
 // Props
 const props = defineProps<{
@@ -130,7 +130,7 @@ const handleScroll = () => {
   showBackToTop.value = scrollY > 300;
 };
 
-useEventListener(window, 'scroll', handleScroll, { passive: true })
+useEventListener(window, 'scroll', handleScroll, { passive: true });
 </script>
 
 <style scoped>

@@ -6,7 +6,7 @@ import {
   persistMouseTrail,
   readStoredMouseTrailPreference,
   type MouseTrailPreference,
-  type MouseTrailPreset,
+  type MouseTrailPreset
 } from '@/assets/composables/mouse/mouseTrailPreference';
 
 export const popupMouseTrailStorageKey = mouseTrailStorageKey;
@@ -31,7 +31,7 @@ const isUsablePageTab = (tab: chrome.tabs.Tab | undefined): tab is chrome.tabs.T
 
 const getCurrentPreference = (): MouseTrailPreference => ({
   enabled: isMouseTrailEnabled.value,
-  preset: mouseTrailPreset.value,
+  preset: mouseTrailPreset.value
 });
 
 const notifyCurrentPageMouseTrail = async (preference: MouseTrailPreference): Promise<void> => {
@@ -52,7 +52,7 @@ const notifyCurrentPageMouseTrail = async (preference: MouseTrailPreference): Pr
         type: 'TOGGLE_MOUSE_TRAIL',
         source: 'popup',
         target: 'content',
-        payload: preference,
+        payload: preference
       }, () => {
         if (chrome.runtime.lastError) {
           maLogger.warn('当前页面暂未接收鼠标拖尾消息:', chrome.runtime.lastError.message);
@@ -99,6 +99,6 @@ export const usePopupMouseTrail = () => {
     isMouseTrailLoaded,
     loadPopupMouseTrail,
     setPopupMouseTrail,
-    setPopupMouseTrailPreset,
+    setPopupMouseTrailPreset
   };
 };

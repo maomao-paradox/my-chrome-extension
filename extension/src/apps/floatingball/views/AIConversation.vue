@@ -183,14 +183,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
-import type { PropType } from "vue";
-import { MaMarkdown } from "@components/index";
-import { loadAIConfig } from "@/utils/ai-config";
-import { IconDelete } from "@/assets/icons";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import type { PropType } from 'vue';
+import { MaMarkdown } from '@components/index';
+import { loadAIConfig } from '@/utils/ai-config';
+import { IconDelete } from '@/assets/icons';
 
 type ChatMessage = {
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
 };
@@ -205,100 +205,100 @@ type AiRoleOption = {
 const props = defineProps({
   title: {
     type: String,
-    default: "AI 助手",
+    default: 'AI 助手'
   },
   welcomeTitle: {
     type: String,
-    default: "开始一段临床级问答",
+    default: '开始一段临床级问答'
   },
   welcomeMessage: {
     type: String,
-    default: "输入病例、数据问题或工作流需求，AI 将在当前面板中连续响应。",
+    default: '输入病例、数据问题或工作流需求，AI 将在当前面板中连续响应。'
   },
   welcomeIcon: {
     type: String,
-    default: "AI",
+    default: 'AI'
   },
   userIcon: {
     type: String,
-    default: "YOU",
+    default: 'YOU'
   },
   aiIcon: {
     type: String,
-    default: "AI",
+    default: 'AI'
   },
   typingMessage: {
     type: String,
-    default: "Generating response...",
+    default: 'Generating response...'
   },
   inputPlaceholder: {
     type: String,
-    default: "Ask about radiotherapy workflows, metrics, or current records...",
+    default: 'Ask about radiotherapy workflows, metrics, or current records...'
   },
   sendButtonText: {
     type: String,
-    default: "Send",
+    default: 'Send'
   },
   inputHint: {
     type: String,
-    default: "Enter to send. Shift + Enter for a new line.",
+    default: 'Enter to send. Shift + Enter for a new line.'
   },
   defaultRole: {
     type: String,
-    default: "",
+    default: ''
   },
   systemPrompt: {
     type: String,
-    default: "",
+    default: ''
   },
   showToolbar: {
     type: Boolean,
-    default: true,
+    default: true
   },
   roleOptions: {
     type: Array as PropType<AiRoleOption[]>,
     default: () => [
-      { value: "", label: "AI Assistant" },
-      { value: "Fuka Shikuzaki", label: "Fuka Shikuzaki", avatar: "FS" },
-    ],
-  },
+      { value: '', label: 'AI Assistant' },
+      { value: 'Fuka Shikuzaki', label: 'Fuka Shikuzaki', avatar: 'FS' }
+    ]
+  }
 });
 
 const emit = defineEmits([
-  "messageSent",
-  "messageReceived",
-  "error",
-  "conversationCleared",
+  'messageSent',
+  'messageReceived',
+  'error',
+  'conversationCleared'
 ]);
 
-const aiModels = [{ value: "deepseek", label: "DeepSeek" }];
+const aiModels = [{ value: 'deepseek', label: 'DeepSeek' }];
 const aiRoles = computed(() => props.roleOptions);
 
-const input = ref("");
+const input = ref('');
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
-const error = ref("");
+const error = ref('');
 const conversationBody = ref<HTMLElement | null>(null);
 const messageInput = ref<HTMLTextAreaElement | null>(null);
-const selectedModel = ref("deepseek");
+const selectedModel = ref('deepseek');
 const selectedRole = ref(props.defaultRole);
 const copiedIndex = ref<number | null>(null);
 const autoScrollEnabled = ref(true);
 const isInputFocused = ref(false);
-const currentMessageId = ref("");
+const currentMessageId = ref('');
 const currentPort = ref<chrome.runtime.Port | null>(null);
 
 const currentRoleOption = computed(() =>
-  aiRoles.value.find((role) => role.value === selectedRole.value),
+  aiRoles.value.find((role) => role.value === selectedRole.value)
 );
 const currentAssistantIcon = computed(
-  () => currentRoleOption.value?.avatar || props.aiIcon,
+  () => currentRoleOption.value?.avatar || props.aiIcon
 );
 const currentSystemPrompt = computed(
-  () => currentRoleOption.value?.systemPrompt || props.systemPrompt,
+  () => currentRoleOption.value?.systemPrompt || props.systemPrompt
 );
 const showSendButton = computed(
-  () => isInputFocused.value || !!input.value.trim() || loading.value,
+  () => isInputFocused.value || !!input.value.trim() || loading.value
 );
 const showTypingIndicator = computed(() => {
   if (!loading.value) {
@@ -308,7 +308,7 @@ const showTypingIndicator = computed(() => {
   const lastMessage = messages.value[messages.value.length - 1];
   return (
     !lastMessage ||
-    lastMessage.role !== "assistant" ||
+    lastMessage.role !== 'assistant' ||
     !lastMessage.content.trim()
   );
 });
@@ -337,13 +337,13 @@ const resizeMessageInput = () => {
       return;
     }
 
-    inputElement.style.height = "0px";
+    inputElement.style.height = '0px';
     const nextHeight = Math.min(Math.max(inputElement.scrollHeight, 32), 108);
     inputElement.style.height = `${nextHeight}px`;
   });
 };
 
-const scheduleScrollToBottom = (behavior: ScrollBehavior = "auto") => {
+const scheduleScrollToBottom = (behavior: ScrollBehavior = 'auto') => {
   nextTick(() => {
     if (!conversationBody.value || !autoScrollEnabled.value) {
       return;
@@ -353,7 +353,7 @@ const scheduleScrollToBottom = (behavior: ScrollBehavior = "auto") => {
     scrollAnimationFrame = requestAnimationFrame(() => {
       conversationBody.value?.scrollTo({
         top: conversationBody.value.scrollHeight,
-        behavior,
+        behavior
       });
       scrollAnimationFrame = null;
     });
@@ -382,7 +382,7 @@ const flushHistorySave = () => {
 };
 
 const getStorageKey = () => {
-  const roleKey = selectedRole.value || "default_ai_assistant";
+  const roleKey = selectedRole.value || 'default_ai_assistant';
   return `shared_chat_history_${roleKey}`;
 };
 
@@ -399,22 +399,22 @@ const normalizeStoredMessages = (storedData: unknown): ChatMessage[] => {
 
   const source = Array.isArray(storedData)
     ? storedData
-    : typeof storedData === "object"
+    : typeof storedData === 'object'
       ? Object.keys(storedData as Record<string, unknown>)
-          .map(Number)
-          .sort((left, right) => left - right)
-          .map((key) => (storedData as Record<number, any>)[key])
+        .map(Number)
+        .sort((left, right) => left - right)
+        .map((key) => (storedData as Record<number, any>)[key])
       : [];
 
   return source
     .filter(
       (message) =>
-        message && (message.role === "user" || message.role === "assistant"),
+        message && (message.role === 'user' || message.role === 'assistant')
     )
     .map((message) => ({
-      role: message.role as "user" | "assistant",
-      content: typeof message.content === "string" ? message.content : "",
-      timestamp: normalizeTimestamp(message.timestamp),
+      role: message.role as 'user' | 'assistant',
+      content: typeof message.content === 'string' ? message.content : '',
+      timestamp: normalizeTimestamp(message.timestamp)
     }));
 };
 
@@ -427,8 +427,8 @@ const disconnectCurrentPort = () => {
     currentPort.value.disconnect();
   } catch (disconnectError) {
     maLogger.warn(
-      "Failed to disconnect AI conversation port:",
-      disconnectError,
+      'Failed to disconnect AI conversation port:',
+      disconnectError
     );
   } finally {
     currentPort.value = null;
@@ -436,7 +436,7 @@ const disconnectCurrentPort = () => {
 };
 
 async function loadChatHistory() {
-  if (typeof chrome === "undefined" || !chrome.storage?.local) {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) {
     messages.value = [];
     return;
   }
@@ -446,16 +446,16 @@ async function loadChatHistory() {
     const result = await chrome.storage.local.get([storageKey]);
     messages.value = normalizeStoredMessages(result[storageKey]);
     autoScrollEnabled.value = true;
-    scheduleScrollToBottom("auto");
+    scheduleScrollToBottom('auto');
   } catch (loadError) {
-    maLogger.error("Error loading AI conversation history:", loadError);
+    maLogger.error('Error loading AI conversation history:', loadError);
     messages.value = [];
   }
 }
 
 async function saveChatHistory() {
   if (
-    typeof chrome === "undefined" ||
+    typeof chrome === 'undefined' ||
     !chrome.storage?.local ||
     messages.value.length === 0
   ) {
@@ -467,19 +467,19 @@ async function saveChatHistory() {
     const payload = {
       [storageKey]: messages.value.map((message) => ({
         ...message,
-        timestamp: normalizeTimestamp(message.timestamp).toISOString(),
-      })),
+        timestamp: normalizeTimestamp(message.timestamp).toISOString()
+      }))
     };
 
     await chrome.storage.local.set(payload);
   } catch (saveError) {
-    maLogger.error("Error saving AI conversation history:", saveError);
+    maLogger.error('Error saving AI conversation history:', saveError);
   }
 }
 
 const formatTime = (timestamp: Date) => {
   const date = normalizeTimestamp(timestamp);
-  return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 };
 
 const isAtBottom = () => {
@@ -497,7 +497,7 @@ const handleScroll = () => {
 
 const handleInput = () => {
   if (error.value) {
-    error.value = "";
+    error.value = '';
   }
 
   resizeMessageInput();
@@ -526,40 +526,40 @@ const sendMessage = async () => {
     return;
   }
 
-  if (typeof chrome === "undefined" || !chrome.runtime?.connect) {
-    error.value = "AI service is unavailable in the current runtime.";
+  if (typeof chrome === 'undefined' || !chrome.runtime?.connect) {
+    error.value = 'AI service is unavailable in the current runtime.';
     return;
   }
 
-  error.value = "";
+  error.value = '';
   autoScrollEnabled.value = true;
 
   messages.value.push({
-    role: "user",
+    role: 'user',
     content: text,
-    timestamp: new Date(),
+    timestamp: new Date()
   });
   scheduleHistorySave(80);
 
-  input.value = "";
+  input.value = '';
   resizeMessageInput();
-  scheduleScrollToBottom("smooth");
-  emit("messageSent", text);
+  scheduleScrollToBottom('smooth');
+  emit('messageSent', text);
 
   try {
     loading.value = true;
     const assistantMessageIndex =
       messages.value.push({
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
+        role: 'assistant',
+        content: '',
+        timestamp: new Date()
       }) - 1;
 
     currentMessageId.value = `ai-conversation-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     disconnectCurrentPort();
 
     const port = chrome.runtime.connect({
-      name: `ai-conversation-${currentMessageId.value}`,
+      name: `ai-conversation-${currentMessageId.value}`
     });
     currentPort.value = port;
 
@@ -588,13 +588,13 @@ const sendMessage = async () => {
       }
 
       loading.value = false;
-      currentMessageId.value = "";
+      currentMessageId.value = '';
 
       if (currentPort.value === port) {
         currentPort.value = null;
       }
 
-      scheduleScrollToBottom("auto");
+      scheduleScrollToBottom('auto');
       flushHistorySave();
 
       if (options?.disconnectPort !== false) {
@@ -602,8 +602,8 @@ const sendMessage = async () => {
           port.disconnect();
         } catch (disconnectError) {
           maLogger.warn(
-            "Failed to disconnect settled AI conversation port:",
-            disconnectError,
+            'Failed to disconnect settled AI conversation port:',
+            disconnectError
           );
         }
       }
@@ -614,29 +614,29 @@ const sendMessage = async () => {
         return;
       }
 
-      if (message.type === "AI_CONVERSATION_STREAM_DATA") {
+      if (message.type === 'AI_CONVERSATION_STREAM_DATA') {
         if (messages.value[assistantMessageIndex]) {
           messages.value[assistantMessageIndex].content +=
-            message.payload.content || "";
+            message.payload.content || '';
         }
         scheduleHistorySave(320);
-        scheduleScrollToBottom("auto");
+        scheduleScrollToBottom('auto');
         emit(
-          "messageReceived",
-          messages.value[assistantMessageIndex]?.content || "",
+          'messageReceived',
+          messages.value[assistantMessageIndex]?.content || ''
         );
         return;
       }
 
-      if (message.type === "AI_CONVERSATION_COMPLETE") {
+      if (message.type === 'AI_CONVERSATION_COMPLETE') {
         settleStream({ trimEnd: true });
         return;
       }
 
-      if (message.type === "AI_CONVERSATION_ERROR") {
-        emit("error", message.payload.error);
+      if (message.type === 'AI_CONVERSATION_ERROR') {
+        emit('error', message.payload.error);
         settleStream({
-          errorMessage: `Sorry, something went wrong: ${message.payload.error}`,
+          errorMessage: `Sorry, something went wrong: ${message.payload.error}`
         });
       }
     });
@@ -647,15 +647,15 @@ const sendMessage = async () => {
       }
 
       settleStream({
-        errorMessage: "Connection to the background service was interrupted.",
-        disconnectPort: false,
+        errorMessage: 'Connection to the background service was interrupted.',
+        disconnectPort: false
       });
     });
 
     const config = await loadAIConfig();
 
     port.postMessage({
-      type: "START_AI_CONVERSATION",
+      type: 'START_AI_CONVERSATION',
       payload: {
         prompt: text,
         messageId: currentMessageId.value,
@@ -664,39 +664,39 @@ const sendMessage = async () => {
         apiKey: config.apiKey,
         apiBaseUrl: config.apiBaseUrl,
         role: selectedRole.value,
-        systemPrompt: currentSystemPrompt.value,
-      },
+        systemPrompt: currentSystemPrompt.value
+      }
     });
   } catch (sendError: any) {
-    maLogger.error("Error sending AI conversation message:", sendError);
+    maLogger.error('Error sending AI conversation message:', sendError);
     loading.value = false;
-    currentMessageId.value = "";
+    currentMessageId.value = '';
     disconnectCurrentPort();
 
     if (messages.value.length > 0) {
       messages.value.pop();
     }
 
-    const fallbackMessage = "Sorry, the AI service is temporarily unavailable.";
+    const fallbackMessage = 'Sorry, the AI service is temporarily unavailable.';
     error.value = fallbackMessage;
     messages.value.push({
-      role: "assistant",
+      role: 'assistant',
       content: fallbackMessage,
-      timestamp: new Date(),
+      timestamp: new Date()
     });
 
     flushHistorySave();
-    scheduleScrollToBottom("auto");
-    emit("error", sendError?.message || fallbackMessage);
+    scheduleScrollToBottom('auto');
+    emit('error', sendError?.message || fallbackMessage);
   }
 };
 
 const clearConversation = async () => {
   disconnectCurrentPort();
   loading.value = false;
-  currentMessageId.value = "";
-  input.value = "";
-  error.value = "";
+  currentMessageId.value = '';
+  input.value = '';
+  error.value = '';
   copiedIndex.value = null;
   clearHistorySaveTimer();
 
@@ -704,23 +704,23 @@ const clearConversation = async () => {
     messages.value = [];
     resizeMessageInput();
 
-    if (typeof chrome !== "undefined" && chrome.storage?.local) {
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
       await chrome.storage.local.remove([getStorageKey()]);
     }
 
-    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+    if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
       chrome.runtime.sendMessage({
-        type: "CLEAR_AI_SESSION",
+        type: 'CLEAR_AI_SESSION',
         payload: {
-          role: selectedRole.value,
-        },
+          role: selectedRole.value
+        }
       });
     }
 
-    emit("conversationCleared");
+    emit('conversationCleared');
   } catch (clearError) {
-    maLogger.error("Error clearing AI conversation:", clearError);
-    error.value = "Unable to clear the current conversation.";
+    maLogger.error('Error clearing AI conversation:', clearError);
+    error.value = 'Unable to clear the current conversation.';
   }
 };
 
@@ -735,7 +735,7 @@ const copyMessage = async (content: string, index: number) => {
       }
     }, 1600);
   } catch (copyError) {
-    maLogger.error("Failed to copy AI conversation message:", copyError);
+    maLogger.error('Failed to copy AI conversation message:', copyError);
   }
 };
 
@@ -746,8 +746,8 @@ watch(selectedRole, async (newRole, oldRole) => {
 
   disconnectCurrentPort();
   loading.value = false;
-  currentMessageId.value = "";
-  error.value = "";
+  currentMessageId.value = '';
+  error.value = '';
   copiedIndex.value = null;
   clearHistorySaveTimer();
 

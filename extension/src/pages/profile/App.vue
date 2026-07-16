@@ -194,7 +194,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 const navItems = [
   { id: 'about', label: '设定' },
   { id: 'work', label: '展柜' },
-  { id: 'skills', label: '技法' },
+  { id: 'skills', label: '技法' }
 ];
 
 const kineticWords = ['NEON', 'AURA', 'GLITCH', 'MANGA', 'HOLO', 'RHYTHM', 'PRISM', 'NOVA'];
@@ -203,18 +203,18 @@ const principles = [
   {
     index: '01',
     title: '霓虹人格',
-    description: '角色不是头像，而是一套视觉语法：高反差轮廓、扫描光、能量环和带有节拍感的文字。',
+    description: '角色不是头像，而是一套视觉语法：高反差轮廓、扫描光、能量环和带有节拍感的文字。'
   },
   {
     index: '02',
     title: '舞台叙事',
-    description: '页面像一段开场动画，先给冲击力，再把设定、场景和技法拆成可探索的章节。',
+    description: '页面像一段开场动画，先给冲击力，再把设定、场景和技法拆成可探索的章节。'
   },
   {
     index: '03',
     title: '可控炫技',
-    description: '动效集中在主视觉、卡片和滚动入场，不让每个元素同时抢戏，保留静态模式作为出口。',
-  },
+    description: '动效集中在主视觉、卡片和滚动入场，不让每个元素同时抢戏，保留静态模式作为出口。'
+  }
 ];
 
 const projects = [
@@ -225,7 +225,7 @@ const projects = [
     type: 'Neon Shrine',
     title: '电子神社',
     description: '雨夜屋檐、赛博御守和漂浮符文组成的入口场景，适合做滚动首屏或音乐启动页。',
-    tags: ['Scanline', 'Glow', 'Parallax'],
+    tags: ['Scanline', 'Glow', 'Parallax']
   },
   {
     id: 'duel',
@@ -234,7 +234,7 @@ const projects = [
     type: 'Prism Duel',
     title: '棱镜决斗场',
     description: '卡片悬浮、边框脉冲和角色能量条同步变化，像一套轻量级网页战斗 UI。',
-    tags: ['Tilt', 'Pulse', 'HUD'],
+    tags: ['Tilt', 'Pulse', 'HUD']
   },
   {
     id: 'metro',
@@ -243,8 +243,8 @@ const projects = [
     type: 'Moon Metro',
     title: '月面电车',
     description: '银色轨道、窗外城市和字符雨从远景穿过，强调速度感和漫画分镜式构图。',
-    tags: ['Kinetic Type', 'Depth', 'Story'],
-  },
+    tags: ['Kinetic Type', 'Depth', 'Story']
+  }
 ];
 
 const skills = [
@@ -253,7 +253,7 @@ const skills = [
   { category: '动效', name: '视差与漂浮层', level: 92, note: '鼠标位置驱动舞台层次，制造轻量但明显的空间感。' },
   { category: '动效', name: '故障与扫描线', level: 84, note: '控制频率和透明度，保留动漫开场感，避免持续眩目。' },
   { category: '结构', name: '响应式舞台', level: 86, note: '桌面双栏冲击力，移动端收拢为单栏角色海报。' },
-  { category: '结构', name: '可访问动效开关', level: 90, note: '静态模式与 reduced-motion 共同兜底，让炫技仍然可退出。' },
+  { category: '结构', name: '可访问动效开关', level: 90, note: '静态模式与 reduced-motion 共同兜底，让炫技仍然可退出。' }
 ];
 
 const activeProject = ref(projects[0].id);
@@ -275,7 +275,7 @@ const pageVars = computed(() => ({
   '--pointer-x': `${pointerX.value}%`,
   '--pointer-y': `${pointerY.value}%`,
   '--ship-x': motionEnabled.value ? `${(pointerX.value - 50) * -0.18}px` : '0px',
-  '--ship-y': motionEnabled.value ? `${(pointerY.value - 50) * -0.1}px` : '0px',
+  '--ship-y': motionEnabled.value ? `${(pointerY.value - 50) * -0.1}px` : '0px'
 }));
 
 const handlePointerMove = (event: MouseEvent) => {
@@ -302,7 +302,7 @@ const scrollToSection = (sectionId: string) => {
 
   window.scrollTo({
     top: Math.max(targetTop, 0),
-    behavior: motionEnabled.value ? 'smooth' : 'auto',
+    behavior: motionEnabled.value ? 'smooth' : 'auto'
   });
 };
 
@@ -337,7 +337,7 @@ onMounted(() => {
         }
       });
     },
-    { threshold: 0.18 },
+    { threshold: 0.18 }
   );
 
   document.querySelectorAll('.observe-section').forEach((section) => {

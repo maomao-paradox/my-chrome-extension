@@ -2,8 +2,8 @@
     <div v-if="visible" class="control-panel-wrapper">
         <div class="mask" @click="close"></div>
 
-        <Draggable :initial-position="'center'" :enable-adsorption="false" :drag-handle="'.drag-area'"
-            :container-style="draggableContainerStyle" ref="draggableRef">
+        <Draggable ref="draggableRef" :initial-position="'center'" :enable-adsorption="false"
+            :drag-handle="'.drag-area'" :container-style="draggableContainerStyle">
             <div
                 :class="['ma-collapse-container', { 'is-fullscreen': isFullscreen, 'is-transitioning': isFullscreenTransitioning }]">
                 <div class="drag-area">
@@ -34,12 +34,12 @@
 
                         <div class="top-buttons">
                             <el-button type="text" size="small" :disabled="isFullscreenTransitioning"
-                                @click.stop="toggleFullscreen"
-                                :class="['fullscreen-btn', { 'is-busy': isFullscreenTransitioning }]">
+                                :class="['fullscreen-btn', { 'is-busy': isFullscreenTransitioning }]"
+                                @click.stop="toggleFullscreen">
                                 <IconFullScreen v-if="!isFullscreen" />
                                 <IconOffScreen v-else />
                             </el-button>
-                            <el-button type="text" size="small" @click.stop="close" class="close-btn">
+                            <el-button type="text" size="small" class="close-btn" @click.stop="close">
                                 <IconClose />
                             </el-button>
                         </div>
@@ -78,8 +78,8 @@
                                             <div class="description-text">
                                                 {{ item.details || item.label }}
                                             </div>
-                                            <el-button type="primary" size="small" @click.stop="handleClick(item)"
-                                                class="execute-button">
+                                            <el-button type="primary" size="small" class="execute-button"
+                                                @click.stop="handleClick(item)">
                                                 执行
                                             </el-button>
                                         </div>
@@ -124,132 +124,132 @@ const draggableRef = ref<any>(null);
 const isFullscreen = ref(false);
 const isFullscreenTransitioning = ref(false);
 const panelMeta = [
-    { key: 'chat', code: 'AI', label: 'AI 对话', shortLabel: 'AI CHAT', description: '页面会话、上下文分析与即时协作' },
-    { key: 'skill', code: 'SK', label: '技能列表', shortLabel: 'SKILLS', description: '快速执行悬浮工具与页面动作' },
+  { key: 'chat', code: 'AI', label: 'AI 对话', shortLabel: 'AI CHAT', description: '页面会话、上下文分析与即时协作' },
+  { key: 'skill', code: 'SK', label: '技能列表', shortLabel: 'SKILLS', description: '快速执行悬浮工具与页面动作' }
 ];
 const savedPosition = ref({
-    x: 0,
-    y: 0,
+  x: 0,
+  y: 0
 });
 const FULLSCREEN_TRANSITION_MS = 440;
 let fullscreenTimer: number | null = null;
 let fullscreenAnimationFrame: number | null = null;
 
 const draggableContainerStyle = computed<Record<string, string>>(() => ({
-    pointerEvents: isFullscreenTransitioning.value ? 'none' : 'auto',
+  pointerEvents: isFullscreenTransitioning.value ? 'none' : 'auto'
 }));
 
 const clearFullscreenTimer = () => {
-    if (fullscreenTimer !== null) {
-        window.clearTimeout(fullscreenTimer);
-        fullscreenTimer = null;
-    }
+  if (fullscreenTimer !== null) {
+    window.clearTimeout(fullscreenTimer);
+    fullscreenTimer = null;
+  }
 };
 
 const clearFullscreenAnimation = () => {
-    if (fullscreenAnimationFrame !== null) {
-        cancelAnimationFrame(fullscreenAnimationFrame);
-        fullscreenAnimationFrame = null;
-    }
+  if (fullscreenAnimationFrame !== null) {
+    cancelAnimationFrame(fullscreenAnimationFrame);
+    fullscreenAnimationFrame = null;
+  }
 };
 
 const easeInOutCubic = (progress: number) => {
-    return progress < 0.5
-        ? 4 * progress * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+  return progress < 0.5
+    ? 4 * progress * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 };
 
 const animateDraggablePosition = (targetX: number, targetY: number) => {
-    const draggableApi = draggableRef.value;
-    if (!draggableApi?.getCurrentPosition || !draggableApi?.setPositionImmediate) {
-        return;
+  const draggableApi = draggableRef.value;
+  if (!draggableApi?.getCurrentPosition || !draggableApi?.setPositionImmediate) {
+    return;
+  }
+
+  const startPosition = draggableApi.getCurrentPosition() as { x: number; y: number };
+  const deltaX = targetX - startPosition.x;
+  const deltaY = targetY - startPosition.y;
+
+  clearFullscreenAnimation();
+
+  if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) {
+    draggableApi.setPositionImmediate(targetX, targetY);
+    return;
+  }
+
+  const startTime = performance.now();
+  const step = (now: number) => {
+    const rawProgress = Math.min((now - startTime) / FULLSCREEN_TRANSITION_MS, 1);
+    const easedProgress = easeInOutCubic(rawProgress);
+
+    draggableApi.setPositionImmediate(
+      startPosition.x + deltaX * easedProgress,
+      startPosition.y + deltaY * easedProgress
+    );
+
+    if (rawProgress < 1) {
+      fullscreenAnimationFrame = requestAnimationFrame(step);
+      return;
     }
 
-    const startPosition = draggableApi.getCurrentPosition() as { x: number; y: number };
-    const deltaX = targetX - startPosition.x;
-    const deltaY = targetY - startPosition.y;
+    draggableApi.setPositionImmediate(targetX, targetY);
+    fullscreenAnimationFrame = null;
+  };
 
-    clearFullscreenAnimation();
-
-    if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) {
-        draggableApi.setPositionImmediate(targetX, targetY);
-        return;
-    }
-
-    const startTime = performance.now();
-    const step = (now: number) => {
-        const rawProgress = Math.min((now - startTime) / FULLSCREEN_TRANSITION_MS, 1);
-        const easedProgress = easeInOutCubic(rawProgress);
-
-        draggableApi.setPositionImmediate(
-            startPosition.x + deltaX * easedProgress,
-            startPosition.y + deltaY * easedProgress,
-        );
-
-        if (rawProgress < 1) {
-            fullscreenAnimationFrame = requestAnimationFrame(step);
-            return;
-        }
-
-        draggableApi.setPositionImmediate(targetX, targetY);
-        fullscreenAnimationFrame = null;
-    };
-
-    fullscreenAnimationFrame = requestAnimationFrame(step);
+  fullscreenAnimationFrame = requestAnimationFrame(step);
 };
 
 const finishFullscreenTransition = () => {
-    clearFullscreenTimer();
-    isFullscreenTransitioning.value = false;
+  clearFullscreenTimer();
+  isFullscreenTransitioning.value = false;
 };
 
 const scheduleFullscreenTransitionEnd = () => {
-    clearFullscreenTimer();
-    fullscreenTimer = window.setTimeout(() => {
-        finishFullscreenTransition();
-    }, FULLSCREEN_TRANSITION_MS + 80);
+  clearFullscreenTimer();
+  fullscreenTimer = window.setTimeout(() => {
+    finishFullscreenTransition();
+  }, FULLSCREEN_TRANSITION_MS + 80);
 };
 
 const toggleFullscreen = () => {
-    const draggableApi = draggableRef.value;
-    if (!draggableApi?.getCurrentPosition) {
-        return;
-    }
+  const draggableApi = draggableRef.value;
+  if (!draggableApi?.getCurrentPosition) {
+    return;
+  }
 
-    if (isFullscreenTransitioning.value) {
-        return;
-    }
+  if (isFullscreenTransitioning.value) {
+    return;
+  }
 
-    isFullscreenTransitioning.value = true;
+  isFullscreenTransitioning.value = true;
 
-    if (!isFullscreen.value) {
-        savedPosition.value = draggableApi.getCurrentPosition() as { x: number; y: number };
-        isFullscreen.value = true;
-        animateDraggablePosition(0, 0);
-    } else {
-        isFullscreen.value = false;
-        animateDraggablePosition(savedPosition.value.x, savedPosition.value.y);
-    }
+  if (!isFullscreen.value) {
+    savedPosition.value = draggableApi.getCurrentPosition() as { x: number; y: number };
+    isFullscreen.value = true;
+    animateDraggablePosition(0, 0);
+  } else {
+    isFullscreen.value = false;
+    animateDraggablePosition(savedPosition.value.x, savedPosition.value.y);
+  }
 
-    scheduleFullscreenTransitionEnd();
+  scheduleFullscreenTransitionEnd();
 };
 
 const handleClick = (item: Tool) => {
-    emit('click-tool', item);
+  emit('click-tool', item);
 };
 
 const close = () => {
-    emit('close-panel');
-    emit('update:visible', false);
+  emit('close-panel');
+  emit('update:visible', false);
 };
 
 const togglePanel = (panelIndex: number) => {
-    activePanel.value = panelIndex;
+  activePanel.value = panelIndex;
 };
 
 onUnmounted(() => {
-    clearFullscreenTimer();
-    clearFullscreenAnimation();
+  clearFullscreenTimer();
+  clearFullscreenAnimation();
 });
 </script>
 

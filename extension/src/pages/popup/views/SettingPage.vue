@@ -170,10 +170,10 @@
               <MASwitch v-model="app.enabled" :label="app.name">
                 <div v-if="app.type === 'toolbar'" class="color-picker-wrapper">
                   <input
+                    v-model="app.options.brandColor"
                     type="color"
                     class="color-picker"
                     aria-label="选择品牌颜色"
-                    v-model="app.options.brandColor"
                   />
                   <span>{{ app.options.brandColor }}</span>
                 </div>

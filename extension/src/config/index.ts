@@ -21,14 +21,14 @@ const getAppEntryUrl = async (appName: string) => await getAssetsAbstractPath(`j
 const contentDomains = ['Radius', 'Zentao', 'Mria', 'Qapro', 'Teach', 'Lanhuapp', 'Portainer'];
 
 export const contentModules = contentDomains.reduce((acc, domain) => acc.set(domain, {
-    domainKey: `content${domain}Domains`,
-    flag: `__CONTENT_SCRIPT_${domain.toUpperCase()}`,
-    path: getContentScriptUrl(domain.toLowerCase())
+  domainKey: `content${domain}Domains`,
+  flag: `__CONTENT_SCRIPT_${domain.toUpperCase()}`,
+  path: getContentScriptUrl(domain.toLowerCase())
 }), new Map<string, ModuleOption>());
 
 const appDomains = ['sidebar', 'floatingball', 'pianoEffect', 'textSelectionToolbar', 'componentCapture', 'errorMonitor', 'menu'];
 
 export const appModules = appDomains.reduce((acc, domain) => acc.set(domain, {
-    flag: `__APP_${domain.toUpperCase()}`,
-    path: getAppEntryUrl(domain)
+  flag: `__APP_${domain.toUpperCase()}`,
+  path: getAppEntryUrl(domain)
 }), new Map<string, ModuleOption>());

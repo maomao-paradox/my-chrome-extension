@@ -48,335 +48,335 @@
             </g>
         </svg>
         <input id="search" ref="searchInput" v-model="inputModel" class="animated-search" autocomplete="off"
-            @keyup.enter="submitQuestion" maxlength="32" />
+            maxlength="32" @keyup.enter="submitQuestion" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue';
 import { gsap } from 'gsap';
 interface AnimatedSearchProps {
 }
-const inputModel = defineModel<string>()
-const props = defineProps<AnimatedSearchProps>()
-const searchInput = ref<HTMLInputElement>()
+const inputModel = defineModel<string>();
+const props = defineProps<AnimatedSearchProps>();
+const searchInput = ref<HTMLInputElement>();
 
-const emit = defineEmits(['submitQuestion'])
+const emit = defineEmits(['submitQuestion']);
 
 function submitQuestion() {
-    if (!inputModel.value) {
-        searchInput.value?.focus()
-        return
-    }
-    emit('submitQuestion', inputModel.value)
+  if (!inputModel.value) {
+    searchInput.value?.focus();
+    return;
+  }
+  emit('submitQuestion', inputModel.value);
 }
 
 onMounted(() => {
-    class App {
-        private select = (e: string) => document.querySelector(e);
-        private selectAll = (e: string) => document.querySelectorAll(e);
-        private mainTl: gsap.core.Timeline;
-        private search: HTMLInputElement | null;
-        private magnifier: HTMLElement | null;
-        private searchGroup: HTMLElement | null;
-        private close: HTMLElement | null;
-        private wholeSearch: HTMLElement | null;
-        private hit: HTMLElement | null;
-        private fieldWidth = 301;
-        private searchWidth = 210;
-        private seX = -260;
-        private fieldX = -260;
-        private growInc = 15;
-        private magStartX = -200;
-        private magEndX = -258;
-        private searchGroupX = 100;
-        private wholeSearchX = 400;
-        private searchX = -35;
-        private minChars = 15;
-        private maxChars = 26;
-        private charCount = 1;
+  class App {
+    private select = (e: string) => document.querySelector(e);
+    private selectAll = (e: string) => document.querySelectorAll(e);
+    private mainTl: gsap.core.Timeline;
+    private search: HTMLInputElement | null;
+    private magnifier: HTMLElement | null;
+    private searchGroup: HTMLElement | null;
+    private close: HTMLElement | null;
+    private wholeSearch: HTMLElement | null;
+    private hit: HTMLElement | null;
+    private fieldWidth = 301;
+    private searchWidth = 210;
+    private seX = -260;
+    private fieldX = -260;
+    private growInc = 15;
+    private magStartX = -200;
+    private magEndX = -258;
+    private searchGroupX = 100;
+    private wholeSearchX = 400;
+    private searchX = -35;
+    private minChars = 15;
+    private maxChars = 26;
+    private charCount = 1;
 
-        constructor() {
-            this.mainTl = gsap.timeline({ paused: true });
-            this.search = this.select('#search') as HTMLInputElement;
-            this.magnifier = this.select('#magnifier') as HTMLElement;
-            this.searchGroup = this.select('#searchGroup') as HTMLElement;
-            this.close = this.select('.close') as HTMLElement;
-            this.wholeSearch = this.select('.wholeSearch') as HTMLElement;
-            this.hit = this.select('#hit') as HTMLElement;
+    constructor() {
+      this.mainTl = gsap.timeline({ paused: true });
+      this.search = this.select('#search') as HTMLInputElement;
+      this.magnifier = this.select('#magnifier') as HTMLElement;
+      this.searchGroup = this.select('#searchGroup') as HTMLElement;
+      this.close = this.select('.close') as HTMLElement;
+      this.wholeSearch = this.select('.wholeSearch') as HTMLElement;
+      this.hit = this.select('#hit') as HTMLElement;
 
-            gsap.globalTimeline.timeScale(2);
-            this.initPositions();
-            this.buildTimeline();
-            this.bindEvents();
-        }
-
-        private initPositions() {
-            if (this.search) {
-                gsap.set(this.search, {
-                    x: this.searchX,
-                    y: 12,
-                    xPercent: 0,
-                    yPercent: 0
-                });
-            }
-            if (this.close) {
-                gsap.set(this.close, {
-                    x: 0,
-                    y: 0
-                });
-            }
-        }
-
-        private buildTimeline() {
-            this.mainTl.to('#se', {
-                duration: 1,
-                x: this.seX,
-                ease: "expo.inOut"
-            })
-                .to('#field', {
-                    duration: 1,
-                    attr: {
-                        width: this.fieldWidth
-                    },
-                    x: this.fieldX,
-                    ease: "expo.inOut"
-                }, '-=1')
-                .to(this.wholeSearch, {
-                    duration: 1,
-                    attr: {
-                        x: this.wholeSearchX
-                    },
-                    ease: "expo.inOut"
-                }, '-=1')
-                .fromTo(this.magnifier, {
-                    autoAlpha: 0,
-                    scale: 0,
-                    transformOrigin: '0% 45%',
-                    x: this.magStartX
-                }, {
-                    duration: 1,
-                    autoAlpha: 0.38,
-                    rotation: 0,
-                    scale: 1,
-                    transformOrigin: '0% 45%',
-                    x: this.magEndX,
-                    ease: "expo.inOut"
-                }, '-=0.95')
-                .fromTo(this.close, {
-                    autoAlpha: 0,
-                    scale: 0,
-                    transformOrigin: '50% 50%',
-                    svgOrigin: '511 300',
-                    x: 0
-                }, {
-                    duration: 1,
-                    autoAlpha: 0.5,
-                    rotation: 0,
-                    scale: 1,
-                    transformOrigin: '50% 50%',
-                    svgOrigin: '511 300',
-                    x: 0,
-                    ease: "expo.inOut"
-                }, '-=1')
-                .from(this.search, {
-                    duration: 0.5,
-                    autoAlpha: 0
-                }, '-=0.5')
-                .addPause('+=0', () => {
-                    this.search?.focus();
-                });
-        }
-
-        private bindEvents() {
-            if (this.close) {
-                this.close.addEventListener('click', this.clearField);
-            }
-            if (this.searchGroup) {
-                this.searchGroup.addEventListener('click', this.clickSearch);
-                this.searchGroup.addEventListener('touchstart', this.clickSearch);
-            }
-            if (this.search) {
-                this.search.addEventListener('keydown', this.onKeyDown);
-            }
-        }
-
-        private clearField = (e: Event) => {
-            if (this.search?.value == "") {
-                this.doOutro();
-            } else {
-                // 使用 GSAP 3 动画输入框的值（从当前值到空字符串）
-                gsap.to(this.search, {
-                    duration: 0.2,
-                    value: '',
-                    onComplete: this.resetFieldWidth,
-                    ease: "none"
-                });
-                this.search?.focus();
-            }
-        };
-
-        private doOutro = (e?: Event) => {
-            if (this.hit) {
-                this.hit.classList.remove('disabled');
-            }
-            if (this.searchGroup) {
-                this.searchGroup.classList.remove('disabled');
-            }
-            const outroTl = gsap.timeline({
-                onComplete: () => {
-                    if (this.search) {
-                        this.search.value = "";
-                    }
-                    this.mainTl.pause(0);
-                }
-            }).timeScale(1);
-            outroTl.to([this.magnifier, this.close, this.search], {
-                duration: 0.2,
-                autoAlpha: 0,
-                ease: "sine.in"
-            })
-                .to('#se', {
-                    duration: 1,
-                    x: 0,
-                    ease: "expo.inOut"
-                }, '-=0.2')
-                .to('#field', {
-                    duration: 1,
-                    attr: {
-                        width: 41
-                    },
-                    x: 0,
-                    ease: "expo.inOut"
-                }, '-=1')
-                .to(this.search, {
-                    duration: 1,
-                    width: this.searchWidth,
-                    x: this.searchX,
-                    ease: "expo.inOut"
-                }, '-=1')
-                .to(this.wholeSearch, {
-                    duration: 1,
-                    attr: {
-                        x: 300
-                    },
-                    ease: "expo.inOut"
-                }, '-=1');
-        };
-
-        private onKeyDown = (e: KeyboardEvent) => {
-            if (this.search) {
-                this.charCount = this.search.value.length + 1;
-                if (this.charCount >= this.minChars) {
-                    const diffChars = this.charCount - this.minChars;
-                    const growAmount = diffChars * this.growInc;
-                    const halfGrowAmount = growAmount / 2;
-                    
-                    // 同步动画所有元素
-                    const tl = gsap.timeline();
-                    
-                    tl.to('#se', {
-                        duration: 0.2,
-                        x: this.seX - growAmount,
-                        ease: "expo.inOut"
-                    })
-                    .to('#field', {
-                        duration: 0.2,
-                        attr: {
-                            width: this.fieldWidth + growAmount
-                        },
-                        x: this.fieldX - growAmount,
-                        ease: "expo.inOut"
-                    }, 0)
-                    .to(this.search, {
-                        duration: 0.2,
-                        left: 474 + halfGrowAmount,
-                        width: this.searchWidth + growAmount,
-                        ease: "expo.inOut"
-                    }, 0)
-                    .to(this.magnifier, {
-                        duration: 0.2,
-                        x: this.magEndX - growAmount,
-                        ease: "expo.inOut"
-                    }, 0)
-                    .to(this.wholeSearch, {
-                        duration: 0.2,
-                        attr: {
-                            x: this.wholeSearchX + halfGrowAmount
-                        },
-                        ease: "expo.inOut"
-                    }, 0)
-                    .to(this.close, {
-                        duration: 0.2,
-                        x: halfGrowAmount,
-                        ease: "expo.inOut"
-                    }, 0);
-                }
-                if (this.search.value != "") {
-                    // 此处原注释代码省略
-                }
-            }
-        };
-
-        private resetFieldWidth = () => {
-            const tl = gsap.timeline();
-            tl.to('#se', {
-                duration: 1,
-                x: this.seX,
-                ease: "expo.inOut"
-            })
-                .to('#field', {
-                    duration: 1,
-                    attr: {
-                        width: this.fieldWidth
-                    },
-                    x: this.fieldX,
-                    ease: "expo.inOut"
-                }, 0)
-                .to(this.search, {
-                    duration: 1,
-                    x: this.searchX,
-                    width: this.searchWidth,
-                    ease: "expo.inOut"
-                }, 0)
-                .to(this.magnifier, {
-                    duration: 1,
-                    x: this.magEndX,
-                    ease: "expo.inOut"
-                }, 0)
-                .to(this.wholeSearch, {
-                    duration: 1,
-                    attr: {
-                        x: this.wholeSearchX
-                    },
-                    ease: "expo.inOut"
-                }, 0)
-                .to(this.close, {
-                    duration: 1,
-                    x: 0,
-                    ease: "expo.inOut"
-                }, 0);
-        };
-
-        private clickSearch = (e: Event) => {
-            maLogger.log("clickSearch");
-            if (this.mainTl.time() == 0) {
-                this.mainTl.play(0);
-            } else {
-                this.doOutro();
-            }
-        };
-
-        private closeSearch = (e: Event) => {
-            this.doOutro();
-        };
+      gsap.globalTimeline.timeScale(2);
+      this.initPositions();
+      this.buildTimeline();
+      this.bindEvents();
     }
-    // 使 SVG 可见
-    gsap.set('svg', {
-        visibility: 'visible'
-    });
-    const app = new App();
-})
+
+    private initPositions() {
+      if (this.search) {
+        gsap.set(this.search, {
+          x: this.searchX,
+          y: 12,
+          xPercent: 0,
+          yPercent: 0
+        });
+      }
+      if (this.close) {
+        gsap.set(this.close, {
+          x: 0,
+          y: 0
+        });
+      }
+    }
+
+    private buildTimeline() {
+      this.mainTl.to('#se', {
+        duration: 1,
+        x: this.seX,
+        ease: 'expo.inOut'
+      })
+        .to('#field', {
+          duration: 1,
+          attr: {
+            width: this.fieldWidth
+          },
+          x: this.fieldX,
+          ease: 'expo.inOut'
+        }, '-=1')
+        .to(this.wholeSearch, {
+          duration: 1,
+          attr: {
+            x: this.wholeSearchX
+          },
+          ease: 'expo.inOut'
+        }, '-=1')
+        .fromTo(this.magnifier, {
+          autoAlpha: 0,
+          scale: 0,
+          transformOrigin: '0% 45%',
+          x: this.magStartX
+        }, {
+          duration: 1,
+          autoAlpha: 0.38,
+          rotation: 0,
+          scale: 1,
+          transformOrigin: '0% 45%',
+          x: this.magEndX,
+          ease: 'expo.inOut'
+        }, '-=0.95')
+        .fromTo(this.close, {
+          autoAlpha: 0,
+          scale: 0,
+          transformOrigin: '50% 50%',
+          svgOrigin: '511 300',
+          x: 0
+        }, {
+          duration: 1,
+          autoAlpha: 0.5,
+          rotation: 0,
+          scale: 1,
+          transformOrigin: '50% 50%',
+          svgOrigin: '511 300',
+          x: 0,
+          ease: 'expo.inOut'
+        }, '-=1')
+        .from(this.search, {
+          duration: 0.5,
+          autoAlpha: 0
+        }, '-=0.5')
+        .addPause('+=0', () => {
+          this.search?.focus();
+        });
+    }
+
+    private bindEvents() {
+      if (this.close) {
+        this.close.addEventListener('click', this.clearField);
+      }
+      if (this.searchGroup) {
+        this.searchGroup.addEventListener('click', this.clickSearch);
+        this.searchGroup.addEventListener('touchstart', this.clickSearch);
+      }
+      if (this.search) {
+        this.search.addEventListener('keydown', this.onKeyDown);
+      }
+    }
+
+    private clearField = (e: Event) => {
+      if (this.search?.value == '') {
+        this.doOutro();
+      } else {
+        // 使用 GSAP 3 动画输入框的值（从当前值到空字符串）
+        gsap.to(this.search, {
+          duration: 0.2,
+          value: '',
+          onComplete: this.resetFieldWidth,
+          ease: 'none'
+        });
+        this.search?.focus();
+      }
+    };
+
+    private doOutro = (e?: Event) => {
+      if (this.hit) {
+        this.hit.classList.remove('disabled');
+      }
+      if (this.searchGroup) {
+        this.searchGroup.classList.remove('disabled');
+      }
+      const outroTl = gsap.timeline({
+        onComplete: () => {
+          if (this.search) {
+            this.search.value = '';
+          }
+          this.mainTl.pause(0);
+        }
+      }).timeScale(1);
+      outroTl.to([this.magnifier, this.close, this.search], {
+        duration: 0.2,
+        autoAlpha: 0,
+        ease: 'sine.in'
+      })
+        .to('#se', {
+          duration: 1,
+          x: 0,
+          ease: 'expo.inOut'
+        }, '-=0.2')
+        .to('#field', {
+          duration: 1,
+          attr: {
+            width: 41
+          },
+          x: 0,
+          ease: 'expo.inOut'
+        }, '-=1')
+        .to(this.search, {
+          duration: 1,
+          width: this.searchWidth,
+          x: this.searchX,
+          ease: 'expo.inOut'
+        }, '-=1')
+        .to(this.wholeSearch, {
+          duration: 1,
+          attr: {
+            x: 300
+          },
+          ease: 'expo.inOut'
+        }, '-=1');
+    };
+
+    private onKeyDown = (e: KeyboardEvent) => {
+      if (this.search) {
+        this.charCount = this.search.value.length + 1;
+        if (this.charCount >= this.minChars) {
+          const diffChars = this.charCount - this.minChars;
+          const growAmount = diffChars * this.growInc;
+          const halfGrowAmount = growAmount / 2;
+                    
+          // 同步动画所有元素
+          const tl = gsap.timeline();
+                    
+          tl.to('#se', {
+            duration: 0.2,
+            x: this.seX - growAmount,
+            ease: 'expo.inOut'
+          })
+            .to('#field', {
+              duration: 0.2,
+              attr: {
+                width: this.fieldWidth + growAmount
+              },
+              x: this.fieldX - growAmount,
+              ease: 'expo.inOut'
+            }, 0)
+            .to(this.search, {
+              duration: 0.2,
+              left: 474 + halfGrowAmount,
+              width: this.searchWidth + growAmount,
+              ease: 'expo.inOut'
+            }, 0)
+            .to(this.magnifier, {
+              duration: 0.2,
+              x: this.magEndX - growAmount,
+              ease: 'expo.inOut'
+            }, 0)
+            .to(this.wholeSearch, {
+              duration: 0.2,
+              attr: {
+                x: this.wholeSearchX + halfGrowAmount
+              },
+              ease: 'expo.inOut'
+            }, 0)
+            .to(this.close, {
+              duration: 0.2,
+              x: halfGrowAmount,
+              ease: 'expo.inOut'
+            }, 0);
+        }
+        if (this.search.value != '') {
+          // 此处原注释代码省略
+        }
+      }
+    };
+
+    private resetFieldWidth = () => {
+      const tl = gsap.timeline();
+      tl.to('#se', {
+        duration: 1,
+        x: this.seX,
+        ease: 'expo.inOut'
+      })
+        .to('#field', {
+          duration: 1,
+          attr: {
+            width: this.fieldWidth
+          },
+          x: this.fieldX,
+          ease: 'expo.inOut'
+        }, 0)
+        .to(this.search, {
+          duration: 1,
+          x: this.searchX,
+          width: this.searchWidth,
+          ease: 'expo.inOut'
+        }, 0)
+        .to(this.magnifier, {
+          duration: 1,
+          x: this.magEndX,
+          ease: 'expo.inOut'
+        }, 0)
+        .to(this.wholeSearch, {
+          duration: 1,
+          attr: {
+            x: this.wholeSearchX
+          },
+          ease: 'expo.inOut'
+        }, 0)
+        .to(this.close, {
+          duration: 1,
+          x: 0,
+          ease: 'expo.inOut'
+        }, 0);
+    };
+
+    private clickSearch = (e: Event) => {
+      maLogger.log('clickSearch');
+      if (this.mainTl.time() == 0) {
+        this.mainTl.play(0);
+      } else {
+        this.doOutro();
+      }
+    };
+
+    private closeSearch = (e: Event) => {
+      this.doOutro();
+    };
+  }
+  // 使 SVG 可见
+  gsap.set('svg', {
+    visibility: 'visible'
+  });
+  const app = new App();
+});
 
 </script>
 

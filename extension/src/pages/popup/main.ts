@@ -8,7 +8,7 @@
  */
 
 import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/logger';
-import { createApp } from "vue";
+import { createApp } from 'vue';
 import Popup from './App.vue';
 import './styles/themes.css';
 import { applyStoredPopupThemeHint } from './composables/usePopupTheme.js';
@@ -21,10 +21,10 @@ function mountPopup() {
   const app = createApp(Popup);
   app.mount('#app');
   app.config.errorHandler = (err, vm, info) => {
-    console.error('全局错误:', err)
-    console.error('组件实例:', vm)
-    console.error('错误信息:', info)
-  }
+    console.error('全局错误:', err);
+    console.error('组件实例:', vm);
+    console.error('错误信息:', info);
+  };
 }
 
 if (document.readyState === 'complete') {

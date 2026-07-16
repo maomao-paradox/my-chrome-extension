@@ -16,30 +16,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref } from 'vue';
+import { ElMessage } from 'element-plus';
 
 // 响应式数据
-const raw = ref<string>('{"name":"tom","age":18,"skills":["js","css"]}')
-const out = ref<string>('')
+const raw = ref<string>('{"name":"tom","age":18,"skills":["js","css"]}');
+const out = ref<string>('');
 
 // 格式化JSON
 const fmt = (): void => {
   try {
-    const parsed = JSON.parse(raw.value)
-    out.value = JSON.stringify(parsed, null, 2)
+    const parsed = JSON.parse(raw.value);
+    out.value = JSON.stringify(parsed, null, 2);
   } catch (e) {
-    ElMessage.error('JSON格式错误')
+    ElMessage.error('JSON格式错误');
   }
-}
+};
 
 // 压缩JSON
 const min = (): void => {
   try {
-    const parsed = JSON.parse(raw.value)
-    out.value = JSON.stringify(parsed)
+    const parsed = JSON.parse(raw.value);
+    out.value = JSON.stringify(parsed);
   } catch (e) {
-    ElMessage.error('JSON格式错误')
+    ElMessage.error('JSON格式错误');
   }
-}
+};
 </script>

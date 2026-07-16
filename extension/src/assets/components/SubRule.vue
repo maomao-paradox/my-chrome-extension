@@ -2,7 +2,7 @@
   <div class="subrule-card">
     <div class="subrule-header">
       <span class="subrule-index">#{{ index + 1 }}</span>
-      <MRIconButton @click="emit('remove')" icon="🗑️" tooltip="删除子规则" variant="danger" />
+      <MRIconButton icon="🗑️" tooltip="删除子规则" variant="danger" @click="emit('remove')" />
     </div>
 
     <div class="subrule-content">
@@ -137,18 +137,18 @@ const handleTypeChange = (newType: string) => {
       delete subRule.params.path;
     }
     // 初始化 search 和 value 参数
-    if (subRule.params.search === undefined) subRule.params.search = '';
-    if (subRule.params.value === undefined) subRule.params.value = '';
+    if (subRule.params.search === undefined) {subRule.params.search = '';}
+    if (subRule.params.value === undefined) {subRule.params.value = '';}
   } else if (newType === 'setParam' || newType === 'deleteParam') {
-    if (!subRule.params.path) subRule.params.path = '';
+    if (!subRule.params.path) {subRule.params.path = '';}
     if (newType === 'setParam' && !subRule.params.value) {
       subRule.params.value = '';
     }
   } else if (newType === 'setField' || newType === 'appendArray') {
-    if (!subRule.params.path) subRule.params.path = '';
-    if (!subRule.params.value) subRule.params.value = '';
+    if (!subRule.params.path) {subRule.params.path = '';}
+    if (!subRule.params.value) {subRule.params.value = '';}
   } else if (newType === 'deleteField') {
-    if (!subRule.params.path) subRule.params.path = '';
+    if (!subRule.params.path) {subRule.params.path = '';}
   } else if (newType === 'setStatus') {
     if (subRule.params.statusCode === undefined) {
       subRule.params.statusCode = 200;

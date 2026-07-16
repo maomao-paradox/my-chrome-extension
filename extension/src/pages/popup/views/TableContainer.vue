@@ -29,24 +29,24 @@ const props = withDefaults(defineProps<{
     titleFontWeight?: string | number;
     textFontSize?: string;
 }>(), {
-    density: 'default',
-    sectionGap: '14px',
-    contentGap: '14px',
-    heroGap: '12px',
-    rightMaxWidth: '50%',
-    titleFontSize: '16px',
-    titleFontWeight: 500,
-    textFontSize: '12px',
+  density: 'default',
+  sectionGap: '14px',
+  contentGap: '14px',
+  heroGap: '12px',
+  rightMaxWidth: '50%',
+  titleFontSize: '16px',
+  titleFontWeight: 500,
+  textFontSize: '12px'
 });
 
 const containerStyle = computed<CSSProperties>(() => ({
-    '--table-section-gap': props.sectionGap,
-    '--table-content-gap': props.contentGap,
-    '--table-hero-gap': props.heroGap,
-    '--table-right-max-width': props.rightMaxWidth,
-    '--table-title-font-size': props.titleFontSize,
-    '--table-title-font-weight': String(props.titleFontWeight),
-    '--table-text-font-size': props.textFontSize,
+  '--table-section-gap': props.sectionGap,
+  '--table-content-gap': props.contentGap,
+  '--table-hero-gap': props.heroGap,
+  '--table-right-max-width': props.rightMaxWidth,
+  '--table-title-font-size': props.titleFontSize,
+  '--table-title-font-weight': String(props.titleFontWeight),
+  '--table-text-font-size': props.textFontSize
 }));
 </script>
 

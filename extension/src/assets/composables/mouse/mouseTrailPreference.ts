@@ -13,7 +13,7 @@ export interface MouseTrailPreference {
 export const mouseTrailPresetOptions: Array<{ value: MouseTrailPreset; label: string }> = [
   { value: 'star', label: '星星' },
   { value: 'snowflake', label: '雪花' },
-  { value: 'music', label: '音符' },
+  { value: 'music', label: '音符' }
 ];
 
 export const normalizeMouseTrailEnabled = (value: unknown): boolean => {
@@ -41,7 +41,7 @@ export const normalizeMouseTrailPreference = (value: unknown): MouseTrailPrefere
     } catch {
       return {
         enabled: defaultMouseTrailEnabled,
-        preset: defaultMouseTrailPreset,
+        preset: defaultMouseTrailPreset
       };
     }
   }
@@ -50,13 +50,13 @@ export const normalizeMouseTrailPreference = (value: unknown): MouseTrailPrefere
     const record = value as Record<string, unknown>;
     return {
       enabled: normalizeMouseTrailEnabled(record.enabled),
-      preset: normalizeMouseTrailPreset(record.preset),
+      preset: normalizeMouseTrailPreset(record.preset)
     };
   }
 
   return {
     enabled: normalizeMouseTrailEnabled(value),
-    preset: defaultMouseTrailPreset,
+    preset: defaultMouseTrailPreset
   };
 };
 
@@ -65,10 +65,10 @@ export const readStoredMouseTrailPreference = async (): Promise<MouseTrailPrefer
     if (typeof chrome !== 'undefined' && chrome.storage?.local) {
       const snapshot = await chrome.storage.local.get([
         mouseTrailStorageKey,
-        legacyPopupMouseTrailStorageKey,
+        legacyPopupMouseTrailStorageKey
       ]);
       return normalizeMouseTrailPreference(
-        snapshot[mouseTrailStorageKey] ?? snapshot[legacyPopupMouseTrailStorageKey],
+        snapshot[mouseTrailStorageKey] ?? snapshot[legacyPopupMouseTrailStorageKey]
       );
     }
   } catch (error) {
@@ -77,12 +77,12 @@ export const readStoredMouseTrailPreference = async (): Promise<MouseTrailPrefer
 
   try {
     return normalizeMouseTrailPreference(
-      localStorage.getItem(mouseTrailStorageKey) ?? localStorage.getItem(legacyPopupMouseTrailStorageKey),
+      localStorage.getItem(mouseTrailStorageKey) ?? localStorage.getItem(legacyPopupMouseTrailStorageKey)
     );
   } catch {
     return {
       enabled: defaultMouseTrailEnabled,
-      preset: defaultMouseTrailPreset,
+      preset: defaultMouseTrailPreset
     };
   }
 };

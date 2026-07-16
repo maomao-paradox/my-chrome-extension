@@ -1,15 +1,15 @@
 <template>
-  <div class="component-capture-container" ref="captureContainer">
+  <div ref="captureContainer" class="component-capture-container">
     <!-- 悬浮提示框背景 -->
-    <div class="capture-overlay" v-if="isCapturing"></div>
+    <div v-if="isCapturing" class="capture-overlay"></div>
 
     <!-- 圆形缩小图标 -->
-    <div class="minimized-icon" v-if="isCapturing && isMinimized" @click="expandPopup">
+    <div v-if="isCapturing && isMinimized" class="minimized-icon" @click="expandPopup">
       <span>🔍</span>
     </div>
 
     <!-- 选中元素信息 -->
-    <div class="selection-info" v-if="isCapturing && selectedElement && !isMinimized"
+    <div v-if="isCapturing && selectedElement && !isMinimized" class="selection-info"
       :style="{ top: popupPosition.selectionInfo.top + 'px', left: popupPosition.selectionInfo.left + 'px', transform: 'none' }"
       @mousedown="handleMouseDown($event, 'selectionInfo')">
       <div class="info-header" style="cursor: move;">
@@ -36,7 +36,7 @@
     </div>
 
     <!-- 组件预览和代码展示 -->
-    <div class="component-preview" v-if="showPreview && capturedCode"
+    <div v-if="showPreview && capturedCode" class="component-preview"
       :style="{ top: popupPosition.componentPreview.top + 'px', left: popupPosition.componentPreview.left + 'px', transform: 'none' }"
       @mousedown="handleMouseDown($event, 'componentPreview')">
       <div class="preview-header" style="cursor: move;">
@@ -59,35 +59,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
-import { eventManager } from '@/event'
+import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue';
+import { eventManager } from '@/event';
 
 // 状态管理
-const isCapturing = ref(false)
-const selectedElement = ref<Element | null>(null)
-const highlightOverlay = ref<HTMLDivElement | null>(null)
-const showPreview = ref(false)
-const capturedCode = ref('')
-const copied = ref(false)
-const isMinimized = ref(false)
+const isCapturing = ref(false);
+const selectedElement = ref<Element | null>(null);
+const highlightOverlay = ref<HTMLDivElement | null>(null);
+const showPreview = ref(false);
+const capturedCode = ref('');
+const copied = ref(false);
+const isMinimized = ref(false);
 
 // 拖动相关状态
-const isDragging = ref(false)
-const dragStartX = ref(0)
-const dragStartY = ref(0)
+const isDragging = ref(false);
+const dragStartX = ref(0);
+const dragStartY = ref(0);
 const popupPosition = ref({
   selectionInfo: { top: 20, left: window.innerWidth / 2 - 200 }, // 200是弹窗宽度的一半
   componentPreview: { top: window.innerHeight / 2 - 250, left: window.innerWidth / 2 - 300 } // 300是弹窗宽度的一半，250是弹窗高度的一半
-})
+});
 
 // 拖动目标
-const dragTarget = ref<string | null>(null)
+const dragTarget = ref<string | null>(null);
 
 /**
  * 创建高亮遮罩层
  */
 function createHighlightOverlay(): HTMLDivElement {
-  const overlay = document.createElement('div')
+  const overlay = document.createElement('div');
   overlay.style.cssText = `
     position: fixed;
     pointer-events: none;
@@ -96,21 +96,21 @@ function createHighlightOverlay(): HTMLDivElement {
     z-index: 999998;
     transition: all 0.1s ease;
     border-radius: 4px;
-  `
-  return overlay
+  `;
+  return overlay;
 }
 
 /**
  * 更新高亮位置
  */
 function updateHighlight(element: Element): void {
-  if (!highlightOverlay.value) return
+  if (!highlightOverlay.value) {return;}
 
-  const rect = element.getBoundingClientRect()
-  highlightOverlay.value.style.left = `${rect.left + window.scrollX}px`
-  highlightOverlay.value.style.top = `${rect.top + window.scrollY}px`
-  highlightOverlay.value.style.width = `${rect.width}px`
-  highlightOverlay.value.style.height = `${rect.height}px`
+  const rect = element.getBoundingClientRect();
+  highlightOverlay.value.style.left = `${rect.left + window.scrollX}px`;
+  highlightOverlay.value.style.top = `${rect.top + window.scrollY}px`;
+  highlightOverlay.value.style.width = `${rect.width}px`;
+  highlightOverlay.value.style.height = `${rect.height}px`;
 }
 
 /**
@@ -118,8 +118,8 @@ function updateHighlight(element: Element): void {
  */
 function removeHighlight(): void {
   if (highlightOverlay.value && highlightOverlay.value.parentNode) {
-    highlightOverlay.value.parentNode.removeChild(highlightOverlay.value)
-    highlightOverlay.value = null
+    highlightOverlay.value.parentNode.removeChild(highlightOverlay.value);
+    highlightOverlay.value = null;
   }
 }
 
@@ -129,42 +129,42 @@ function removeHighlight(): void {
 function isExtensionElement(element: Element): boolean {
   // 检查元素本身是否是扩展的shadow host
   if (element.id === 'ma-extension-shadow-host') {
-    return true
+    return true;
   }
 
   // 检查元素是否在扩展的shadow host内
-  let current = element
+  let current = element;
   while (current) {
     if (current.id === 'ma-extension-shadow-host') {
-      return true
+      return true;
     }
-    current = current.parentElement!
+    current = current.parentElement!;
   }
 
-  return false
+  return false;
 }
 
 /**
  * 处理鼠标移动
  */
 function handleMouseMove(event: MouseEvent): void {
-  if (!isCapturing.value) return
+  if (!isCapturing.value) {return;}
 
   // 禁用鼠标事件的默认行为和冒泡，防止网站的悬浮响应
-  event.preventDefault()
-  event.stopPropagation()
+  event.preventDefault();
+  event.stopPropagation();
 
   try {
     // 使用try-catch防止元素获取失败
-    const element = document.elementFromPoint(event.clientX, event.clientY)
+    const element = document.elementFromPoint(event.clientX, event.clientY);
     if (element && element !== highlightOverlay.value && !isExtensionElement(element)) {
-      updateHighlight(element)
+      updateHighlight(element);
     }
   } catch (error) {
-    maLogger.warn('获取元素失败:', error)
+    maLogger.warn('获取元素失败:', error);
   }
 }
-const captureContainer = useTemplateRef<HTMLDivElement | null>('captureContainer')
+const captureContainer = useTemplateRef<HTMLDivElement | null>('captureContainer');
 
 /**
  * 处理点击
@@ -172,7 +172,7 @@ const captureContainer = useTemplateRef<HTMLDivElement | null>('captureContainer
 function handleClick(event: MouseEvent): void {
   // if (!isCapturing.value) return
 
-  const target = event.target as Element
+  const target = event.target as Element;
 
   // 检查是否是弹窗容器或弹窗内的元素
   // if (target === captureContainer.value || captureContainer.value?.contains(target)) {
@@ -182,19 +182,19 @@ function handleClick(event: MouseEvent): void {
 
   // 检查点击的是否是高亮层
   if (target === highlightOverlay.value) {
-    return
+    return;
   }
 
-  event.preventDefault()
-  event.stopPropagation()
+  event.preventDefault();
+  event.stopPropagation();
 
-  const element = document.elementFromPoint(event.clientX, event.clientY)
+  const element = document.elementFromPoint(event.clientX, event.clientY);
   if (element && element !== highlightOverlay.value && !isExtensionElement(element)) {
-    selectedElement.value = element
+    selectedElement.value = element;
     // 点击后停止鼠标移动监听，避免继续高亮其他元素
-    document.removeEventListener('mousemove', handleMouseMove)
-    document.removeEventListener('click', handleClick, true)
-    document.removeEventListener('keydown', handleKeyDown)
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('click', handleClick, true);
+    document.removeEventListener('keydown', handleKeyDown);
   }
 }
 
@@ -202,10 +202,10 @@ function handleClick(event: MouseEvent): void {
  * 处理键盘事件
  */
 function handleKeyDown(event: KeyboardEvent): void {
-  if (!isCapturing.value) return
+  if (!isCapturing.value) {return;}
 
   if (event.key === 'Escape') {
-    exitCapture()
+    exitCapture();
   }
 }
 
@@ -213,91 +213,91 @@ function handleKeyDown(event: KeyboardEvent): void {
  * 开始拖动
  */
 function handleMouseDown(event: MouseEvent, target: string): void {
-  isDragging.value = true
-  dragTarget.value = target
-  dragStartX.value = event.clientX
-  dragStartY.value = event.clientY
+  isDragging.value = true;
+  dragTarget.value = target;
+  dragStartX.value = event.clientX;
+  dragStartY.value = event.clientY;
 
   // 添加全局鼠标移动和释放事件监听器
-  document.addEventListener('mousemove', handleDragMove)
-  document.addEventListener('mouseup', handleMouseUp)
+  document.addEventListener('mousemove', handleDragMove);
+  document.addEventListener('mouseup', handleMouseUp);
 }
 
 /**
  * 处理拖动
  */
 function handleDragMove(event: MouseEvent): void {
-  if (!isDragging.value || !dragTarget.value) return
+  if (!isDragging.value || !dragTarget.value) {return;}
 
-  const deltaX = event.clientX - dragStartX.value
-  const deltaY = event.clientY - dragStartY.value
+  const deltaX = event.clientX - dragStartX.value;
+  const deltaY = event.clientY - dragStartY.value;
 
   // 更新弹窗位置
   if (dragTarget.value === 'selectionInfo') {
-    popupPosition.value.selectionInfo.top += deltaY
-    popupPosition.value.selectionInfo.left += deltaX
+    popupPosition.value.selectionInfo.top += deltaY;
+    popupPosition.value.selectionInfo.left += deltaX;
   } else if (dragTarget.value === 'componentPreview') {
-    popupPosition.value.componentPreview.top += deltaY
-    popupPosition.value.componentPreview.left += deltaX
+    popupPosition.value.componentPreview.top += deltaY;
+    popupPosition.value.componentPreview.left += deltaX;
   }
 
   // 更新起始位置，用于下一次计算
-  dragStartX.value = event.clientX
-  dragStartY.value = event.clientY
+  dragStartX.value = event.clientX;
+  dragStartY.value = event.clientY;
 }
 
 /**
  * 结束拖动
  */
 function handleMouseUp(): void {
-  isDragging.value = false
-  dragTarget.value = null
+  isDragging.value = false;
+  dragTarget.value = null;
 
   // 移除全局事件监听器
-  document.removeEventListener('mousemove', handleDragMove)
-  document.removeEventListener('mouseup', handleMouseUp)
+  document.removeEventListener('mousemove', handleDragMove);
+  document.removeEventListener('mouseup', handleMouseUp);
 }
 
 /**
  * 开始捕获
  */
 function startCapture(): void {
-  isCapturing.value = true
-  selectedElement.value = null
-  showPreview.value = false
-  capturedCode.value = ''
-  isMinimized.value = false
+  isCapturing.value = true;
+  selectedElement.value = null;
+  showPreview.value = false;
+  capturedCode.value = '';
+  isMinimized.value = false;
 
   if (!highlightOverlay.value) {
-    highlightOverlay.value = createHighlightOverlay()
-    document.body.appendChild(highlightOverlay.value)
+    highlightOverlay.value = createHighlightOverlay();
+    document.body.appendChild(highlightOverlay.value);
   }
 
   // 确保添加事件监听器
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('click', handleClick, true)
-  document.addEventListener('keydown', handleKeyDown)
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('click', handleClick, true);
+  document.addEventListener('keydown', handleKeyDown);
 
-  maLogger.log('组件捕获模式已启动')
+  maLogger.log('组件捕获模式已启动');
 }
 
 /**
  * 取消选择
  */
 function cancelSelection(): void {
-  selectedElement.value = null
+  selectedElement.value = null;
   // 取消选择后重新开始监听鼠标移动事件
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('click', handleClick, true)
-  document.addEventListener('keydown', handleKeyDown)
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('click', handleClick, true);
+  document.addEventListener('keydown', handleKeyDown);
 }
 
 /**
  * 提取元素的计算样式
  */
 function extractElementStyles(element: Element): string {
-  const styles = window.getComputedStyle(element)
-  let styleStr = ''
+  const styles = window.getComputedStyle(element);
+  let styleStr = '';
 
   // 提取主要的样式属性
   const importantStyles = [
@@ -305,68 +305,68 @@ function extractElementStyles(element: Element): string {
     'margin', 'padding', 'border', 'border-radius',
     'background', 'color', 'font-size', 'font-family',
     'text-align', 'line-height', 'box-shadow'
-  ]
+  ];
 
   importantStyles.forEach(prop => {
-    const value = styles[prop as any]
+    const value = styles[prop as any];
     if (value && value !== 'auto' && value !== 'none') {
       styleStr += `  ${prop}: ${value};
-`
+`;
     }
-  })
+  });
 
-  return styleStr
+  return styleStr;
 }
 
 /**
  * 提取元素HTML代码和样式
  */
 function extractElementCode(element: Element): string {
-  const clone = element.cloneNode(true) as Element
+  const clone = element.cloneNode(true) as Element;
 
   // 移除一些可能包含敏感信息的属性
-  const attributesToRemove = ['onclick', 'onload', 'onerror', 'onmouseover', 'onmouseout', 'onmousedown', 'onmouseup']
+  const attributesToRemove = ['onclick', 'onload', 'onerror', 'onmouseover', 'onmouseout', 'onmousedown', 'onmouseup'];
   attributesToRemove.forEach(attr => {
-    clone.removeAttribute(attr)
+    clone.removeAttribute(attr);
     // 也检查子元素
-    clone.querySelectorAll(`[${attr}]`).forEach(el => el.removeAttribute(attr))
-  })
+    clone.querySelectorAll(`[${attr}]`).forEach(el => el.removeAttribute(attr));
+  });
 
   // 美化HTML
-  let html = clone.outerHTML
+  let html = clone.outerHTML;
 
   // 简单的格式化
   html = html
     .replace(/></g, '>\n<')
-    .replace(/\n\s*\n/g, '\n')
+    .replace(/\n\s*\n/g, '\n');
 
   // 提取样式
-  const styles = extractElementStyles(element)
+  const styles = extractElementStyles(element);
 
   // 组合HTML和样式
-  let result = `<template><!-- 组件HTML结构 -->
+  const result = `<template><!-- 组件HTML结构 -->
 ${html}\n\n<!-- 组件样式 --></template>
 <style>
 ${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${element.className ? `.${element.className.split(' ').join('.')}` : ''} {
 ${styles}}
-</style>`
+</style>`;
 
-  return result
+  return result;
 }
 
 /**
  * 确认选择
  */
 function confirmSelection(): void {
-  if (!selectedElement.value) return
+  if (!selectedElement.value) {return;}
 
-  maLogger.log('已选择元素:', selectedElement.value)
+  maLogger.log('已选择元素:', selectedElement.value);
 
   // 提取代码
-  capturedCode.value = extractElementCode(selectedElement.value)
+  capturedCode.value = extractElementCode(selectedElement.value);
 
   // 显示预览
-  showPreview.value = true
+  showPreview.value = true;
 
   // 发送事件通知
   // bus.emit('component-captured', {
@@ -374,48 +374,48 @@ function confirmSelection(): void {
   //   code: capturedCode.value
   // })
 
-  exitCapture()
+  exitCapture();
 }
 
 /**
  * 缩小弹窗
  */
 function minimizePopup(): void {
-  isMinimized.value = true
-  maLogger.log('组件捕获弹窗已缩小')
+  isMinimized.value = true;
+  maLogger.log('组件捕获弹窗已缩小');
 }
 
 /**
  * 展开弹窗
  */
 function expandPopup(): void {
-  isMinimized.value = false
-  maLogger.log('组件捕获弹窗已展开')
+  isMinimized.value = false;
+  maLogger.log('组件捕获弹窗已展开');
 }
 
 /**
  * 退出捕获模式
  */
 function exitCapture(): void {
-  isCapturing.value = false
-  selectedElement.value = null
-  isMinimized.value = false
+  isCapturing.value = false;
+  selectedElement.value = null;
+  isMinimized.value = false;
 
-  removeHighlight()
+  removeHighlight();
 
-  document.removeEventListener('mousemove', handleMouseMove)
-  document.removeEventListener('click', handleClick, true)
-  document.removeEventListener('keydown', handleKeyDown)
+  document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('click', handleClick, true);
+  document.removeEventListener('keydown', handleKeyDown);
 
-  maLogger.log('组件捕获模式已退出')
+  maLogger.log('组件捕获模式已退出');
 }
 
 /**
  * 关闭预览
  */
 function closePreview(): void {
-  showPreview.value = false
-  capturedCode.value = ''
+  showPreview.value = false;
+  capturedCode.value = '';
 }
 
 /**
@@ -423,48 +423,48 @@ function closePreview(): void {
  */
 async function copyCode(): Promise<void> {
   try {
-    await navigator.clipboard.writeText(capturedCode.value)
-    copied.value = true
+    await navigator.clipboard.writeText(capturedCode.value);
+    copied.value = true;
 
     setTimeout(() => {
-      copied.value = false
-    }, 2000)
+      copied.value = false;
+    }, 2000);
 
-    maLogger.log('代码已复制到剪贴板')
+    maLogger.log('代码已复制到剪贴板');
   } catch (error) {
-    maLogger.error('复制代码失败:', error)
+    maLogger.error('复制代码失败:', error);
 
     // 降级方案
-    const textarea = document.createElement('textarea')
-    textarea.value = capturedCode.value
-    document.body.appendChild(textarea)
-    textarea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textarea)
+    const textarea = document.createElement('textarea');
+    textarea.value = capturedCode.value;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
 
-    copied.value = true
+    copied.value = true;
     setTimeout(() => {
-      copied.value = false
-    }, 2000)
+      copied.value = false;
+    }, 2000);
   }
 }
 
-const bus = eventManager.useBus('start-component-capture', startCapture)
+const bus = eventManager.useBus('start-component-capture', startCapture);
 
 // 监听启动捕获事件
 onMounted(() => {
-})
+});
 
 onUnmounted(() => {
-  exitCapture()
-})
+  exitCapture();
+});
 
 // 暴露方法给外部使用
 defineExpose({
   startCapture,
   exitCapture,
   bus
-})
+});
 </script>
 
 <style scoped>

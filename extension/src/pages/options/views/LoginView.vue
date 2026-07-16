@@ -5,13 +5,13 @@
       <h1>Login</h1>
       <el-form ref="loginFormRef" :model="loginForm" :rules="rules" class="login-form">
         <el-form-item prop="username">
-          <input type="text" name="u" placeholder="Username" v-model="loginForm.username" />
+          <input v-model="loginForm.username" type="text" name="u" placeholder="Username" />
         </el-form-item>
         <el-form-item prop="password">
-          <input type="password" name="p" placeholder="Password" v-model="loginForm.password" />
+          <input v-model="loginForm.password" type="password" name="p" placeholder="Password" />
         </el-form-item>
         <el-form-item>
-          <button type="button" class="btn btn-primary btn-block btn-large" @click="handleLogin" :loading="loading">
+          <button type="button" class="btn btn-primary btn-block btn-large" :loading="loading" @click="handleLogin">
             Let me in.
           </button>
         </el-form-item>
@@ -23,27 +23,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import CryptoJS from 'crypto-js'
-import Push from '@components/particles/push.vue'
-import { saveLoginState, verifyLoginState } from '@/utils/auth'
+import { ref, reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import CryptoJS from 'crypto-js';
+import Push from '@components/particles/push.vue';
+import { saveLoginState, verifyLoginState } from '@/utils/auth';
 
 
 // 路由实例
-const router = useRouter()
+const router = useRouter();
 
 // 表单引用
-const loginFormRef = ref<any>(null)
+const loginFormRef = ref<any>(null);
 
 // 响应式数据
 const loginForm = reactive({
   username: '',
   password: ''
-})
+});
 
-const loading = ref(false)
+const loading = ref(false);
 
 // 表单验证规则
 const rules = {
@@ -53,14 +53,14 @@ const rules = {
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' }
   ]
-}
+};
 
 // 登录处理函数
 const handleLogin = () => {
   if (loginFormRef.value) {
     loginFormRef.value.validate((valid: boolean) => {
       if (valid) {
-        loading.value = true
+        loading.value = true;
 
         // 模拟登录请求
         setTimeout(() => {
@@ -101,29 +101,29 @@ const handleLogin = () => {
 
           if (loginSuccess) {
             // 跳转到相应页面
-            router.push(redirectPath)
+            router.push(redirectPath);
           } else {
             // 使用ElMessage显示错误信息，从顶部弹出
             ElMessage.error({
               message: '身份验证失败',
               offset: 80, // 距离顶部的距离
               duration: 3000 // 显示时间
-            })
+            });
           }
-          loading.value = false
-        }, 200)
+          loading.value = false;
+        }, 200);
       }
-    })
+    });
   }
-}
+};
 
 // 生命周期钩子
 onMounted(() => {
   // 检查是否已登录，如果已登录则直接跳转到用户配置页面
   if (verifyLoginState()) {
-    router.push('/user')
+    router.push('/user');
   }
-})
+});
 </script>
 
 <style scoped>

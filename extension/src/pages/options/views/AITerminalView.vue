@@ -232,7 +232,7 @@ const providerOptions = [
   { value: 'openai', label: 'OpenAI Compatible' },
   { value: 'anthropic', label: 'Anthropic' },
   { value: 'google', label: 'Google Gemini' },
-  { value: 'custom', label: 'Custom Gateway' },
+  { value: 'custom', label: 'Custom Gateway' }
 ] as const;
 
 const providerCatalog: Record<ProviderMode, {
@@ -249,7 +249,7 @@ const providerCatalog: Record<ProviderMode, {
     modelPlaceholder: 'deepseek-chat',
     basePlaceholder: '内置链路无需填写',
     apiKeyPlaceholder: '内置链路无需填写',
-    description: '使用扩展内置的 DeepSeek 会话链路，适合直接启用舰桥 AI。',
+    description: '使用扩展内置的 DeepSeek 会话链路，适合直接启用舰桥 AI。'
   },
   openai: {
     label: 'OpenAI Compatible',
@@ -257,7 +257,7 @@ const providerCatalog: Record<ProviderMode, {
     modelPlaceholder: '输入你的 OpenAI 模型 ID',
     basePlaceholder: 'https://api.openai.com/v1',
     apiKeyPlaceholder: 'sk-...',
-    description: '使用标准 Chat Completions 接口。若不填基址，将默认回落到 OpenAI 官方入口。',
+    description: '使用标准 Chat Completions 接口。若不填基址，将默认回落到 OpenAI 官方入口。'
   },
   anthropic: {
     label: 'Anthropic',
@@ -265,7 +265,7 @@ const providerCatalog: Record<ProviderMode, {
     modelPlaceholder: '输入你的 Claude 模型 ID',
     basePlaceholder: 'https://api.anthropic.com/v1',
     apiKeyPlaceholder: 'sk-ant-...',
-    description: '使用 Anthropic Messages 接口。模型 ID 与 API Key 都需要由你手动填写。',
+    description: '使用 Anthropic Messages 接口。模型 ID 与 API Key 都需要由你手动填写。'
   },
   google: {
     label: 'Google Gemini',
@@ -273,7 +273,7 @@ const providerCatalog: Record<ProviderMode, {
     modelPlaceholder: '输入你的 Gemini 模型 ID',
     basePlaceholder: 'https://generativelanguage.googleapis.com/v1beta',
     apiKeyPlaceholder: 'AIza...',
-    description: '使用 Gemini 流式接口。若不填基址，将默认回落到 Google 的 Generative Language API。',
+    description: '使用 Gemini 流式接口。若不填基址，将默认回落到 Google 的 Generative Language API。'
   },
   custom: {
     label: 'Custom Gateway',
@@ -281,8 +281,8 @@ const providerCatalog: Record<ProviderMode, {
     modelPlaceholder: '输入你的自定义模型 ID',
     basePlaceholder: '例如 https://your-gateway.example/v1',
     apiKeyPlaceholder: '输入网关鉴权密钥',
-    description: '面向 OpenAI 兼容网关或私有部署服务。需要提供自定义 Provider 名称与 Base URL。',
-  },
+    description: '面向 OpenAI 兼容网关或私有部署服务。需要提供自定义 Provider 名称与 Base URL。'
+  }
 };
 
 const createDefaultConfig = (): TerminalConfig => ({
@@ -291,7 +291,7 @@ const createDefaultConfig = (): TerminalConfig => ({
   modelId: 'deepseek-chat',
   apiBaseUrl: '',
   apiKey: '',
-  systemPrompt: BUILTIN_SYSTEM_PROMPT,
+  systemPrompt: BUILTIN_SYSTEM_PROMPT
 });
 
 const config = ref<TerminalConfig>(createDefaultConfig());
@@ -348,7 +348,7 @@ const linkState = computed(() => {
     return {
       status: 'standby' as StarshipStatus,
       label: 'UNBOUND',
-      detail: '等待指定模型路由',
+      detail: '等待指定模型路由'
     };
   }
 
@@ -356,7 +356,7 @@ const linkState = computed(() => {
     return {
       status: 'online' as StarshipStatus,
       label: 'READY',
-      detail: '内置 DeepSeek 链路可直接接管对话',
+      detail: '内置 DeepSeek 链路可直接接管对话'
     };
   }
 
@@ -367,7 +367,7 @@ const linkState = computed(() => {
     return {
       status: 'online' as StarshipStatus,
       label: 'READY',
-      detail: `${provider.toUpperCase()} 已完成绑定`,
+      detail: `${provider.toUpperCase()} 已完成绑定`
     };
   }
 
@@ -375,14 +375,14 @@ const linkState = computed(() => {
     return {
       status: 'warning' as StarshipStatus,
       label: 'PARTIAL',
-      detail: '链路参数不完整，发送前需补足',
+      detail: '链路参数不完整，发送前需补足'
     };
   }
 
   return {
     status: 'standby' as StarshipStatus,
     label: 'STANDBY',
-    detail: '等待填写模型与鉴权信息',
+    detail: '等待填写模型与鉴权信息'
   };
 });
 
@@ -439,7 +439,7 @@ const buildPersistedConfig = () => {
     modelId: effectiveModelId.value,
     apiBaseUrl: config.value.apiBaseUrl.trim(),
     apiKey: config.value.apiKey.trim(),
-    systemPrompt: sanitizedPrompt,
+    systemPrompt: sanitizedPrompt
   };
 };
 
@@ -486,7 +486,7 @@ const restoreDefaults = async () => {
     await ElMessageBox.confirm('恢复默认后将重置 Provider、模型、鉴权信息与舰桥 Prompt。', '恢复默认协议', {
       confirmButtonText: '恢复',
       cancelButtonText: '取消',
-      type: 'warning',
+      type: 'warning'
     });
 
     config.value = createDefaultConfig();
@@ -507,7 +507,7 @@ const persistConversation = async () => {
   try {
     if (canUseExtensionStorage()) {
       await chrome.storage.local.set({
-        [CONVERSATION_STORAGE_KEY]: messages.value,
+        [CONVERSATION_STORAGE_KEY]: messages.value
       });
       return;
     }
@@ -529,7 +529,7 @@ const loadConversation = async () => {
       nextMessages = storedData.map((entry: any) => ({
         role: entry.role === 'assistant' ? 'assistant' : 'user',
         content: String(entry.content || ''),
-        timestamp: typeof entry.timestamp === 'string' ? entry.timestamp : new Date(entry.timestamp).toISOString(),
+        timestamp: typeof entry.timestamp === 'string' ? entry.timestamp : new Date(entry.timestamp).toISOString()
       }));
     } else if (storedData && typeof storedData === 'object') {
       const indexes = Object.keys(storedData).map(Number).sort((a, b) => a - b);
@@ -538,7 +538,7 @@ const loadConversation = async () => {
         return {
           role: entry.role === 'assistant' ? 'assistant' : 'user',
           content: String(entry.content || ''),
-          timestamp: typeof entry.timestamp === 'string' ? entry.timestamp : new Date(entry.timestamp).toISOString(),
+          timestamp: typeof entry.timestamp === 'string' ? entry.timestamp : new Date(entry.timestamp).toISOString()
         };
       });
     }
@@ -595,7 +595,7 @@ const sendMessage = async () => {
   messages.value.push({
     role: 'user',
     content,
-    timestamp: now,
+    timestamp: now
   });
   draft.value = '';
   await persistConversation();
@@ -604,7 +604,7 @@ const sendMessage = async () => {
   const reply: ConversationEntry = {
     role: 'assistant',
     content: '',
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   };
   messages.value.push(reply);
   loading.value = true;
@@ -620,7 +620,7 @@ const sendMessage = async () => {
 
   const messageId = `bridge-aegis-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
   const port = chrome.runtime.connect({
-    name: `ai-conversation-${messageId}`,
+    name: `ai-conversation-${messageId}`
   });
 
   currentPort.value = port;
@@ -690,8 +690,8 @@ const sendMessage = async () => {
       apiKey: config.value.apiKey.trim(),
       apiBaseUrl: effectiveBaseUrl.value,
       role: ROLE_ID,
-      systemPrompt: config.value.systemPrompt.trim() || BUILTIN_SYSTEM_PROMPT,
-    },
+      systemPrompt: config.value.systemPrompt.trim() || BUILTIN_SYSTEM_PROMPT
+    }
   });
 };
 
@@ -700,7 +700,7 @@ const clearConversation = async () => {
     await ElMessageBox.confirm('这会清空当前 AI 终端的历史消息与 DeepSeek 上下文。', '清空上下文', {
       confirmButtonText: '清空',
       cancelButtonText: '取消',
-      type: 'warning',
+      type: 'warning'
     });
 
     messages.value = [];
@@ -717,7 +717,7 @@ const clearConversation = async () => {
     if (canUseRuntimeMessaging()) {
       chrome.runtime.sendMessage({
         type: 'CLEAR_AI_SESSION',
-        payload: { role: ROLE_ID },
+        payload: { role: ROLE_ID }
       });
     }
 
@@ -741,7 +741,7 @@ const formatTime = (timestamp: string) => {
   const date = new Date(timestamp);
   return new Intl.DateTimeFormat('zh-CN', {
     hour: '2-digit',
-    minute: '2-digit',
+    minute: '2-digit'
   }).format(date);
 };
 

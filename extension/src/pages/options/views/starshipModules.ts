@@ -56,13 +56,13 @@ export interface StarshipModuleState extends StarshipModuleMeta {
 export const STARSHIP_STATUS_TEXT: Record<StarshipStatus, string> = {
   online: '在线',
   warning: '警戒',
-  standby: '待命',
+  standby: '待命'
 };
 
 export const STARSHIP_STATUS_TINT: Record<StarshipStatus, string> = {
   online: '#69b7ff',
   warning: '#ff6262',
-  standby: '#7af7d0',
+  standby: '#7af7d0'
 };
 
 export const STARSHIP_MODULES: StarshipModuleMeta[] = [
@@ -78,8 +78,8 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'online',
       headline: '舰桥链路稳定',
       detail: '等待各舱段回传状态数据',
-      metric: '07/07',
-    },
+      metric: '07/07'
+    }
   },
   {
     id: 'top',
@@ -93,13 +93,13 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'standby',
       headline: '异常监控待命',
       detail: '尚未加载 WebSocket 回传参数',
-      metric: 'OFF',
+      metric: 'OFF'
     },
     overview: {
       anchor: { x: 500, y: 238 },
       lineEnd: { x: 500, y: 132 },
-      card: { x: 500, y: 52, align: 'center' },
-    },
+      card: { x: 500, y: 52, align: 'center' }
+    }
   },
   {
     id: 'top-left',
@@ -113,13 +113,13 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'standby',
       headline: '暂无拦截规则',
       detail: '可为接口响应建立定向篡改矩阵',
-      metric: '00',
+      metric: '00'
     },
     overview: {
       anchor: { x: 398, y: 286 },
       lineEnd: { x: 274, y: 186 },
-      card: { x: 90, y: 116, align: 'left' },
-    },
+      card: { x: 90, y: 116, align: 'left' }
+    }
   },
   {
     id: 'top-right',
@@ -133,13 +133,13 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'online',
       headline: '浏览器遥测正常',
       detail: '可直接连通当前活动标签页',
-      metric: 'LIVE',
+      metric: 'LIVE'
     },
     overview: {
       anchor: { x: 602, y: 286 },
       lineEnd: { x: 726, y: 186 },
-      card: { x: 910, y: 116, align: 'right' },
-    },
+      card: { x: 910, y: 116, align: 'right' }
+    }
   },
   {
     id: 'left',
@@ -153,13 +153,13 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'online',
       headline: '扩展设置已加载',
       detail: '等待同步主题与调试模式状态',
-      metric: 'AUTO',
+      metric: 'AUTO'
     },
     overview: {
       anchor: { x: 334, y: 350 },
       lineEnd: { x: 188, y: 350 },
-      card: { x: 40, y: 288, align: 'left' },
-    },
+      card: { x: 40, y: 288, align: 'left' }
+    }
   },
   {
     id: 'right',
@@ -173,13 +173,13 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'standby',
       headline: '暂无船员档案',
       detail: '可在此维护自动登录用户列表',
-      metric: '00',
+      metric: '00'
     },
     overview: {
       anchor: { x: 666, y: 350 },
       lineEnd: { x: 812, y: 350 },
-      card: { x: 960, y: 288, align: 'right' },
-    },
+      card: { x: 960, y: 288, align: 'right' }
+    }
   },
   {
     id: 'bottom',
@@ -193,13 +193,13 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'online',
       headline: '域名航线可用',
       detail: '等待统计当前已启用的脚本模块',
-      metric: '00/00',
+      metric: '00/00'
     },
     overview: {
       anchor: { x: 500, y: 462 },
       lineEnd: { x: 500, y: 586 },
-      card: { x: 500, y: 604, align: 'center' },
-    },
+      card: { x: 500, y: 604, align: 'center' }
+    }
   },
   {
     id: 'bottom-left',
@@ -213,13 +213,13 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'online',
       headline: '技能图谱可编辑',
       detail: '拖拽节点整理结构，任意节点可继续扩展分支',
-      metric: 'MAP',
+      metric: 'MAP'
     },
     overview: {
       anchor: { x: 386, y: 432 },
       lineEnd: { x: 188, y: 536 },
-      card: { x: 46, y: 468, align: 'left' },
-    },
+      card: { x: 46, y: 468, align: 'left' }
+    }
   },
   {
     id: 'bottom-right',
@@ -233,14 +233,14 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       status: 'standby',
       headline: '等待接入 AI 链路',
       detail: '配置模型与舰桥协议后可启动智能协同',
-      metric: 'OFF',
+      metric: 'OFF'
     },
     overview: {
       anchor: { x: 614, y: 432 },
       lineEnd: { x: 814, y: 536 },
-      card: { x: 954, y: 468, align: 'right' },
-    },
-  },
+      card: { x: 954, y: 468, align: 'right' }
+    }
+  }
 ];
 
 export const STARSHIP_MODULE_MAP = STARSHIP_MODULES.reduce((acc, module) => {

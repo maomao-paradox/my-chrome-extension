@@ -71,7 +71,7 @@ const initRenderer = () => {
 
 // 计算属性：渲染后的HTML
 const previewHtml = computed(() => {
-  if (!markdownText.value || !mdRenderer.value) return '';
+  if (!markdownText.value || !mdRenderer.value) {return '';}
   const html = mdRenderer.value.render(markdownText.value);
   return DOMPurify.sanitize(html);
 });

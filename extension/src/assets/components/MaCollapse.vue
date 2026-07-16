@@ -1,6 +1,6 @@
 <template>
     <Draggable :initial-position="'center'" :enable-adsorption="false">
-        <div v-show="visible" class="ma-collapse-container" ref="containerRef">
+        <div v-show="visible" ref="containerRef" class="ma-collapse-container">
             <!-- 拖动区域 -->
             <div class="drag-area">
                 <!-- 顶部的标题 -->
@@ -8,9 +8,9 @@
                     {{ props.title }}
                     <!-- 关闭按钮 -->
                     <div class="close-btn-wrapper">
-                        <el-button type="text" size="small" @click.stop="close" class="close-btn">
+                        <el-button type="text" size="small" class="close-btn" @click.stop="close">
                             <el-icon>
-                                <close />
+                                <Close />
                             </el-icon>
                         </el-button>
                     </div>
@@ -34,8 +34,8 @@
                                     {{ item.details || item.label }}
                                 </div>
                                 <!-- 跳转按钮 -->
-                                <el-button type="primary" size="small" @click.stop="handleClick(item)"
-                                    class="execute-button">
+                                <el-button type="primary" size="small" class="execute-button"
+                                    @click.stop="handleClick(item)">
                                     执行
                                 </el-button>
                             </div>
@@ -48,10 +48,10 @@
 </template>
 
 <script setup lang="ts">
-import { Close } from '@element-plus/icons-vue'
-import { Tool } from '@/types'
-import { ref } from 'vue'
-import Draggable from '@/plugins/floatingball/Draggable.vue'
+import { Close } from '@element-plus/icons-vue';
+import { Tool } from '@/types';
+import { ref } from 'vue';
+import Draggable from '@/plugins/floatingball/Draggable.vue';
 
 // 定义props类型
 interface Props {
@@ -66,24 +66,24 @@ const emit = defineEmits(['update:visible', 'item-click', 'close']);
 
 // 处理点击事件
 const handleClick = (item: Tool) => {
-    // 发送消息到后台脚本
-    chrome.runtime.sendMessage({
-        type: 'CONTEXT_MENU_CLICK',
-        payload: {
-            itemId: item.id,
-            itemLabel: item.label,
-            toolId: props.toolId
-        },
-        target: "background"
-    })
-    // 触发item-click事件，将点击的item传递给父组件
-    emit('item-click', item);
+  // 发送消息到后台脚本
+  chrome.runtime.sendMessage({
+    type: 'CONTEXT_MENU_CLICK',
+    payload: {
+      itemId: item.id,
+      itemLabel: item.label,
+      toolId: props.toolId
+    },
+    target: 'background'
+  });
+  // 触发item-click事件，将点击的item传递给父组件
+  emit('item-click', item);
 };
 
 // 提供关闭方法
 const close = () => {
-    emit('close');
-    emit('update:visible', false);
+  emit('close');
+  emit('update:visible', false);
 };
 
 </script>

@@ -103,69 +103,69 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { Draggable } from "@components/index";
+import { computed, ref } from 'vue';
+import { Draggable } from '@components/index';
 import {
   IconNextMusic,
   IconPause,
   IconPlay,
-  IconPreviousMusic,
-} from "@icons/index";
-import AIConversation from "../floatingball/views/AIConversation.vue";
+  IconPreviousMusic
+} from '@icons/index';
+import AIConversation from '../floatingball/views/AIConversation.vue';
 
 defineEmits<{
   close: [];
 }>();
 
-const mikuSrc = chrome.runtime.getURL("static/img/miku.png");
+const mikuSrc = chrome.runtime.getURL('static/img/miku.png');
 const isMusicPlaying = ref(false);
 
 const draggableContainerStyle = computed<Record<string, string>>(() => ({
-  "--z-index": "10000",
-  cursor: "default",
+  '--z-index': '10000',
+  cursor: 'default'
 }));
 
-type MusicControlAction = "previous" | "toggle" | "next";
+type MusicControlAction = 'previous' | 'toggle' | 'next';
 
 const musicControls = computed(() => [
   {
-    action: "previous" as const,
-    label: "上一首",
-    icon: IconPreviousMusic,
+    action: 'previous' as const,
+    label: '上一首',
+    icon: IconPreviousMusic
   },
   {
-    action: "toggle" as const,
-    label: isMusicPlaying.value ? "暂停" : "播放",
-    icon: isMusicPlaying.value ? IconPause : IconPlay,
+    action: 'toggle' as const,
+    label: isMusicPlaying.value ? '暂停' : '播放',
+    icon: isMusicPlaying.value ? IconPause : IconPlay
   },
   {
-    action: "next" as const,
-    label: "下一首",
-    icon: IconNextMusic,
-  },
+    action: 'next' as const,
+    label: '下一首',
+    icon: IconNextMusic
+  }
 ]);
 
 const handleMusicControl = (action: MusicControlAction) => {
-  if (action === "toggle") {
+  if (action === 'toggle') {
     isMusicPlaying.value = !isMusicPlaying.value;
   }
 };
 
 const mikuSystemPrompt = [
-  "你正在进行角色扮演：你是初音未来风格的虚拟歌姬 Miku，在一个安静、温暖的酒馆式对话窗口里和用户聊天。",
-  "用中文为主回应，语气轻快、亲切、有一点舞台感，但不要过度卖萌，不要刷屏。",
-  "你可以谈音乐、创作、日常陪伴、学习和编程想法；当用户需要严肃帮助时，保持清晰、实用、可靠。",
-  "不要声称自己是真实人物或真人偶像；你是一个由 AI 模拟的角色。",
-  "回答尽量自然，短句优先。需要步骤时用简洁列表。",
-].join("\n");
+  '你正在进行角色扮演：你是初音未来风格的虚拟歌姬 Miku，在一个安静、温暖的酒馆式对话窗口里和用户聊天。',
+  '用中文为主回应，语气轻快、亲切、有一点舞台感，但不要过度卖萌，不要刷屏。',
+  '你可以谈音乐、创作、日常陪伴、学习和编程想法；当用户需要严肃帮助时，保持清晰、实用、可靠。',
+  '不要声称自己是真实人物或真人偶像；你是一个由 AI 模拟的角色。',
+  '回答尽量自然，短句优先。需要步骤时用简洁列表。'
+].join('\n');
 
 const mikuRoles = [
   {
-    value: "hatsune_miku_tavern",
-    label: "Hatsune Miku",
-    avatar: "MK",
-    systemPrompt: mikuSystemPrompt,
-  },
+    value: 'hatsune_miku_tavern',
+    label: 'Hatsune Miku',
+    avatar: 'MK',
+    systemPrompt: mikuSystemPrompt
+  }
 ];
 </script>
 

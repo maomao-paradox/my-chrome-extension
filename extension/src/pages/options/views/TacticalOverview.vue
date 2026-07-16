@@ -163,7 +163,7 @@ const statusColor = (status: StarshipStatus) => STARSHIP_STATUS_TINT[status];
 
 const parallaxStyle = computed(() => ({
   '--overview-px': pointer.value.x.toFixed(4),
-  '--overview-py': pointer.value.y.toFixed(4),
+  '--overview-py': pointer.value.y.toFixed(4)
 }));
 
 const getConnectorPath = (module: StarshipModuleState) => {
@@ -196,7 +196,7 @@ const getCalloutStyle = (module: StarshipModuleState) => {
   return {
     left: `${(card.x / 1000) * 100}%`,
     top: `${(card.y / 700) * 100}%`,
-    transform,
+    transform
   };
 };
 
@@ -204,7 +204,7 @@ const getStripCellStyle = (module: StarshipModuleState, cell: number) => {
   const seed = module.id.charCodeAt(0) + cell * 19;
   return {
     '--cell-scale': `${0.8 + ((seed % 4) * 0.05)}`,
-    animationDelay: `${cell * 0.14}s`,
+    animationDelay: `${cell * 0.14}s`
   };
 };
 
@@ -233,7 +233,7 @@ const handlePointerMove = (event: PointerEvent) => {
 
   pointer.value = {
     x: (((event.clientX - bounds.left) / bounds.width) - 0.5) * 2,
-    y: (((event.clientY - bounds.top) / bounds.height) - 0.5) * 2,
+    y: (((event.clientY - bounds.top) / bounds.height) - 0.5) * 2
   };
 };
 

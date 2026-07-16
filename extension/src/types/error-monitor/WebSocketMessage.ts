@@ -115,7 +115,7 @@ export const DEFAULT_WS_CONFIG: WebSocketClientConfig = {
   maxReconnectAttempts: 5,
   reconnectBaseInterval: 1000,
   pingInterval: 30000,
-  connectTimeout: 10000,
+  connectTimeout: 10000
 };
 
 /** 消息工具类 */
@@ -138,18 +138,18 @@ export const WebSocketMessageUtils = {
         title: document.title,
         referrer: document.referrer,
         viewportWidth: window.innerWidth,
-        viewportHeight: window.innerHeight,
+        viewportHeight: window.innerHeight
       },
       browser: {
         name: this.getBrowserName(),
         version: this.getBrowserVersion(),
         userAgent: navigator.userAgent,
         platform: nav.userAgentData?.platform || navigator.platform,
-        language: navigator.language,
+        language: navigator.language
       },
       error,
       screenshot,
-      dingTalkToken,
+      dingTalkToken
     };
   },
 
@@ -159,7 +159,7 @@ export const WebSocketMessageUtils = {
   createPingMessage(): PingMessage {
     return {
       type: MessageType.PING,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
   },
 
@@ -169,7 +169,7 @@ export const WebSocketMessageUtils = {
   createPongMessage(): PongMessage {
     return {
       type: MessageType.PONG,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
   },
 
@@ -180,7 +180,7 @@ export const WebSocketMessageUtils = {
     return {
       type: MessageType.AUTH,
       token,
-      clientId: this.generateClientId(),
+      clientId: this.generateClientId()
     };
   },
 
@@ -190,11 +190,11 @@ export const WebSocketMessageUtils = {
   getBrowserName(): string {
     const ua = navigator.userAgent;
 
-    if (ua.includes('Chrome')) return 'Chrome';
-    if (ua.includes('Firefox')) return 'Firefox';
-    if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
-    if (ua.includes('Edge')) return 'Edge';
-    if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
+    if (ua.includes('Chrome')) {return 'Chrome';}
+    if (ua.includes('Firefox')) {return 'Firefox';}
+    if (ua.includes('Safari') && !ua.includes('Chrome')) {return 'Safari';}
+    if (ua.includes('Edge')) {return 'Edge';}
+    if (ua.includes('Opera') || ua.includes('OPR')) {return 'Opera';}
 
     return 'Unknown';
   },
@@ -207,16 +207,16 @@ export const WebSocketMessageUtils = {
     let match: RegExpMatchArray | null;
 
     match = ua.match(/Chrome\/([\d.]+)/);
-    if (match) return match[1];
+    if (match) {return match[1];}
 
     match = ua.match(/Firefox\/([\d.]+)/);
-    if (match) return match[1];
+    if (match) {return match[1];}
 
     match = ua.match(/Safari\/([\d.]+)/);
-    if (match) return match[1];
+    if (match) {return match[1];}
 
     match = ua.match(/Edge\/([\d.]+)/);
-    if (match) return match[1];
+    if (match) {return match[1];}
 
     return 'Unknown';
   },
@@ -226,7 +226,7 @@ export const WebSocketMessageUtils = {
    */
   generateClientId(): string {
     const stored = sessionStorage.getItem('error-monitor-client-id');
-    if (stored) return stored;
+    if (stored) {return stored;}
 
     const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     sessionStorage.setItem('error-monitor-client-id', id);
@@ -249,5 +249,5 @@ export const WebSocketMessageUtils = {
     } catch {
       return null;
     }
-  },
+  }
 };

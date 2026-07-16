@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted, watch, type Component } from 'vue'
+import { ref, computed, onUnmounted, watch, type Component } from 'vue';
 import {
   ChatDotRound,
   CloseBold,
@@ -30,9 +30,9 @@ import {
   RefreshLeft,
   Search,
   Tools
-} from '@element-plus/icons-vue'
-import { TextTool } from '@/types'
-import { componentManager } from '@/utils/componentManager'
+} from '@element-plus/icons-vue';
+import { TextTool } from '@/types';
+import { componentManager } from '@/utils/componentManager';
 
 // 组件props
 const props = defineProps<{
@@ -40,38 +40,38 @@ const props = defineProps<{
   initialText?: string;
   customTools?: TextTool[];
   showCloseBtn?: boolean;
-}>()
+}>();
 
 // 定义事件
 const emit = defineEmits<{
   // 关闭工具栏事件
   (e: 'close'): void;
-}>()
+}>();
 
 // 工具栏引用
-const toolbarRef = ref<HTMLElement | null>(null)
+const toolbarRef = ref<HTMLElement | null>(null);
 // AI对话窗口可见性
-const aiChatVisible = ref(false)
+const aiChatVisible = ref(false);
 // 初始文本（选中文本）
-const initialText = ref<string>(props.initialText || '')
+const initialText = ref<string>(props.initialText || '');
 
 watch(() => props.initialText, (nextText) => {
-  initialText.value = nextText || ''
-})
+  initialText.value = nextText || '';
+});
 
 const closeToolbar = () => {
   // 触发close事件，让父组件处理关闭逻辑
-  emit('close')
-}
+  emit('close');
+};
 
 // 合并默认工具和自定义工具
 const tools = computed(() => {
   if (props.customTools && props.customTools.length > 0) {
     // maLogger.log("合并后的工具:", [...props.customTools])
-    return [...props.customTools]
+    return [...props.customTools];
   }
-  return []
-})
+  return [];
+});
 
 const toolIconMap: Record<string, Component> = {
   bookmark: CollectionTag,
@@ -80,42 +80,42 @@ const toolIconMap: Record<string, Component> = {
   replace: RefreshLeft,
   search: Search,
   translate: EditPen
-}
+};
 
 const getToolIcon = (tool: TextTool) => {
-  return toolIconMap[tool.id] || Tools
-}
+  return toolIconMap[tool.id] || Tools;
+};
 
 // 计算工具栏样式
 const toolbarStyle = computed(() => {
   return {
     left: '0px',
     top: '0px'
-  }
-})
+  };
+});
 
 // 工具点击处理
 const handleToolClick = (tool: TextTool) => {
-  maLogger.log('工具点击:', tool.id, tool.label)
+  maLogger.log('工具点击:', tool.id, tool.label);
 
   if (tool.handler && typeof tool.handler === 'function') {
-    maLogger.log('执行工具handler:', tool.id)
+    maLogger.log('执行工具handler:', tool.id);
 
     Promise.resolve(tool.handler(initialText.value))
       .then(() => {
-        maLogger.log('工具执行完成:', tool.id)
+        maLogger.log('工具执行完成:', tool.id);
       })
       .catch((error) => {
-        maLogger.error('工具执行失败:', error)
-      })
+        maLogger.error('工具执行失败:', error);
+      });
   } else {
-    maLogger.log('handler不存在:', { hasText: !!initialText, hasHandler: !!tool.handler, isFunction: typeof tool.handler === 'function' })
+    maLogger.log('handler不存在:', { hasText: !!initialText, hasHandler: !!tool.handler, isFunction: typeof tool.handler === 'function' });
   }
-}
+};
 
 onUnmounted(() => {
   componentManager.unregister('TextSelectionToolbar');
-})
+});
 </script>
 
 <style scoped lang="scss">

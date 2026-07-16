@@ -8,12 +8,12 @@
  */
 
 export interface ImageInfo {
-  src: string
-  alt: string
-  loaded?: boolean
-  isBase64: boolean
-  name?: string
-  element?: HTMLElement | Element
+  src: string;
+  alt: string;
+  loaded?: boolean;
+  isBase64: boolean;
+  name?: string;
+  element?: HTMLElement | Element;
 }
 
 export interface StyleObject {
@@ -35,20 +35,18 @@ export interface ElemOpts {
   eventlistener?: EventListenerObject;
   children?: (HTMLElement | ElemOpts)[];
   [key: string]: any;
-};
+}
 
-export interface CreateElemOpts extends ElemOpts {
-
-};
+export interface CreateElemOpts extends ElemOpts {}
 
 export interface CloneElemOpts extends ElemOpts {
-  deep: boolean,
+  deep: boolean;
   el: HTMLElement;
-};
+}
 
 export interface AddElemOpts extends ElemOpts {
   autoRemoveDelay?: number;
-};
+}
 
 /**
  * 过滤函数类型定义
@@ -107,9 +105,9 @@ export type DEBUGER = {
 };
 
 /*
-     * 对XMLHttpRequest进行修改
-     * 支持动态配置规则，通过content script注入和通信
-     */
+ * 对XMLHttpRequest进行修改
+ * 支持动态配置规则，通过content script注入和通信
+ */
 // 定义类型
 export type XhrRequest = {
   method: string;
@@ -159,12 +157,15 @@ export interface AppModule {
   disable(): void;
 }
 
-export type AddElementFunc = (byElement?: HTMLElement, position?: string) => void
+export type AddElementFunc = (
+  byElement?: HTMLElement,
+  position?: string,
+) => void;
 
 // 定位相关类型定义
-export type PositionStrategy = 'top' | 'bottom' | 'left' | 'right' | 'center';
-export type Alignment = 'start' | 'center' | 'end';
-export type PositionContext = 'viewport' | 'document' | 'parent';
+export type PositionStrategy = "top" | "bottom" | "left" | "right" | "center";
+export type Alignment = "start" | "center" | "end";
+export type PositionContext = "viewport" | "document" | "parent";
 
 export interface Offset {
   x: number;
@@ -234,4 +235,4 @@ export interface ElementPositionInfo {
   }): HTMLElement;
 
   positionElement(options: PositionOptions): PositionResult;
-} 
+}

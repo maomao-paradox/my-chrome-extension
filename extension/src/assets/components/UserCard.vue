@@ -2,11 +2,11 @@
 <template>
     <div class="el-item-card">
         <div class="card-chunk">
-            <input :disabled="!isEditing" v-model="realname" @change="updateUsername" />
+            <input v-model="realname" :disabled="!isEditing" @change="updateUsername" />
         </div>
         <div v-show="isEditing" class="card-chunk">
-            <input placeholder="请输入用户名" v-model="newUsername" />
-            <input placeholder="请输入密码" v-model="password" />
+            <input v-model="newUsername" placeholder="请输入用户名" />
+            <input v-model="password" placeholder="请输入密码" />
         </div>
         <div v-show="isEditing" class="card-chunk">
             <select v-model="role">
@@ -61,7 +61,7 @@ const realname = ref(props.userInfo.realname || '');
 const password = ref(props.userInfo.password || '');
 const role = ref(props.userInfo.role || '');
 const newUsername = ref(props.username);
-const enabled = ref(props.userInfo.enabled !== undefined && props.userInfo.enabled !== null && typeof props.userInfo.enabled === "boolean" ? props.userInfo.enabled : true);
+const enabled = ref(props.userInfo.enabled !== undefined && props.userInfo.enabled !== null && typeof props.userInfo.enabled === 'boolean' ? props.userInfo.enabled : true);
 const showDeleteButton = ref(true);
 const showEditButton = ref(true);
 const isEditing = ref(false);
@@ -70,62 +70,62 @@ const showCancelButton = ref(false);
 
 // 监听props变化，更新本地数据
 watch(() => props.userInfo, (newUserInfo) => {
-    realname.value = newUserInfo.realname || '';
-    password.value = newUserInfo.password || '';
-    role.value = newUserInfo.role || '';
-    enabled.value = newUserInfo.enabled !== undefined && newUserInfo.enabled !== null && typeof newUserInfo.enabled === "boolean" ? newUserInfo.enabled : true;
+  realname.value = newUserInfo.realname || '';
+  password.value = newUserInfo.password || '';
+  role.value = newUserInfo.role || '';
+  enabled.value = newUserInfo.enabled !== undefined && newUserInfo.enabled !== null && typeof newUserInfo.enabled === 'boolean' ? newUserInfo.enabled : true;
 }, { deep: true });
 
 watch(() => props.username, (newUsernameValue) => {
-    newUsername.value = newUsernameValue;
+  newUsername.value = newUsernameValue;
 });
 
 // 方法
 async function updateUsername() {
-    chrome.runtime.sendMessage({
-        action: "getPinyin",
-        data: realname.value
-    }, (response) => {
-        if (response && response.success) {
-            newUsername.value = response.data;
-        } else {
-            maLogger.error("获取拼音失败:", response);
-        }
-    });
+  chrome.runtime.sendMessage({
+    action: 'getPinyin',
+    data: realname.value
+  }, (response) => {
+    if (response && response.success) {
+      newUsername.value = response.data;
+    } else {
+      maLogger.error('获取拼音失败:', response);
+    }
+  });
 }
 
 function editItem() {
-    isEditing.value = true;
-    showSaveButton.value = true;
-    showCancelButton.value = true;
-    showEditButton.value = false;
-    showDeleteButton.value = false;
+  isEditing.value = true;
+  showSaveButton.value = true;
+  showCancelButton.value = true;
+  showEditButton.value = false;
+  showDeleteButton.value = false;
 }
 
 function deleteItem() {
-    emit('delete', props.username);
+  emit('delete', props.username);
 }
 
 function save() {
-    emit('save', props.username, newUsername.value, {
-        "realname": realname.value,
-        "password": password.value,
-        "role": role.value,
-        "enabled": enabled.value,
-    });
-    isEditing.value = false;
-    showSaveButton.value = false;
-    showCancelButton.value = false;
-    showEditButton.value = true;
-    showDeleteButton.value = true;
+  emit('save', props.username, newUsername.value, {
+    'realname': realname.value,
+    'password': password.value,
+    'role': role.value,
+    'enabled': enabled.value
+  });
+  isEditing.value = false;
+  showSaveButton.value = false;
+  showCancelButton.value = false;
+  showEditButton.value = true;
+  showDeleteButton.value = true;
 }
 
 function cancel() {
-    isEditing.value = false;
-    showSaveButton.value = false;
-    showCancelButton.value = false;
-    showEditButton.value = true;
-    showDeleteButton.value = true;
+  isEditing.value = false;
+  showSaveButton.value = false;
+  showCancelButton.value = false;
+  showEditButton.value = true;
+  showDeleteButton.value = true;
 }
 </script>
 

@@ -4,8 +4,8 @@
     <div class="feature-grid">
       <div 
         class="feature-card" 
-        @click="toggleContentEditable"
         :class="{ active: isContentEditable }"
+        @click="toggleContentEditable"
       >
         <h3><span class="feature-icon">✏️</span>{{ isContentEditable ? '禁用内容编辑' : '网页内容编辑' }}</h3>
         <p>开启后可以直接编辑当前网页的文本内容，类似编辑Word文档</p>

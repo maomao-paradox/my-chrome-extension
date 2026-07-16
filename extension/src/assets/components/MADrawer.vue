@@ -7,12 +7,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
 interface DrawerProps {
   visible?: boolean
   title?: string
-  direction?: "rtl" | "ltr" | "ttb" | "btt"
+  direction?: 'rtl' | 'ltr' | 'ttb' | 'btt'
   resizable?: boolean
   modal?: boolean
   closeOnClickModal?: boolean
@@ -30,27 +30,27 @@ const props = withDefaults(defineProps<DrawerProps>(), {
   closeOnClickModal: true,
   customClass: '',
   overlayClass: ''
-})
+});
 
 // Emits定义
 const emit = defineEmits<{
   'update:visible': [value: boolean]
   'close': []
   'closed': []
-}>()
+}>();
 
 // 响应式数据
 const visible = computed({
   get: () => props.visible,
   set: (value: boolean) => {
-    emit('update:visible', value)
+    emit('update:visible', value);
   }
-})
+});
 
 // 处理关闭事件
 const handleClose = () => {
-  emit('closed')
-}
+  emit('closed');
+};
 </script>
 
 <style scoped>

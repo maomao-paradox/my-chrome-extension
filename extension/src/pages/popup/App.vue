@@ -70,21 +70,21 @@ const tabs = [
     label: '锚点',
     hint: '管理片段书签，快速回到对应页面。',
     icon: IconBookmark,
-    tabPage: BookmarkPage,
+    tabPage: BookmarkPage
   },
   {
     key: 'capture',
     label: '捕获',
     hint: '从当前页面拾取组件，结果同步到开发者工具。',
     icon: IconCapture,
-    tabPage: CapturePage,
+    tabPage: CapturePage
   },
   {
     key: 'tokens',
     label: '令牌',
     hint: '查看后端生成的动态验证码。',
     icon: IconTime,
-    tabPage: TOTPTokenPage,
+    tabPage: TOTPTokenPage
   },
   // {
   //   key: 'accessibility',
@@ -98,8 +98,8 @@ const tabs = [
     label: '设置',
     hint: '管理内容脚本与插件默认打开方式。',
     icon: IconSetting,
-    tabPage: SettingPage,
-  },
+    tabPage: SettingPage
+  }
 ] as const;
 
 type TabKey = (typeof tabs)[number]['key'];

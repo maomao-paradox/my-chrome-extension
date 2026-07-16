@@ -24,10 +24,10 @@
     </div>
 
     <div class="button-group">
-        <button class="btn-primary" @click="extractAccessibilityTree" :disabled="isLoading">
+        <button class="btn-primary" :disabled="isLoading" @click="extractAccessibilityTree">
             {{ isLoading ? '提取中...' : '提取无障碍树' }}
         </button>
-        <button class="btn-secondary" @click="copyMarkdown" :disabled="!canCopy || copySuccess">
+        <button class="btn-secondary" :disabled="!canCopy || copySuccess" @click="copyMarkdown">
             {{ copySuccess ? '已复制' : '复制 Markdown' }}
         </button>
     </div>
@@ -64,10 +64,10 @@ interface AccessibilityData {
 
 const currentUrl = ref('加载中...');
 const stats = ref<AccessibilityStats>({
-    totalNodes: 0,
-    interactiveCount: 0,
-    buttonsCount: 0,
-    linksCount: 0
+  totalNodes: 0,
+  interactiveCount: 0,
+  buttonsCount: 0,
+  linksCount: 0
 });
 const showStats = ref(false);
 const currentData = ref<AccessibilityData | null>(null);
@@ -79,74 +79,74 @@ const copySuccess = ref(false);
 const canCopy = computed(() => !!markdown.value);
 
 async function displayUrl() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    currentUrl.value = tab.url || '无法获取URL';
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  currentUrl.value = tab.url || '无法获取URL';
 }
 
 async function extractAccessibilityTree() {
-    isLoading.value = true;
-    error.value = '';
-    markdown.value = '';
-    showStats.value = false;
+  isLoading.value = true;
+  error.value = '';
+  markdown.value = '';
+  showStats.value = false;
 
-    try {
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (!tabs[0]?.id) {
-            throw new Error('无法获取当前标签页');
-        }
-
-        chrome.tabs.sendMessage(tabs[0].id, {
-            type: 'extractAccessibilityTree',
-            target: 'content',
-            payload: { maxDepth: 8, includeHidden: false, simplify: true }
-        }, (response: any) => {
-            if (chrome.runtime.lastError) {
-                maLogger.error('发送消息失败:', chrome.runtime.lastError.message);
-                error.value = '无法连接到页面，请刷新页面后重试。';
-                isLoading.value = false;
-                return;
-            }
-
-            if (response && response.success) {
-                currentData.value = response.data;
-                stats.value = response.data.stats;
-                markdown.value = response.data.markdown;
-                showStats.value = true;
-            } else {
-                error.value = `错误: ${response?.error || '提取失败'}`;
-            }
-            isLoading.value = false;
-        });
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        maLogger.error('提取失败:', errorMessage);
-
-        if (errorMessage.includes('Could not establish connection')) {
-            error.value = '无法连接到页面，请刷新页面后重试。';
-        } else {
-            error.value = `错误: ${errorMessage}`;
-        }
-        isLoading.value = false;
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tabs[0]?.id) {
+      throw new Error('无法获取当前标签页');
     }
+
+    chrome.tabs.sendMessage(tabs[0].id, {
+      type: 'extractAccessibilityTree',
+      target: 'content',
+      payload: { maxDepth: 8, includeHidden: false, simplify: true }
+    }, (response: any) => {
+      if (chrome.runtime.lastError) {
+        maLogger.error('发送消息失败:', chrome.runtime.lastError.message);
+        error.value = '无法连接到页面，请刷新页面后重试。';
+        isLoading.value = false;
+        return;
+      }
+
+      if (response && response.success) {
+        currentData.value = response.data;
+        stats.value = response.data.stats;
+        markdown.value = response.data.markdown;
+        showStats.value = true;
+      } else {
+        error.value = `错误: ${response?.error || '提取失败'}`;
+      }
+      isLoading.value = false;
+    });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    maLogger.error('提取失败:', errorMessage);
+
+    if (errorMessage.includes('Could not establish connection')) {
+      error.value = '无法连接到页面，请刷新页面后重试。';
+    } else {
+      error.value = `错误: ${errorMessage}`;
+    }
+    isLoading.value = false;
+  }
 }
 
 async function copyMarkdown() {
-    if (!markdown.value) return;
+  if (!markdown.value) {return;}
 
-    try {
-        await navigator.clipboard.writeText(markdown.value);
-        copySuccess.value = true;
-        setTimeout(() => {
-            copySuccess.value = false;
-        }, 2000);
-    } catch (err) {
-        maLogger.error('复制失败:', err);
-        error.value = '复制失败，请手动复制';
-    }
+  try {
+    await navigator.clipboard.writeText(markdown.value);
+    copySuccess.value = true;
+    setTimeout(() => {
+      copySuccess.value = false;
+    }, 2000);
+  } catch (err) {
+    maLogger.error('复制失败:', err);
+    error.value = '复制失败，请手动复制';
+  }
 }
 
 onMounted(() => {
-    displayUrl();
+  displayUrl();
 });
 </script>
 

@@ -8,7 +8,7 @@
 				</div>
 			</template>
 			<div class='menu'>
-				<div class='share' id='ss_toggle' ref='toggleRef' data-rot='180'>
+				<div id='ss_toggle' ref='toggleRef' class='share' data-rot='180'>
 					<div class='circle'></div>
 					<div class='bar'></div>
 				</div>
@@ -20,11 +20,11 @@
 </template>
 
 <script setup lang="ts">
-import { Tool } from '@/types'
-import { onMounted, ref } from 'vue'
-import { toolIcon } from '@/assets/icons'
+import { Tool } from '@/types';
+import { onMounted, ref } from 'vue';
+import { toolIcon } from '@/assets/icons';
 import { sendMessageToBackground, showSuccessMessage } from '@/utils';
-import AutoClick from './tools/AutoClick.vue'
+import AutoClick from './tools/AutoClick.vue';
 
 interface MenuProps {
 	visible: boolean;
@@ -34,7 +34,7 @@ interface MenuProps {
 const props = defineProps<MenuProps>();
 
 // 限定长度最多为4个
-const localTools = ref<Tool[]>([...props.tools!].slice(0, 4))
+const localTools = ref<Tool[]>([...props.tools!].slice(0, 4));
 
 const menuRef = ref<HTMLDivElement>();
 const toggleRef = ref<HTMLDivElement>();
@@ -46,92 +46,92 @@ const autoClickVisible = ref<boolean>(false);
 const emit = defineEmits(['toolClick']);
 
 const handleToolClick = (toolId: string) => {
-	maLogger.log(toolId);
-	if (toolId === 'autoClick') {
-		autoClickVisible.value = !autoClickVisible.value;
-		return;
-	}
+  maLogger.log(toolId);
+  if (toolId === 'autoClick') {
+    autoClickVisible.value = !autoClickVisible.value;
+    return;
+  }
 
-	// sendMessageToBackground({
-	// 	type: 'CREATE_TAB_WITH_SCRIPT',
-	// 	payload: {
-	// 		url: 'https://baidu.com',
-	// 		scriptPath: 'js/runtime/test.js'
-	// 	}
-	// });
-	// emit('toolClick', toolId);
-}
+  // sendMessageToBackground({
+  // 	type: 'CREATE_TAB_WITH_SCRIPT',
+  // 	payload: {
+  // 		url: 'https://baidu.com',
+  // 		scriptPath: 'js/runtime/test.js'
+  // 	}
+  // });
+  // emit('toolClick', toolId);
+};
 const toggleMenu = () => {
-	if (!menuRef.value || !toggleRef.value) {
-		return;
-	}
-	// 获取DOM元素 (对应jQuery选择器)
-	maLogger.log(menuRef.value);
-	// 获取所有需要添加/移除 ss_animate 的 i 元素
-	var iconElements = menuRef.value.querySelectorAll('.tool-item-icon');
+  if (!menuRef.value || !toggleRef.value) {
+    return;
+  }
+  // 获取DOM元素 (对应jQuery选择器)
+  maLogger.log(menuRef.value);
+  // 获取所有需要添加/移除 ss_animate 的 i 元素
+  const iconElements = menuRef.value.querySelectorAll('.tool-item-icon');
 
-	// 初始化旋转角度 (从 data-rot 读取)
-	var rot = parseInt(toggleRef.value.getAttribute('data-rot')!) || 0;
+  // 初始化旋转角度 (从 data-rot 读取)
+  let rot = parseInt(toggleRef.value.getAttribute('data-rot')!) || 0;
 
-	// ----- 点击事件处理 -----
-	toggleRef.value.addEventListener('click', function (ev) {
-		count.value++;
-		// 在10次，20次，30次，40次，50次，60次，70次，80次，90次，100次时，提示成就
-		if (count.value >= 10 && count.value % 10 === 0) {
-			showSuccessMessage(`达成成就：点击菜单${count.value}次`);
-			count.value = 0;
-		}
-		// 1. 更新旋转角度 (每次减180)
-		if (rot == 180) {
-			flag.value = -1;
-		} else if (rot == -180) {
-			flag.value = 1;
-		}
-		rot += flag.value * 180;
+  // ----- 点击事件处理 -----
+  toggleRef.value.addEventListener('click', function (ev) {
+    count.value++;
+    // 在10次，20次，30次，40次，50次，60次，70次，80次，90次，100次时，提示成就
+    if (count.value >= 10 && count.value % 10 === 0) {
+      showSuccessMessage(`达成成就：点击菜单${count.value}次`);
+      count.value = 0;
+    }
+    // 1. 更新旋转角度 (每次减180)
+    if (rot == 180) {
+      flag.value = -1;
+    } else if (rot == -180) {
+      flag.value = 1;
+    }
+    rot += flag.value * 180;
 		// 2. 应用旋转到 menu (加单位deg)
 		menuRef.value!.style.transform = 'rotate(' + rot + 'deg)';
 		// 兼容旧版webkit (非必须, 但保留原逻辑)
 		menuRef.value!.style.webkitTransform = 'rotate(' + rot + 'deg)';
 
 		// 3. 根据旋转角度判断奇偶 (rot/180 % 2 == 0 为偶数)
-		var isEven = (rot / 180) % 2 === 0;
+		const isEven = (rot / 180) % 2 === 0;
 
 		// 获取父容器 (toggle.parentElement)
-		var parent = toggleRef.value!.parentElement!;
+		const parent = toggleRef.value!.parentElement!;
 
 		if (isEven) {
-			// 偶数: 添加 ss_active 和 close 类
-			parent.classList.add('ss_active');
+		  // 偶数: 添加 ss_active 和 close 类
+		  parent.classList.add('ss_active');
 			toggleRef.value!.classList.add('close');
 		} else {
-			// 奇数: 移除 ss_active 和 close 类
-			parent.classList.remove('ss_active');
+		  // 奇数: 移除 ss_active 和 close 类
+		  parent.classList.remove('ss_active');
 			toggleRef.value!.classList.remove('close');
 		}
 
 		// 4. 将旋转角度保存回 data-rot (使用 setAttribute)
 		toggleRef.value!.setAttribute('data-rot', rot.toString());
-	});
+  });
 
-	// ----- transitionend 事件处理 (监听菜单旋转结束) -----
-	function onTransitionEnd(ev: TransitionEvent) {
-		// 只处理 transform 属性的过渡结束 (避免其他属性触发)
-		if (ev.propertyName && ev.propertyName !== 'transform' && ev.propertyName !== '-webkit-transform') {
-			return;
-		}
+  // ----- transitionend 事件处理 (监听菜单旋转结束) -----
+  function onTransitionEnd(ev: TransitionEvent) {
+    // 只处理 transform 属性的过渡结束 (避免其他属性触发)
+    if (ev.propertyName && ev.propertyName !== 'transform' && ev.propertyName !== '-webkit-transform') {
+      return;
+    }
 
-		// 再次判断奇偶 (与点击逻辑一致)
-		var isEven = (rot / 180) % 2 === 0;
+    // 再次判断奇偶 (与点击逻辑一致)
+    const isEven = (rot / 180) % 2 === 0;
 
-		// 遍历所有 i 元素 添加/移除 ss_animate 类
-		for (var i = 0; i < iconElements.length; i++) {
-			if (isEven) {
-				iconElements[i].classList.add('ss_animate');
-			} else {
-				iconElements[i].classList.remove('ss_animate');
-			}
-		}
-	}
+    // 遍历所有 i 元素 添加/移除 ss_animate 类
+    for (let i = 0; i < iconElements.length; i++) {
+      if (isEven) {
+        iconElements[i].classList.add('ss_animate');
+      } else {
+        iconElements[i].classList.remove('ss_animate');
+      }
+    }
+  }
 	// 绑定 transitionend 事件 (兼容不同前缀)
 	menuRef.value!.addEventListener('transitionend', onTransitionEnd);
 	//@ts-ignore
@@ -141,7 +141,7 @@ const toggleMenu = () => {
 };
 
 onMounted(() => {
-	toggleMenu();
+  toggleMenu();
 });
 
 </script>

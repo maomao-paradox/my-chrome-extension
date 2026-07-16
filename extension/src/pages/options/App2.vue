@@ -29,7 +29,7 @@ const { performanceLevel, isHighPerformance } = useOptionsPerformance();
 const PERFORMANCE_BODY_CLASSES = [
   'options-performance-low',
   'options-performance-medium',
-  'options-performance-high',
+  'options-performance-high'
 ] as const;
 
 const performanceClass = computed(() => `options-performance-${performanceLevel.value}`);

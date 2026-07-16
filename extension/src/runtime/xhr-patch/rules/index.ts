@@ -9,11 +9,11 @@
 
 import { type XhrRulesMap } from '@/types';
 import { rules as mriaRules } from './mria';
-import {rules as qaproRules } from './qapro'
+import {rules as qaproRules } from './qapro';
 
 const rules: Record<string, XhrRulesMap> = {
-    mria: mriaRules,
-    qapro: qaproRules,
+  mria: mriaRules,
+  qapro: qaproRules
 };
 
 export default rules;

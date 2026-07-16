@@ -44,7 +44,7 @@ export const DEFAULT_MONITOR_CONFIG: MonitorConfig = {
   captureConsoleError: false,
   maxScreenshotSize: 2,
   maxReconnectAttempts: 5,
-  reconnectBaseInterval: 1000,
+  reconnectBaseInterval: 1000
 };
 
 /** 配置验证结果 */
@@ -94,7 +94,7 @@ export const MonitorConfigUtils = {
 
     return {
       valid: errors.length === 0,
-      errors,
+      errors
     };
   },
 
@@ -168,7 +168,7 @@ export const MonitorConfigUtils = {
       config.webhookUrl,
       config.webhook,
       config.wsUrl,
-      config.socket,
+      config.socket
     ].find((value): value is string => typeof value === 'string' && value.trim().length > 0)?.trim() || '';
 
     return {
@@ -187,7 +187,7 @@ export const MonitorConfigUtils = {
       captureConsoleError: typeof config.captureConsoleError === 'boolean' ? config.captureConsoleError : DEFAULT_MONITOR_CONFIG.captureConsoleError,
       maxScreenshotSize: typeof config.maxScreenshotSize === 'number' ? config.maxScreenshotSize : DEFAULT_MONITOR_CONFIG.maxScreenshotSize,
       maxReconnectAttempts: typeof config.maxReconnectAttempts === 'number' ? config.maxReconnectAttempts : DEFAULT_MONITOR_CONFIG.maxReconnectAttempts,
-      reconnectBaseInterval: typeof config.reconnectBaseInterval === 'number' ? config.reconnectBaseInterval : DEFAULT_MONITOR_CONFIG.reconnectBaseInterval,
+      reconnectBaseInterval: typeof config.reconnectBaseInterval === 'number' ? config.reconnectBaseInterval : DEFAULT_MONITOR_CONFIG.reconnectBaseInterval
     };
   },
 
@@ -201,5 +201,5 @@ export const MonitorConfigUtils = {
     } catch {
       return '';
     }
-  },
+  }
 };

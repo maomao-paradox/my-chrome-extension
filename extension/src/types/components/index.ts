@@ -18,7 +18,7 @@ export interface Rule {
 export interface Tool {
   id: string;
   label: string;
-  icon?: any;
+  icon?: string | any;
   image?: string;
   details?: string;
   color?: string;
@@ -34,12 +34,12 @@ export interface ConfigItem {
   id?: string;
   value: boolean;
   desc: string;
-  type?: "dialog" | "sidepanel";
+  type?: 'dialog' | 'sidepanel';
   [key: string]: any;
 }
 
 // 1. 定义插件类型枚举
-type PluginType = "sidebar" | "toolbar" | "effect" | "menu" | "floating";
+type PluginType = 'sidebar' | 'toolbar' | 'effect' | 'menu' | 'floating';
 
 // 2. 基础配置
 interface BasePluginConfig {
@@ -52,7 +52,7 @@ interface BasePluginConfig {
 
 // 3. 各插件特有配置
 interface ToolbarPluginConfig extends BasePluginConfig {
-  type: "toolbar";
+  type: 'toolbar';
   options: {
     brandColor: string;
   };

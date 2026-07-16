@@ -14,11 +14,11 @@
                     {{ rule.urlPattern }}
                 </div>
                 <div class="rule-actions">
-                    <button @click="toggle(rule.id)" :title="rule.enabled ? '停用规则' : '启用规则'">
+                    <button :title="rule.enabled ? '停用规则' : '启用规则'" @click="toggle(rule.id)">
                         {{ rule.enabled ? '⏸️' : '▶️' }}
                     </button>
-                    <button @click="edit(rule)" title="编辑规则">✏️</button>
-                    <button @click="del(rule.id)" title="删除规则">🗑️</button>
+                    <button title="编辑规则" @click="edit(rule)">✏️</button>
+                    <button title="删除规则" @click="del(rule.id)">🗑️</button>
                 </div>
             </div>
 
@@ -37,21 +37,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Rule } from '@/types/index'
+import { ref } from 'vue';
+import { Rule } from '@/types/index';
 
 interface RuleProps {
     rules: Rule[]
 }
 
-const props = defineProps<RuleProps>()
-const rules = ref(props.rules)
+const props = defineProps<RuleProps>();
+const rules = ref(props.rules);
 
-const emit = defineEmits(['toggle', 'edit', 'delete'])
+const emit = defineEmits(['toggle', 'edit', 'delete']);
 
-const toggle = (id: number) => emit('toggle', id)
-const edit = (rule: Rule) => emit('edit', rule)
-const del = (id: number) => emit('delete', id)
+const toggle = (id: number) => emit('toggle', id);
+const edit = (rule: Rule) => emit('edit', rule);
+const del = (id: number) => emit('delete', id);
 </script>
 
 <style scoped>

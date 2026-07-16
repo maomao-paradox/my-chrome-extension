@@ -1,7 +1,7 @@
 <template>
   <div class="mcp-dialog">
     <!-- 对话历史 -->
-    <div class="dialog-history" ref="historyRef">
+    <div ref="historyRef" class="dialog-history">
       <div v-for="(item, index) in conversationHistory" :key="index" :class="['message-item', item.role]">
         <div class="message-avatar">
           {{ item.role === 'user' ? '👤' : '🤖' }}
@@ -31,7 +31,7 @@
       <el-input v-model="inputMessage" type="textarea" :rows="2" placeholder="请输入您想要执行的操作，例如：点击页面右上角的登录按钮" resize="none"
         @keyup.enter.native="handleSend" />
       <div class="input-actions">
-        <el-button type="primary" @click="handleSend" :disabled="!inputMessage.trim() || loading">
+        <el-button type="primary" :disabled="!inputMessage.trim() || loading" @click="handleSend">
           发送
         </el-button>
         <el-button @click="handleClear">清空</el-button>
@@ -89,7 +89,7 @@ function scrollToBottom() {
 // 处理发送消息
 async function handleSend() {
   const message = inputMessage.value.trim();
-  if (!message || loading.value) return;
+  if (!message || loading.value) {return;}
 
   // 添加用户消息到历史记录
   const userItem: ConversationItem = {

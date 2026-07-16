@@ -296,7 +296,7 @@ import {
   Plus,
   RefreshLeft,
   ZoomIn,
-  ZoomOut,
+  ZoomOut
 } from '@element-plus/icons-vue';
 
 type NodeCategory = 'foundation' | 'frontend' | 'backend' | 'ai' | 'product' | 'operations';
@@ -350,13 +350,13 @@ const categoryMeta: Record<NodeCategory, { label: string; code: string; color: s
   backend: { label: '后端服务', code: 'BE', color: '#7af7d0', surface: 'rgba(122, 247, 208, 0.17)' },
   ai: { label: 'AI 协作', code: 'AI', color: '#b9a1ff', surface: 'rgba(185, 161, 255, 0.17)' },
   product: { label: '产品思维', code: 'PD', color: '#ffcf6b', surface: 'rgba(255, 207, 107, 0.16)' },
-  operations: { label: '工程运维', code: 'OPS', color: '#ff8f70', surface: 'rgba(255, 143, 112, 0.16)' },
+  operations: { label: '工程运维', code: 'OPS', color: '#ff8f70', surface: 'rgba(255, 143, 112, 0.16)' }
 };
 
 const statusMeta: Record<NodeStatus, { label: string; weight: number }> = {
   learning: { label: '学习中', weight: 0.35 },
   active: { label: '实践中', weight: 0.7 },
-  mastered: { label: '已掌握', weight: 1 },
+  mastered: { label: '已掌握', weight: 1 }
 };
 
 const defaultNodes = (): KnowledgeNode[] => [
@@ -369,7 +369,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '所有能力、经验和知识条目的根节点。',
     x: 0,
     y: 0,
-    parentId: null,
+    parentId: null
   },
   {
     id: 'frontend-core',
@@ -380,7 +380,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: 'Vue、状态管理、构建链路和组件设计。',
     x: -260,
     y: -140,
-    parentId: ROOT_NODE_ID,
+    parentId: ROOT_NODE_ID
   },
   {
     id: 'backend-core',
@@ -391,7 +391,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '接口设计、鉴权、数据建模和任务队列。',
     x: 270,
     y: -130,
-    parentId: ROOT_NODE_ID,
+    parentId: ROOT_NODE_ID
   },
   {
     id: 'ai-workflow',
@@ -402,7 +402,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '提示词、Agent 协同、评估和自动化。',
     x: 10,
     y: -250,
-    parentId: ROOT_NODE_ID,
+    parentId: ROOT_NODE_ID
   },
   {
     id: 'product-sense',
@@ -413,7 +413,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '需求拆解、优先级、信息架构和验收标准。',
     x: -230,
     y: 180,
-    parentId: ROOT_NODE_ID,
+    parentId: ROOT_NODE_ID
   },
   {
     id: 'ops-quality',
@@ -424,7 +424,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '日志、监控、发布、回滚和性能预算。',
     x: 250,
     y: 185,
-    parentId: ROOT_NODE_ID,
+    parentId: ROOT_NODE_ID
   },
   {
     id: 'vue-system',
@@ -435,7 +435,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '组合式 API、可复用组件和样式边界。',
     x: -430,
     y: -270,
-    parentId: 'frontend-core',
+    parentId: 'frontend-core'
   },
   {
     id: 'interaction-design',
@@ -446,7 +446,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '复杂工具页面的状态、反馈和可访问性。',
     x: -470,
     y: -60,
-    parentId: 'frontend-core',
+    parentId: 'frontend-core'
   },
   {
     id: 'api-contract',
@@ -457,7 +457,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '请求响应结构、错误模型和版本兼容。',
     x: 430,
     y: -250,
-    parentId: 'backend-core',
+    parentId: 'backend-core'
   },
   {
     id: 'prompt-eval',
@@ -468,7 +468,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '任务拆分、输出约束、回归样例和人工复核。',
     x: 150,
     y: -410,
-    parentId: 'ai-workflow',
+    parentId: 'ai-workflow'
   },
   {
     id: 'research-notes',
@@ -479,7 +479,7 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '把零散输入沉淀为可复用知识条目。',
     x: -390,
     y: 330,
-    parentId: 'product-sense',
+    parentId: 'product-sense'
   },
   {
     id: 'release-loop',
@@ -490,8 +490,8 @@ const defaultNodes = (): KnowledgeNode[] => [
     notes: '构建、冒烟、风险记录和发布后观察。',
     x: 420,
     y: 330,
-    parentId: 'ops-quality',
-  },
+    parentId: 'ops-quality'
+  }
 ];
 
 const activeView = ref<ActiveView>('graph');
@@ -506,12 +506,12 @@ let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
 const categoryOptions = Object.entries(categoryMeta).map(([value, meta]) => ({
   value: value as NodeCategory,
-  label: meta.label,
+  label: meta.label
 }));
 
 const statusOptions = Object.entries(statusMeta).map(([value, meta]) => ({
   value: value as NodeStatus,
-  label: meta.label,
+  label: meta.label
 }));
 
 const nodesById = computed(() => {
@@ -534,7 +534,7 @@ const links = computed<NodeLink[]>(() => {
       acc.push({
         id: `${source.id}-${node.id}`,
         source,
-        target: node,
+        target: node
       });
     }
 
@@ -553,7 +553,7 @@ const matchedNodeIds = computed(() => {
       .filter((node) => {
         return `${node.title} ${node.notes} ${categoryMeta[node.category].label}`.toLowerCase().includes(query);
       })
-      .map((node) => node.id),
+      .map((node) => node.id)
   );
 });
 
@@ -579,7 +579,7 @@ const groupedNodes = computed(() => {
   return categoryOptions
     .map((option) => ({
       category: option.value,
-      nodes: nodes.value.filter((node) => node.category === option.value),
+      nodes: nodes.value.filter((node) => node.category === option.value)
     }))
     .filter((group) => group.nodes.length > 0);
 });
@@ -593,7 +593,7 @@ const graphMetrics = computed(() => {
     { label: '节点', value: String(nodes.value.length).padStart(2, '0') },
     { label: '实践中', value: String(active).padStart(2, '0') },
     { label: '已掌握', value: String(mastered).padStart(2, '0') },
-    { label: '均值', value: `${average}%` },
+    { label: '均值', value: `${average}%` }
   ];
 });
 
@@ -612,7 +612,7 @@ const clientToCanvasPoint = (event: PointerEvent | WheelEvent) => {
 
   return {
     x: ((event.clientX - rect.left) / rect.width) * CANVAS_WIDTH,
-    y: ((event.clientY - rect.top) / rect.height) * CANVAS_HEIGHT,
+    y: ((event.clientY - rect.top) / rect.height) * CANVAS_HEIGHT
   };
 };
 
@@ -620,7 +620,7 @@ const clientToGraphPoint = (event: PointerEvent | WheelEvent) => {
   const point = clientToCanvasPoint(event);
   return {
     x: (point.x - CANVAS_WIDTH / 2 - viewport.value.x) / viewport.value.scale,
-    y: (point.y - CANVAS_HEIGHT / 2 - viewport.value.y) / viewport.value.scale,
+    y: (point.y - CANVAS_HEIGHT / 2 - viewport.value.y) / viewport.value.scale
   };
 };
 
@@ -675,7 +675,7 @@ const loadGraph = () => {
 
   const storedViewport = safeParse<Partial<typeof viewport.value>>(
     window.localStorage.getItem(VIEWPORT_STORAGE_KEY),
-    {},
+    {}
   );
 
   if (
@@ -686,7 +686,7 @@ const loadGraph = () => {
     viewport.value = {
       x: storedViewport.x,
       y: storedViewport.y,
-      scale: clampScale(storedViewport.scale),
+      scale: clampScale(storedViewport.scale)
     };
   }
 
@@ -745,7 +745,7 @@ const addChildNode = (parentId: string) => {
     notes: '',
     x: parent.x + Math.cos(angle) * radius,
     y: parent.y + Math.sin(angle) * radius,
-    parentId: parent.id,
+    parentId: parent.id
   };
 
   nodes.value = [...nodes.value, nextNode];
@@ -802,8 +802,8 @@ const deleteNode = async (nodeId: string) => {
       {
         type: 'warning',
         confirmButtonText: '删除',
-        cancelButtonText: '取消',
-      },
+        cancelButtonText: '取消'
+      }
     );
   } catch {
     return;
@@ -824,7 +824,7 @@ const resetGraph = async () => {
     await ElMessageBox.confirm('恢复内置技能书示例会覆盖当前图谱。', '重置知识图谱', {
       type: 'warning',
       confirmButtonText: '重置',
-      cancelButtonText: '取消',
+      cancelButtonText: '取消'
     });
   } catch {
     return;
@@ -857,7 +857,7 @@ const zoomBy = (factor: number, anchor = { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT
   viewport.value = {
     x: anchor.x - CANVAS_WIDTH / 2 - graphX * nextScale,
     y: anchor.y - CANVAS_HEIGHT / 2 - graphY * nextScale,
-    scale: nextScale,
+    scale: nextScale
   };
   queuePersist();
 };
@@ -872,7 +872,7 @@ const startCanvasPan = (event: PointerEvent) => {
     mode: 'pan',
     pointerId: event.pointerId,
     lastCanvasX: point.x,
-    lastCanvasY: point.y,
+    lastCanvasY: point.y
   };
   canvasRef.value?.setPointerCapture(event.pointerId);
 };
@@ -885,7 +885,7 @@ const startNodeDrag = (event: PointerEvent, node: KnowledgeNode) => {
     pointerId: event.pointerId,
     nodeId: node.id,
     offsetX: point.x - node.x,
-    offsetY: point.y - node.y,
+    offsetY: point.y - node.y
   };
   canvasRef.value?.setPointerCapture(event.pointerId);
 };
@@ -901,12 +901,12 @@ const handleCanvasPointerMove = (event: PointerEvent) => {
     viewport.value = {
       ...viewport.value,
       x: viewport.value.x + point.x - gesture.lastCanvasX,
-      y: viewport.value.y + point.y - gesture.lastCanvasY,
+      y: viewport.value.y + point.y - gesture.lastCanvasY
     };
     dragState.value = {
       ...gesture,
       lastCanvasX: point.x,
-      lastCanvasY: point.y,
+      lastCanvasY: point.y
     };
     queuePersist();
     return;
@@ -965,7 +965,7 @@ onUnmounted(() => {
 defineExpose({
   ROOT_NODE_ID,
   categoryMeta,
-  statusMeta,
+  statusMeta
 });
 </script>
 

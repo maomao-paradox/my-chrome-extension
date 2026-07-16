@@ -43,7 +43,7 @@ export class CommentStorage {
       const newComment: Comment = {
         ...comment,
         id: generateId(),
-        timestamp: Date.now(),
+        timestamp: Date.now()
       };
       
       comments.push(newComment);
@@ -135,7 +135,7 @@ export class CommentStorage {
       comments[index] = {
         ...comments[index],
         ...updates,
-        timestamp: Date.now(),
+        timestamp: Date.now()
       };
       
       await storage.ext.local.set(COMMENT_STORAGE_KEY, comments);

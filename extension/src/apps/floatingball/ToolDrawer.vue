@@ -1,7 +1,7 @@
 <!-- MADrawer.vue -->
 <template>
     <!-- 右上角的消息弹窗通知中心 -->
-    <div class="notification-center" v-if="internalVisible">
+    <div v-if="internalVisible" class="notification-center">
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notification-badge" type="danger">
             <el-button circle size="default" class="notification-btn" @click="showNotifications = !showNotifications">
                 <template #icon><el-icon>
@@ -41,7 +41,7 @@
                         </div>
                         <div class="card-content">
                             <div class="card-title">{{ item.title }}</div>
-                            <div class="card-desc" v-if="item.message">{{ item.message }}</div>
+                            <div v-if="item.message" class="card-desc">{{ item.message }}</div>
                             <div class="card-time">{{ formatTime(item.timestamp) }}</div>
                         </div>
                     </div>
@@ -54,18 +54,18 @@
         :modal="modal" :close-on-click-modal="closeOnClickModal" :custom-class="drawerClass"
         :overlay-class="drawerOverlayClass" @closed="handleClosed">
         <div class="drawer-content-wrapper">
-            <component v-if="toolComponent" :is="toolComponent" @add-message="addNotification" />
+            <component :is="toolComponent" v-if="toolComponent" @add-message="addNotification" />
             <Static404 v-else />
         </div>
     </el-drawer>
 </template>
 
 <script setup lang="ts">
-import toolMap from "./views/index"
-import { computed, ref } from 'vue'
-import { Static404 } from '@components/index'
-import { Tool } from "@/types"
-import { Bell, CircleCheck, Warning, CircleClose, InfoFilled } from '@element-plus/icons-vue'
+import toolMap from './views/index';
+import { computed, ref } from 'vue';
+import { Static404 } from '@components/index';
+import { Tool } from '@/types';
+import { Bell, CircleCheck, Warning, CircleClose, InfoFilled } from '@element-plus/icons-vue';
 
 interface Notification {
     id?: number
@@ -76,42 +76,42 @@ interface Notification {
     timestamp: Date
 }
 
-const notifications = ref<Notification[]>([])
-const showNotifications = ref(false)
+const notifications = ref<Notification[]>([]);
+const showNotifications = ref(false);
 
-const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
+const unreadCount = computed(() => notifications.value.filter(n => !n.read).length);
 
 const addNotification = (opts: Partial<Notification> & { title: string }) => {
-    notifications.value.unshift({
-        title: opts.title,
-        message: opts.message,
-        type: opts.type || 'info',
-        read: false,
-        timestamp: new Date()
-    })
-}
+  notifications.value.unshift({
+    title: opts.title,
+    message: opts.message,
+    type: opts.type || 'info',
+    read: false,
+    timestamp: new Date()
+  });
+};
 
 const markAsRead = (idx: number) => {
-    if (notifications.value[idx]) notifications.value[idx].read = true
-}
+  if (notifications.value[idx]) {notifications.value[idx].read = true;}
+};
 
 const clearAllNotifications = () => {
-    notifications.value.forEach(n => n.read = true)
-}
+  notifications.value.forEach(n => n.read = true);
+};
 
 const formatTime = (date: Date) => {
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    if (diff < 60000) return '刚刚'
-    if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`
-    return date.toLocaleDateString()
-}
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  if (diff < 60000) {return '刚刚';}
+  if (diff < 3600000) {return `${Math.floor(diff / 60000)} 分钟前`;}
+  if (diff < 86400000) {return `${Math.floor(diff / 3600000)} 小时前`;}
+  return date.toLocaleDateString();
+};
 
 interface DrawerProps {
     visible?: boolean
     title?: string
-    direction?: "rtl" | "ltr" | "ttb" | "btt"
+    direction?: 'rtl' | 'ltr' | 'ttb' | 'btt'
     resizable?: boolean
     modal?: boolean
     closeOnClickModal?: boolean
@@ -125,65 +125,65 @@ interface DrawerProps {
 
 // Props定义
 const props = withDefaults(defineProps<DrawerProps>(), {
-    visible: false,
-    title: '',
-    direction: 'rtl',
-    resizable: false,
-    modal: true,
-    closeOnClickModal: true,
-    customClass: '',
-    overlayClass: '',
-    useMask: false,
-    activeTool: null
-})
+  visible: false,
+  title: '',
+  direction: 'rtl',
+  resizable: false,
+  modal: true,
+  closeOnClickModal: true,
+  customClass: '',
+  overlayClass: '',
+  useMask: false,
+  activeTool: null
+});
 
 const emit = defineEmits<{
     'update:visible': [value: boolean]
     'close-drawer': []
-}>()
+}>();
 
 // 内部可见性状态，用于双向绑定
 const internalVisible = computed({
-    get: () => props.visible,
-    set: (value: boolean) => {
-        emit('update:visible', value)
-        if (!value) {
-            emit('close-drawer')
-        }
+  get: () => props.visible,
+  set: (value: boolean) => {
+    emit('update:visible', value);
+    if (!value) {
+      emit('close-drawer');
     }
-})
+  }
+});
 
 // 抽屉标题
-const drawerTitle = computed(() => props.activeTool ? props.activeTool.label : props.title ?? "未命名的工具")
-const drawerClass = computed(() => ['mria-tool-drawer', props.customClass].filter(Boolean).join(' '))
-const drawerOverlayClass = computed(() => ['mria-tool-drawer-overlay', props.overlayClass].filter(Boolean).join(' '))
+const drawerTitle = computed(() => props.activeTool ? props.activeTool.label : props.title ?? '未命名的工具');
+const drawerClass = computed(() => ['mria-tool-drawer', props.customClass].filter(Boolean).join(' '));
+const drawerOverlayClass = computed(() => ['mria-tool-drawer-overlay', props.overlayClass].filter(Boolean).join(' '));
 
 // 处理抽屉关闭事件
 const handleClosed = () => {
-    emit('close-drawer')
-    emit('update:visible', false)
-}
+  emit('close-drawer');
+  emit('update:visible', false);
+};
 
 // 计算要显示的工具组件
 const toolComponent = computed(() => {
-    // 为 toolMap 添加类型定义
-    const typedToolMap: Record<string, any> = toolMap;
+  // 为 toolMap 添加类型定义
+  const typedToolMap: Record<string, any> = toolMap;
 
-    // 简化逻辑，提高可读性
-    if (!props.activeTool) {
-        return Static404;
-    }
+  // 简化逻辑，提高可读性
+  if (!props.activeTool) {
+    return Static404;
+  }
 
-    const toolId = props.activeTool.id;
-    return typedToolMap[toolId] || Static404;
-})
+  const toolId = props.activeTool.id;
+  return typedToolMap[toolId] || Static404;
+});
 
 // 如果需要暴露给模板的方法或数据
 defineExpose({
-    visible: internalVisible,
-    toolComponent,
-    addNotification, notifications, clearAllNotifications
-})
+  visible: internalVisible,
+  toolComponent,
+  addNotification, notifications, clearAllNotifications
+});
 </script>
 
 <style scoped>

@@ -83,7 +83,7 @@ const handleClose = () => {
 };
 
 const handleSave = () => {
-  if (!commentContent.value.trim()) return;
+  if (!commentContent.value.trim()) {return;}
   
   emit('save', {
     text: props.selectedText,

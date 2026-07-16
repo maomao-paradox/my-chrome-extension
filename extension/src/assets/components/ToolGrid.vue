@@ -15,8 +15,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import IconCommunity from '../icons/IconCommunity.vue'
+import { computed } from 'vue';
+import IconCommunity from '../icons/IconCommunity.vue';
 
 // 定义工具类型
 interface Tool {
@@ -30,22 +30,22 @@ const props = withDefaults(defineProps<{
   tools: Tool[]
 }>(), {
   tools: () => []
-})
+});
 
 // Emits定义
 const emit = defineEmits<{
   'click': [tool: Tool]
-}>()
+}>();
 
 // 获取工具图标
 const getToolIcon = (tool: Tool) => {
-  return tool.icon || IconCommunity
-}
+  return tool.icon || IconCommunity;
+};
 
 // 点击工具项
 const onClickTool = (tool: Tool) => {
-  emit('click', tool)
-}
+  emit('click', tool);
+};
 </script>
 
 <style scoped>

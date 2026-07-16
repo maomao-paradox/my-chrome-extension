@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import type { ExtMessage } from '@/types';
 import { useDomainState } from '../composables/useDomainState';
 import TableContainer from './TableContainer.vue';
@@ -106,7 +106,7 @@ const sendMessageToActiveContentScript = async (message: ExtMessage): Promise<an
 const checkContentScriptReady = async (): Promise<void> => {
   try {
     const response = await sendMessageToActiveContentScript({
-      type: 'POPUP_CAPTURE_HANDSHAKE',
+      type: 'POPUP_CAPTURE_HANDSHAKE'
     });
     isContentScriptReady.value = response?.success === true;
   } catch (error) {
@@ -122,7 +122,7 @@ const refreshCaptureStatus = async (): Promise<void> => {
   try {
     await Promise.allSettled([
       checkDomainStatus(),
-      checkContentScriptReady(),
+      checkContentScriptReady()
     ]);
   } finally {
     isCheckingSiteReadiness.value = false;
@@ -137,7 +137,7 @@ const triggerComponentCapture = async (): Promise<void> => {
   try {
     maLogger.log('从popup触发组件捕获...');
     const res = await sendMessageToActiveContentScript({
-      type: 'TRIGGER_COMPONENT_CAPTURE',
+      type: 'TRIGGER_COMPONENT_CAPTURE'
     });
     maLogger.log('组件捕获响应:', res);
     window.close();

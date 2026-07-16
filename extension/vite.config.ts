@@ -44,10 +44,10 @@ export default defineConfig({
         injectCss: false,
       },
     }),
-    removeConsole({
-      // 保留指定的 console 方法
-      external: ["error", "warn"], // 保留 console.error 和 console.warn
-    }),
+    // removeConsole({
+    //   // 保留指定的 console 方法
+    //   external: ["error", "warn"], // 保留 console.error 和 console.warn
+    // }),
     generateFileMapPlugin(),
     isEncryptEnabled ? encryptFileMapPlugin() : undefined,
   ].filter(Boolean) as any,

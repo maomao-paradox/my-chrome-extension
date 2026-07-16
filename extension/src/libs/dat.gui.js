@@ -1,70 +1,70 @@
 (function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["dat"] = factory();
-	else
-		root["dat"] = factory();
+  if(typeof exports === 'object' && typeof module === 'object')
+  {module.exports = factory();}
+  else if(typeof define === 'function' && define.amd)
+  {define([], factory);}
+  else if(typeof exports === 'object')
+  {exports['dat'] = factory();}
+  else
+  {root['dat'] = factory();}
 })(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
-/******/ 			return installedModules[moduleId].exports;
-/******/
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			exports: {},
-/******/ 			id: moduleId,
-/******/ 			loaded: false
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.loaded = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(0);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ function(module, exports, __webpack_require__) {
+  return /******/ (function(modules) { // webpackBootstrap
+    /******/ 	// The module cache
+    /******/ 	const installedModules = {};
+    /******/
+    /******/ 	// The require function
+    /******/ 	function __webpack_require__(moduleId) {
+      /******/
+      /******/ 		// Check if module is in cache
+      /******/ 		if(installedModules[moduleId])
+      /******/ 			{return installedModules[moduleId].exports;}
+      /******/
+      /******/ 		// Create a new module (and put it into the cache)
+      /******/ 		const module = installedModules[moduleId] = {
+        /******/ 			exports: {},
+        /******/ 			id: moduleId,
+        /******/ 			loaded: false
+        /******/ 		};
+      /******/
+      /******/ 		// Execute the module function
+      /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+      /******/
+      /******/ 		// Flag the module as loaded
+      /******/ 		module.loaded = true;
+      /******/
+      /******/ 		// Return the exports of the module
+      /******/ 		return module.exports;
+      /******/ 	}
+    /******/
+    /******/
+    /******/ 	// expose the modules object (__webpack_modules__)
+    /******/ 	__webpack_require__.m = modules;
+    /******/
+    /******/ 	// expose the module cache
+    /******/ 	__webpack_require__.c = installedModules;
+    /******/
+    /******/ 	// __webpack_public_path__
+    /******/ 	__webpack_require__.p = '';
+    /******/
+    /******/ 	// Load entry module and return exports
+    /******/ 	return __webpack_require__(0);
+    /******/ })
+  /************************************************************************/
+  /******/ ([
+    /* 0 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _index = __webpack_require__(1);
+      const _index = __webpack_require__(1);
 	
-	var _index2 = _interopRequireDefault(_index);
+      const _index2 = _interopRequireDefault(_index);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = _index2.default; /**
+      exports.default = _index2.default; /**
 	                                    * dat-gui JavaScript Controller Library
 	                                    * http://code.google.com/p/dat-gui
 	                                    *
@@ -77,75 +77,75 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                    * http://www.apache.org/licenses/LICENSE-2.0
 	                                    */
 
-	module.exports = exports['default'];
+      module.exports = exports['default'];
 
-/***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 1 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _Color = __webpack_require__(2);
+      const _Color = __webpack_require__(2);
 	
-	var _Color2 = _interopRequireDefault(_Color);
+      const _Color2 = _interopRequireDefault(_Color);
 	
-	var _math = __webpack_require__(6);
+      const _math = __webpack_require__(6);
 	
-	var _math2 = _interopRequireDefault(_math);
+      const _math2 = _interopRequireDefault(_math);
 	
-	var _interpret = __webpack_require__(3);
+      const _interpret = __webpack_require__(3);
 	
-	var _interpret2 = _interopRequireDefault(_interpret);
+      const _interpret2 = _interopRequireDefault(_interpret);
 	
-	var _Controller = __webpack_require__(7);
+      const _Controller = __webpack_require__(7);
 	
-	var _Controller2 = _interopRequireDefault(_Controller);
+      const _Controller2 = _interopRequireDefault(_Controller);
 	
-	var _BooleanController = __webpack_require__(8);
+      const _BooleanController = __webpack_require__(8);
 	
-	var _BooleanController2 = _interopRequireDefault(_BooleanController);
+      const _BooleanController2 = _interopRequireDefault(_BooleanController);
 	
-	var _OptionController = __webpack_require__(10);
+      const _OptionController = __webpack_require__(10);
 	
-	var _OptionController2 = _interopRequireDefault(_OptionController);
+      const _OptionController2 = _interopRequireDefault(_OptionController);
 	
-	var _StringController = __webpack_require__(11);
+      const _StringController = __webpack_require__(11);
 	
-	var _StringController2 = _interopRequireDefault(_StringController);
+      const _StringController2 = _interopRequireDefault(_StringController);
 	
-	var _NumberController = __webpack_require__(12);
+      const _NumberController = __webpack_require__(12);
 	
-	var _NumberController2 = _interopRequireDefault(_NumberController);
+      const _NumberController2 = _interopRequireDefault(_NumberController);
 	
-	var _NumberControllerBox = __webpack_require__(13);
+      const _NumberControllerBox = __webpack_require__(13);
 	
-	var _NumberControllerBox2 = _interopRequireDefault(_NumberControllerBox);
+      const _NumberControllerBox2 = _interopRequireDefault(_NumberControllerBox);
 	
-	var _NumberControllerSlider = __webpack_require__(14);
+      const _NumberControllerSlider = __webpack_require__(14);
 	
-	var _NumberControllerSlider2 = _interopRequireDefault(_NumberControllerSlider);
+      const _NumberControllerSlider2 = _interopRequireDefault(_NumberControllerSlider);
 	
-	var _FunctionController = __webpack_require__(15);
+      const _FunctionController = __webpack_require__(15);
 	
-	var _FunctionController2 = _interopRequireDefault(_FunctionController);
+      const _FunctionController2 = _interopRequireDefault(_FunctionController);
 	
-	var _ColorController = __webpack_require__(16);
+      const _ColorController = __webpack_require__(16);
 	
-	var _ColorController2 = _interopRequireDefault(_ColorController);
+      const _ColorController2 = _interopRequireDefault(_ColorController);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	var _GUI = __webpack_require__(17);
+      const _GUI = __webpack_require__(17);
 	
-	var _GUI2 = _interopRequireDefault(_GUI);
+      const _GUI2 = _interopRequireDefault(_GUI);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/**
+      /**
 	 * dat-gui JavaScript Controller Library
 	 * http://code.google.com/p/dat-gui
 	 *
@@ -158,7 +158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * http://www.apache.org/licenses/LICENSE-2.0
 	 */
 	
-	exports.default = {
+      exports.default = {
 	  color: {
 	    Color: _Color2.default,
 	    math: _math2.default,
@@ -186,36 +186,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  GUI: _GUI2.default
-	};
-	module.exports = exports['default'];
+      };
+      module.exports = exports['default'];
 
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 2 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _interpret = __webpack_require__(3);
+      const _interpret = __webpack_require__(3);
 	
-	var _interpret2 = _interopRequireDefault(_interpret);
+      const _interpret2 = _interopRequireDefault(_interpret);
 	
-	var _math = __webpack_require__(6);
+      const _math = __webpack_require__(6);
 	
-	var _math2 = _interopRequireDefault(_math);
+      const _math2 = _interopRequireDefault(_math);
 	
-	var _toString = __webpack_require__(4);
+      const _toString = __webpack_require__(4);
 	
-	var _toString2 = _interopRequireDefault(_toString);
+      const _toString2 = _interopRequireDefault(_toString);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } /**
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } } /**
 	                                                                                                                                                           * dat-gui JavaScript Controller Library
 	                                                                                                                                                           * http://code.google.com/p/dat-gui
 	                                                                                                                                                           *
@@ -228,7 +228,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                           * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                           */
 	
-	var Color = function () {
+      const Color = function () {
 	  function Color() {
 	    _classCallCheck(this, Color);
 	
@@ -254,9 +254,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return Color;
-	}();
+      }();
 	
-	function defineRGBComponent(target, component, componentHexIndex) {
+      function defineRGBComponent(target, component, componentHexIndex) {
 	  Object.defineProperty(target, component, {
 	    get: function get() {
 	      if (this.__state.space === 'RGB') {
@@ -277,9 +277,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.__state[component] = v;
 	    }
 	  });
-	}
+      }
 	
-	function defineHSVComponent(target, component) {
+      function defineHSVComponent(target, component) {
 	  Object.defineProperty(target, component, {
 	    get: function get() {
 	      if (this.__state.space === 'HSV') {
@@ -300,9 +300,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.__state[component] = v;
 	    }
 	  });
-	}
+      }
 	
-	Color.recalculateRGB = function (color, component, componentHexIndex) {
+      Color.recalculateRGB = function (color, component, componentHexIndex) {
 	  if (color.__state.space === 'HEX') {
 	    color.__state[component] = _math2.default.component_from_hex(color.__state.hex, componentHexIndex);
 	  } else if (color.__state.space === 'HSV') {
@@ -310,10 +310,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    throw new Error('Corrupted color state');
 	  }
-	};
+      };
 	
-	Color.recalculateHSV = function (color) {
-	  var result = _math2.default.rgb_to_hsv(color.r, color.g, color.b);
+      Color.recalculateHSV = function (color) {
+	  const result = _math2.default.rgb_to_hsv(color.r, color.g, color.b);
 	
 	  _common2.default.extend(color.__state, {
 	    s: result.s,
@@ -325,19 +325,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else if (_common2.default.isUndefined(color.__state.h)) {
 	    color.__state.h = 0;
 	  }
-	};
+      };
 	
-	Color.COMPONENTS = ['r', 'g', 'b', 'h', 's', 'v', 'hex', 'a'];
+      Color.COMPONENTS = ['r', 'g', 'b', 'h', 's', 'v', 'hex', 'a'];
 	
-	defineRGBComponent(Color.prototype, 'r', 2);
-	defineRGBComponent(Color.prototype, 'g', 1);
-	defineRGBComponent(Color.prototype, 'b', 0);
+      defineRGBComponent(Color.prototype, 'r', 2);
+      defineRGBComponent(Color.prototype, 'g', 1);
+      defineRGBComponent(Color.prototype, 'b', 0);
 	
-	defineHSVComponent(Color.prototype, 'h');
-	defineHSVComponent(Color.prototype, 's');
-	defineHSVComponent(Color.prototype, 'v');
+      defineHSVComponent(Color.prototype, 'h');
+      defineHSVComponent(Color.prototype, 's');
+      defineHSVComponent(Color.prototype, 'v');
 	
-	Object.defineProperty(Color.prototype, 'a', {
+      Object.defineProperty(Color.prototype, 'a', {
 	  get: function get() {
 	    return this.__state.a;
 	  },
@@ -345,9 +345,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  set: function set(v) {
 	    this.__state.a = v;
 	  }
-	});
+      });
 	
-	Object.defineProperty(Color.prototype, 'hex', {
+      Object.defineProperty(Color.prototype, 'hex', {
 	  get: function get() {
 	    if (!this.__state.space !== 'HEX') {
 	      this.__state.hex = _math2.default.rgb_to_hex(this.r, this.g, this.b);
@@ -360,30 +360,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.__state.space = 'HEX';
 	    this.__state.hex = v;
 	  }
-	});
+      });
 	
-	exports.default = Color;
-	module.exports = exports['default'];
+      exports.default = Color;
+      module.exports = exports['default'];
 
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 3 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _toString = __webpack_require__(4);
+      const _toString = __webpack_require__(4);
 	
-	var _toString2 = _interopRequireDefault(_toString);
+      const _toString2 = _interopRequireDefault(_toString);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/**
+      /**
 	 * dat-gui JavaScript Controller Library
 	 * http://code.google.com/p/dat-gui
 	 *
@@ -396,14 +396,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * http://www.apache.org/licenses/LICENSE-2.0
 	 */
 	
-	var INTERPRETATIONS = [
-	// Strings
-	{
+      const INTERPRETATIONS = [
+        // Strings
+        {
 	  litmus: _common2.default.isString,
 	  conversions: {
 	    THREE_CHAR_HEX: {
 	      read: function read(original) {
-	        var test = original.match(/^#([A-F0-9])([A-F0-9])([A-F0-9])$/i);
+	        const test = original.match(/^#([A-F0-9])([A-F0-9])([A-F0-9])$/i);
 	        if (test === null) {
 	          return false;
 	        }
@@ -419,7 +419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    SIX_CHAR_HEX: {
 	      read: function read(original) {
-	        var test = original.match(/^#([A-F0-9]{6})$/i);
+	        const test = original.match(/^#([A-F0-9]{6})$/i);
 	        if (test === null) {
 	          return false;
 	        }
@@ -435,7 +435,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    CSS_RGB: {
 	      read: function read(original) {
-	        var test = original.match(/^rgb\(\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*\)/);
+	        const test = original.match(/^rgb\(\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*\)/);
 	        if (test === null) {
 	          return false;
 	        }
@@ -453,7 +453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    CSS_RGBA: {
 	      read: function read(original) {
-	        var test = original.match(/^rgba\(\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*\)/);
+	        const test = original.match(/^rgba\(\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*\)/);
 	        if (test === null) {
 	          return false;
 	        }
@@ -470,10 +470,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      write: _toString2.default
 	    }
 	  }
-	},
+        },
 	
-	// Numbers
-	{
+        // Numbers
+        {
 	  litmus: _common2.default.isNumber,
 	
 	  conversions: {
@@ -494,10 +494,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  }
 	
-	},
+        },
 	
-	// Arrays
-	{
+        // Arrays
+        {
 	  litmus: _common2.default.isArray,
 	  conversions: {
 	    RGB_ARRAY: {
@@ -521,7 +521,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    RGBA_ARRAY: {
 	      read: function read(original) {
-	        if (original.length !== 4) return false;
+	        if (original.length !== 4) {return false;}
 	        return {
 	          space: 'RGB',
 	          r: original[0],
@@ -536,10 +536,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }
-	},
+        },
 	
-	// Objects
-	{
+        // Objects
+        {
 	  litmus: _common2.default.isObject,
 	  conversions: {
 	
@@ -635,15 +635,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }
-	}];
+        }];
 	
-	var result = void 0;
-	var toReturn = void 0;
+      let result = void 0;
+      let toReturn = void 0;
 	
-	var interpret = function interpret() {
+      const interpret = function interpret() {
 	  toReturn = false;
 	
-	  var original = arguments.length > 1 ? _common2.default.toArray(arguments) : arguments[0];
+	  const original = arguments.length > 1 ? _common2.default.toArray(arguments) : arguments[0];
 	  _common2.default.each(INTERPRETATIONS, function (family) {
 	    if (family.litmus(original)) {
 	      _common2.default.each(family.conversions, function (conversion, conversionName) {
@@ -662,32 +662,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	
 	  return toReturn;
-	};
+      };
 	
-	exports.default = interpret;
-	module.exports = exports['default'];
+      exports.default = interpret;
+      module.exports = exports['default'];
 
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
+      /***/ },
+    /* 4 */
+    /***/ function(module, exports) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	exports.default = function (color, forceCSSHex) {
-	  var colorFormat = color.__state.conversionName.toString();
+      exports.default = function (color, forceCSSHex) {
+	  const colorFormat = color.__state.conversionName.toString();
 	
-	  var r = Math.round(color.r);
-	  var g = Math.round(color.g);
-	  var b = Math.round(color.b);
-	  var a = color.a;
-	  var h = Math.round(color.h);
-	  var s = color.s.toFixed(1);
-	  var v = color.v.toFixed(1);
+	  const r = Math.round(color.r);
+	  const g = Math.round(color.g);
+	  const b = Math.round(color.b);
+	  const a = color.a;
+	  const h = Math.round(color.h);
+	  const s = color.s.toFixed(1);
+	  const v = color.v.toFixed(1);
 	
 	  if (forceCSSHex || colorFormat === 'THREE_CHAR_HEX' || colorFormat === 'SIX_CHAR_HEX') {
-	    var str = color.hex.toString(16);
+	    let str = color.hex.toString(16);
 	    while (str.length < 6) {
 	      str = '0' + str;
 	    }
@@ -713,9 +713,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  return 'unknown format';
-	};
+      };
 	
-	module.exports = exports['default']; /**
+      module.exports = exports['default']; /**
 	                                      * dat-gui JavaScript Controller Library
 	                                      * http://code.google.com/p/dat-gui
 	                                      *
@@ -728,14 +728,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                      * http://www.apache.org/licenses/LICENSE-2.0
 	                                      */
 
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
+      /***/ },
+    /* 5 */
+    /***/ function(module, exports) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
-	/**
+      exports.__esModule = true;
+      /**
 	 * dat-gui JavaScript Controller Library
 	 * http://code.google.com/p/dat-gui
 	 *
@@ -748,21 +748,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * http://www.apache.org/licenses/LICENSE-2.0
 	 */
 	
-	var ARR_EACH = Array.prototype.forEach;
-	var ARR_SLICE = Array.prototype.slice;
+      const ARR_EACH = Array.prototype.forEach;
+      const ARR_SLICE = Array.prototype.slice;
 	
-	/**
+      /**
 	 * Band-aid methods for things that should be a lot easier in JavaScript.
 	 * Implementation and structure inspired by underscore.js
 	 * http://documentcloud.github.com/underscore/
 	 */
 	
-	var Common = {
+      const Common = {
 	  BREAK: {},
 	
 	  extend: function extend(target) {
 	    this.each(ARR_SLICE.call(arguments, 1), function (obj) {
-	      var keys = this.isObject(obj) ? Object.keys(obj) : [];
+	      const keys = this.isObject(obj) ? Object.keys(obj) : [];
 	      keys.forEach(function (key) {
 	        if (!this.isUndefined(obj[key])) {
 	          target[key] = obj[key];
@@ -775,7 +775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  defaults: function defaults(target) {
 	    this.each(ARR_SLICE.call(arguments, 1), function (obj) {
-	      var keys = this.isObject(obj) ? Object.keys(obj) : [];
+	      const keys = this.isObject(obj) ? Object.keys(obj) : [];
 	      keys.forEach(function (key) {
 	        if (this.isUndefined(target[key])) {
 	          target[key] = obj[key];
@@ -787,10 +787,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  compose: function compose() {
-	    var toCall = ARR_SLICE.call(arguments);
+	    const toCall = ARR_SLICE.call(arguments);
 	    return function () {
-	      var args = ARR_SLICE.call(arguments);
-	      for (var i = toCall.length - 1; i >= 0; i--) {
+	      let args = ARR_SLICE.call(arguments);
+	      for (let i = toCall.length - 1; i >= 0; i--) {
 	        args = [toCall[i].apply(this, args)];
 	      }
 	      return args[0];
@@ -806,15 +806,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      obj.forEach(itr, scope);
 	    } else if (obj.length === obj.length + 0) {
 	      // Is number but not NaN
-	      var key = void 0;
-	      var l = void 0;
+	      let key = void 0;
+	      let l = void 0;
 	      for (key = 0, l = obj.length; key < l; key++) {
 	        if (key in obj && itr.call(scope, obj[key], key) === this.BREAK) {
 	          return;
 	        }
 	      }
 	    } else {
-	      for (var _key in obj) {
+	      for (const _key in obj) {
 	        if (itr.call(scope, obj[_key], _key) === this.BREAK) {
 	          return;
 	        }
@@ -828,17 +828,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  // if the function is called repeatedly, wait until threshold passes until we execute the function
 	  debounce: function debounce(func, threshold, callImmediately) {
-	    var timeout = void 0;
+	    let timeout = void 0;
 	
 	    return function () {
-	      var obj = this;
-	      var args = arguments;
+	      const obj = this;
+	      const args = arguments;
 	      function delayed() {
 	        timeout = null;
-	        if (!callImmediately) func.apply(obj, args);
+	        if (!callImmediately) {func.apply(obj, args);}
 	      }
 	
-	      var callNow = callImmediately || !timeout;
+	      const callNow = callImmediately || !timeout;
 	
 	      clearTimeout(timeout);
 	      timeout = setTimeout(delayed, threshold);
@@ -850,7 +850,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  toArray: function toArray(obj) {
-	    if (obj.toArray) return obj.toArray();
+	    if (obj.toArray) {return obj.toArray();}
 	    return ARR_SLICE.call(obj);
 	  },
 	
@@ -900,19 +900,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Object.prototype.toString.call(obj) === '[object Function]';
 	  }
 	
-	};
+      };
 	
-	exports.default = Common;
-	module.exports = exports['default'];
+      exports.default = Common;
+      module.exports = exports['default'];
 
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
+      /***/ },
+    /* 6 */
+    /***/ function(module, exports) {
 
-	"use strict";
+      'use strict';
 	
-	exports.__esModule = true;
-	/**
+      exports.__esModule = true;
+      /**
 	 * dat-gui JavaScript Controller Library
 	 * http://code.google.com/p/dat-gui
 	 *
@@ -925,18 +925,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * http://www.apache.org/licenses/LICENSE-2.0
 	 */
 	
-	var tmpComponent = void 0;
+      let tmpComponent = void 0;
 	
-	var ColorMath = {
+      const ColorMath = {
 	  hsv_to_rgb: function hsv_to_rgb(h, s, v) {
-	    var hi = Math.floor(h / 60) % 6;
+	    const hi = Math.floor(h / 60) % 6;
 	
-	    var f = h / 60 - Math.floor(h / 60);
-	    var p = v * (1.0 - s);
-	    var q = v * (1.0 - f * s);
-	    var t = v * (1.0 - (1.0 - f) * s);
+	    const f = h / 60 - Math.floor(h / 60);
+	    const p = v * (1.0 - s);
+	    const q = v * (1.0 - f * s);
+	    const t = v * (1.0 - (1.0 - f) * s);
 	
-	    var c = [[v, t, p], [q, v, p], [p, v, t], [p, q, v], [t, p, v], [v, p, q]][hi];
+	    const c = [[v, t, p], [q, v, p], [p, v, t], [p, q, v], [t, p, v], [v, p, q]][hi];
 	
 	    return {
 	      r: c[0] * 255,
@@ -946,11 +946,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  rgb_to_hsv: function rgb_to_hsv(r, g, b) {
-	    var min = Math.min(r, g, b);
-	    var max = Math.max(r, g, b);
-	    var delta = max - min;
-	    var h = void 0;
-	    var s = void 0;
+	    const min = Math.min(r, g, b);
+	    const max = Math.max(r, g, b);
+	    const delta = max - min;
+	    let h = void 0;
+	    let s = void 0;
 	
 	    if (max !== 0) {
 	      s = delta / max;
@@ -982,7 +982,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  rgb_to_hex: function rgb_to_hex(r, g, b) {
-	    var hex = this.hex_with_component(0, 2, r);
+	    let hex = this.hex_with_component(0, 2, r);
 	    hex = this.hex_with_component(hex, 1, g);
 	    hex = this.hex_with_component(hex, 0, b);
 	    return hex;
@@ -995,22 +995,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  hex_with_component: function hex_with_component(hex, componentIndex, value) {
 	    return value << (tmpComponent = componentIndex * 8) | hex & ~(0xFF << tmpComponent);
 	  }
-	};
+      };
 	
-	exports.default = ColorMath;
-	module.exports = exports["default"];
+      exports.default = ColorMath;
+      module.exports = exports['default'];
 
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
+      /***/ },
+    /* 7 */
+    /***/ function(module, exports) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	/**
+      /**
 	 * dat-gui JavaScript Controller Library
 	 * http://code.google.com/p/dat-gui
 	 *
@@ -1023,7 +1023,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * http://www.apache.org/licenses/LICENSE-2.0
 	 */
 	
-	/**
+      /**
 	 * @class An "abstract" class that represents a given property of an object.
 	 *
 	 * @param {Object} object The object to be manipulated
@@ -1031,7 +1031,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @member dat.controllers
 	 */
-	var Controller = function () {
+      const Controller = function () {
 	  function Controller(object, property) {
 	    _classCallCheck(this, Controller);
 	
@@ -1150,34 +1150,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return Controller;
-	}();
+      }();
 	
-	exports.default = Controller;
-	module.exports = exports['default'];
+      exports.default = Controller;
+      module.exports = exports['default'];
 
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 8 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _Controller2 = __webpack_require__(7);
+      const _Controller2 = __webpack_require__(7);
 	
-	var _Controller3 = _interopRequireDefault(_Controller2);
+      const _Controller3 = _interopRequireDefault(_Controller2);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+      function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) {Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;} } /**
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
@@ -1190,7 +1190,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 	
-	/**
+      /**
 	 * @class Provides a checkbox input to alter the boolean property of an object.
 	 * @extends dat.controllers.Controller
 	 *
@@ -1199,15 +1199,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @member dat.controllers
 	 */
-	var BooleanController = function (_Controller) {
+      const BooleanController = function (_Controller) {
 	  _inherits(BooleanController, _Controller);
 	
 	  function BooleanController(object, property) {
 	    _classCallCheck(this, BooleanController);
 	
-	    var _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
+	    const _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
 	
-	    var _this = _this2;
+	    const _this = _this2;
 	    _this2.__prev = _this2.getValue();
 	
 	    _this2.__checkbox = document.createElement('input');
@@ -1227,7 +1227,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  BooleanController.prototype.setValue = function setValue(v) {
-	    var toReturn = _Controller.prototype.setValue.call(this, v);
+	    const toReturn = _Controller.prototype.setValue.call(this, v);
 	    if (this.__onFinishChange) {
 	      this.__onFinishChange.call(this, this.getValue());
 	    }
@@ -1249,30 +1249,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return BooleanController;
-	}(_Controller3.default);
+      }(_Controller3.default);
 	
-	exports.default = BooleanController;
-	module.exports = exports['default'];
+      exports.default = BooleanController;
+      module.exports = exports['default'];
 
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 9 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var EVENT_MAP = {
+      const EVENT_MAP = {
 	  HTMLEvents: ['change'],
 	  MouseEvents: ['click', 'mousemove', 'mousedown', 'mouseup', 'mouseover'],
 	  KeyboardEvents: ['keydown']
-	}; /**
+      }; /**
 	    * dat-gui JavaScript Controller Library
 	    * http://code.google.com/p/dat-gui
 	    *
@@ -1285,21 +1285,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    * http://www.apache.org/licenses/LICENSE-2.0
 	    */
 	
-	var EVENT_MAP_INV = {};
-	_common2.default.each(EVENT_MAP, function (v, k) {
+      const EVENT_MAP_INV = {};
+      _common2.default.each(EVENT_MAP, function (v, k) {
 	  _common2.default.each(v, function (e) {
 	    EVENT_MAP_INV[e] = k;
 	  });
-	});
+      });
 	
-	var CSS_VALUE_PIXELS = /(\d+(\.\d+)?)px/;
+      const CSS_VALUE_PIXELS = /(\d+(\.\d+)?)px/;
 	
-	function cssValueToPixels(val) {
+      function cssValueToPixels(val) {
 	  if (val === '0' || _common2.default.isUndefined(val)) {
 	    return 0;
 	  }
 	
-	  var match = val.match(CSS_VALUE_PIXELS);
+	  const match = val.match(CSS_VALUE_PIXELS);
 	
 	  if (!_common2.default.isNull(match)) {
 	    return parseFloat(match[1]);
@@ -1308,13 +1308,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // TODO ...ems? %?
 	
 	  return 0;
-	}
+      }
 	
-	/**
+      /**
 	 * @namespace
 	 * @member dat.dom
 	 */
-	var dom = {
+      var dom = {
 	
 	  /**
 	   *
@@ -1322,7 +1322,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param selectable
 	   */
 	  makeSelectable: function makeSelectable(elem, selectable) {
-	    if (elem === undefined || elem.style === undefined) return;
+	    if (elem === undefined || elem.style === undefined) {return;}
 	
 	    elem.onselectstart = selectable ? function () {
 	      return false;
@@ -1340,8 +1340,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param vert
 	   */
 	  makeFullscreen: function makeFullscreen(elem, hor, vert) {
-	    var vertical = vert;
-	    var horizontal = hor;
+	    let vertical = vert;
+	    let horizontal = hor;
 	
 	    if (_common2.default.isUndefined(horizontal)) {
 	      horizontal = true;
@@ -1370,17 +1370,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param params
 	   */
 	  fakeEvent: function fakeEvent(elem, eventType, pars, aux) {
-	    var params = pars || {};
-	    var className = EVENT_MAP_INV[eventType];
+	    const params = pars || {};
+	    const className = EVENT_MAP_INV[eventType];
 	    if (!className) {
 	      throw new Error('Event type ' + eventType + ' not supported.');
 	    }
-	    var evt = document.createEvent(className);
+	    const evt = document.createEvent(className);
 	    switch (className) {
 	      case 'MouseEvents':
 	        {
-	          var clientX = params.x || params.clientX || 0;
-	          var clientY = params.y || params.clientY || 0;
+	          const clientX = params.x || params.clientX || 0;
+	          const clientY = params.y || params.clientY || 0;
 	          evt.initMouseEvent(eventType, params.bubbles || false, params.cancelable || true, window, params.clickCount || 1, 0, // screen X
 	          0, // screen Y
 	          clientX, // client X
@@ -1390,7 +1390,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      case 'KeyboardEvents':
 	        {
-	          var init = evt.initKeyboardEvent || evt.initKeyEvent; // webkit || moz
+	          const init = evt.initKeyboardEvent || evt.initKeyEvent; // webkit || moz
 	          _common2.default.defaults(params, {
 	            cancelable: true,
 	            ctrlKey: false,
@@ -1421,7 +1421,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param bool
 	   */
 	  bind: function bind(elem, event, func, newBool) {
-	    var bool = newBool || false;
+	    const bool = newBool || false;
 	    if (elem.addEventListener) {
 	      elem.addEventListener(event, func, bool);
 	    } else if (elem.attachEvent) {
@@ -1438,7 +1438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param bool
 	   */
 	  unbind: function unbind(elem, event, func, newBool) {
-	    var bool = newBool || false;
+	    const bool = newBool || false;
 	    if (elem.removeEventListener) {
 	      elem.removeEventListener(event, func, bool);
 	    } else if (elem.detachEvent) {
@@ -1456,7 +1456,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (elem.className === undefined) {
 	      elem.className = className;
 	    } else if (elem.className !== className) {
-	      var classes = elem.className.split(/ +/);
+	      const classes = elem.className.split(/ +/);
 	      if (classes.indexOf(className) === -1) {
 	        classes.push(className);
 	        elem.className = classes.join(' ').replace(/^\s+/, '').replace(/\s+$/, '');
@@ -1475,8 +1475,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (elem.className === className) {
 	        elem.removeAttribute('class');
 	      } else {
-	        var classes = elem.className.split(/ +/);
-	        var index = classes.indexOf(className);
+	        const classes = elem.className.split(/ +/);
+	        const index = classes.indexOf(className);
 	        if (index !== -1) {
 	          classes.splice(index, 1);
 	          elem.className = classes.join(' ');
@@ -1497,7 +1497,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param elem
 	   */
 	  getWidth: function getWidth(elem) {
-	    var style = getComputedStyle(elem);
+	    const style = getComputedStyle(elem);
 	
 	    return cssValueToPixels(style['border-left-width']) + cssValueToPixels(style['border-right-width']) + cssValueToPixels(style['padding-left']) + cssValueToPixels(style['padding-right']) + cssValueToPixels(style.width);
 	  },
@@ -1507,7 +1507,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param elem
 	   */
 	  getHeight: function getHeight(elem) {
-	    var style = getComputedStyle(elem);
+	    const style = getComputedStyle(elem);
 	
 	    return cssValueToPixels(style['border-top-width']) + cssValueToPixels(style['border-bottom-width']) + cssValueToPixels(style['padding-top']) + cssValueToPixels(style['padding-bottom']) + cssValueToPixels(style.height);
 	  },
@@ -1517,8 +1517,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param el
 	   */
 	  getOffset: function getOffset(el) {
-	    var elem = el;
-	    var offset = { left: 0, top: 0 };
+	    let elem = el;
+	    const offset = { left: 0, top: 0 };
 	    if (elem.offsetParent) {
 	      do {
 	        offset.left += elem.offsetLeft;
@@ -1538,38 +1538,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return elem === document.activeElement && (elem.type || elem.href);
 	  }
 	
-	};
+      };
 	
-	exports.default = dom;
-	module.exports = exports['default'];
+      exports.default = dom;
+      module.exports = exports['default'];
 
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 10 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _Controller2 = __webpack_require__(7);
+      const _Controller2 = __webpack_require__(7);
 	
-	var _Controller3 = _interopRequireDefault(_Controller2);
+      const _Controller3 = _interopRequireDefault(_Controller2);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+      function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) {Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;} } /**
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
@@ -1582,7 +1582,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 	
-	/**
+      /**
 	 * @class Provides a select input to alter the property of an object, using a
 	 * list of accepted values.
 	 *
@@ -1595,17 +1595,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @member dat.controllers
 	 */
-	var OptionController = function (_Controller) {
+      const OptionController = function (_Controller) {
 	  _inherits(OptionController, _Controller);
 	
 	  function OptionController(object, property, opts) {
 	    _classCallCheck(this, OptionController);
 	
-	    var _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
+	    const _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
 	
-	    var options = opts;
+	    let options = opts;
 	
-	    var _this = _this2;
+	    const _this = _this2;
 	
 	    /**
 	     * The drop down menu
@@ -1614,7 +1614,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _this2.__select = document.createElement('select');
 	
 	    if (_common2.default.isArray(options)) {
-	      var map = {};
+	      const map = {};
 	      _common2.default.each(options, function (element) {
 	        map[element] = element;
 	      });
@@ -1622,7 +1622,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    _common2.default.each(options, function (value, key) {
-	      var opt = document.createElement('option');
+	      const opt = document.createElement('option');
 	      opt.innerHTML = key;
 	      opt.setAttribute('value', value);
 	      _this.__select.appendChild(opt);
@@ -1632,7 +1632,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _this2.updateDisplay();
 	
 	    _dom2.default.bind(_this2.__select, 'change', function () {
-	      var desiredValue = this.options[this.selectedIndex].value;
+	      const desiredValue = this.options[this.selectedIndex].value;
 	      _this.setValue(desiredValue);
 	    });
 	
@@ -1641,7 +1641,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  OptionController.prototype.setValue = function setValue(v) {
-	    var toReturn = _Controller.prototype.setValue.call(this, v);
+	    const toReturn = _Controller.prototype.setValue.call(this, v);
 	
 	    if (this.__onFinishChange) {
 	      this.__onFinishChange.call(this, this.getValue());
@@ -1650,40 +1650,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  OptionController.prototype.updateDisplay = function updateDisplay() {
-	    if (_dom2.default.isActive(this.__select)) return this; // prevent number from updating if user is trying to manually update
+	    if (_dom2.default.isActive(this.__select)) {return this;} // prevent number from updating if user is trying to manually update
 	    this.__select.value = this.getValue();
 	    return _Controller.prototype.updateDisplay.call(this);
 	  };
 	
 	  return OptionController;
-	}(_Controller3.default);
+      }(_Controller3.default);
 	
-	exports.default = OptionController;
-	module.exports = exports['default'];
+      exports.default = OptionController;
+      module.exports = exports['default'];
 
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 11 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _Controller2 = __webpack_require__(7);
+      const _Controller2 = __webpack_require__(7);
 	
-	var _Controller3 = _interopRequireDefault(_Controller2);
+      const _Controller3 = _interopRequireDefault(_Controller2);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+      function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) {Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;} } /**
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
@@ -1696,7 +1696,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 	
-	/**
+      /**
 	 * @class Provides a text input to alter the string property of an object.
 	 *
 	 * @extends dat.controllers.Controller
@@ -1706,15 +1706,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @member dat.controllers
 	 */
-	var StringController = function (_Controller) {
+      const StringController = function (_Controller) {
 	  _inherits(StringController, _Controller);
 	
 	  function StringController(object, property) {
 	    _classCallCheck(this, StringController);
 	
-	    var _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
+	    const _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
 	
-	    var _this = _this2;
+	    const _this = _this2;
 	
 	    function onChange() {
 	      _this.setValue(_this.__input.value);
@@ -1754,34 +1754,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return StringController;
-	}(_Controller3.default);
+      }(_Controller3.default);
 	
-	exports.default = StringController;
-	module.exports = exports['default'];
+      exports.default = StringController;
+      module.exports = exports['default'];
 
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 12 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _Controller2 = __webpack_require__(7);
+      const _Controller2 = __webpack_require__(7);
 	
-	var _Controller3 = _interopRequireDefault(_Controller2);
+      const _Controller3 = _interopRequireDefault(_Controller2);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+      function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) {Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;} } /**
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
@@ -1794,16 +1794,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 	
-	function numDecimals(x) {
-	  var _x = x.toString();
+      function numDecimals(x) {
+	  const _x = x.toString();
 	  if (_x.indexOf('.') > -1) {
 	    return _x.length - _x.indexOf('.') - 1;
 	  }
 	
 	  return 0;
-	}
+      }
 	
-	/**
+      /**
 	 * @class Represents a given property of an object that is a number.
 	 *
 	 * @extends dat.controllers.Controller
@@ -1818,15 +1818,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @member dat.controllers
 	 */
 	
-	var NumberController = function (_Controller) {
+      const NumberController = function (_Controller) {
 	  _inherits(NumberController, _Controller);
 	
 	  function NumberController(object, property, params) {
 	    _classCallCheck(this, NumberController);
 	
-	    var _this = _possibleConstructorReturn(this, _Controller.call(this, object, property));
+	    const _this = _possibleConstructorReturn(this, _Controller.call(this, object, property));
 	
-	    var _params = params || {};
+	    const _params = params || {};
 	
 	    _this.__min = _params.min;
 	    _this.__max = _params.max;
@@ -1848,7 +1848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  NumberController.prototype.setValue = function setValue(v) {
-	    var _v = v;
+	    let _v = v;
 	
 	    if (this.__min !== undefined && _v < this.__min) {
 	      _v = this.__min;
@@ -1911,38 +1911,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return NumberController;
-	}(_Controller3.default);
+      }(_Controller3.default);
 	
-	exports.default = NumberController;
-	module.exports = exports['default'];
+      exports.default = NumberController;
+      module.exports = exports['default'];
 
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 13 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _NumberController2 = __webpack_require__(12);
+      const _NumberController2 = __webpack_require__(12);
 	
-	var _NumberController3 = _interopRequireDefault(_NumberController2);
+      const _NumberController3 = _interopRequireDefault(_NumberController2);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+      function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) {Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;} } /**
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
@@ -1955,12 +1955,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 	
-	function roundToDecimal(value, decimals) {
-	  var tenTo = Math.pow(10, decimals);
+      function roundToDecimal(value, decimals) {
+	  const tenTo = Math.pow(10, decimals);
 	  return Math.round(value * tenTo) / tenTo;
-	}
+      }
 	
-	/**
+      /**
 	 * @class Represents a given property of an object that is a number and
 	 * provides an input element with which to manipulate it.
 	 *
@@ -1977,26 +1977,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @member dat.controllers
 	 */
 	
-	var NumberControllerBox = function (_NumberController) {
+      const NumberControllerBox = function (_NumberController) {
 	  _inherits(NumberControllerBox, _NumberController);
 	
 	  function NumberControllerBox(object, property, params) {
 	    _classCallCheck(this, NumberControllerBox);
 	
-	    var _this2 = _possibleConstructorReturn(this, _NumberController.call(this, object, property, params));
+	    const _this2 = _possibleConstructorReturn(this, _NumberController.call(this, object, property, params));
 	
 	    _this2.__truncationSuspended = false;
 	
-	    var _this = _this2;
+	    const _this = _this2;
 	
 	    /**
 	     * {Number} Previous mouse y position
 	     * @ignore
 	     */
-	    var prevY = void 0;
+	    let prevY = void 0;
 	
 	    function onChange() {
-	      var attempted = parseFloat(_this.__input.value);
+	      const attempted = parseFloat(_this.__input.value);
 	      if (!_common2.default.isNaN(attempted)) {
 	        _this.setValue(attempted);
 	      }
@@ -2013,7 +2013,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    function onMouseDrag(e) {
-	      var diff = prevY - e.clientY;
+	      const diff = prevY - e.clientY;
 	      _this.setValue(_this.getValue() + diff * _this.__impliedStep);
 	
 	      prevY = e.clientY;
@@ -2061,34 +2061,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return NumberControllerBox;
-	}(_NumberController3.default);
+      }(_NumberController3.default);
 	
-	exports.default = NumberControllerBox;
-	module.exports = exports['default'];
+      exports.default = NumberControllerBox;
+      module.exports = exports['default'];
 
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 14 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _NumberController2 = __webpack_require__(12);
+      const _NumberController2 = __webpack_require__(12);
 	
-	var _NumberController3 = _interopRequireDefault(_NumberController2);
+      const _NumberController3 = _interopRequireDefault(_NumberController2);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+      function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) {Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;} } /**
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
@@ -2101,11 +2101,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 	
-	function map(v, i1, i2, o1, o2) {
+      function map(v, i1, i2, o1, o2) {
 	  return o1 + (o2 - o1) * ((v - i1) / (i2 - i1));
-	}
+      }
 	
-	/**
+      /**
 	 * @class Represents a given property of an object that is a number, contains
 	 * a minimum and maximum, and provides a slider element with which to
 	 * manipulate it. It should be noted that the slider element is made up of
@@ -2124,15 +2124,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @member dat.controllers
 	 */
 	
-	var NumberControllerSlider = function (_NumberController) {
+      const NumberControllerSlider = function (_NumberController) {
 	  _inherits(NumberControllerSlider, _NumberController);
 	
 	  function NumberControllerSlider(object, property, min, max, step) {
 	    _classCallCheck(this, NumberControllerSlider);
 	
-	    var _this2 = _possibleConstructorReturn(this, _NumberController.call(this, object, property, { min: min, max: max, step: step }));
+	    const _this2 = _possibleConstructorReturn(this, _NumberController.call(this, object, property, { min: min, max: max, step: step }));
 	
-	    var _this = _this2;
+	    const _this = _this2;
 	
 	    _this2.__background = document.createElement('div');
 	    _this2.__foreground = document.createElement('div');
@@ -2154,7 +2154,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function onMouseDrag(e) {
 	      e.preventDefault();
 	
-	      var bgRect = _this.__background.getBoundingClientRect();
+	      const bgRect = _this.__background.getBoundingClientRect();
 	
 	      _this.setValue(map(e.clientX, bgRect.left, bgRect.right, _this.__min, _this.__max));
 	
@@ -2177,40 +2177,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  NumberControllerSlider.prototype.updateDisplay = function updateDisplay() {
-	    var pct = (this.getValue() - this.__min) / (this.__max - this.__min);
+	    const pct = (this.getValue() - this.__min) / (this.__max - this.__min);
 	    this.__foreground.style.width = pct * 100 + '%';
 	    return _NumberController.prototype.updateDisplay.call(this);
 	  };
 	
 	  return NumberControllerSlider;
-	}(_NumberController3.default);
+      }(_NumberController3.default);
 	
-	exports.default = NumberControllerSlider;
-	module.exports = exports['default'];
+      exports.default = NumberControllerSlider;
+      module.exports = exports['default'];
 
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 15 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _Controller2 = __webpack_require__(7);
+      const _Controller2 = __webpack_require__(7);
 	
-	var _Controller3 = _interopRequireDefault(_Controller2);
+      const _Controller3 = _interopRequireDefault(_Controller2);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+      function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) {Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;} } /**
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
@@ -2223,7 +2223,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 	
-	/**
+      /**
 	 * @class Provides a GUI interface to fire a specified method, a property of an object.
 	 *
 	 * @extends dat.controllers.Controller
@@ -2233,15 +2233,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @member dat.controllers
 	 */
-	var FunctionController = function (_Controller) {
+      const FunctionController = function (_Controller) {
 	  _inherits(FunctionController, _Controller);
 	
 	  function FunctionController(object, property, text) {
 	    _classCallCheck(this, FunctionController);
 	
-	    var _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
+	    const _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
 	
-	    var _this = _this2;
+	    const _this = _this2;
 	
 	    _this2.__button = document.createElement('div');
 	    _this2.__button.innerHTML = text === undefined ? 'Fire' : text;
@@ -2269,46 +2269,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return FunctionController;
-	}(_Controller3.default);
+      }(_Controller3.default);
 	
-	exports.default = FunctionController;
-	module.exports = exports['default'];
+      exports.default = FunctionController;
+      module.exports = exports['default'];
 
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 16 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _Controller2 = __webpack_require__(7);
+      const _Controller2 = __webpack_require__(7);
 	
-	var _Controller3 = _interopRequireDefault(_Controller2);
+      const _Controller3 = _interopRequireDefault(_Controller2);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	var _Color = __webpack_require__(2);
+      const _Color = __webpack_require__(2);
 	
-	var _Color2 = _interopRequireDefault(_Color);
+      const _Color2 = _interopRequireDefault(_Color);
 	
-	var _interpret = __webpack_require__(3);
+      const _interpret = __webpack_require__(3);
 	
-	var _interpret2 = _interopRequireDefault(_interpret);
+      const _interpret2 = _interopRequireDefault(_interpret);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+      function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
 	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+      function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) {Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;} } /**
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
@@ -2321,18 +2321,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 	
-	var ColorController = function (_Controller) {
+      const ColorController = function (_Controller) {
 	  _inherits(ColorController, _Controller);
 	
 	  function ColorController(object, property) {
 	    _classCallCheck(this, ColorController);
 	
-	    var _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
+	    const _this2 = _possibleConstructorReturn(this, _Controller.call(this, object, property));
 	
 	    _this2.__color = new _Color2.default(_this2.getValue());
 	    _this2.__temp = new _Color2.default(0);
 	
-	    var _this = _this2;
+	    const _this = _this2;
 	
 	    _this2.domElement = document.createElement('div');
 	
@@ -2373,7 +2373,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	    });
 	
-	    var valueField = document.createElement('div');
+	    const valueField = document.createElement('div');
 	
 	    _common2.default.extend(_this2.__selector.style, {
 	      width: '122px',
@@ -2466,7 +2466,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    function onBlur() {
-	      var i = (0, _interpret2.default)(this.value);
+	      const i = (0, _interpret2.default)(this.value);
 	      if (i !== false) {
 	        _this.__color.__state = i;
 	        _this.setValue(_this.__color.toOriginal());
@@ -2501,9 +2501,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function setSV(e) {
 	      e.preventDefault();
 	
-	      var fieldRect = _this.__saturation_field.getBoundingClientRect();
-	      var s = (e.clientX - fieldRect.left) / (fieldRect.right - fieldRect.left);
-	      var v = 1 - (e.clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
+	      const fieldRect = _this.__saturation_field.getBoundingClientRect();
+	      let s = (e.clientX - fieldRect.left) / (fieldRect.right - fieldRect.left);
+	      let v = 1 - (e.clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
 	
 	      if (v > 1) {
 	        v = 1;
@@ -2528,8 +2528,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function setH(e) {
 	      e.preventDefault();
 	
-	      var fieldRect = _this.__hue_field.getBoundingClientRect();
-	      var h = 1 - (e.clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
+	      const fieldRect = _this.__hue_field.getBoundingClientRect();
+	      let h = 1 - (e.clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
 	
 	      if (h > 1) {
 	        h = 1;
@@ -2547,10 +2547,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  ColorController.prototype.updateDisplay = function updateDisplay() {
-	    var i = (0, _interpret2.default)(this.getValue());
+	    const i = (0, _interpret2.default)(this.getValue());
 	
 	    if (i !== false) {
-	      var mismatch = false;
+	      let mismatch = false;
 	
 	      // Check for mismatch on the interpreted value.
 	
@@ -2572,8 +2572,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    this.__temp.a = 1;
 	
-	    var flip = this.__color.v < 0.5 || this.__color.s > 0.5 ? 255 : 0;
-	    var _flip = 255 - flip;
+	    const flip = this.__color.v < 0.5 || this.__color.s > 0.5 ? 255 : 0;
+	    const _flip = 255 - flip;
 	
 	    _common2.default.extend(this.__field_knob.style, {
 	      marginLeft: 100 * this.__color.s - 7 + 'px',
@@ -2599,38 +2599,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return ColorController;
-	}(_Controller3.default);
+      }(_Controller3.default);
 	
-	var vendors = ['-moz-', '-o-', '-webkit-', '-ms-', ''];
+      const vendors = ['-moz-', '-o-', '-webkit-', '-ms-', ''];
 	
-	function linearGradient(elem, x, a, b) {
+      function linearGradient(elem, x, a, b) {
 	  elem.style.background = '';
 	  _common2.default.each(vendors, function (vendor) {
 	    elem.style.cssText += 'background: ' + vendor + 'linear-gradient(' + x + ', ' + a + ' 0%, ' + b + ' 100%); ';
 	  });
-	}
+      }
 	
-	function hueGradient(elem) {
+      function hueGradient(elem) {
 	  elem.style.background = '';
 	  elem.style.cssText += 'background: -moz-linear-gradient(top,  #ff0000 0%, #ff00ff 17%, #0000ff 34%, #00ffff 50%, #00ff00 67%, #ffff00 84%, #ff0000 100%);';
 	  elem.style.cssText += 'background: -webkit-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
 	  elem.style.cssText += 'background: -o-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
 	  elem.style.cssText += 'background: -ms-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
 	  elem.style.cssText += 'background: linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
-	}
+      }
 	
-	exports.default = ColorController;
-	module.exports = exports['default'];
+      exports.default = ColorController;
+      module.exports = exports['default'];
 
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 17 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; /**
+      const _typeof = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === 'function' && obj.constructor === Symbol && obj !== Symbol.prototype ? 'symbol' : typeof obj; }; /**
 	                                                                                                                                                                                                                                                                               * dat-gui JavaScript Controller Library
 	                                                                                                                                                                                                                                                                               * http://code.google.com/p/dat-gui
 	                                                                                                                                                                                                                                                                               *
@@ -2643,101 +2643,101 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                                                                                                                                               * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                                                                                                                                               */
 	
-	var _css = __webpack_require__(18);
+      const _css = __webpack_require__(18);
 	
-	var _css2 = _interopRequireDefault(_css);
+      const _css2 = _interopRequireDefault(_css);
 	
-	var _saveDialogue = __webpack_require__(19);
+      const _saveDialogue = __webpack_require__(19);
 	
-	var _saveDialogue2 = _interopRequireDefault(_saveDialogue);
+      const _saveDialogue2 = _interopRequireDefault(_saveDialogue);
 	
-	var _ControllerFactory = __webpack_require__(20);
+      const _ControllerFactory = __webpack_require__(20);
 	
-	var _ControllerFactory2 = _interopRequireDefault(_ControllerFactory);
+      const _ControllerFactory2 = _interopRequireDefault(_ControllerFactory);
 	
-	var _Controller = __webpack_require__(7);
+      const _Controller = __webpack_require__(7);
 	
-	var _Controller2 = _interopRequireDefault(_Controller);
+      const _Controller2 = _interopRequireDefault(_Controller);
 	
-	var _BooleanController = __webpack_require__(8);
+      const _BooleanController = __webpack_require__(8);
 	
-	var _BooleanController2 = _interopRequireDefault(_BooleanController);
+      const _BooleanController2 = _interopRequireDefault(_BooleanController);
 	
-	var _FunctionController = __webpack_require__(15);
+      const _FunctionController = __webpack_require__(15);
 	
-	var _FunctionController2 = _interopRequireDefault(_FunctionController);
+      const _FunctionController2 = _interopRequireDefault(_FunctionController);
 	
-	var _NumberControllerBox = __webpack_require__(13);
+      const _NumberControllerBox = __webpack_require__(13);
 	
-	var _NumberControllerBox2 = _interopRequireDefault(_NumberControllerBox);
+      const _NumberControllerBox2 = _interopRequireDefault(_NumberControllerBox);
 	
-	var _NumberControllerSlider = __webpack_require__(14);
+      const _NumberControllerSlider = __webpack_require__(14);
 	
-	var _NumberControllerSlider2 = _interopRequireDefault(_NumberControllerSlider);
+      const _NumberControllerSlider2 = _interopRequireDefault(_NumberControllerSlider);
 	
-	var _ColorController = __webpack_require__(16);
+      const _ColorController = __webpack_require__(16);
 	
-	var _ColorController2 = _interopRequireDefault(_ColorController);
+      const _ColorController2 = _interopRequireDefault(_ColorController);
 	
-	var _requestAnimationFrame = __webpack_require__(21);
+      const _requestAnimationFrame = __webpack_require__(21);
 	
-	var _requestAnimationFrame2 = _interopRequireDefault(_requestAnimationFrame);
+      const _requestAnimationFrame2 = _interopRequireDefault(_requestAnimationFrame);
 	
-	var _CenteredDiv = __webpack_require__(22);
+      const _CenteredDiv = __webpack_require__(22);
 	
-	var _CenteredDiv2 = _interopRequireDefault(_CenteredDiv);
+      const _CenteredDiv2 = _interopRequireDefault(_CenteredDiv);
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	var _style = __webpack_require__(23);
+      const _style = __webpack_require__(23);
 	
-	var _style2 = _interopRequireDefault(_style);
+      const _style2 = _interopRequireDefault(_style);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	// CSS to embed in build
+      // CSS to embed in build
 	
-	_css2.default.inject(_style2.default);
+      _css2.default.inject(_style2.default);
 	
-	/** Outer-most className for GUI's */
-	var CSS_NAMESPACE = 'dg';
+      /** Outer-most className for GUI's */
+      const CSS_NAMESPACE = 'dg';
 	
-	var HIDE_KEY_CODE = 72;
+      const HIDE_KEY_CODE = 72;
 	
-	/** The only value shared between the JS and SCSS. Use caution. */
-	var CLOSE_BUTTON_HEIGHT = 20;
+      /** The only value shared between the JS and SCSS. Use caution. */
+      const CLOSE_BUTTON_HEIGHT = 20;
 	
-	var DEFAULT_DEFAULT_PRESET_NAME = 'Default';
+      const DEFAULT_DEFAULT_PRESET_NAME = 'Default';
 	
-	var SUPPORTS_LOCAL_STORAGE = function () {
+      const SUPPORTS_LOCAL_STORAGE = function () {
 	  try {
 	    return 'localStorage' in window && window.localStorage !== null;
 	  } catch (e) {
 	    return false;
 	  }
-	}();
+      }();
 	
-	var SAVE_DIALOGUE = void 0;
+      let SAVE_DIALOGUE = void 0;
 	
-	/** Have we yet to create an autoPlace GUI? */
-	var autoPlaceVirgin = true;
+      /** Have we yet to create an autoPlace GUI? */
+      let autoPlaceVirgin = true;
 	
-	/** Fixed position div that auto place GUI's go inside */
-	var autoPlaceContainer = void 0;
+      /** Fixed position div that auto place GUI's go inside */
+      let autoPlaceContainer = void 0;
 	
-	/** Are we hiding the GUI's ? */
-	var hide = false;
+      /** Are we hiding the GUI's ? */
+      let hide = false;
 	
-	/** GUI's which should be hidden */
-	var hideableGuis = [];
+      /** GUI's which should be hidden */
+      const hideableGuis = [];
 	
-	/**
+      /**
 	 * A lightweight controller library for JavaScript. It allows you to easily
 	 * manipulate variables and fire functions on the fly.
 	 * @class
@@ -2753,10 +2753,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Boolean} [params.closed] If true, starts closed
 	 * @param {Boolean} [params.closeOnTop] If true, close/open button shows on top of the GUI
 	 */
-	var GUI = function GUI(pars) {
-	  var _this = this;
+      const GUI = function GUI(pars) {
+	  const _this = this;
 	
-	  var params = pars || {};
+	  let params = pars || {};
 	
 	  /**
 	   * Outermost DOM Element
@@ -2839,9 +2839,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  // Not part of params because I don't want people passing this in via
 	  // constructor. Should be a 'remembered' value.
-	  var useLocalStorage = SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(this, 'isLocal')) === 'true';
+	  let useLocalStorage = SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(this, 'isLocal')) === 'true';
 	
-	  var saveToLocalStorage = void 0;
+	  let saveToLocalStorage = void 0;
 	
 	  Object.defineProperties(this,
 	  /** @lends dat.gui.GUI.prototype */
@@ -3010,7 +3010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (useLocalStorage) {
 	        _this.useLocalStorage = true;
 	
-	        var savedGui = localStorage.getItem(getLocalStorageHash(this, 'gui'));
+	        const savedGui = localStorage.getItem(getLocalStorageHash(this, 'gui'));
 	
 	        if (savedGui) {
 	          params.load = JSON.parse(savedGui);
@@ -3038,12 +3038,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      params.closed = true;
 	    }
 	
-	    var _titleRowName = document.createTextNode(params.name);
+	    const _titleRowName = document.createTextNode(params.name);
 	    _dom2.default.addClass(_titleRowName, 'controller-name');
 	
-	    var titleRow = addRow(_this, _titleRowName);
+	    const titleRow = addRow(_this, _titleRowName);
 	
-	    var onClickTitle = function onClickTitle(e) {
+	    const onClickTitle = function onClickTitle(e) {
 	      e.preventDefault();
 	      _this.closed = !_this.closed;
 	      return false;
@@ -3106,7 +3106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.saveToLocalStorageIfPossible = saveToLocalStorage;
 	
 	  function resetWidth() {
-	    var root = _this.getRoot();
+	    const root = _this.getRoot();
 	    root.width += 1;
 	    _common2.default.defer(function () {
 	      root.width -= 1;
@@ -3116,41 +3116,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!params.parent) {
 	    resetWidth();
 	  }
-	};
+      };
 	
-	GUI.toggleHide = function () {
+      GUI.toggleHide = function () {
 	  hide = !hide;
 	  _common2.default.each(hideableGuis, function (gui) {
 	    gui.domElement.style.display = hide ? 'none' : '';
 	  });
-	};
+      };
 	
-	GUI.CLASS_AUTO_PLACE = 'a';
-	GUI.CLASS_AUTO_PLACE_CONTAINER = 'ac';
-	GUI.CLASS_MAIN = 'main';
-	GUI.CLASS_CONTROLLER_ROW = 'cr';
-	GUI.CLASS_TOO_TALL = 'taller-than-window';
-	GUI.CLASS_CLOSED = 'closed';
-	GUI.CLASS_CLOSE_BUTTON = 'close-button';
-	GUI.CLASS_CLOSE_TOP = 'close-top';
-	GUI.CLASS_CLOSE_BOTTOM = 'close-bottom';
-	GUI.CLASS_DRAG = 'drag';
+      GUI.CLASS_AUTO_PLACE = 'a';
+      GUI.CLASS_AUTO_PLACE_CONTAINER = 'ac';
+      GUI.CLASS_MAIN = 'main';
+      GUI.CLASS_CONTROLLER_ROW = 'cr';
+      GUI.CLASS_TOO_TALL = 'taller-than-window';
+      GUI.CLASS_CLOSED = 'closed';
+      GUI.CLASS_CLOSE_BUTTON = 'close-button';
+      GUI.CLASS_CLOSE_TOP = 'close-top';
+      GUI.CLASS_CLOSE_BOTTOM = 'close-bottom';
+      GUI.CLASS_DRAG = 'drag';
 	
-	GUI.DEFAULT_WIDTH = 245;
-	GUI.TEXT_CLOSED = 'Close Controls';
-	GUI.TEXT_OPEN = 'Open Controls';
+      GUI.DEFAULT_WIDTH = 245;
+      GUI.TEXT_CLOSED = 'Close Controls';
+      GUI.TEXT_OPEN = 'Open Controls';
 	
-	GUI._keydownHandler = function (e) {
+      GUI._keydownHandler = function (e) {
 	  if (document.activeElement.type !== 'text' && (e.which === HIDE_KEY_CODE || e.keyCode === HIDE_KEY_CODE)) {
 	    GUI.toggleHide();
 	  }
-	};
-	_dom2.default.bind(window, 'keydown', GUI._keydownHandler, false);
+      };
+      _dom2.default.bind(window, 'keydown', GUI._keydownHandler, false);
 	
-	_common2.default.extend(GUI.prototype,
+      _common2.default.extend(GUI.prototype,
 	
-	/** @lends dat.gui.GUI */
-	{
+        /** @lends dat.gui.GUI */
+        {
 	
 	  /**
 	   * @param object
@@ -3184,7 +3184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // TODO listening?
 	    this.__ul.removeChild(controller.__li);
 	    this.__controllers.splice(this.__controllers.indexOf(controller), 1);
-	    var _this = this;
+	    const _this = this;
 	    _common2.default.defer(function () {
 	      _this.onResize();
 	    });
@@ -3217,7 +3217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      throw new Error('You already have a folder in this GUI by the' + ' name "' + name + '"');
 	    }
 	
-	    var newGuiParams = { name: name, parent: this };
+	    const newGuiParams = { name: name, parent: this };
 	
 	    // We need to pass down the autoPlace trait so that we can
 	    // attach event listeners to open/close folder actions to
@@ -3236,10 +3236,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      newGuiParams.load = this.load.folders[name];
 	    }
 	
-	    var gui = new GUI(newGuiParams);
+	    const gui = new GUI(newGuiParams);
 	    this.__folders[name] = gui;
 	
-	    var li = addRow(this, gui.domElement);
+	    const li = addRow(this, gui.domElement);
 	    _dom2.default.addClass(li, 'folder');
 	    return gui;
 	  },
@@ -3254,10 +3254,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  onResize: function onResize() {
 	    // we debounce this function to prevent performance issues when rotating on tablet/mobile
-	    var root = this.getRoot();
+	    const root = this.getRoot();
 	    if (root.scrollable) {
-	      var top = _dom2.default.getOffset(root.__ul).top;
-	      var h = 0;
+	      const top = _dom2.default.getOffset(root.__ul).top;
+	      let h = 0;
 	
 	      _common2.default.each(root.__ul.childNodes, function (node) {
 	        if (!(root.autoPlace && node === root.__save_row)) {
@@ -3308,7 +3308,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      throw new Error('You can only call remember on a top level GUI.');
 	    }
 	
-	    var _this = this;
+	    const _this = this;
 	
 	    _common2.default.each(Array.prototype.slice.call(arguments), function (object) {
 	      if (_this.__rememberedObjects.length === 0) {
@@ -3330,7 +3330,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @instance
 	   */
 	  getRoot: function getRoot() {
-	    var gui = this;
+	    let gui = this;
 	    while (gui.parent) {
 	      gui = gui.parent;
 	    }
@@ -3343,7 +3343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @instance
 	   */
 	  getSaveObject: function getSaveObject() {
-	    var toReturn = this.load;
+	    const toReturn = this.load;
 	    toReturn.closed = this.closed;
 	
 	    // Am I remembering any values?
@@ -3413,7 +3413,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  listen: function listen(controller) {
-	    var init = this.__listening.length === 0;
+	    const init = this.__listening.length === 0;
 	    this.__listening.push(controller);
 	    if (init) {
 	      updateDisplays(this.__listening);
@@ -3428,17 +3428,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      folder.updateDisplay();
 	    });
 	  }
-	});
+        });
 	
-	/**
+      /**
 	 * Add a row to the end of the GUI or before another row.
 	 *
 	 * @param gui
 	 * @param [newDom] If specified, inserts the dom content in the new row
 	 * @param [liBefore] If specified, places the new row before another row
 	 */
-	function addRow(gui, newDom, liBefore) {
-	  var li = document.createElement('li');
+      function addRow(gui, newDom, liBefore) {
+	  const li = document.createElement('li');
 	  if (newDom) {
 	    li.appendChild(newDom);
 	  }
@@ -3450,10 +3450,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  gui.onResize();
 	  return li;
-	}
+      }
 	
-	function markPresetModified(gui, modified) {
-	  var opt = gui.__preset_select[gui.__preset_select.selectedIndex];
+      function markPresetModified(gui, modified) {
+	  const opt = gui.__preset_select[gui.__preset_select.selectedIndex];
 	
 	  // console.log('mark', modified, opt);
 	  if (modified) {
@@ -3461,16 +3461,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    opt.innerHTML = opt.value;
 	  }
-	}
+      }
 	
-	function augmentController(gui, li, controller) {
+      function augmentController(gui, li, controller) {
 	  controller.__li = li;
 	  controller.__gui = gui;
 	
 	  _common2.default.extend(controller, {
 	    options: function options(_options) {
 	      if (arguments.length > 1) {
-	        var nextSibling = controller.__li.nextElementSibling;
+	        const nextSibling = controller.__li.nextElementSibling;
 	        controller.remove();
 	
 	        return _add(gui, controller.object, controller.property, {
@@ -3480,7 +3480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	
 	      if (_common2.default.isArray(_options) || _common2.default.isObject(_options)) {
-	        var _nextSibling = controller.__li.nextElementSibling;
+	        const _nextSibling = controller.__li.nextElementSibling;
 	        controller.remove();
 	
 	        return _add(gui, controller.object, controller.property, {
@@ -3508,13 +3508,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  // All sliders should be accompanied by a box.
 	  if (controller instanceof _NumberControllerSlider2.default) {
-	    var box = new _NumberControllerBox2.default(controller.object, controller.property, { min: controller.__min, max: controller.__max, step: controller.__step });
+	    const box = new _NumberControllerBox2.default(controller.object, controller.property, { min: controller.__min, max: controller.__max, step: controller.__step });
 	
 	    _common2.default.each(['updateDisplay', 'onChange', 'onFinishChange', 'step'], function (method) {
-	      var pc = controller[method];
-	      var pb = box[method];
+	      const pc = controller[method];
+	      const pb = box[method];
 	      controller[method] = box[method] = function () {
-	        var args = Array.prototype.slice.call(arguments);
+	        const args = Array.prototype.slice.call(arguments);
 	        pb.apply(box, args);
 	        return pc.apply(controller, args);
 	      };
@@ -3523,23 +3523,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _dom2.default.addClass(li, 'has-slider');
 	    controller.domElement.insertBefore(box.domElement, controller.domElement.firstElementChild);
 	  } else if (controller instanceof _NumberControllerBox2.default) {
-	    var r = function r(returned) {
+	    const r = function r(returned) {
 	      // Have we defined both boundaries?
 	      if (_common2.default.isNumber(controller.__min) && _common2.default.isNumber(controller.__max)) {
 	        // Well, then lets just replace this with a slider.
 	
 	        // lets remember if the old controller had a specific name or was listening
-	        var oldName = controller.__li.firstElementChild.firstElementChild.innerHTML;
-	        var wasListening = controller.__gui.__listening.indexOf(controller) > -1;
+	        const oldName = controller.__li.firstElementChild.firstElementChild.innerHTML;
+	        const wasListening = controller.__gui.__listening.indexOf(controller) > -1;
 	
 	        controller.remove();
-	        var newController = _add(gui, controller.object, controller.property, {
+	        const newController = _add(gui, controller.object, controller.property, {
 	          before: controller.__li.nextElementSibling,
 	          factoryArgs: [controller.__min, controller.__max, controller.__step]
 	        });
 	
 	        newController.name(oldName);
-	        if (wasListening) newController.listen();
+	        if (wasListening) {newController.listen();}
 	
 	        return newController;
 	      }
@@ -3586,20 +3586,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    return val;
 	  }, controller.setValue);
-	}
+      }
 	
-	function recallSavedValue(gui, controller) {
+      function recallSavedValue(gui, controller) {
 	  // Find the topmost GUI, that's where remembered objects live.
-	  var root = gui.getRoot();
+	  const root = gui.getRoot();
 	
 	  // Does the object we're controlling match anything we've been told to
 	  // remember?
-	  var matchedIndex = root.__rememberedObjects.indexOf(controller.object);
+	  const matchedIndex = root.__rememberedObjects.indexOf(controller.object);
 	
 	  // Why yes, it does!
 	  if (matchedIndex !== -1) {
 	    // Let me fetch a map of controllers for thcommon.isObject.
-	    var controllerMap = root.__rememberedObjectIndecesToControllers[matchedIndex];
+	    let controllerMap = root.__rememberedObjectIndecesToControllers[matchedIndex];
 	
 	    // Ohp, I believe this is the first controller we've created for this
 	    // object. Lets make the map fresh.
@@ -3613,10 +3613,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    // Okay, now have we saved any values for this controller?
 	    if (root.load && root.load.remembered) {
-	      var presetMap = root.load.remembered;
+	      const presetMap = root.load.remembered;
 	
 	      // Which preset are we trying to load?
-	      var preset = void 0;
+	      let preset = void 0;
 	
 	      if (presetMap[gui.preset]) {
 	        preset = presetMap[gui.preset];
@@ -3631,7 +3631,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // Did the loaded object remember thcommon.isObject? &&  Did we remember this particular property?
 	      if (preset[matchedIndex] && preset[matchedIndex][controller.property] !== undefined) {
 	        // We did remember something for this guy ...
-	        var value = preset[matchedIndex][controller.property];
+	        const value = preset[matchedIndex][controller.property];
 	
 	        // And that's what it is.
 	        controller.initialValue = value;
@@ -3639,19 +3639,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }
-	}
+      }
 	
-	function _add(gui, object, property, params) {
+      function _add(gui, object, property, params) {
 	  if (object[property] === undefined) {
 	    throw new Error('Object "' + object + '" has no property "' + property + '"');
 	  }
 	
-	  var controller = void 0;
+	  let controller = void 0;
 	
 	  if (params.color) {
 	    controller = new _ColorController2.default(object, property);
 	  } else {
-	    var factoryArgs = [object, property].concat(params.factoryArgs);
+	    const factoryArgs = [object, property].concat(params.factoryArgs);
 	    controller = _ControllerFactory2.default.apply(gui, factoryArgs);
 	  }
 	
@@ -3663,15 +3663,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  _dom2.default.addClass(controller.domElement, 'c');
 	
-	  var name = document.createElement('span');
+	  const name = document.createElement('span');
 	  _dom2.default.addClass(name, 'property-name');
 	  name.innerHTML = controller.property;
 	
-	  var container = document.createElement('div');
+	  const container = document.createElement('div');
 	  container.appendChild(name);
 	  container.appendChild(controller.domElement);
 	
-	  var li = addRow(gui, container, params.before);
+	  const li = addRow(gui, container, params.before);
 	
 	  _dom2.default.addClass(li, GUI.CLASS_CONTROLLER_ROW);
 	  if (controller instanceof _ColorController2.default) {
@@ -3685,29 +3685,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	  gui.__controllers.push(controller);
 	
 	  return controller;
-	}
+      }
 	
-	function getLocalStorageHash(gui, key) {
+      function getLocalStorageHash(gui, key) {
 	  // TODO how does this deal with multiple GUI's?
 	  return document.location.href + '.' + key;
-	}
+      }
 	
-	function addPresetOption(gui, name, setSelected) {
-	  var opt = document.createElement('option');
+      function addPresetOption(gui, name, setSelected) {
+	  const opt = document.createElement('option');
 	  opt.innerHTML = name;
 	  opt.value = name;
 	  gui.__preset_select.appendChild(opt);
 	  if (setSelected) {
 	    gui.__preset_select.selectedIndex = gui.__preset_select.length - 1;
 	  }
-	}
+      }
 	
-	function showHideExplain(gui, explain) {
+      function showHideExplain(gui, explain) {
 	  explain.style.display = gui.useLocalStorage ? 'block' : 'none';
-	}
+      }
 	
-	function addSaveMenu(gui) {
-	  var div = gui.__save_row = document.createElement('li');
+      function addSaveMenu(gui) {
+	  const div = gui.__save_row = document.createElement('li');
 	
 	  _dom2.default.addClass(gui.domElement, 'has-save');
 	
@@ -3715,27 +3715,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  _dom2.default.addClass(div, 'save-row');
 	
-	  var gears = document.createElement('span');
+	  const gears = document.createElement('span');
 	  gears.innerHTML = '&nbsp;';
 	  _dom2.default.addClass(gears, 'button gears');
 	
 	  // TODO replace with FunctionController
-	  var button = document.createElement('span');
+	  const button = document.createElement('span');
 	  button.innerHTML = 'Save';
 	  _dom2.default.addClass(button, 'button');
 	  _dom2.default.addClass(button, 'save');
 	
-	  var button2 = document.createElement('span');
+	  const button2 = document.createElement('span');
 	  button2.innerHTML = 'New';
 	  _dom2.default.addClass(button2, 'button');
 	  _dom2.default.addClass(button2, 'save-as');
 	
-	  var button3 = document.createElement('span');
+	  const button3 = document.createElement('span');
 	  button3.innerHTML = 'Revert';
 	  _dom2.default.addClass(button3, 'button');
 	  _dom2.default.addClass(button3, 'revert');
 	
-	  var select = gui.__preset_select = document.createElement('select');
+	  const select = gui.__preset_select = document.createElement('select');
 	
 	  if (gui.load && gui.load.remembered) {
 	    _common2.default.each(gui.load.remembered, function (value, key) {
@@ -3746,7 +3746,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  _dom2.default.bind(select, 'change', function () {
-	    for (var index = 0; index < gui.__preset_select.length; index++) {
+	    for (let index = 0; index < gui.__preset_select.length; index++) {
 	      gui.__preset_select[index].innerHTML = gui.__preset_select[index].value;
 	    }
 	
@@ -3760,9 +3760,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  div.appendChild(button3);
 	
 	  if (SUPPORTS_LOCAL_STORAGE) {
-	    var explain = document.getElementById('dg-local-explain');
-	    var localStorageCheckBox = document.getElementById('dg-local-storage');
-	    var saveLocally = document.getElementById('dg-save-locally');
+	    const explain = document.getElementById('dg-local-explain');
+	    const localStorageCheckBox = document.getElementById('dg-local-storage');
+	    const saveLocally = document.getElementById('dg-save-locally');
 	
 	    saveLocally.style.display = 'block';
 	
@@ -3779,7 +3779,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  }
 	
-	  var newConstructorTextArea = document.getElementById('dg-new-constructor');
+	  const newConstructorTextArea = document.getElementById('dg-new-constructor');
 	
 	  _dom2.default.bind(newConstructorTextArea, 'keydown', function (e) {
 	    if (e.metaKey && (e.which === 67 || e.keyCode === 67)) {
@@ -3799,7 +3799,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	
 	  _dom2.default.bind(button2, 'click', function () {
-	    var presetName = prompt('Enter a new preset name.');
+	    const presetName = prompt('Enter a new preset name.');
 	    if (presetName) {
 	      gui.saveAs(presetName);
 	    }
@@ -3810,10 +3810,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	
 	  // div.appendChild(button2);
-	}
+      }
 	
-	function addResizeHandle(gui) {
-	  var pmouseX = void 0;
+      function addResizeHandle(gui) {
+	  let pmouseX = void 0;
 	
 	  gui.__resize_handle = document.createElement('div');
 	
@@ -3860,9 +3860,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _dom2.default.bind(gui.__closeButton, 'mousedown', dragStart);
 	
 	  gui.domElement.insertBefore(gui.__resize_handle, gui.domElement.firstElementChild);
-	}
+      }
 	
-	function setWidth(gui, w) {
+      function setWidth(gui, w) {
 	  gui.domElement.style.width = w + 'px';
 	  // Auto placed save-rows are position fixed, so we have to
 	  // set the width manually if we want it to bleed to the edge
@@ -3872,17 +3872,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (gui.__closeButton) {
 	    gui.__closeButton.style.width = w + 'px';
 	  }
-	}
+      }
 	
-	function getCurrentPreset(gui, useInitialValues) {
-	  var toReturn = {};
+      function getCurrentPreset(gui, useInitialValues) {
+	  const toReturn = {};
 	
 	  // For each object I'm remembering
 	  _common2.default.each(gui.__rememberedObjects, function (val, index) {
-	    var savedValues = {};
+	    const savedValues = {};
 	
 	    // The controllers I've made for thcommon.isObject by property
-	    var controllerMap = gui.__rememberedObjectIndecesToControllers[index];
+	    const controllerMap = gui.__rememberedObjectIndecesToControllers[index];
 	
 	    // Remember each value for each property
 	    _common2.default.each(controllerMap, function (controller, property) {
@@ -3894,17 +3894,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	
 	  return toReturn;
-	}
+      }
 	
-	function setPresetSelectIndex(gui) {
-	  for (var index = 0; index < gui.__preset_select.length; index++) {
+      function setPresetSelectIndex(gui) {
+	  for (let index = 0; index < gui.__preset_select.length; index++) {
 	    if (gui.__preset_select[index].value === gui.preset) {
 	      gui.__preset_select.selectedIndex = index;
 	    }
 	  }
-	}
+      }
 	
-	function updateDisplays(controllerArray) {
+      function updateDisplays(controllerArray) {
 	  if (controllerArray.length !== 0) {
 	    _requestAnimationFrame2.default.call(window, function () {
 	      updateDisplays(controllerArray);
@@ -3914,18 +3914,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _common2.default.each(controllerArray, function (c) {
 	    c.updateDisplay();
 	  });
-	}
+      }
 	
-	exports.default = GUI;
-	module.exports = exports['default'];
+      exports.default = GUI;
+      module.exports = exports['default'];
 
-/***/ },
-/* 18 */
-/***/ function(module, exports) {
+      /***/ },
+    /* 18 */
+    /***/ function(module, exports) {
 
-	'use strict';
+      'use strict';
 	
-	/**
+      /**
 	 * dat-gui JavaScript Controller Library
 	 * http://code.google.com/p/dat-gui
 	 *
@@ -3938,10 +3938,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * http://www.apache.org/licenses/LICENSE-2.0
 	 */
 	
-	module.exports = {
+      module.exports = {
 	  load: function load(url, indoc) {
-	    var doc = indoc || document;
-	    var link = doc.createElement('link');
+	    const doc = indoc || document;
+	    const link = doc.createElement('link');
 	    link.type = 'text/css';
 	    link.rel = 'stylesheet';
 	    link.href = url;
@@ -3949,64 +3949,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  inject: function inject(css, indoc) {
-	    var doc = indoc || document;
-	    var injected = document.createElement('style');
+	    const doc = indoc || document;
+	    const injected = document.createElement('style');
 	    injected.type = 'text/css';
 	    injected.innerHTML = css;
-	    var head = doc.getElementsByTagName('head')[0];
+	    const head = doc.getElementsByTagName('head')[0];
 	    try {
 	      head.appendChild(injected);
 	    } catch (e) {// Unable to inject CSS, probably because of a Content Security Policy
 	    }
 	  }
-	};
+      };
 
-/***/ },
-/* 19 */
-/***/ function(module, exports) {
+      /***/ },
+    /* 19 */
+    /***/ function(module, exports) {
 
-	module.exports = "<div id=\"dg-save\" class=\"dg dialogue\">\n\n  Here's the new load parameter for your <code>GUI</code>'s constructor:\n\n  <textarea id=\"dg-new-constructor\"></textarea>\n\n  <div id=\"dg-save-locally\">\n\n    <input id=\"dg-local-storage\" type=\"checkbox\"/> Automatically save\n    values to <code>localStorage</code> on exit.\n\n    <div id=\"dg-local-explain\">The values saved to <code>localStorage</code> will\n      override those passed to <code>dat.GUI</code>'s constructor. This makes it\n      easier to work incrementally, but <code>localStorage</code> is fragile,\n      and your friends may not see the same values you do.\n\n    </div>\n\n  </div>\n\n</div>";
+      module.exports = "<div id=\"dg-save\" class=\"dg dialogue\">\n\n  Here's the new load parameter for your <code>GUI</code>'s constructor:\n\n  <textarea id=\"dg-new-constructor\"></textarea>\n\n  <div id=\"dg-save-locally\">\n\n    <input id=\"dg-local-storage\" type=\"checkbox\"/> Automatically save\n    values to <code>localStorage</code> on exit.\n\n    <div id=\"dg-local-explain\">The values saved to <code>localStorage</code> will\n      override those passed to <code>dat.GUI</code>'s constructor. This makes it\n      easier to work incrementally, but <code>localStorage</code> is fragile,\n      and your friends may not see the same values you do.\n\n    </div>\n\n  </div>\n\n</div>";
 
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 20 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _OptionController = __webpack_require__(10);
+      const _OptionController = __webpack_require__(10);
 	
-	var _OptionController2 = _interopRequireDefault(_OptionController);
+      const _OptionController2 = _interopRequireDefault(_OptionController);
 	
-	var _NumberControllerBox = __webpack_require__(13);
+      const _NumberControllerBox = __webpack_require__(13);
 	
-	var _NumberControllerBox2 = _interopRequireDefault(_NumberControllerBox);
+      const _NumberControllerBox2 = _interopRequireDefault(_NumberControllerBox);
 	
-	var _NumberControllerSlider = __webpack_require__(14);
+      const _NumberControllerSlider = __webpack_require__(14);
 	
-	var _NumberControllerSlider2 = _interopRequireDefault(_NumberControllerSlider);
+      const _NumberControllerSlider2 = _interopRequireDefault(_NumberControllerSlider);
 	
-	var _StringController = __webpack_require__(11);
+      const _StringController = __webpack_require__(11);
 	
-	var _StringController2 = _interopRequireDefault(_StringController);
+      const _StringController2 = _interopRequireDefault(_StringController);
 	
-	var _FunctionController = __webpack_require__(15);
+      const _FunctionController = __webpack_require__(15);
 	
-	var _FunctionController2 = _interopRequireDefault(_FunctionController);
+      const _FunctionController2 = _interopRequireDefault(_FunctionController);
 	
-	var _BooleanController = __webpack_require__(8);
+      const _BooleanController = __webpack_require__(8);
 	
-	var _BooleanController2 = _interopRequireDefault(_BooleanController);
+      const _BooleanController2 = _interopRequireDefault(_BooleanController);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var ControllerFactory = function ControllerFactory(object, property) {
-	  var initialValue = object[property];
+      const ControllerFactory = function ControllerFactory(object, property) {
+	  const initialValue = object[property];
 	
 	  // Providing options?
 	  if (_common2.default.isArray(arguments[2]) || _common2.default.isObject(arguments[2])) {
@@ -4046,7 +4046,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  return null;
-	}; /**
+      }; /**
 	    * dat-gui JavaScript Controller Library
 	    * http://code.google.com/p/dat-gui
 	    *
@@ -4059,17 +4059,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    * http://www.apache.org/licenses/LICENSE-2.0
 	    */
 	
-	exports.default = ControllerFactory;
-	module.exports = exports['default'];
+      exports.default = ControllerFactory;
+      module.exports = exports['default'];
 
-/***/ },
-/* 21 */
-/***/ function(module, exports) {
+      /***/ },
+    /* 21 */
+    /***/ function(module, exports) {
 
-	"use strict";
+      'use strict';
 	
-	exports.__esModule = true;
-	/**
+      exports.__esModule = true;
+      /**
 	 * dat-gui JavaScript Controller Library
 	 * http://code.google.com/p/dat-gui
 	 *
@@ -4082,32 +4082,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * http://www.apache.org/licenses/LICENSE-2.0
 	 */
 	
-	function requestAnimationFrame(callback) {
+      function requestAnimationFrame(callback) {
 	  setTimeout(callback, 1000 / 60);
-	}
+      }
 	
-	exports.default = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || requestAnimationFrame;
-	module.exports = exports["default"];
+      exports.default = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || requestAnimationFrame;
+      module.exports = exports['default'];
 
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 22 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+      'use strict';
 	
-	exports.__esModule = true;
+      exports.__esModule = true;
 	
-	var _dom = __webpack_require__(9);
+      const _dom = __webpack_require__(9);
 	
-	var _dom2 = _interopRequireDefault(_dom);
+      const _dom2 = _interopRequireDefault(_dom);
 	
-	var _common = __webpack_require__(5);
+      const _common = __webpack_require__(5);
 	
-	var _common2 = _interopRequireDefault(_common);
+      const _common2 = _interopRequireDefault(_common);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+      function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } /**
+      function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } } /**
 	                                                                                                                                                           * dat-gui JavaScript Controller Library
 	                                                                                                                                                           * http://code.google.com/p/dat-gui
 	                                                                                                                                                           *
@@ -4120,7 +4120,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                                                                                                                                           * http://www.apache.org/licenses/LICENSE-2.0
 	                                                                                                                                                           */
 	
-	var CenteredDiv = function () {
+      const CenteredDiv = function () {
 	  function CenteredDiv() {
 	    _classCallCheck(this, CenteredDiv);
 	
@@ -4152,14 +4152,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    document.body.appendChild(this.backgroundElement);
 	    document.body.appendChild(this.domElement);
 	
-	    var _this = this;
+	    const _this = this;
 	    _dom2.default.bind(this.backgroundElement, 'click', function () {
 	      _this.hide();
 	    });
 	  }
 	
 	  CenteredDiv.prototype.show = function show() {
-	    var _this = this;
+	    const _this = this;
 	
 	    this.backgroundElement.style.display = 'block';
 	
@@ -4183,9 +4183,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	  CenteredDiv.prototype.hide = function hide() {
-	    var _this = this;
+	    const _this = this;
 	
-	    var hide = function hide() {
+	    const hide = function hide() {
 	      _this.domElement.style.display = 'none';
 	      _this.backgroundElement.style.display = 'none';
 	
@@ -4210,83 +4210,83 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	
 	  return CenteredDiv;
-	}();
+      }();
 	
-	exports.default = CenteredDiv;
-	module.exports = exports['default'];
+      exports.default = CenteredDiv;
+      module.exports = exports['default'];
 
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
+      /***/ },
+    /* 23 */
+    /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(24)();
-	// imports
+      exports = module.exports = __webpack_require__(24)();
+      // imports
 	
 	
-	// module
-	exports.push([module.id, ".dg {\n  /** Clear list styles */\n  /* Auto-place container */\n  /* Auto-placed GUI's */\n  /* Line items that don't contain folders. */\n  /** Folder names */\n  /** Hides closed items */\n  /** Controller row */\n  /** Name-half (left) */\n  /** Controller-half (right) */\n  /** Controller placement */\n  /** Shorter number boxes when slider is present. */\n  /** Ensure the entire boolean and function row shows a hand */\n  /** allow overflow for color selector */ }\n  .dg ul {\n    list-style: none;\n    margin: 0;\n    padding: 0;\n    width: 100%;\n    clear: both; }\n  .dg.ac {\n    position: fixed;\n    top: 0;\n    left: 0;\n    right: 0;\n    height: 0;\n    z-index: 0; }\n  .dg:not(.ac) .main {\n    /** Exclude mains in ac so that we don't hide close button */\n    overflow: hidden; }\n  .dg.main {\n    -webkit-transition: opacity 0.1s linear;\n    -o-transition: opacity 0.1s linear;\n    -moz-transition: opacity 0.1s linear;\n    transition: opacity 0.1s linear; }\n    .dg.main.taller-than-window {\n      overflow-y: auto; }\n      .dg.main.taller-than-window .close-button {\n        opacity: 1;\n        /* TODO, these are style notes */\n        margin-top: -1px;\n        border-top: 1px solid #2c2c2c; }\n    .dg.main ul.closed .close-button {\n      opacity: 1 !important; }\n    .dg.main:hover .close-button,\n    .dg.main .close-button.drag {\n      opacity: 1; }\n    .dg.main .close-button {\n      /*opacity: 0;*/\n      -webkit-transition: opacity 0.1s linear;\n      -o-transition: opacity 0.1s linear;\n      -moz-transition: opacity 0.1s linear;\n      transition: opacity 0.1s linear;\n      border: 0;\n      line-height: 19px;\n      height: 20px;\n      /* TODO, these are style notes */\n      cursor: pointer;\n      text-align: center;\n      background-color: #000; }\n      .dg.main .close-button.close-top {\n        position: relative; }\n      .dg.main .close-button.close-bottom {\n        position: absolute; }\n      .dg.main .close-button:hover {\n        background-color: #111; }\n  .dg.a {\n    float: right;\n    margin-right: 15px;\n    overflow-y: visible; }\n    .dg.a.has-save > ul.close-top {\n      margin-top: 0; }\n    .dg.a.has-save > ul.close-bottom {\n      margin-top: 27px; }\n    .dg.a.has-save > ul.closed {\n      margin-top: 0; }\n    .dg.a .save-row {\n      top: 0;\n      z-index: 1002; }\n      .dg.a .save-row.close-top {\n        position: relative; }\n      .dg.a .save-row.close-bottom {\n        position: fixed; }\n  .dg li {\n    -webkit-transition: height 0.1s ease-out;\n    -o-transition: height 0.1s ease-out;\n    -moz-transition: height 0.1s ease-out;\n    transition: height 0.1s ease-out;\n    -webkit-transition: overflow 0.1s linear;\n    -o-transition: overflow 0.1s linear;\n    -moz-transition: overflow 0.1s linear;\n    transition: overflow 0.1s linear; }\n  .dg li:not(.folder) {\n    cursor: auto;\n    height: 27px;\n    line-height: 27px;\n    padding: 0 4px 0 5px; }\n  .dg li.folder {\n    padding: 0;\n    border-left: 4px solid transparent; }\n  .dg li.title {\n    cursor: pointer;\n    margin-left: -4px; }\n  .dg .closed li:not(.title),\n  .dg .closed ul li,\n  .dg .closed ul li > * {\n    height: 0;\n    overflow: hidden;\n    border: 0; }\n  .dg .cr {\n    clear: both;\n    padding-left: 3px;\n    height: 27px;\n    overflow: hidden; }\n  .dg .property-name {\n    cursor: default;\n    float: left;\n    clear: left;\n    width: 40%;\n    overflow: hidden;\n    text-overflow: ellipsis; }\n  .dg .c {\n    float: left;\n    width: 60%;\n    position: relative; }\n  .dg .c input[type=text] {\n    border: 0;\n    margin-top: 4px;\n    padding: 3px;\n    width: 100%;\n    float: right; }\n  .dg .has-slider input[type=text] {\n    width: 30%;\n    /*display: none;*/\n    margin-left: 0; }\n  .dg .slider {\n    float: left;\n    width: 66%;\n    margin-left: -5px;\n    margin-right: 0;\n    height: 19px;\n    margin-top: 4px; }\n  .dg .slider-fg {\n    height: 100%; }\n  .dg .c input[type=checkbox] {\n    margin-top: 7px; }\n  .dg .c select {\n    margin-top: 5px; }\n  .dg .cr.function,\n  .dg .cr.function .property-name,\n  .dg .cr.function *,\n  .dg .cr.boolean,\n  .dg .cr.boolean * {\n    cursor: pointer; }\n  .dg .cr.color {\n    overflow: visible; }\n  .dg .selector {\n    display: none;\n    position: absolute;\n    margin-left: -9px;\n    margin-top: 23px;\n    z-index: 10; }\n  .dg .c:hover .selector,\n  .dg .selector.drag {\n    display: block; }\n  .dg li.save-row {\n    padding: 0; }\n    .dg li.save-row .button {\n      display: inline-block;\n      padding: 0px 6px; }\n  .dg.dialogue {\n    background-color: #222;\n    width: 460px;\n    padding: 15px;\n    font-size: 13px;\n    line-height: 15px; }\n\n/* TODO Separate style and structure */\n#dg-new-constructor {\n  padding: 10px;\n  color: #222;\n  font-family: Monaco, monospace;\n  font-size: 10px;\n  border: 0;\n  resize: none;\n  box-shadow: inset 1px 1px 1px #888;\n  word-wrap: break-word;\n  margin: 12px 0;\n  display: block;\n  width: 440px;\n  overflow-y: scroll;\n  height: 100px;\n  position: relative; }\n\n#dg-local-explain {\n  display: none;\n  font-size: 11px;\n  line-height: 17px;\n  border-radius: 3px;\n  background-color: #333;\n  padding: 8px;\n  margin-top: 10px; }\n  #dg-local-explain code {\n    font-size: 10px; }\n\n#dat-gui-save-locally {\n  display: none; }\n\n/** Main type */\n.dg {\n  color: #eee;\n  font: 11px 'Lucida Grande', sans-serif;\n  text-shadow: 0 -1px 0 #111;\n  /** Auto place */\n  /* Controller row, <li> */\n  /** Controllers */ }\n  .dg.main {\n    /** Scrollbar */ }\n    .dg.main::-webkit-scrollbar {\n      width: 5px;\n      background: #1a1a1a; }\n    .dg.main::-webkit-scrollbar-corner {\n      height: 0;\n      display: none; }\n    .dg.main::-webkit-scrollbar-thumb {\n      border-radius: 5px;\n      background: #676767; }\n  .dg li:not(.folder) {\n    background: #1a1a1a;\n    border-bottom: 1px solid #2c2c2c; }\n  .dg li.save-row {\n    line-height: 25px;\n    background: #dad5cb;\n    border: 0; }\n    .dg li.save-row select {\n      margin-left: 5px;\n      width: 108px; }\n    .dg li.save-row .button {\n      margin-left: 5px;\n      margin-top: 1px;\n      border-radius: 2px;\n      font-size: 9px;\n      line-height: 7px;\n      padding: 4px 4px 5px 4px;\n      background: #c5bdad;\n      color: #fff;\n      text-shadow: 0 1px 0 #b0a58f;\n      box-shadow: 0 -1px 0 #b0a58f;\n      cursor: pointer; }\n      .dg li.save-row .button.gears {\n        background: #c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;\n        height: 7px;\n        width: 8px; }\n      .dg li.save-row .button:hover {\n        background-color: #bab19e;\n        box-shadow: 0 -1px 0 #b0a58f; }\n  .dg li.folder {\n    border-bottom: 0; }\n  .dg li.title {\n    padding-left: 16px;\n    background: #000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;\n    cursor: pointer;\n    border-bottom: 1px solid rgba(255, 255, 255, 0.2); }\n  .dg .closed li.title {\n    background-image: url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==); }\n  .dg .cr.boolean {\n    border-left: 3px solid #806787; }\n  .dg .cr.color {\n    border-left: 3px solid; }\n  .dg .cr.function {\n    border-left: 3px solid #e61d5f; }\n  .dg .cr.number {\n    border-left: 3px solid #2FA1D6; }\n    .dg .cr.number input[type=text] {\n      color: #2FA1D6; }\n  .dg .cr.string {\n    border-left: 3px solid #1ed36f; }\n    .dg .cr.string input[type=text] {\n      color: #1ed36f; }\n  .dg .cr.function:hover, .dg .cr.boolean:hover {\n    background: #111; }\n  .dg .c input[type=text] {\n    background: #303030;\n    outline: none; }\n    .dg .c input[type=text]:hover {\n      background: #3c3c3c; }\n    .dg .c input[type=text]:focus {\n      background: #494949;\n      color: #fff; }\n  .dg .c .slider {\n    background: #303030;\n    cursor: ew-resize; }\n  .dg .c .slider-fg {\n    background: #2FA1D6;\n    max-width: 100%; }\n  .dg .c .slider:hover {\n    background: #3c3c3c; }\n    .dg .c .slider:hover .slider-fg {\n      background: #44abda; }\n", ""]);
+      // module
+      exports.push([module.id, ".dg {\n  /** Clear list styles */\n  /* Auto-place container */\n  /* Auto-placed GUI's */\n  /* Line items that don't contain folders. */\n  /** Folder names */\n  /** Hides closed items */\n  /** Controller row */\n  /** Name-half (left) */\n  /** Controller-half (right) */\n  /** Controller placement */\n  /** Shorter number boxes when slider is present. */\n  /** Ensure the entire boolean and function row shows a hand */\n  /** allow overflow for color selector */ }\n  .dg ul {\n    list-style: none;\n    margin: 0;\n    padding: 0;\n    width: 100%;\n    clear: both; }\n  .dg.ac {\n    position: fixed;\n    top: 0;\n    left: 0;\n    right: 0;\n    height: 0;\n    z-index: 0; }\n  .dg:not(.ac) .main {\n    /** Exclude mains in ac so that we don't hide close button */\n    overflow: hidden; }\n  .dg.main {\n    -webkit-transition: opacity 0.1s linear;\n    -o-transition: opacity 0.1s linear;\n    -moz-transition: opacity 0.1s linear;\n    transition: opacity 0.1s linear; }\n    .dg.main.taller-than-window {\n      overflow-y: auto; }\n      .dg.main.taller-than-window .close-button {\n        opacity: 1;\n        /* TODO, these are style notes */\n        margin-top: -1px;\n        border-top: 1px solid #2c2c2c; }\n    .dg.main ul.closed .close-button {\n      opacity: 1 !important; }\n    .dg.main:hover .close-button,\n    .dg.main .close-button.drag {\n      opacity: 1; }\n    .dg.main .close-button {\n      /*opacity: 0;*/\n      -webkit-transition: opacity 0.1s linear;\n      -o-transition: opacity 0.1s linear;\n      -moz-transition: opacity 0.1s linear;\n      transition: opacity 0.1s linear;\n      border: 0;\n      line-height: 19px;\n      height: 20px;\n      /* TODO, these are style notes */\n      cursor: pointer;\n      text-align: center;\n      background-color: #000; }\n      .dg.main .close-button.close-top {\n        position: relative; }\n      .dg.main .close-button.close-bottom {\n        position: absolute; }\n      .dg.main .close-button:hover {\n        background-color: #111; }\n  .dg.a {\n    float: right;\n    margin-right: 15px;\n    overflow-y: visible; }\n    .dg.a.has-save > ul.close-top {\n      margin-top: 0; }\n    .dg.a.has-save > ul.close-bottom {\n      margin-top: 27px; }\n    .dg.a.has-save > ul.closed {\n      margin-top: 0; }\n    .dg.a .save-row {\n      top: 0;\n      z-index: 1002; }\n      .dg.a .save-row.close-top {\n        position: relative; }\n      .dg.a .save-row.close-bottom {\n        position: fixed; }\n  .dg li {\n    -webkit-transition: height 0.1s ease-out;\n    -o-transition: height 0.1s ease-out;\n    -moz-transition: height 0.1s ease-out;\n    transition: height 0.1s ease-out;\n    -webkit-transition: overflow 0.1s linear;\n    -o-transition: overflow 0.1s linear;\n    -moz-transition: overflow 0.1s linear;\n    transition: overflow 0.1s linear; }\n  .dg li:not(.folder) {\n    cursor: auto;\n    height: 27px;\n    line-height: 27px;\n    padding: 0 4px 0 5px; }\n  .dg li.folder {\n    padding: 0;\n    border-left: 4px solid transparent; }\n  .dg li.title {\n    cursor: pointer;\n    margin-left: -4px; }\n  .dg .closed li:not(.title),\n  .dg .closed ul li,\n  .dg .closed ul li > * {\n    height: 0;\n    overflow: hidden;\n    border: 0; }\n  .dg .cr {\n    clear: both;\n    padding-left: 3px;\n    height: 27px;\n    overflow: hidden; }\n  .dg .property-name {\n    cursor: default;\n    float: left;\n    clear: left;\n    width: 40%;\n    overflow: hidden;\n    text-overflow: ellipsis; }\n  .dg .c {\n    float: left;\n    width: 60%;\n    position: relative; }\n  .dg .c input[type=text] {\n    border: 0;\n    margin-top: 4px;\n    padding: 3px;\n    width: 100%;\n    float: right; }\n  .dg .has-slider input[type=text] {\n    width: 30%;\n    /*display: none;*/\n    margin-left: 0; }\n  .dg .slider {\n    float: left;\n    width: 66%;\n    margin-left: -5px;\n    margin-right: 0;\n    height: 19px;\n    margin-top: 4px; }\n  .dg .slider-fg {\n    height: 100%; }\n  .dg .c input[type=checkbox] {\n    margin-top: 7px; }\n  .dg .c select {\n    margin-top: 5px; }\n  .dg .cr.function,\n  .dg .cr.function .property-name,\n  .dg .cr.function *,\n  .dg .cr.boolean,\n  .dg .cr.boolean * {\n    cursor: pointer; }\n  .dg .cr.color {\n    overflow: visible; }\n  .dg .selector {\n    display: none;\n    position: absolute;\n    margin-left: -9px;\n    margin-top: 23px;\n    z-index: 10; }\n  .dg .c:hover .selector,\n  .dg .selector.drag {\n    display: block; }\n  .dg li.save-row {\n    padding: 0; }\n    .dg li.save-row .button {\n      display: inline-block;\n      padding: 0px 6px; }\n  .dg.dialogue {\n    background-color: #222;\n    width: 460px;\n    padding: 15px;\n    font-size: 13px;\n    line-height: 15px; }\n\n/* TODO Separate style and structure */\n#dg-new-constructor {\n  padding: 10px;\n  color: #222;\n  font-family: Monaco, monospace;\n  font-size: 10px;\n  border: 0;\n  resize: none;\n  box-shadow: inset 1px 1px 1px #888;\n  word-wrap: break-word;\n  margin: 12px 0;\n  display: block;\n  width: 440px;\n  overflow-y: scroll;\n  height: 100px;\n  position: relative; }\n\n#dg-local-explain {\n  display: none;\n  font-size: 11px;\n  line-height: 17px;\n  border-radius: 3px;\n  background-color: #333;\n  padding: 8px;\n  margin-top: 10px; }\n  #dg-local-explain code {\n    font-size: 10px; }\n\n#dat-gui-save-locally {\n  display: none; }\n\n/** Main type */\n.dg {\n  color: #eee;\n  font: 11px 'Lucida Grande', sans-serif;\n  text-shadow: 0 -1px 0 #111;\n  /** Auto place */\n  /* Controller row, <li> */\n  /** Controllers */ }\n  .dg.main {\n    /** Scrollbar */ }\n    .dg.main::-webkit-scrollbar {\n      width: 5px;\n      background: #1a1a1a; }\n    .dg.main::-webkit-scrollbar-corner {\n      height: 0;\n      display: none; }\n    .dg.main::-webkit-scrollbar-thumb {\n      border-radius: 5px;\n      background: #676767; }\n  .dg li:not(.folder) {\n    background: #1a1a1a;\n    border-bottom: 1px solid #2c2c2c; }\n  .dg li.save-row {\n    line-height: 25px;\n    background: #dad5cb;\n    border: 0; }\n    .dg li.save-row select {\n      margin-left: 5px;\n      width: 108px; }\n    .dg li.save-row .button {\n      margin-left: 5px;\n      margin-top: 1px;\n      border-radius: 2px;\n      font-size: 9px;\n      line-height: 7px;\n      padding: 4px 4px 5px 4px;\n      background: #c5bdad;\n      color: #fff;\n      text-shadow: 0 1px 0 #b0a58f;\n      box-shadow: 0 -1px 0 #b0a58f;\n      cursor: pointer; }\n      .dg li.save-row .button.gears {\n        background: #c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;\n        height: 7px;\n        width: 8px; }\n      .dg li.save-row .button:hover {\n        background-color: #bab19e;\n        box-shadow: 0 -1px 0 #b0a58f; }\n  .dg li.folder {\n    border-bottom: 0; }\n  .dg li.title {\n    padding-left: 16px;\n    background: #000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;\n    cursor: pointer;\n    border-bottom: 1px solid rgba(255, 255, 255, 0.2); }\n  .dg .closed li.title {\n    background-image: url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==); }\n  .dg .cr.boolean {\n    border-left: 3px solid #806787; }\n  .dg .cr.color {\n    border-left: 3px solid; }\n  .dg .cr.function {\n    border-left: 3px solid #e61d5f; }\n  .dg .cr.number {\n    border-left: 3px solid #2FA1D6; }\n    .dg .cr.number input[type=text] {\n      color: #2FA1D6; }\n  .dg .cr.string {\n    border-left: 3px solid #1ed36f; }\n    .dg .cr.string input[type=text] {\n      color: #1ed36f; }\n  .dg .cr.function:hover, .dg .cr.boolean:hover {\n    background: #111; }\n  .dg .c input[type=text] {\n    background: #303030;\n    outline: none; }\n    .dg .c input[type=text]:hover {\n      background: #3c3c3c; }\n    .dg .c input[type=text]:focus {\n      background: #494949;\n      color: #fff; }\n  .dg .c .slider {\n    background: #303030;\n    cursor: ew-resize; }\n  .dg .c .slider-fg {\n    background: #2FA1D6;\n    max-width: 100%; }\n  .dg .c .slider:hover {\n    background: #3c3c3c; }\n    .dg .c .slider:hover .slider-fg {\n      background: #44abda; }\n", '']);
 	
-	// exports
+      // exports
 
 
-/***/ },
-/* 24 */
-/***/ function(module, exports) {
+      /***/ },
+    /* 24 */
+    /***/ function(module, exports) {
 
-	/*
+      /*
 		MIT License http://www.opensource.org/licenses/mit-license.php
 		Author Tobias Koppers @sokra
 	*/
-	// css base code, injected by the css-loader
-	module.exports = function() {
-		var list = [];
+      // css base code, injected by the css-loader
+      module.exports = function() {
+        const list = [];
 	
-		// return the list of modules as css string
-		list.toString = function toString() {
-			var result = [];
-			for(var i = 0; i < this.length; i++) {
-				var item = this[i];
-				if(item[2]) {
-					result.push("@media " + item[2] + "{" + item[1] + "}");
-				} else {
-					result.push(item[1]);
-				}
-			}
-			return result.join("");
-		};
+        // return the list of modules as css string
+        list.toString = function toString() {
+          const result = [];
+          for(let i = 0; i < this.length; i++) {
+            const item = this[i];
+            if(item[2]) {
+              result.push('@media ' + item[2] + '{' + item[1] + '}');
+            } else {
+              result.push(item[1]);
+            }
+          }
+          return result.join('');
+        };
 	
-		// import a list of modules into the list
-		list.i = function(modules, mediaQuery) {
-			if(typeof modules === "string")
-				modules = [[null, modules, ""]];
-			var alreadyImportedModules = {};
-			for(var i = 0; i < this.length; i++) {
-				var id = this[i][0];
-				if(typeof id === "number")
-					alreadyImportedModules[id] = true;
-			}
-			for(i = 0; i < modules.length; i++) {
-				var item = modules[i];
-				// skip already imported module
-				// this implementation is not 100% perfect for weird media query combinations
-				//  when a module is imported multiple times with different media queries.
-				//  I hope this will never occur (Hey this way we have smaller bundles)
-				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-					if(mediaQuery && !item[2]) {
-						item[2] = mediaQuery;
-					} else if(mediaQuery) {
-						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-					}
-					list.push(item);
-				}
-			}
-		};
-		return list;
-	};
+        // import a list of modules into the list
+        list.i = function(modules, mediaQuery) {
+          if(typeof modules === 'string')
+          {modules = [[null, modules, '']];}
+          const alreadyImportedModules = {};
+          for(var i = 0; i < this.length; i++) {
+            const id = this[i][0];
+            if(typeof id === 'number')
+            {alreadyImportedModules[id] = true;}
+          }
+          for(i = 0; i < modules.length; i++) {
+            const item = modules[i];
+            // skip already imported module
+            // this implementation is not 100% perfect for weird media query combinations
+            //  when a module is imported multiple times with different media queries.
+            //  I hope this will never occur (Hey this way we have smaller bundles)
+            if(typeof item[0] !== 'number' || !alreadyImportedModules[item[0]]) {
+              if(mediaQuery && !item[2]) {
+                item[2] = mediaQuery;
+              } else if(mediaQuery) {
+                item[2] = '(' + item[2] + ') and (' + mediaQuery + ')';
+              }
+              list.push(item);
+            }
+          }
+        };
+        return list;
+      };
 
 
-/***/ }
-/******/ ])
+      /***/ }
+    /******/ ]);
 });
 ;
 //# sourceMappingURL=dat.gui.js.map

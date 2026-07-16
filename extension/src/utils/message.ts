@@ -13,14 +13,14 @@
  */
 export interface Message {
   type: string;
-  payload: any;
+  payload: Record<string, any> | any;
 }
 
 /**
  * 响应结构
  */
 export interface Response {
-  result?: any;
+  result?: Record<string, any> | any;
   error?: string;
 }
 
@@ -29,25 +29,31 @@ export interface Response {
  * @param message 消息对象
  * @returns Promise<Response> 响应
  */
-export function sendMessageToContentScript(message: Message): Promise<Response> {
+export function sendMessageToContentScript(
+  message: Message,
+): Promise<Response> {
   return new Promise((resolve) => {
     // 向当前标签页发送消息
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length > 0) {
         const tabId = tabs[0].id;
         if (tabId) {
-          chrome.tabs.sendMessage(tabId, { ...message, target: 'content' }, (response) => {
-            if (chrome.runtime.lastError) {
-              resolve({ error: chrome.runtime.lastError.message });
-            } else {
-              resolve(response || {});
-            }
-          });
+          chrome.tabs.sendMessage(
+            tabId,
+            { ...message, target: "content" },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                resolve({ error: chrome.runtime.lastError.message });
+              } else {
+                resolve(response || {});
+              }
+            },
+          );
         } else {
-          resolve({ error: 'No active tab id' });
+          resolve({ error: "No active tab id" });
         }
       } else {
-        resolve({ error: 'No active tabs' });
+        resolve({ error: "No active tabs" });
       }
     });
   });
@@ -60,12 +66,15 @@ export function sendMessageToContentScript(message: Message): Promise<Response> 
  */
 export function sendMessageToBackground(message: Message): Promise<Response> {
   return new Promise((resolve) => {
-    chrome.runtime.sendMessage({ ...message, target: 'background' }, (response) => {
-      if (chrome.runtime.lastError) {
-        resolve({ error: chrome.runtime.lastError.message });
-      } else {
-        resolve(response || {});
-      }
-    });
+    chrome.runtime.sendMessage(
+      { ...message, target: "background" },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          resolve({ error: chrome.runtime.lastError.message });
+        } else {
+          resolve(response || {});
+        }
+      },
+    );
   });
 }

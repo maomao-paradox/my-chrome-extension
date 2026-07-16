@@ -11,8 +11,8 @@ import { ref } from 'vue';
 
 // 定义防抖函数的类型
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
-  if (typeof func !== "function") {
-    throw new Error("func is not a function");
+  if (typeof func !== 'function') {
+    throw new Error('func is not a function');
   }
   let timeout: ReturnType<typeof setTimeout> | null = null;
   return function (...args: Parameters<T>) {

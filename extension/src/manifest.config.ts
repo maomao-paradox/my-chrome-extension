@@ -1,12 +1,12 @@
-import { defineManifest } from '@crxjs/vite-plugin'
+import { defineManifest } from '@crxjs/vite-plugin';
 
 function generateContentScripts() {
   return [{
     matches: ['*://*/*'],
     js: ['content/main'],
     run_at: 'document_start',
-    "all_frames": true,
-  }]
+    'all_frames': true
+  }];
 }
 
 export default defineManifest({
@@ -19,7 +19,7 @@ export default defineManifest({
   icons: {
     16: 'static/icons/favicon16.ico' as never,
     48: 'static/icons/favicon48.ico' as never,
-    128: 'static/icons/favicon128.ico' as never,
+    128: 'static/icons/favicon128.ico' as never
   },
 
   action: {
@@ -28,8 +28,8 @@ export default defineManifest({
     default_icon: {
       16: 'static/icons/favicon16.ico' as never,
       48: 'static/icons/favicon48.ico' as never,
-      128: 'static/icons/favicon128.ico' as never,
-    },
+      128: 'static/icons/favicon128.ico' as never
+    }
   },
   //@ts-ignore chrome dev版本
   // automation: {
@@ -38,16 +38,16 @@ export default defineManifest({
   // },
 
   side_panel: {
-    default_path: 'pages/sidepanel.html',
+    default_path: 'pages/sidepanel.html'
   },
 
   options_page: 'pages/options.html' as never,
 
-  devtools_page: "pages/devtools.html" as never,
+  devtools_page: 'pages/devtools.html' as never,
 
   background: {
     service_worker: 'service-worker/background',
-    type: 'module',
+    type: 'module'
   },
 
   content_scripts: [...generateContentScripts()],
@@ -68,11 +68,11 @@ export default defineManifest({
         'static/css/*.css',
         'pages/devtools/*.html',
         'pages/devtools/*.js',
-        "*.json",
-        "ExtensionToolPrompt.md"
+        '*.json',
+        'ExtensionToolPrompt.md'
       ],
-      matches: ['*://*/*'],
-    },
+      matches: ['*://*/*']
+    }
   ],
 
   permissions: [
@@ -86,12 +86,12 @@ export default defineManifest({
     'contextMenus',
     'cookies',
     'sidePanel',
-    'webNavigation',
+    'webNavigation'
     // "automation"
   ],
   host_permissions: ['<all_urls>'],
 
   content_security_policy: {
-    extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
-  },
+    extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
 });

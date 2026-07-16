@@ -53,30 +53,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useMouseTracker } from '@/assets/composables/mouse/mouseTracker'
+import { ref, onMounted } from 'vue';
+import { useMouseTracker } from '@/assets/composables/mouse/mouseTracker';
 
-const curX = ref(0)
-const curY = ref(0)
+const curX = ref(0);
+const curY = ref(0);
 
-const { x: tgX, y: tgY } = useMouseTracker()
+const { x: tgX, y: tgY } = useMouseTracker();
 
-const interactiveBubble = ref<HTMLDivElement>()
+const interactiveBubble = ref<HTMLDivElement>();
 
 const move = () => {
-    curX.value += (tgX.value - curX.value) / 20;
-    curY.value += (tgY.value - curY.value) / 20;
-    //@ts-ignore
-    interactiveBubble.value.style.transform = `translate(${Math.round(curX.value)}px, ${Math.round(curY.value)}px)`;
-    requestAnimationFrame(move);
+  curX.value += (tgX.value - curX.value) / 20;
+  curY.value += (tgY.value - curY.value) / 20;
+  //@ts-ignore
+  interactiveBubble.value.style.transform = `translate(${Math.round(curX.value)}px, ${Math.round(curY.value)}px)`;
+  requestAnimationFrame(move);
 };
 onMounted(() => {
-    if (!interactiveBubble.value || interactiveBubble.value === void 0) {
-        maLogger.error('Interactive element not found');
-        return;
-    }
-    move();
-    maLogger.log('Interactive gradient initialized');
+  if (!interactiveBubble.value || interactiveBubble.value === void 0) {
+    maLogger.error('Interactive element not found');
+    return;
+  }
+  move();
+  maLogger.log('Interactive gradient initialized');
 });
 </script>
 

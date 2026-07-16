@@ -1,13 +1,13 @@
 <template>
-    <a class="rolling-text" href="#" ref="rollingTextRef">
+    <a ref="rollingTextRef" class="rolling-text" href="#">
         <div class='block'>
-            <span class="letter" v-for="(letter, i) in props.text" :key="i"
+            <span v-for="(letter, i) in props.text" :key="i" class="letter"
                 :style="{ transitionDelay: i * 0.015 + 's' }">
                 {{ letter.trim() === '' ? '\xa0' : letter }}
             </span>
         </div>
         <div class='block-shadow'>
-            <span class="letter" v-for="(letter, i) in props.text" :key="i"
+            <span v-for="(letter, i) in props.text" :key="i" class="letter"
                 :style="{ transitionDelay: i * 0.015 + 's' }">
                 {{ letter.trim() === '' ? '\xa0' : letter }}
             </span>
@@ -16,32 +16,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue';
 
 interface RollingTextProps {
     text: string;
 }
 
-const props = defineProps<RollingTextProps>()
+const props = defineProps<RollingTextProps>();
 
-const rollingTextRef = ref<HTMLAnchorElement>()
+const rollingTextRef = ref<HTMLAnchorElement>();
 
 onMounted(() => {
-    // for presentation purpose
-    setTimeout(() => {
-        rollingTextRef.value?.classList.add('play');
-    }, 600);
+  // for presentation purpose
+  setTimeout(() => {
+    rollingTextRef.value?.classList.add('play');
+  }, 600);
 
-    rollingTextRef.value?.addEventListener('mouseover', () => {
-        rollingTextRef.value?.classList.remove('play');
-    });
-})
+  rollingTextRef.value?.addEventListener('mouseover', () => {
+    rollingTextRef.value?.classList.remove('play');
+  });
+});
 
 onUnmounted(() => {
-    rollingTextRef.value?.removeEventListener('mouseover', () => {
-        rollingTextRef.value?.classList.remove('play');
-    });
-})
+  rollingTextRef.value?.removeEventListener('mouseover', () => {
+    rollingTextRef.value?.classList.remove('play');
+  });
+});
 </script>
 
 <style>

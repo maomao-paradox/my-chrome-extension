@@ -2,7 +2,7 @@
   <div class="app-container">
     <!-- 顶部导航栏 -->
     <nav class="navigation">
-      <div class="nav-tabs-scroll" ref="navTabsScroll">
+      <div ref="navTabsScroll" class="nav-tabs-scroll">
         <div class="nav-tabs">
           <button
             v-for="tab in tabs"
@@ -67,7 +67,7 @@
     </main>
 
     <!-- 状态栏 -->
-    <div class="status-bar" ref="statusBar">
+    <div ref="statusBar" class="status-bar">
       <div class="status-left">
         <span>MRIA Extension v1.0.0</span>
       </div>
@@ -83,14 +83,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onBeforeUnmount } from "vue";
-import PageInfo from "./views/PageInfo.vue";
-import CoreFeatures from "./views/CoreFeatures.vue";
-import TextOperations from "./views/TextOperations.vue";
-import DeveloperTools from "./views/DeveloperTools.vue";
-import About from "./views/About.vue";
-import HiddenPathScanner from "./views/HiddenPathScanner.vue";
-import AutomationPanel from "./views/AutomationPanel.vue";
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
+import PageInfo from './views/PageInfo.vue';
+import CoreFeatures from './views/CoreFeatures.vue';
+import TextOperations from './views/TextOperations.vue';
+import DeveloperTools from './views/DeveloperTools.vue';
+import About from './views/About.vue';
+import HiddenPathScanner from './views/HiddenPathScanner.vue';
+import AutomationPanel from './views/AutomationPanel.vue';
 
 // 导航选项卡定义
 interface Tab {
@@ -101,15 +101,15 @@ interface Tab {
 // 导航选项卡列表
 const tabs: Tab[] = [
   // { id: 'ai-chat', name: '网页分析' },
-  { id: "automation", name: "网页自动化" },
-  { id: "other-features", name: "功能面板" },
+  { id: 'automation', name: '网页自动化' },
+  { id: 'other-features', name: '功能面板' },
   // { id: 'browser-var', name: '调试面板' },
-  { id: "path-scanner", name: "路径扫描" },
+  { id: 'path-scanner', name: '路径扫描' }
   // { id: 'music', name: '音乐' }
 ];
 
 // 当前选中的选项卡
-const currentTab = ref("ai-chat"); // 默认选中网页分析
+const currentTab = ref('ai-chat'); // 默认选中网页分析
 
 // 引用DOM元素
 const statusBar = ref<HTMLElement | null>(null);
@@ -122,36 +122,36 @@ const formattedTime = computed(() => {
 });
 
 // Toast类型定义
-type ToastType = "success" | "error" | "info";
-let currentToastType: ToastType = "info";
+type ToastType = 'success' | 'error' | 'info';
+let currentToastType: ToastType = 'info';
 let timeUpdateInterval: number | null = null;
 
 // 获取标签页图标
 const getTabIcon = (tabId: string) => {
   const icons: Record<string, string> = {
-    "ai-chat": "🤖",
-    "other-features": "⚙️",
-    "browser-var": "🔍",
-    "path-scanner": "🔐",
-    "xhr-patch": "🔧",
+    'ai-chat': '🤖',
+    'other-features': '⚙️',
+    'browser-var': '🔍',
+    'path-scanner': '🔐',
+    'xhr-patch': '🔧'
   };
-  return icons[tabId] || "📄";
+  return icons[tabId] || '📄';
 };
 
 // 获取提示框图标
 const getToastIcon = (type: ToastType) => {
   const icons: Record<ToastType, string> = {
-    success: "✅",
-    error: "❌",
-    info: "ℹ️",
+    success: '✅',
+    error: '❌',
+    info: 'ℹ️'
   };
   return icons[type];
 };
 
 // 提示框图标
-const toastIcon = computed(() => {
-  return getToastIcon(currentToastType);
-});
+// const toastIcon = computed(() => {
+//   return getToastIcon(currentToastType);
+// });
 
 /**
  * 处理选项卡点击
@@ -160,7 +160,7 @@ function handleTabClick(tabId: string) {
   currentTab.value = tabId;
   showToast(
     `已切换到 ${tabs.find((tab) => tab.id === tabId)?.name}`,
-    "success",
+    'success'
   );
 }
 
@@ -172,14 +172,14 @@ function handleTabClick(tabId: string) {
  */
 function showToast(
   message: string,
-  type: ToastType = "info",
-  duration: number = 3000,
+  type: ToastType = 'info',
+  duration: number = 3000
 ): void {
-  if (!toast.value) return;
+  if (!toast.value) {return;}
 
   const toastElement = toast.value;
   const messageElement = toastElement.querySelector(
-    ".toast-message",
+    '.toast-message'
   ) as HTMLElement;
 
   if (messageElement) {
@@ -194,7 +194,7 @@ function showToast(
   // 定时隐藏
   setTimeout(() => {
     if (toast.value) {
-      toast.value.className = "toast";
+      toast.value.className = 'toast';
     }
   }, duration);
 }
@@ -208,26 +208,26 @@ onMounted(() => {
     (
       message: any,
       sender: chrome.runtime.MessageSender,
-      sendResponse: (response?: any) => void,
+      sendResponse: (response?: any) => void
     ): boolean => {
-      if (message.action === "UPDATE_STATUS" && statusBar.value) {
+      if (message.action === 'UPDATE_STATUS' && statusBar.value) {
         const statusCenter = statusBar.value.querySelector(
-          ".status-center span",
+          '.status-center span'
         );
         if (statusCenter) {
           statusCenter.textContent = message.text;
         }
         sendResponse({ success: true });
-      } else if (message.action === "SHOW_TOAST") {
-        showToast(message.text, (message.type as ToastType) || "info");
+      } else if (message.action === 'SHOW_TOAST') {
+        showToast(message.text, (message.type as ToastType) || 'info');
         sendResponse({ success: true });
       }
       return true; // 保持消息通道开放以便异步响应
-    },
+    }
   );
 
   // 显示初始化成功消息
-  showToast("侧边栏初始化成功", "success");
+  showToast('侧边栏初始化成功', 'success');
 
   // 更新时间显示
   timeUpdateInterval = window.setInterval(() => {
@@ -239,13 +239,13 @@ onMounted(() => {
   if (navTabsScroll.value) {
     // 平滑滚动变量
     let scrollAnimationId: number | null = null;
-    let currentScrollPos = 0;
+    // const currentScrollPos = 0;
     let targetScrollPos = 0;
-    let easeFactor = 0.3; // 缓动因子，值越大滚动越快
+    const easeFactor = 0.3; // 缓动因子，值越大滚动越快
 
     // 平滑滚动动画函数
     const smoothScroll = () => {
-      if (!navTabsScroll.value) return;
+      if (!navTabsScroll.value) {return;}
 
       // 计算当前位置和目标位置的差值
       const diff = targetScrollPos - navTabsScroll.value.scrollLeft;
@@ -285,8 +285,8 @@ onMounted(() => {
             0,
             Math.min(
               targetScrollPos,
-              navTabsScroll.value.scrollWidth - navTabsScroll.value.clientWidth,
-            ),
+              navTabsScroll.value.scrollWidth - navTabsScroll.value.clientWidth
+            )
           );
 
           // 如果没有正在运行的动画，启动一个
@@ -297,14 +297,14 @@ onMounted(() => {
       }
     };
 
-    navTabsScroll.value.addEventListener("wheel", handleWheel, {
-      passive: false,
+    navTabsScroll.value.addEventListener('wheel', handleWheel, {
+      passive: false
     });
 
     // 在组件卸载时清理
     onBeforeUnmount(() => {
       if (navTabsScroll.value) {
-        navTabsScroll.value.removeEventListener("wheel", handleWheel);
+        navTabsScroll.value.removeEventListener('wheel', handleWheel);
       }
       if (scrollAnimationId) {
         cancelAnimationFrame(scrollAnimationId);

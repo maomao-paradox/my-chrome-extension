@@ -1,6 +1,11 @@
 <template>
-  <section ref="bridgeRoot" class="bridge-console" :style="parallaxStyle" @pointermove="handlePointerMove"
-    @pointerleave="resetPointer">
+  <section
+    ref="bridgeRoot"
+    class="bridge-console"
+    :style="parallaxStyle"
+    @pointermove="handlePointerMove"
+    @pointerleave="resetPointer"
+  >
     <header class="bridge-header">
       <div class="bridge-header__title">
         <div class="hud-rail hud-rail--left">
@@ -17,7 +22,9 @@
         </div>
 
         <div class="hud-rail hud-rail--right">
-          <span class="hud-rail__text">{{ activeModule.code }} / {{ activeModule.section }}</span>
+          <span class="hud-rail__text"
+            >{{ activeModule.code }} / {{ activeModule.section }}</span
+          >
           <span class="hud-rail__line"></span>
         </div>
       </div>
@@ -31,7 +38,10 @@
           <span class="meta-chip__label">CLOCK</span>
           <strong>{{ currentTime }}</strong>
         </div>
-        <div class="meta-chip meta-chip--status" :data-status="activeModule.telemetry.status">
+        <div
+          class="meta-chip meta-chip--status"
+          :data-status="activeModule.telemetry.status"
+        >
           <span class="meta-chip__label">LINK</span>
           <strong>{{ statusText(activeModule.telemetry.status) }}</strong>
         </div>
@@ -39,15 +49,41 @@
     </header>
 
     <div ref="bridgeLayout" class="bridge-layout">
-      <svg v-if="enableHoverGuide && hoverGuide && layoutSize.width > 0 && layoutSize.height > 0"
-        class="bridge-layout__overlay" :viewBox="`0 0 ${layoutSize.width} ${layoutSize.height}`" aria-hidden="true">
-        <path class="bridge-guide bridge-guide--glow" :d="hoverGuide.path"
-          :style="{ '--guide-color': hoverGuide.color }" />
-        <path class="bridge-guide" :d="hoverGuide.path" :style="{ '--guide-color': hoverGuide.color }" />
-        <circle class="bridge-guide__pulse" :cx="hoverGuide.startX" :cy="hoverGuide.startY" r="4.2"
-          :style="{ '--guide-color': hoverGuide.color }" />
-        <circle class="bridge-guide__node" :cx="hoverGuide.endX" :cy="hoverGuide.endY" r="4.8"
-          :style="{ '--guide-color': hoverGuide.color }" />
+      <svg
+        v-if="
+          enableHoverGuide &&
+          hoverGuide &&
+          layoutSize.width > 0 &&
+          layoutSize.height > 0
+        "
+        class="bridge-layout__overlay"
+        :viewBox="`0 0 ${layoutSize.width} ${layoutSize.height}`"
+        aria-hidden="true"
+      >
+        <path
+          class="bridge-guide bridge-guide--glow"
+          :d="hoverGuide.path"
+          :style="{ '--guide-color': hoverGuide.color }"
+        />
+        <path
+          class="bridge-guide"
+          :d="hoverGuide.path"
+          :style="{ '--guide-color': hoverGuide.color }"
+        />
+        <circle
+          class="bridge-guide__pulse"
+          :cx="hoverGuide.startX"
+          :cy="hoverGuide.startY"
+          r="4.2"
+          :style="{ '--guide-color': hoverGuide.color }"
+        />
+        <circle
+          class="bridge-guide__node"
+          :cx="hoverGuide.endX"
+          :cy="hoverGuide.endY"
+          r="4.8"
+          :style="{ '--guide-color': hoverGuide.color }"
+        />
       </svg>
 
       <aside class="bridge-sidebar bridge-sidebar--left">
@@ -58,14 +94,21 @@
           </div>
 
           <div class="metric-stack">
-            <div v-for="metric in coreMetrics" :key="metric.label" class="metric-row">
+            <div
+              v-for="metric in coreMetrics"
+              :key="metric.label"
+              class="metric-row"
+            >
               <div class="metric-row__top">
                 <span>{{ metric.label }}</span>
                 <strong>{{ metric.value }}</strong>
               </div>
               <div class="metric-row__track">
-                <div class="metric-row__fill" :class="`metric-row__fill--${metric.tone}`"
-                  :style="{ width: `${metric.fill}%` }"></div>
+                <div
+                  class="metric-row__fill"
+                  :class="`metric-row__fill--${metric.tone}`"
+                  :style="{ width: `${metric.fill}%` }"
+                ></div>
               </div>
             </div>
           </div>
@@ -93,20 +136,55 @@
               <svg ref="radarSvg" viewBox="0 0 220 220" class="radar-svg">
                 <defs>
                   <radialGradient id="radarGlow">
-                    <stop offset="0%" stop-color="#7af7d0" stop-opacity="0.62" />
+                    <stop
+                      offset="0%"
+                      stop-color="#7af7d0"
+                      stop-opacity="0.62"
+                    />
                     <stop offset="100%" stop-color="#7af7d0" stop-opacity="0" />
                   </radialGradient>
-                  <linearGradient id="radarSweepLead" x1="110" y1="110" x2="198" y2="62" gradientUnits="userSpaceOnUse">
+                  <linearGradient
+                    id="radarSweepLead"
+                    x1="110"
+                    y1="110"
+                    x2="198"
+                    y2="62"
+                    gradientUnits="userSpaceOnUse"
+                  >
                     <stop offset="0%" stop-color="#7af7d0" stop-opacity="0" />
-                    <stop offset="78%" stop-color="#7af7d0" stop-opacity="0.08" />
-                    <stop offset="100%" stop-color="#7af7d0" stop-opacity="0.52" />
+                    <stop
+                      offset="78%"
+                      stop-color="#7af7d0"
+                      stop-opacity="0.08"
+                    />
+                    <stop
+                      offset="100%"
+                      stop-color="#7af7d0"
+                      stop-opacity="0.52"
+                    />
                   </linearGradient>
-                  <linearGradient id="radarSweepTrail" x1="110" y1="110" x2="196" y2="72"
-                    gradientUnits="userSpaceOnUse">
+                  <linearGradient
+                    id="radarSweepTrail"
+                    x1="110"
+                    y1="110"
+                    x2="196"
+                    y2="72"
+                    gradientUnits="userSpaceOnUse"
+                  >
                     <stop offset="0%" stop-color="#69b7ff" stop-opacity="0" />
-                    <stop offset="100%" stop-color="#69b7ff" stop-opacity="0.22" />
+                    <stop
+                      offset="100%"
+                      stop-color="#69b7ff"
+                      stop-opacity="0.22"
+                    />
                   </linearGradient>
-                  <filter id="radarBlur" x="-20%" y="-20%" width="140%" height="140%">
+                  <filter
+                    id="radarBlur"
+                    x="-20%"
+                    y="-20%"
+                    width="140%"
+                    height="140%"
+                  >
                     <feGaussianBlur stdDeviation="4.6" />
                   </filter>
                 </defs>
@@ -120,38 +198,93 @@
                   <line x1="14" y1="110" x2="206" y2="110" />
                   <line x1="42" y1="42" x2="178" y2="178" />
                   <line x1="42" y1="178" x2="178" y2="42" />
-                  <line v-for="tick in radarTicks" :key="tick.id" :x1="tick.x1" :y1="tick.y1" :x2="tick.x2"
-                    :y2="tick.y2" class="radar-grid__tick" />
+                  <line
+                    v-for="tick in radarTicks"
+                    :key="tick.id"
+                    :x1="tick.x1"
+                    :y1="tick.y1"
+                    :x2="tick.x2"
+                    :y2="tick.y2"
+                    class="radar-grid__tick"
+                  />
                 </g>
 
                 <g class="radar-labels">
-                  <text v-for="label in radarBearingLabels" :key="label.id" :x="label.x" :y="label.y"
-                    :text-anchor="label.anchor">
+                  <text
+                    v-for="label in radarBearingLabels"
+                    :key="label.id"
+                    :x="label.x"
+                    :y="label.y"
+                    :text-anchor="label.anchor"
+                  >
                     {{ label.label }}
                   </text>
                 </g>
 
                 <g class="radar-sweep">
-                  <path class="radar-sweep__trail" d="M110 110 L110 14 A96 96 0 0 1 194 74 Z"
-                    fill="url(#radarSweepTrail)" filter="url(#radarBlur)" />
-                  <path class="radar-sweep__mid" d="M110 110 L110 14 A96 96 0 0 1 198 62 Z" fill="url(#radarGlow)" />
-                  <path class="radar-sweep__lead" d="M110 110 L110 14 A96 96 0 0 1 198 62 Z"
-                    fill="url(#radarSweepLead)" />
-                  <line x1="110" y1="110" x2="110" y2="14" class="radar-sweep__line" />
+                  <path
+                    class="radar-sweep__trail"
+                    d="M110 110 L110 14 A96 96 0 0 1 194 74 Z"
+                    fill="url(#radarSweepTrail)"
+                    filter="url(#radarBlur)"
+                  />
+                  <path
+                    class="radar-sweep__mid"
+                    d="M110 110 L110 14 A96 96 0 0 1 198 62 Z"
+                    fill="url(#radarGlow)"
+                  />
+                  <path
+                    class="radar-sweep__lead"
+                    d="M110 110 L110 14 A96 96 0 0 1 198 62 Z"
+                    fill="url(#radarSweepLead)"
+                  />
+                  <line
+                    x1="110"
+                    y1="110"
+                    x2="110"
+                    y2="14"
+                    class="radar-sweep__line"
+                  />
                 </g>
 
                 <circle cx="110" cy="110" r="10" class="radar-core-halo" />
                 <circle cx="110" cy="110" r="6" class="radar-core" />
 
-                <g v-for="target in radarTargets" :key="target.id" class="radar-target-unit" :class="{
-                  'radar-target-unit--hovered': hoveredRadarId === target.id,
-                  'radar-target-unit--active': activePanelKey === target.id,
-                }" :style="{ '--target-color': target.color }" @pointerenter="setHoveredRadar(target.id)"
-                  @pointerleave="clearHoveredRadar" @click="emit('navigate-panel', target.id)">
-                  <circle :cx="target.x" :cy="target.y" r="12" class="radar-target-hit" />
-                  <circle :cx="target.x" :cy="target.y" r="7.4" class="radar-target-echo" />
-                  <path :d="getRadarTargetBracketPath(target)" class="radar-target-lock" />
-                  <circle :cx="target.x" :cy="target.y" r="2.6" class="radar-target-dot" />
+                <g
+                  v-for="target in radarTargets"
+                  :key="target.id"
+                  class="radar-target-unit"
+                  :class="{
+                    'radar-target-unit--hovered': hoveredRadarId === target.id,
+                    'radar-target-unit--active': activePanelKey === target.id,
+                  }"
+                  :style="{ '--target-color': target.color }"
+                  @pointerenter="setHoveredRadar(target.id)"
+                  @pointerleave="clearHoveredRadar"
+                  @click="emit('navigate-panel', target.id)"
+                >
+                  <circle
+                    :cx="target.x"
+                    :cy="target.y"
+                    r="12"
+                    class="radar-target-hit"
+                  />
+                  <circle
+                    :cx="target.x"
+                    :cy="target.y"
+                    r="7.4"
+                    class="radar-target-echo"
+                  />
+                  <path
+                    :d="getRadarTargetBracketPath(target)"
+                    class="radar-target-lock"
+                  />
+                  <circle
+                    :cx="target.x"
+                    :cy="target.y"
+                    r="2.6"
+                    class="radar-target-dot"
+                  />
                 </g>
               </svg>
             </div>
@@ -186,7 +319,11 @@
           <div class="ship-stage">
             <div class="ship-stage__floor"></div>
             <div class="ship-stage__glow"></div>
-            <Rotation3DShowcase class="ship-stage__rotation" projection :items="projectionItems" />
+            <Rotation3DShowcase
+              class="ship-stage__rotation"
+              projection
+              :items="projectionItems"
+            />
 
             <svg viewBox="0 0 1000 700" class="ship-scene">
               <g class="ship-grid">
@@ -202,35 +339,77 @@
               </g>
 
               <g class="ship-projection">
-                <image href="/static/img/starship.png" x="160" y="134" width="700" height="394.3"
-                  class="ship-projection__glow" preserveAspectRatio="xMidYMid meet" />
-                <image href="/static/img/starship.png" x="160" y="134" width="700" height="394.3"
-                  class="ship-projection__asset" preserveAspectRatio="xMidYMid meet" />
+                <image
+                  href="/static/img/starship.png"
+                  x="160"
+                  y="134"
+                  width="700"
+                  height="394.3"
+                  class="ship-projection__glow"
+                  preserveAspectRatio="xMidYMid meet"
+                />
+                <image
+                  href="/static/img/starship.png"
+                  x="160"
+                  y="134"
+                  width="700"
+                  height="394.3"
+                  class="ship-projection__asset"
+                  preserveAspectRatio="xMidYMid meet"
+                />
                 <!-- <circle cx="458" cy="350" r="14" class="ship-core-dot" /> -->
               </g>
 
               <g class="link-architecture">
-                <path v-for="module in peripheralModules" :key="`${module.id}-link`" :d="getConnectorPath(module)"
-                  class="connector-line" :class="`connector-line--${module.telemetry.status}`" />
+                <path
+                  v-for="module in peripheralModules"
+                  :key="`${module.id}-link`"
+                  :d="getConnectorPath(module)"
+                  class="connector-line"
+                  :class="`connector-line--${module.telemetry.status}`"
+                />
 
                 <template v-if="enableLinkMotion">
-                  <circle v-for="module in peripheralModules" :key="`${module.id}-flow`" r="4.4" class="flow-particle"
-                    :style="{ '--flow-color': statusColor(module.telemetry.status) }">
-                    <animateMotion :path="getConnectorPath(module)" :dur="flowDuration(module)"
-                      repeatCount="indefinite" />
+                  <circle
+                    v-for="module in peripheralModules"
+                    :key="`${module.id}-flow`"
+                    r="4.4"
+                    class="flow-particle"
+                    :style="{
+                      '--flow-color': statusColor(module.telemetry.status),
+                    }"
+                  >
+                    <animateMotion
+                      :path="getConnectorPath(module)"
+                      :dur="flowDuration(module)"
+                      repeatCount="indefinite"
+                    />
                   </circle>
                 </template>
               </g>
             </svg>
 
-            <button v-for="module in peripheralModules" :key="module.id" type="button" class="module-pod" :class="{
-              'module-pod--active': module.id === activePanelKey,
-              'module-pod--tracking': module.id === hoveredRadarId,
-            }" :data-status="module.telemetry.status" :style="getPodStyle(module)"
-              :ref="(el) => setPodRefForModule(module, el as Element)" @click="emit('navigate-panel', module.id)">
+            <button
+              v-for="module in peripheralModules"
+              :key="module.id"
+              :ref="(el) => setPodRefForModule(module, el as Element)"
+              type="button"
+              class="module-pod"
+              :class="{
+                'module-pod--active': module.id === activePanelKey,
+                'module-pod--tracking': module.id === hoveredRadarId,
+              }"
+              :data-status="module.telemetry.status"
+              :style="getPodStyle(module)"
+              @click="emit('navigate-panel', module.id)"
+            >
               <div class="module-pod__strip">
-                <span v-for="cell in 6" :key="`${module.id}-${cell}`" class="module-pod__cell"
-                  :style="getStripCellStyle(module, cell)"></span>
+                <span
+                  v-for="cell in 6"
+                  :key="`${module.id}-${cell}`"
+                  class="module-pod__cell"
+                  :style="getStripCellStyle(module, cell)"
+                ></span>
               </div>
 
               <div class="module-pod__content">
@@ -264,7 +443,10 @@
             <strong>{{ activeModule.glyph }}</strong>
           </div>
 
-          <div class="detail-card__header" :data-status="activeModule.telemetry.status">
+          <div
+            class="detail-card__header"
+            :data-status="activeModule.telemetry.status"
+          >
             <div>
               <small>{{ activeModule.code }}</small>
               <h2>{{ activeModule.title }}</h2>
@@ -278,14 +460,23 @@
           <!-- <p class="detail-card__description">{{ activeModule.description }}</p> -->
 
           <div class="detail-metrics">
-            <div v-for="metric in activeDiagnostics" :key="metric.label" class="detail-metric">
+            <div
+              v-for="metric in activeDiagnostics"
+              :key="metric.label"
+              class="detail-metric"
+            >
               <div class="detail-metric__top">
                 <span>{{ metric.label }}</span>
                 <strong>{{ metric.value }}%</strong>
               </div>
               <div class="detail-metric__track">
-                <div class="detail-metric__fill" :style="{ width: `${metric.value}%`, '--metric-color': metric.color }">
-                </div>
+                <div
+                  class="detail-metric__fill"
+                  :style="{
+                    width: `${metric.value}%`,
+                    '--metric-color': metric.color,
+                  }"
+                ></div>
               </div>
             </div>
           </div>
@@ -298,7 +489,12 @@
           </div>
 
           <div class="feed-list">
-            <div v-for="entry in liveFeed" :key="entry.id" class="feed-line" :data-status="entry.status">
+            <div
+              v-for="entry in liveFeed"
+              :key="entry.id"
+              class="feed-line"
+              :data-status="entry.status"
+            >
               <span class="feed-line__time">{{ entry.time }}</span>
               <span class="feed-line__prompt">></span>
               <span class="feed-line__text">{{ entry.text }}</span>
@@ -311,16 +507,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import Rotation3DShowcase, { type RotationItemInput } from '@/pages/index/App.vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import Rotation3DShowcase from "@/pages/index/App.vue";
 import {
   STARSHIP_STATUS_TEXT,
   STARSHIP_STATUS_TINT,
   type StarshipModuleState,
   type StarshipPanelId,
   type StarshipStatus,
-} from './starshipModules';
-import { useOptionsPerformance } from '../composables/useOptionsPerformance';
+} from "./starshipModules";
+import { useOptionsPerformance } from "../composables/useOptionsPerformance";
 
 const props = defineProps<{
   modules: StarshipModuleState[];
@@ -328,8 +524,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'open-overview'): void;
-  (e: 'navigate-panel', panelKey: StarshipPanelId): void;
+  (e: "open-overview"): void;
+  (e: "navigate-panel", panelKey: StarshipPanelId): void;
 }>();
 
 interface FlowLogEntry {
@@ -352,7 +548,7 @@ interface PodLayout {
   anchorY: number;
 }
 
-type PeripheralPanelId = Exclude<StarshipPanelId, 'main'>;
+type PeripheralPanelId = Exclude<StarshipPanelId, "main">;
 
 interface RadarTick {
   id: string;
@@ -367,7 +563,7 @@ interface RadarBearingLabel {
   label: string;
   x: number;
   y: number;
-  anchor: 'start' | 'middle' | 'end';
+  anchor: "start" | "middle" | "end";
 }
 
 interface RadarTarget {
@@ -392,47 +588,50 @@ interface HoverGuide {
 
 const POD_LAYOUT: Record<PeripheralPanelId, PodLayout> = {
   top: { x: 500, y: 96, anchorX: 500, anchorY: 248 },
-  'top-left': { x: 220, y: 178, anchorX: 392, anchorY: 292 },
-  'top-right': { x: 780, y: 178, anchorX: 608, anchorY: 292 },
+  "top-left": { x: 220, y: 178, anchorX: 392, anchorY: 292 },
+  "top-right": { x: 780, y: 178, anchorX: 608, anchorY: 292 },
   left: { x: 146, y: 350, anchorX: 322, anchorY: 350 },
   right: { x: 854, y: 350, anchorX: 680, anchorY: 350 },
   bottom: { x: 500, y: 574, anchorX: 500, anchorY: 454 },
-  'bottom-left': { x: 214, y: 560, anchorX: 376, anchorY: 430 },
-  'bottom-right': { x: 786, y: 560, anchorX: 624, anchorY: 430 },
+  "bottom-left": { x: 214, y: 560, anchorX: 376, anchorY: 430 },
+  "bottom-right": { x: 786, y: 560, anchorX: 624, anchorY: 430 },
 };
 
 const bridgeRoot = ref<HTMLElement | null>(null);
 const bridgeLayout = ref<HTMLElement | null>(null);
 const radarSvg = ref<SVGSVGElement | null>(null);
-const currentTime = ref('');
+const currentTime = ref("");
 const pointer = ref({ x: 0, y: 0 });
 const liveFeed = ref<FlowLogEntry[]>([]);
 const hoveredRadarId = ref<PeripheralPanelId | null>(null);
 const hoverGuide = ref<HoverGuide | null>(null);
 const layoutSize = ref({ width: 0, height: 0 });
-const podRefs = ref<Partial<Record<PeripheralPanelId, HTMLButtonElement | null>>>({});
+const podRefs = ref<
+  Partial<Record<PeripheralPanelId, HTMLButtonElement | null>>
+>({});
 
 let clockTimer: ReturnType<typeof setInterval> | null = null;
 let feedTimer: ReturnType<typeof setInterval> | null = null;
 let guideFrame: number | null = null;
 let guideObserver: ResizeObserver | null = null;
 
-const { performanceLevel, isLowPerformance, isHighPerformance } = useOptionsPerformance();
+const { performanceLevel, isLowPerformance, isHighPerformance } =
+  useOptionsPerformance();
 
 const peripheralModules = computed(() => {
-  return props.modules.filter((module) => module.id !== 'main');
+  return props.modules.filter((module) => module.id !== "main");
 });
 
 const projectionItemType = (status: StarshipStatus) => {
-  if (status === 'warning') {
-    return 'yellow';
+  if (status === "warning") {
+    return "yellow";
   }
 
-  if (status === 'standby') {
-    return 'green';
+  if (status === "standby") {
+    return "green";
   }
 
-  return 'blue';
+  return "blue";
 };
 
 const projectionItems = computed(() => {
@@ -444,20 +643,42 @@ const projectionItems = computed(() => {
 });
 
 const activeModule = computed(() => {
-  return props.modules.find((module) => module.id === props.activePanelKey) || props.modules[0];
+  return (
+    props.modules.find((module) => module.id === props.activePanelKey) ||
+    props.modules[0]
+  );
 });
 
-const onlineCount = computed(() => peripheralModules.value.filter((module) => module.telemetry.status === 'online').length);
-const warningCount = computed(() => peripheralModules.value.filter((module) => module.telemetry.status === 'warning').length);
-const standbyCount = computed(() => peripheralModules.value.filter((module) => module.telemetry.status === 'standby').length);
+const onlineCount = computed(
+  () =>
+    peripheralModules.value.filter(
+      (module) => module.telemetry.status === "online",
+    ).length,
+);
+const warningCount = computed(
+  () =>
+    peripheralModules.value.filter(
+      (module) => module.telemetry.status === "warning",
+    ).length,
+);
+const standbyCount = computed(
+  () =>
+    peripheralModules.value.filter(
+      (module) => module.telemetry.status === "standby",
+    ).length,
+);
 
 const syncPercent = computed(() => {
-  return Math.round((onlineCount.value / Math.max(peripheralModules.value.length, 1)) * 100);
+  return Math.round(
+    (onlineCount.value / Math.max(peripheralModules.value.length, 1)) * 100,
+  );
 });
 
 const readinessPercent = computed(() => {
   const total = Math.max(peripheralModules.value.length, 1);
-  return Math.round(((onlineCount.value + standbyCount.value * 0.7) / total) * 100);
+  return Math.round(
+    ((onlineCount.value + standbyCount.value * 0.7) / total) * 100,
+  );
 });
 
 const alertPercent = computed(() => {
@@ -465,23 +686,38 @@ const alertPercent = computed(() => {
 });
 
 const coreMetrics = computed(() => [
-  { label: 'SYNC', value: `${syncPercent.value}%`, fill: syncPercent.value, tone: 'blue' },
-  { label: 'ALERT', value: `${warningCount.value}`, fill: alertPercent.value, tone: 'red' },
-  { label: 'STANDBY', value: `${readinessPercent.value}%`, fill: readinessPercent.value, tone: 'green' },
+  {
+    label: "SYNC",
+    value: `${syncPercent.value}%`,
+    fill: syncPercent.value,
+    tone: "blue",
+  },
+  {
+    label: "ALERT",
+    value: `${warningCount.value}`,
+    fill: alertPercent.value,
+    tone: "red",
+  },
+  {
+    label: "STANDBY",
+    value: `${readinessPercent.value}%`,
+    fill: readinessPercent.value,
+    tone: "green",
+  },
 ]);
 
 const parallaxStyle = computed(() => ({
-  '--parallax-x': pointer.value.x.toFixed(4),
-  '--parallax-y': pointer.value.y.toFixed(4),
+  "--parallax-x": pointer.value.x.toFixed(4),
+  "--parallax-y": pointer.value.y.toFixed(4),
 }));
 const enableHoverGuide = computed(() => isHighPerformance.value);
 const enableLinkMotion = computed(() => isHighPerformance.value);
 const liveFeedInterval = computed(() => {
-  if (performanceLevel.value === 'high') {
+  if (performanceLevel.value === "high") {
     return 820;
   }
 
-  if (performanceLevel.value === 'medium') {
+  if (performanceLevel.value === "medium") {
     return 2400;
   }
 
@@ -489,14 +725,14 @@ const liveFeedInterval = computed(() => {
 });
 
 const hudCoordinates = computed(() => {
-  const x = (31.2200 + pointer.value.x * 0.084).toFixed(4);
-  const y = (121.4300 + pointer.value.y * 0.096).toFixed(4);
+  const x = (31.22 + pointer.value.x * 0.084).toFixed(4);
+  const y = (121.43 + pointer.value.y * 0.096).toFixed(4);
   return `N${x} / E${y}`;
 });
 
 const radarTicks = computed<RadarTick[]>(() => {
   return Array.from({ length: 24 }, (_, index) => {
-    const angle = ((index * 15) - 90) * (Math.PI / 180);
+    const angle = (index * 15 - 90) * (Math.PI / 180);
     const innerRadius = index % 2 === 0 ? 83 : 88;
     const outerRadius = 96;
 
@@ -511,24 +747,32 @@ const radarTicks = computed<RadarTick[]>(() => {
 });
 
 const radarBearingLabels: RadarBearingLabel[] = [
-  { id: 'north', label: '000°', x: 110, y: 22, anchor: 'middle' },
-  { id: 'east', label: '090°', x: 194, y: 114, anchor: 'end' },
-  { id: 'south', label: '180°', x: 110, y: 204, anchor: 'middle' },
-  { id: 'west', label: '270°', x: 26, y: 114, anchor: 'start' },
+  { id: "north", label: "000°", x: 110, y: 22, anchor: "middle" },
+  { id: "east", label: "090°", x: 194, y: 114, anchor: "end" },
+  { id: "south", label: "180°", x: 110, y: 204, anchor: "middle" },
+  { id: "west", label: "270°", x: 26, y: 114, anchor: "start" },
 ];
 
 const radarTargets = computed<RadarTarget[]>(() => {
   return peripheralModules.value.map((module) => {
     const panelId = module.id as PeripheralPanelId;
     const layout = POD_LAYOUT[panelId];
-    const x = ((layout.x - 500) / 6.6) + 110;
-    const y = ((layout.y - 350) / 6.6) + 110;
+    const x = (layout.x - 500) / 6.6 + 110;
+    const y = (layout.y - 350) / 6.6 + 110;
     const dx = x - 110;
     const dy = 110 - y;
-    const bearing = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
+    const bearing = ((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360;
     const range = 3.4 + (Math.hypot(dx, dy) / 96) * 12.8;
-    const baseSignal = module.telemetry.status === 'online' ? 92 : module.telemetry.status === 'standby' ? 71 : 33;
-    const signal = Math.max(12, Math.min(99, baseSignal + ((layout.x + layout.y) % 13) - 6));
+    const baseSignal =
+      module.telemetry.status === "online"
+        ? 92
+        : module.telemetry.status === "standby"
+          ? 71
+          : 33;
+    const signal = Math.max(
+      12,
+      Math.min(99, baseSignal + ((layout.x + layout.y) % 13) - 6),
+    );
 
     return {
       id: panelId,
@@ -536,7 +780,7 @@ const radarTargets = computed<RadarTarget[]>(() => {
       y,
       color: statusColor(module.telemetry.status),
       module,
-      bearing: `${Math.round(bearing).toString().padStart(3, '0')}°`,
+      bearing: `${Math.round(bearing).toString().padStart(3, "0")}°`,
       range: `${range.toFixed(1)}km`,
       signal: `${signal}%`,
     };
@@ -545,11 +789,17 @@ const radarTargets = computed<RadarTarget[]>(() => {
 
 const focusedRadarTarget = computed(() => {
   if (hoveredRadarId.value) {
-    return radarTargets.value.find((target) => target.id === hoveredRadarId.value) ?? null;
+    return (
+      radarTargets.value.find((target) => target.id === hoveredRadarId.value) ??
+      null
+    );
   }
 
-  if (props.activePanelKey !== 'main') {
-    return radarTargets.value.find((target) => target.id === props.activePanelKey) ?? null;
+  if (props.activePanelKey !== "main") {
+    return (
+      radarTargets.value.find((target) => target.id === props.activePanelKey) ??
+      null
+    );
   }
 
   return radarTargets.value[0] ?? null;
@@ -559,18 +809,18 @@ const radarTelemetry = computed(() => {
   const target = focusedRadarTarget.value;
   if (!target) {
     return {
-      range: '--.-km',
-      bearing: '---°',
-      lock: 'NO-LOCK',
-      title: 'Awaiting Contact',
-      signal: '--%',
+      range: "--.-km",
+      bearing: "---°",
+      lock: "NO-LOCK",
+      title: "Awaiting Contact",
+      signal: "--%",
     };
   }
 
   return {
     range: target.range,
     bearing: target.bearing,
-    lock: `${target.module.glyph}-${target.module.code.split(' ')[0].toUpperCase()}`,
+    lock: `${target.module.glyph}-${target.module.code.split(" ")[0].toUpperCase()}`,
     title: target.module.title,
     signal: target.signal,
   };
@@ -579,14 +829,23 @@ const radarTelemetry = computed(() => {
 const activeDiagnostics = computed<DiagnosticMetric[]>(() => {
   const module = activeModule.value;
   const base = module.id.charCodeAt(0) + module.title.length * 7;
-  const integrity = module.telemetry.status === 'warning' ? 34 : module.telemetry.status === 'standby' ? 68 : 91;
+  const integrity =
+    module.telemetry.status === "warning"
+      ? 34
+      : module.telemetry.status === "standby"
+        ? 68
+        : 91;
   const throughput = Math.min(96, integrity + ((base * 3) % 18) - 6);
   const latency = Math.max(18, 100 - integrity + (base % 12));
 
   return [
-    { label: 'LINK INTEGRITY', value: integrity, color: statusColor(module.telemetry.status) },
-    { label: 'DATA THROUGHPUT', value: throughput, color: '#7ad8ff' },
-    { label: 'LATENCY BUFFER', value: latency, color: '#9b8bff' },
+    {
+      label: "LINK INTEGRITY",
+      value: integrity,
+      color: statusColor(module.telemetry.status),
+    },
+    { label: "DATA THROUGHPUT", value: throughput, color: "#7ad8ff" },
+    { label: "LATENCY BUFFER", value: latency, color: "#9b8bff" },
   ];
 });
 
@@ -594,10 +853,10 @@ const statusText = (status: StarshipStatus) => STARSHIP_STATUS_TEXT[status];
 const statusColor = (status: StarshipStatus) => STARSHIP_STATUS_TINT[status];
 
 const formatTime = () => {
-  return new Intl.DateTimeFormat('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  return new Intl.DateTimeFormat("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   }).format(new Date());
 };
 
@@ -606,9 +865,14 @@ const updateClock = () => {
 };
 
 const serialFor = (module: StarshipModuleState) => {
-  const suffix = module.id.toUpperCase().replace(/[^A-Z]/g, '').padEnd(3, 'X').slice(0, 3);
-  const index = peripheralModules.value.findIndex((item) => item.id === module.id) + 1;
-  return `BLK-${String(index).padStart(3, '0')}-${suffix}`;
+  const suffix = module.id
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .padEnd(3, "X")
+    .slice(0, 3);
+  const index =
+    peripheralModules.value.findIndex((item) => item.id === module.id) + 1;
+  return `BLK-${String(index).padStart(3, "0")}-${suffix}`;
 };
 
 const getPodStyle = (module: StarshipModuleState) => {
@@ -616,20 +880,24 @@ const getPodStyle = (module: StarshipModuleState) => {
   return {
     left: `${(layout.x / 1000) * 100}%`,
     top: `${(layout.y / 700) * 100}%`,
-    '--pod-color': statusColor(module.telemetry.status),
+    "--pod-color": statusColor(module.telemetry.status),
   };
 };
 
 const getConnectorPath = (module: StarshipModuleState) => {
   const layout = POD_LAYOUT[module.id as PeripheralPanelId];
-  const endX = layout.x < 500 ? layout.x + 86 : layout.x > 500 ? layout.x - 86 : layout.x;
+  const endX =
+    layout.x < 500 ? layout.x + 86 : layout.x > 500 ? layout.x - 86 : layout.x;
   const endY = layout.y;
   const midX = layout.anchorX + (endX - layout.anchorX) * 0.46;
   return `M ${layout.anchorX} ${layout.anchorY} L ${midX} ${layout.anchorY} L ${midX} ${endY} L ${endX} ${endY}`;
 };
 
 const getRadarTargetBracketPath = (target: RadarTarget) => {
-  const size = hoveredRadarId.value === target.id || props.activePanelKey === target.id ? 8.8 : 7.2;
+  const size =
+    hoveredRadarId.value === target.id || props.activePanelKey === target.id
+      ? 8.8
+      : 7.2;
   const inset = size - 2.8;
 
   return [
@@ -637,39 +905,42 @@ const getRadarTargetBracketPath = (target: RadarTarget) => {
     `M ${target.x + inset} ${target.y - size} L ${target.x + size} ${target.y - size} L ${target.x + size} ${target.y - inset}`,
     `M ${target.x - size} ${target.y + inset} L ${target.x - size} ${target.y + size} L ${target.x - inset} ${target.y + size}`,
     `M ${target.x + inset} ${target.y + size} L ${target.x + size} ${target.y + size} L ${target.x + size} ${target.y + inset}`,
-  ].join(' ');
+  ].join(" ");
 };
 
 const getStripCellStyle = (module: StarshipModuleState, cell: number) => {
   const seed = module.id.charCodeAt(0) + cell * 17;
   return {
-    '--cell-scale': `${0.5 + ((seed % 4) * 0.05)}`,
+    "--cell-scale": `${0.5 + (seed % 4) * 0.05}`,
     animationDelay: `${cell * 0.12}s`,
   };
 };
 
 const flowDuration = (module: StarshipModuleState) => {
-  if (module.telemetry.status === 'warning') {
-    return '1.25s';
+  if (module.telemetry.status === "warning") {
+    return "1.25s";
   }
 
-  if (module.telemetry.status === 'standby') {
-    return '3.4s';
+  if (module.telemetry.status === "standby") {
+    return "3.4s";
   }
 
-  return '2.1s';
+  return "2.1s";
 };
 
 const buildFeedMessage = (): FlowLogEntry => {
-  const pool = peripheralModules.value.length > 0 ? peripheralModules.value : props.modules;
+  const pool =
+    peripheralModules.value.length > 0
+      ? peripheralModules.value
+      : props.modules;
   const module = pool[Math.floor(Math.random() * pool.length)];
   const phrases = [
-    '链接回波同步完成',
-    '端口握手重新校准',
-    '舱段状态写入主矩阵',
-    '协议缓存进入轮转',
-    '权限航线完成映射',
-    '监控帧序列已刷新',
+    "链接回波同步完成",
+    "端口握手重新校准",
+    "舱段状态写入主矩阵",
+    "协议缓存进入轮转",
+    "权限航线完成映射",
+    "监控帧序列已刷新",
   ];
   const phrase = phrases[Math.floor(Math.random() * phrases.length)];
 
@@ -682,7 +953,9 @@ const buildFeedMessage = (): FlowLogEntry => {
 };
 
 const seedFeed = () => {
-  liveFeed.value = Array.from({ length: 6 }, () => buildFeedMessage()).reverse();
+  liveFeed.value = Array.from({ length: 6 }, () =>
+    buildFeedMessage(),
+  ).reverse();
 };
 
 const pushFeedMessage = () => {
@@ -732,7 +1005,9 @@ const syncHoverGuide = () => {
   }
 
   const radarBounds = radarSvg.value?.getBoundingClientRect();
-  const target = radarTargets.value.find((item) => item.id === hoveredRadarId.value);
+  const target = radarTargets.value.find(
+    (item) => item.id === hoveredRadarId.value,
+  );
   const podElement = target ? podRefs.value[target.id] : null;
 
   if (!radarBounds || !target || !podElement) {
@@ -741,14 +1016,18 @@ const syncHoverGuide = () => {
   }
 
   const podBounds = podElement.getBoundingClientRect();
-  const startX = radarBounds.left - layoutBounds.left + (target.x / 220) * radarBounds.width;
-  const startY = radarBounds.top - layoutBounds.top + (target.y / 220) * radarBounds.height;
+  const startX =
+    radarBounds.left - layoutBounds.left + (target.x / 220) * radarBounds.width;
+  const startY =
+    radarBounds.top - layoutBounds.top + (target.y / 220) * radarBounds.height;
   const endX = podBounds.left - layoutBounds.left + podBounds.width / 2;
   const endY = podBounds.top - layoutBounds.top + podBounds.height / 2;
   const direction = endX >= startX ? 1 : -1;
   const horizontalSpan = Math.abs(endX - startX);
-  const elbow1X = startX + direction * Math.min(90, Math.max(40, horizontalSpan * 0.28));
-  const elbow2X = endX - direction * Math.min(92, Math.max(42, horizontalSpan * 0.22));
+  const elbow1X =
+    startX + direction * Math.min(90, Math.max(40, horizontalSpan * 0.28));
+  const elbow2X =
+    endX - direction * Math.min(92, Math.max(42, horizontalSpan * 0.22));
   const midY = startY + (endY - startY) * 0.22;
 
   hoverGuide.value = {
@@ -759,7 +1038,7 @@ const syncHoverGuide = () => {
       `L ${elbow2X} ${midY}`,
       `L ${elbow2X} ${endY}`,
       `L ${endX} ${endY}`,
-    ].join(' '),
+    ].join(" "),
     color: target.color,
     startX,
     startY,
@@ -770,7 +1049,7 @@ const syncHoverGuide = () => {
 
 const queueGuideSync = () => {
   if (!enableHoverGuide.value) {
-    if (guideFrame && typeof window !== 'undefined') {
+    if (guideFrame && typeof window !== "undefined") {
       window.cancelAnimationFrame(guideFrame);
       guideFrame = null;
     }
@@ -778,7 +1057,7 @@ const queueGuideSync = () => {
     return;
   }
 
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     syncHoverGuide();
     return;
   }
@@ -795,7 +1074,7 @@ const setHoveredRadar = (id: StarshipPanelId) => {
     return;
   }
 
-  if (id === 'main') {
+  if (id === "main") {
     clearHoveredRadar();
     return;
   }
@@ -809,8 +1088,11 @@ const clearHoveredRadar = () => {
   hoverGuide.value = null;
 };
 
-const setPodRefForModule = (module: StarshipModuleState, element: Element | null) => {
-  if (module.id === 'main') {
+const setPodRefForModule = (
+  module: StarshipModuleState,
+  element: Element | null,
+) => {
+  if (module.id === "main") {
     return;
   }
 
@@ -844,19 +1126,26 @@ const resetPointer = () => {
   pointer.value = { x: 0, y: 0 };
 };
 
-watch(() => props.activePanelKey, () => {
-  if (!isLowPerformance.value) {
-    pushFeedMessage();
-  }
-});
+watch(
+  () => props.activePanelKey,
+  () => {
+    if (!isLowPerformance.value) {
+      pushFeedMessage();
+    }
+  },
+);
 
 watch(hoveredRadarId, () => {
   nextTick(queueGuideSync);
 });
 
-watch(radarTargets, () => {
-  nextTick(queueGuideSync);
-}, { deep: true });
+watch(
+  radarTargets,
+  () => {
+    nextTick(queueGuideSync);
+  },
+  { deep: true },
+);
 
 watch(performanceLevel, () => {
   if (!isHighPerformance.value) {
@@ -877,7 +1166,7 @@ onMounted(() => {
   clockTimer = setInterval(updateClock, 1000);
   syncFeedLoop();
 
-  if (typeof ResizeObserver !== 'undefined') {
+  if (typeof ResizeObserver !== "undefined") {
     guideObserver = new ResizeObserver(() => {
       queueGuideSync();
     });
@@ -891,8 +1180,8 @@ onMounted(() => {
     }
   }
 
-  if (typeof window !== 'undefined') {
-    window.addEventListener('resize', queueGuideSync);
+  if (typeof window !== "undefined") {
+    window.addEventListener("resize", queueGuideSync);
   }
 
   nextTick(queueGuideSync);
@@ -913,11 +1202,11 @@ onUnmounted(() => {
     guideObserver = null;
   }
 
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('resize', queueGuideSync);
+  if (typeof window !== "undefined") {
+    window.removeEventListener("resize", queueGuideSync);
   }
 
-  if (guideFrame && typeof window !== 'undefined') {
+  if (guideFrame && typeof window !== "undefined") {
     window.cancelAnimationFrame(guideFrame);
     guideFrame = null;
   }
@@ -964,7 +1253,7 @@ onUnmounted(() => {
 .ship-focus__label,
 .quick-dock__btn,
 .detail-card__header small {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -998,7 +1287,12 @@ onUnmounted(() => {
 .hud-rail__line {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(122, 198, 255, 0.72), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(122, 198, 255, 0.72),
+    transparent
+  );
   box-shadow: 0 0 12px rgba(105, 183, 255, 0.32);
 }
 
@@ -1032,7 +1326,14 @@ onUnmounted(() => {
 .meta-chip {
   min-width: 158px;
   padding: 14px 16px;
-  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  clip-path: polygon(
+    0 12px,
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%
+  );
 }
 
 .meta-chip__label {
@@ -1048,15 +1349,15 @@ onUnmounted(() => {
   text-shadow: 0 0 16px rgba(105, 183, 255, 0.18);
 }
 
-.meta-chip--status[data-status='online'] {
+.meta-chip--status[data-status="online"] {
   border-color: rgba(105, 183, 255, 0.34);
 }
 
-.meta-chip--status[data-status='warning'] {
+.meta-chip--status[data-status="warning"] {
   border-color: rgba(255, 98, 98, 0.34);
 }
 
-.meta-chip--status[data-status='standby'] {
+.meta-chip--status[data-status="standby"] {
   border-color: rgba(122, 247, 208, 0.34);
 }
 
@@ -1128,14 +1429,22 @@ onUnmounted(() => {
 
 .bridge-card {
   padding: 18px;
-  clip-path: polygon(0 16px, 16px 0, calc(100% - 30px) 0, 100% 18px, 100% 100%, 26px 100%, 0 calc(100% - 26px));
+  clip-path: polygon(
+    0 16px,
+    16px 0,
+    calc(100% - 30px) 0,
+    100% 18px,
+    100% 100%,
+    26px 100%,
+    0 calc(100% - 26px)
+  );
 }
 
 .bridge-card::before,
 .bridge-card::after,
 .meta-chip::before,
 .quick-dock::before {
-  content: '';
+  content: "";
   position: absolute;
   pointer-events: none;
 }
@@ -1147,7 +1456,9 @@ onUnmounted(() => {
   background:
     linear-gradient(transparent 96%, rgba(84, 154, 212, 0.05) 100%),
     linear-gradient(90deg, transparent 96%, rgba(84, 154, 212, 0.04) 100%);
-  background-size: 100% 18px, 18px 100%;
+  background-size:
+    100% 18px,
+    18px 100%;
   opacity: 0.18;
 }
 
@@ -1156,7 +1467,12 @@ onUnmounted(() => {
   right: 14px;
   width: 88px;
   height: 14px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(138, 197, 235, 0.24), rgba(255, 255, 255, 0));
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(138, 197, 235, 0.24),
+    rgba(255, 255, 255, 0)
+  );
   opacity: 0.4;
 }
 
@@ -1180,7 +1496,7 @@ onUnmounted(() => {
 }
 
 .card-heading strong {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 12px;
   color: rgba(237, 248, 255, 0.92);
   text-shadow: 0 0 12px rgba(105, 183, 255, 0.16);
@@ -1211,7 +1527,7 @@ onUnmounted(() => {
 }
 
 .metric-row__top strong {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 13px;
 }
 
@@ -1220,7 +1536,13 @@ onUnmounted(() => {
   height: 9px;
   background: rgba(17, 44, 70, 0.86);
   overflow: hidden;
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 8px) 0,
+    100% 50%,
+    calc(100% - 8px) 100%,
+    0 100%
+  );
 }
 
 .metric-row__fill,
@@ -1259,7 +1581,14 @@ onUnmounted(() => {
   position: relative;
   z-index: 1;
   padding: 10px 10px 12px;
-  clip-path: polygon(0 10px, 10px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  clip-path: polygon(
+    0 10px,
+    10px 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    0 100%
+  );
   border: 1px solid rgba(103, 194, 248, 0.2);
   background:
     linear-gradient(180deg, rgba(2, 18, 29, 0.82), rgba(2, 10, 18, 0.96)),
@@ -1272,7 +1601,7 @@ onUnmounted(() => {
 
 .radar-shell::before,
 .radar-shell::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -1282,14 +1611,21 @@ onUnmounted(() => {
   background:
     linear-gradient(transparent 94%, rgba(114, 202, 248, 0.05) 100%),
     linear-gradient(90deg, transparent 94%, rgba(114, 202, 248, 0.04) 100%);
-  background-size: 100% 20px, 20px 100%;
+  background-size:
+    100% 20px,
+    20px 100%;
   opacity: 0.18;
 }
 
 .radar-shell::after {
   inset: auto 10px 12px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(122, 247, 208, 0.42), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(122, 247, 208, 0.42),
+    transparent
+  );
   box-shadow: 0 0 14px rgba(122, 247, 208, 0.2);
 }
 
@@ -1298,7 +1634,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1328,16 +1664,27 @@ onUnmounted(() => {
   place-items: center;
   margin: 10px 0 12px;
   padding: 12px;
-  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  clip-path: polygon(
+    0 10px,
+    10px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%
+  );
   border: 1px solid rgba(101, 186, 240, 0.14);
   background:
-    radial-gradient(circle at center, rgba(24, 149, 255, 0.08), transparent 58%),
+    radial-gradient(
+      circle at center,
+      rgba(24, 149, 255, 0.08),
+      transparent 58%
+    ),
     linear-gradient(180deg, rgba(2, 12, 20, 0.96), rgba(2, 8, 14, 0.88));
 }
 
 .radar-wrap::before,
 .radar-wrap::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 12px;
   pointer-events: none;
@@ -1347,8 +1694,14 @@ onUnmounted(() => {
 .radar-wrap::before {
   background:
     radial-gradient(circle, rgba(122, 247, 208, 0.08) 0 1px, transparent 1px),
-    radial-gradient(circle at center, rgba(122, 247, 208, 0.05), transparent 68%);
-  background-size: 18px 18px, 100% 100%;
+    radial-gradient(
+      circle at center,
+      rgba(122, 247, 208, 0.05),
+      transparent 68%
+    );
+  background-size:
+    18px 18px,
+    100% 100%;
   opacity: 0.28;
 }
 
@@ -1379,7 +1732,7 @@ onUnmounted(() => {
 
 .radar-labels text {
   fill: rgba(137, 210, 240, 0.62);
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 7.8px;
   letter-spacing: 0.16em;
 }
@@ -1435,7 +1788,9 @@ onUnmounted(() => {
   fill: color-mix(in srgb, var(--target-color) 14%, transparent);
   stroke: color-mix(in srgb, var(--target-color) 48%, rgba(255, 255, 255, 0));
   stroke-width: 1;
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--target-color) 28%, transparent));
+  filter: drop-shadow(
+    0 0 10px color-mix(in srgb, var(--target-color) 28%, transparent)
+  );
   animation: radarEchoPulse 1.8s ease-in-out infinite;
   transform-box: fill-box;
   transform-origin: center;
@@ -1447,7 +1802,9 @@ onUnmounted(() => {
   stroke-width: 1.15;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--target-color) 46%, transparent));
+  filter: drop-shadow(
+    0 0 8px color-mix(in srgb, var(--target-color) 46%, transparent)
+  );
 }
 
 .radar-target-dot {
@@ -1492,8 +1849,18 @@ onUnmounted(() => {
   gap: 10px;
   font-size: 12px;
   color: rgba(202, 228, 241, 0.84);
-  clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  clip-path: polygon(
+    0 8px,
+    8px 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0 100%
+  );
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
   cursor: pointer;
 }
 
@@ -1520,9 +1887,20 @@ onUnmounted(() => {
   z-index: 1;
   min-height: 490px;
   overflow: hidden;
-  clip-path: polygon(0 18px, 18px 0, 100% 0, 100% calc(100% - 24px), calc(100% - 24px) 100%, 0 100%);
+  clip-path: polygon(
+    0 18px,
+    18px 0,
+    100% 0,
+    100% calc(100% - 24px),
+    calc(100% - 24px) 100%,
+    0 100%
+  );
   background:
-    radial-gradient(circle at center, rgba(25, 112, 255, 0.18), transparent 36%),
+    radial-gradient(
+      circle at center,
+      rgba(25, 112, 255, 0.18),
+      transparent 36%
+    ),
     linear-gradient(180deg, rgba(3, 11, 22, 0.84), rgba(2, 7, 13, 0.98));
 }
 
@@ -1534,21 +1912,35 @@ onUnmounted(() => {
 }
 
 .ship-stage__floor {
-  transform:
-    perspective(900px) rotateX(72deg) translate3d(calc(var(--parallax-x) * 14px), calc(var(--parallax-y) * 12px), 0);
+  transform: perspective(900px) rotateX(72deg)
+    translate3d(
+      calc(var(--parallax-x) * 14px),
+      calc(var(--parallax-y) * 12px),
+      0
+    );
   transform-origin: center 72%;
   background:
     linear-gradient(transparent 95%, rgba(104, 182, 255, 0.12) 100%),
     linear-gradient(90deg, transparent 95%, rgba(104, 182, 255, 0.12) 100%);
-  background-size: 100% 28px, 28px 100%;
+  background-size:
+    100% 28px,
+    28px 100%;
   opacity: 0.36;
 }
 
 .ship-stage__glow {
   inset: 10% 10% 18%;
-  background: radial-gradient(circle at center, rgba(105, 183, 255, 0.18), transparent 50%);
+  background: radial-gradient(
+    circle at center,
+    rgba(105, 183, 255, 0.18),
+    transparent 50%
+  );
   filter: blur(16px);
-  transform: translate3d(calc(var(--parallax-x) * -20px), calc(var(--parallax-y) * -16px), 0);
+  transform: translate3d(
+    calc(var(--parallax-x) * -20px),
+    calc(var(--parallax-y) * -16px),
+    0
+  );
 }
 
 .ship-stage__rotation {
@@ -1565,8 +1957,12 @@ onUnmounted(() => {
   height: 100%;
   z-index: 2;
   pointer-events: none;
-  transform:
-    translate3d(calc(var(--parallax-x) * 18px), calc(var(--parallax-y) * 12px), 0) scale(1.015);
+  transform: translate3d(
+      calc(var(--parallax-x) * 18px),
+      calc(var(--parallax-y) * 12px),
+      0
+    )
+    scale(1.015);
 }
 
 .ship-grid path {
@@ -1582,14 +1978,16 @@ onUnmounted(() => {
 
 .ship-projection__glow {
   opacity: 0.34;
-  filter:
-    brightness(1.08) saturate(0.82) drop-shadow(0 0 26px rgba(105, 183, 255, 0.24)) drop-shadow(0 0 54px rgba(122, 247, 208, 0.14));
+  filter: brightness(1.08) saturate(0.82)
+    drop-shadow(0 0 26px rgba(105, 183, 255, 0.24))
+    drop-shadow(0 0 54px rgba(122, 247, 208, 0.14));
 }
 
 .ship-projection__asset {
   opacity: 0.94;
-  filter:
-    saturate(0.84) contrast(1.06) drop-shadow(0 12px 28px rgba(0, 0, 0, 0.34)) drop-shadow(0 0 18px rgba(105, 183, 255, 0.12));
+  filter: saturate(0.84) contrast(1.06)
+    drop-shadow(0 12px 28px rgba(0, 0, 0, 0.34))
+    drop-shadow(0 0 18px rgba(105, 183, 255, 0.12));
 }
 
 .ship-core-dot {
@@ -1633,16 +2031,31 @@ onUnmounted(() => {
   min-height: 80px;
   padding: 7px 12px 7px 24px;
   color: #eefaff;
-  border: 1px solid color-mix(in srgb, var(--pod-color) 42%, rgba(102, 164, 219, 0.2));
+  border: 1px solid
+    color-mix(in srgb, var(--pod-color) 42%, rgba(102, 164, 219, 0.2));
   background:
     linear-gradient(180deg, rgba(6, 15, 29, 0.95), rgba(3, 8, 16, 0.72)),
-    radial-gradient(circle at top right, color-mix(in srgb, var(--pod-color) 16%, transparent), transparent 55%);
-  clip-path: polygon(0 14px, 14px 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--pod-color) 16%, transparent),
+      transparent 55%
+    );
+  clip-path: polygon(
+    0 14px,
+    14px 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% 100%,
+    0 100%
+  );
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.28),
     0 0 22px color-mix(in srgb, var(--pod-color) 20%, transparent),
     inset 0 1px 0 rgba(188, 233, 255, 0.06);
-  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
   cursor: pointer;
 }
 
@@ -1657,7 +2070,11 @@ onUnmounted(() => {
 }
 
 .module-pod--tracking {
-  border-color: color-mix(in srgb, var(--pod-color) 62%, rgba(150, 218, 255, 0.22));
+  border-color: color-mix(
+    in srgb,
+    var(--pod-color) 62%,
+    rgba(150, 218, 255, 0.22)
+  );
 }
 
 .module-pod__strip {
@@ -1731,7 +2148,7 @@ onUnmounted(() => {
 }
 
 .module-pod__footer span {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 12px;
   color: #f0fbff;
 }
@@ -1744,7 +2161,14 @@ onUnmounted(() => {
   width: min(300px, calc(100% - 36px));
   padding: 18px 20px;
   text-align: center;
-  clip-path: polygon(0 12px, 12px 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  clip-path: polygon(
+    0 12px,
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    0 100%
+  );
   border: 1px solid rgba(100, 184, 242, 0.2);
   background: rgba(4, 11, 21, 0.76);
   backdrop-filter: blur(16px);
@@ -1788,20 +2212,27 @@ onUnmounted(() => {
   align-items: flex-end;
   padding: 14px 16px;
   margin-bottom: 14px;
-  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  clip-path: polygon(
+    0 10px,
+    10px 0,
+    100% 0,
+    100% calc(100% - 14px),
+    calc(100% - 14px) 100%,
+    0 100%
+  );
   border: 1px solid rgba(101, 183, 241, 0.18);
   background: rgba(5, 13, 24, 0.76);
 }
 
-.detail-card__header[data-status='online'] {
+.detail-card__header[data-status="online"] {
   border-color: rgba(105, 183, 255, 0.3);
 }
 
-.detail-card__header[data-status='warning'] {
+.detail-card__header[data-status="warning"] {
   border-color: rgba(255, 98, 98, 0.3);
 }
 
-.detail-card__header[data-status='standby'] {
+.detail-card__header[data-status="standby"] {
   border-color: rgba(122, 247, 208, 0.3);
 }
 
@@ -1826,11 +2257,11 @@ onUnmounted(() => {
   margin-bottom: 4px;
   color: rgba(141, 204, 239, 0.72);
   font-size: 10px;
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
 }
 
 .detail-card__metric strong {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 16px;
 }
 
@@ -1858,12 +2289,16 @@ onUnmounted(() => {
 }
 
 .detail-metric__top strong {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 13px;
 }
 
 .detail-metric__fill {
-  background: linear-gradient(90deg, var(--metric-color), color-mix(in srgb, var(--metric-color) 20%, #ffffff));
+  background: linear-gradient(
+    90deg,
+    var(--metric-color),
+    color-mix(in srgb, var(--metric-color) 20%, #ffffff)
+  );
   color: var(--metric-color);
 }
 
@@ -1906,16 +2341,16 @@ onUnmounted(() => {
   color: rgba(105, 183, 255, 0.84);
 }
 
-.feed-line[data-status='warning'] .feed-line__prompt {
+.feed-line[data-status="warning"] .feed-line__prompt {
   color: rgba(255, 98, 98, 0.9);
 }
 
-.feed-line[data-status='standby'] .feed-line__prompt {
+.feed-line[data-status="standby"] .feed-line__prompt {
   color: rgba(122, 247, 208, 0.92);
 }
 
 .feed-line__text {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 11px;
   line-height: 1.6;
 }
@@ -1925,7 +2360,14 @@ onUnmounted(() => {
   flex-wrap: wrap;
   gap: 12px;
   padding: 12px;
-  clip-path: polygon(0 12px, 12px 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  clip-path: polygon(
+    0 12px,
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    0 100%
+  );
 }
 
 .quick-dock__btn {
@@ -1933,8 +2375,18 @@ onUnmounted(() => {
   background: rgba(5, 13, 24, 0.72);
   color: #def7ff;
   padding: 12px 16px;
-  clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
-  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  clip-path: polygon(
+    0 8px,
+    8px 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0 100%
+  );
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
 .quick-dock__btn:hover {
@@ -1944,7 +2396,11 @@ onUnmounted(() => {
 }
 
 .quick-dock__btn--primary {
-  background: linear-gradient(135deg, rgba(61, 129, 255, 0.72), rgba(56, 204, 214, 0.28));
+  background: linear-gradient(
+    135deg,
+    rgba(61, 129, 255, 0.72),
+    rgba(56, 204, 214, 0.28)
+  );
   border-color: rgba(118, 220, 255, 0.38);
 }
 
@@ -1959,7 +2415,6 @@ onUnmounted(() => {
 }
 
 @keyframes radarLinePulse {
-
   0%,
   100% {
     opacity: 0.68;
@@ -1971,7 +2426,6 @@ onUnmounted(() => {
 }
 
 @keyframes radarEchoPulse {
-
   0%,
   100% {
     opacity: 0.54;
@@ -2044,7 +2498,6 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1180px) {
-
   .bridge-header,
   .bridge-header__title {
     grid-template-columns: 1fr;
@@ -2075,7 +2528,6 @@ onUnmounted(() => {
 }
 
 @media (max-width: 860px) {
-
   .bridge-header__meta,
   .bridge-sidebar--left,
   .bridge-sidebar--right {

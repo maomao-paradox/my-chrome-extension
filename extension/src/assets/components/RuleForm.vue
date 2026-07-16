@@ -12,7 +12,7 @@
       <label>响应类型</label>
       <div class="response-type">
         <label v-for="t in types" :key="t.value">
-          <input type="radio" :value="t.value" v-model="form.responseType" />
+          <input v-model="form.responseType" type="radio" :value="t.value" />
           {{ t.label }}
         </label>
       </div>
@@ -24,7 +24,7 @@
     </div>
 
     <div class="checkbox-group">
-      <input type="checkbox" id="enableRule" v-model="form.enabled" />
+      <input id="enableRule" v-model="form.enabled" type="checkbox" />
       <label for="enableRule">启用此规则</label>
     </div>
 
@@ -36,47 +36,47 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watchEffect } from 'vue'
+import { reactive, watchEffect } from 'vue';
 
 const props = defineProps({
   editId: { type: [Number, null], default: null },
   rule: { type: Object, default: () => ({}) }
-})
+});
 
-const emit = defineEmits(['submit', 'reset'])
+const emit = defineEmits(['submit', 'reset']);
 
 const types = [
   { value: 'json', label: 'JSON 数据' },
   { value: 'text', label: '文本/HTML' },
   { value: 'xml', label: 'XML 数据' }
-]
+];
 
 const form = reactive({
   urlPattern: '',
   responseType: 'json',
   responseData: '',
   enabled: true
-})
+});
 
 watchEffect(() => {
   // 当父组件把 rule 传进来时回填
   if (props.rule && props.editId) {
-    Object.assign(form, props.rule)
+    Object.assign(form, props.rule);
   } else {
-    reset()
+    reset();
   }
-})
+});
 
 function submit() {
   // JSON 校验
   if (form.responseType === 'json') {
-    try { JSON.parse(form.responseData) }
+    try { JSON.parse(form.responseData); }
     catch (e) {
-      if (!confirm('不是有效 JSON，仍要保存吗？')) return
+      if (!confirm('不是有效 JSON，仍要保存吗？')) {return;}
     }
   }
-  emit('submit', { ...form, id: props.editId })
-  reset()
+  emit('submit', { ...form, id: props.editId });
+  reset();
 }
 
 function reset() {
@@ -85,8 +85,8 @@ function reset() {
     responseType: 'json',
     responseData: '',
     enabled: true
-  })
-  emit('reset')
+  });
+  emit('reset');
 }
 </script>
 

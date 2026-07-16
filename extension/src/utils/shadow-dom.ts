@@ -7,33 +7,30 @@
  * @date 2026-02-05T02:38:01.699Z
  */
 
-import { $id, addElementToDom } from "./element-control";
-// 直接导入CSS文件内容，Vite会将其转换为字符串
-//@ts-ignore
-import shadowThemeCss from "@/assets/styles/shadow-theme.css?raw";
-//@ts-ignore
-import elementPlusCss from "element-plus/dist/index.css?raw";
+import { $id } from './element-control';
+import shadowThemeCss from '@/assets/styles/shadow-theme.css?raw';
+import elementPlusCss from 'element-plus/dist/index.css?raw';
 
 export function createShadowHost(id: string, mode: ShadowRootMode) {
   // 检查是否已存在
-  let existingHost = $id(id);
+  const existingHost = $id(id);
   if (existingHost) {
     // maLogger.log("已存在Shadow Host:", existingHost);
     return {
       shadowHost: existingHost,
-      shadowRoot: existingHost.shadowRoot,
+      shadowRoot: existingHost.shadowRoot
     };
   }
 
   // 创建新的宿主元素（使用普通 div 元素）
-  const shadowHost = document.createElement("div");
+  const shadowHost = document.createElement('div');
   shadowHost.id = id;
   Object.assign(shadowHost.style, {
-    overflow: "visible",
-    position: "absolute",
-    top: "0px",
-    left: "0px",
-    display: "block",
+    overflow: 'visible',
+    position: 'absolute',
+    top: '0px',
+    left: '0px',
+    display: 'block'
   });
 
   // 添加到文档体的开头
@@ -58,14 +55,14 @@ export function createShadowHost(id: string, mode: ShadowRootMode) {
 export function injectStyles(
   shadowRoot: ShadowRoot,
   styles: string,
-  replaceRootSelector: boolean = false,
+  replaceRootSelector: boolean = false
 ) {
   // 如果需要替换 :root 选择器为 :host
   if (replaceRootSelector) {
-    styles = styles.replace(/:root/g, ":host");
+    styles = styles.replace(/:root/g, ':host');
   }
 
-  const styleElement = document.createElement("style");
+  const styleElement = document.createElement('style');
   styleElement.textContent = styles;
   // 在顶部插入样式，确保覆盖默认样式
   shadowRoot.insertBefore(styleElement, shadowRoot.firstChild);
@@ -83,9 +80,9 @@ export async function injectCssDom(shadowRoot: ShadowRoot, cssUrl: string) {
     return cssContent;
   } catch (error) {
     maLogger.error(
-      "Error reading and injecting CSS:",
+      'Error reading and injecting CSS:',
       error,
-      `CSS URL: ${cssUrl}`,
+      `CSS URL: ${cssUrl}`
     );
     throw error;
   }
@@ -97,8 +94,8 @@ export async function injectCssDom(shadowRoot: ShadowRoot, cssUrl: string) {
  * @param {string} href - 样式文件URL
  */
 export function injectStyleLink(shadowRoot: ShadowRoot, href: string) {
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
   link.href = href;
   shadowRoot.appendChild(link);
 }

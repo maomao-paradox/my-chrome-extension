@@ -17,7 +17,7 @@ import type {
   AddElemOpts,
   WaitForSelectorOptions,
 } from "@/types";
-import { getAssetsAbstractPath, getRuntimeScript } from "@/utils/common";
+import { getRuntimeScript } from "@/utils/common";
 
 export const $id = document.getElementById.bind(document);
 export const $query = document.querySelectorAll.bind(document);
@@ -36,8 +36,13 @@ export function whenDomReady(callback: () => void) {
   }
 }
 
-export function throttle(func: Function, wait: number): Function {
-  if (typeof func !== "function") throw new Error("func is not a function");
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  if (typeof func !== "function") {
+    throw new Error("func is not a function");
+  }
   let timeout: NodeJS.Timeout | null = null;
   let lastRun = 0;
   return function (this: any, ...args: any[]) {
@@ -55,8 +60,13 @@ export function throttle(func: Function, wait: number): Function {
   };
 }
 
-export function debounce(func: Function, wait: number): Function {
-  if (typeof func !== "function") throw new Error("func is not a function");
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  if (typeof func !== "function") {
+    throw new Error("func is not a function");
+  }
   let timeout: NodeJS.Timeout | null = null;
   return function (this: any, ...args: any[]) {
     clearTimeout(timeout!);
@@ -122,15 +132,22 @@ export function createEl(options: CreateElemOpts): HTMLElement {
   } else if (tag instanceof HTMLElement) {
     el = tag as HTMLElement;
   }
-  if (!el)
+  if (!el) {
     throw new Error("createEl error: tag is not a string or HTMLElement");
+  }
 
   if (tag === "button") {
     (el as HTMLButtonElement).type = "button";
   }
-  if (attrs) setElAttributes(el, attrs);
-  if (style) setElStyle(el, style);
-  if (eventlistener) setElEventListeners(el, eventlistener);
+  if (attrs) {
+    setElAttributes(el, attrs);
+  }
+  if (style) {
+    setElStyle(el, style);
+  }
+  if (eventlistener) {
+    setElEventListeners(el, eventlistener);
+  }
   if (children && Array.isArray(children) && children.length > 0) {
     children.forEach((child) => {
       el.appendChild(child instanceof HTMLElement ? child : createEl(child));
@@ -369,7 +386,9 @@ class SearchState {
 
   /** 尝试收录一个元素；返回 true 表示是“新”元素 */
   addIfNew(el: Element): boolean {
-    if (this.called.has(el)) return false;
+    if (this.called.has(el)) {
+      return false;
+    }
     this.called.add(el);
     this.found.add(el);
     return true;
@@ -406,17 +425,23 @@ class ElementSearcher {
 
     this.scheduleTimeout();
     this.bindIframeLoadListener();
-    if (this.opts.useMutationObserver !== false) this.buildObserver();
+    if (this.opts.useMutationObserver !== false) {
+      this.buildObserver();
+    }
     this.searchOnce();
   }
 
   /** 监听 iframe 加载事件，确保 iframe 重新加载时能及时更新根节点 */
   private bindIframeLoadListener(): void {
     const { iframeSelector } = this.opts;
-    if (!iframeSelector) return;
+    if (!iframeSelector) {
+      return;
+    }
 
     const iframe = document.querySelector<HTMLIFrameElement>(iframeSelector);
-    if (!iframe) return;
+    if (!iframe) {
+      return;
+    }
 
     const handleLoad = () => {
       // iframe 加载完成后，主动检查根节点
@@ -435,13 +460,19 @@ class ElementSearcher {
   /* ========== 内部实现 ========== */
   private pickRoot(): Document | DocumentFragment {
     const { iframeSelector } = this.opts;
-    if (!iframeSelector) return document;
+    if (!iframeSelector) {
+      return document;
+    }
 
     const iframe = document.querySelector<HTMLIFrameElement>(iframeSelector);
-    if (!iframe) return document; // 找不到 iframe 就退回主文档
+    if (!iframe) {
+      return document;
+    } // 找不到 iframe 就退回主文档
     try {
       const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!doc) throw new Error("cannot access iframe document");
+      if (!doc) {
+        throw new Error("cannot access iframe document");
+      }
       // maLogger.log("已定位到Iframe的dom文档：", doc);
       return doc;
     } catch (e) {
@@ -470,7 +501,9 @@ class ElementSearcher {
 
   private scheduleTimeout(): void {
     const { timeout = 30000 } = this.opts;
-    if (timeout <= 0) return;
+    if (timeout <= 0) {
+      return;
+    }
     this.timeoutId = setTimeout(() => {
       this.state.stopReason = "timeout";
       this.resolve(Array.from(this.state.found));
@@ -479,7 +512,9 @@ class ElementSearcher {
 
   /** 单次查找 + 回调 + 终止判断 */
   private searchOnce(): void {
-    if (this.signal.aborted) return;
+    if (this.signal.aborted) {
+      return;
+    }
     this.state.checkTimes++;
 
     // 重新检查根节点，确保捕获到动态加载的内容
@@ -523,11 +558,15 @@ class ElementSearcher {
 
     let foundNew = false;
     for (const el of list) {
-      if (!this.passesFilter(el)) continue;
+      if (!this.passesFilter(el)) {
+        continue;
+      }
       if (this.state.addIfNew(el)) {
         foundNew = true;
         this.fireCallback(el);
-        if (this.state.shouldStop()) break;
+        if (this.state.shouldStop()) {
+          break;
+        }
       }
     }
 
@@ -560,7 +599,9 @@ class ElementSearcher {
   /** 过滤器 */
   private passesFilter(el: Element): boolean {
     const { filter } = this.opts;
-    if (!filter) return true;
+    if (!filter) {
+      return true;
+    }
     try {
       return filter(el);
     } catch (e) {
@@ -571,7 +612,9 @@ class ElementSearcher {
 
   /** 建立 MutationObserver */
   private buildObserver(): void {
-    if (this.signal.aborted) return;
+    if (this.signal.aborted) {
+      return;
+    }
     try {
       const opts = this.opts.observerOptions || {
         childList: true,
@@ -584,7 +627,9 @@ class ElementSearcher {
         // 简单节流：最后一次变化后 50 ms 再检查
         const delay = Math.min(this.opts.interval || 100, 50);
         requestIdleCallback?.(() => {
-          if (t !== tick) return;
+          if (t !== tick) {
+            return;
+          }
           this.searchOnce();
         }) ?? setTimeout(() => this.searchOnce(), delay);
       });
@@ -620,10 +665,12 @@ class ElementSearcher {
 export function waitForSelector(
   options: WaitForSelectorOptions,
 ): Promise<Element[]> {
-  if (!options.selector)
+  if (!options.selector) {
     return Promise.reject(new Error("selector is required"));
-  if (Array.isArray(options.selector) && options.selector.length === 0)
+  }
+  if (Array.isArray(options.selector) && options.selector.length === 0) {
     return Promise.reject(new Error("selector array cannot be empty"));
+  }
 
   return new Promise<Element[]>((resolve, reject) => {
     const state = new SearchState(options);
@@ -853,11 +900,12 @@ export class ElementPositionInfo {
     const elemW = targetElement.offsetWidth,
       elemH = targetElement.offsetHeight;
 
-    if (pinned)
+    if (pinned) {
       Object.defineProperties(targetElement.style, {
         position: { value: "fixed" },
         zIndex: { value: "9999" },
       });
+    }
 
     const positionMap: Record<string, { x?: number; y?: number }> = {
       top: { y: inside ? this.top + offsetY : this.top - elemH - offsetY },
@@ -904,7 +952,9 @@ export class ElementPositionInfo {
       top: { value: `${finalY}px` },
     });
 
-    if (observeReference) setupReferenceObserver(this.element, targetElement);
+    if (observeReference) {
+      setupReferenceObserver(this.element, targetElement);
+    }
 
     return targetElement;
   }

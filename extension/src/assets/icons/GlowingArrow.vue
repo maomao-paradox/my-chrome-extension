@@ -9,22 +9,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type CSSProperties } from 'vue'
+import { computed, type CSSProperties } from 'vue';
 
 const props = defineProps<{
   color?: string,
   size?: string,
   direction?: 'left' | 'right' | 'top' | 'bottom' | 'left-top' | 'right-top' | 'left-bottom' | 'right-bottom'
-}>()
+}>();
 
 const style = computed<CSSProperties>(() => {
-  const { size, color } = props
+  const { size, color } = props;
 
   return {
     '--font-size': size || '24px',
-    '--color': color || '#FFFFFF',
-  }
-})
+    '--color': color || '#FFFFFF'
+  };
+});
 </script>
 
 <style scoped>

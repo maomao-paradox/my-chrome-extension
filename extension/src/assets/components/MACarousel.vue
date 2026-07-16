@@ -1,13 +1,13 @@
 <template>
-    <div class="dialog-wrapper" v-if="visible">
+    <div v-if="visible" class="dialog-wrapper">
         <!-- 遮罩层 -->
         <div class="dialog-mask" @click="handleMaskClick"></div>
         <!-- 轮播容器 -->
         <div class="carousel-container">
             <el-carousel ref="carouselRef" :interval="4000" type="card" height="300px" @wheel="handleWheel">
-                <el-carousel-item v-for="tool, index in tools" :key="tool.id" @click="() => { handleClickTool(tool) }"
-                    class="carousel-item"
-                    :style="{ backgroundColor: bgColors[index], backgroundImage: `url(${tool.image})` }">
+                <el-carousel-item v-for="tool, index in tools" :key="tool.id" class="carousel-item"
+                    :style="{ backgroundColor: bgColors[index], backgroundImage: `url(${tool.image})` }"
+                    @click="() => { handleClickTool(tool) }">
                     <div v-if="tool.id === 'hello'" key="hello">
                         <div class="context-hello">
                             <span>这里有一个BUG，痛い！</span>
@@ -24,12 +24,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Tool } from "@/types"
+import { ref } from 'vue';
+import { Tool } from '@/types';
 
 const visible = defineModel<boolean>('visible', {
-    default: false
-})
+  default: false
+});
 
 interface MACarouselProps {
     tools?: Tool[]
@@ -37,55 +37,55 @@ interface MACarouselProps {
 }
 
 const props = withDefaults(defineProps<MACarouselProps>(), {
-    tools: () => [
-        { id: '1', label: '工具A', icon: 'el-icon-tool' },
-        { id: '2', label: '工具B', icon: 'el-icon-tool' },
-    ]
-})
+  tools: () => [
+    { id: '1', label: '工具A', icon: 'el-icon-tool' },
+    { id: '2', label: '工具B', icon: 'el-icon-tool' }
+  ]
+});
 
 // 响应式数据
-const carouselRef = ref<any>(null)
+const carouselRef = ref<any>(null);
 
 // 轮播卡片背景色数组
 const bgColors = [
-    '#3498db', // 蓝色
-    '#e74c3c', // 红色
-    '#2ecc71', // 绿色
-    '#f39c12', // 橙色
-    '#9b59b6', // 紫色
-    '#1abc9c'  // 青色
-]
+  '#3498db', // 蓝色
+  '#e74c3c', // 红色
+  '#2ecc71', // 绿色
+  '#f39c12', // 橙色
+  '#9b59b6', // 紫色
+  '#1abc9c'  // 青色
+];
 
 // 处理鼠标滚轮事件
 const handleWheel = (event: WheelEvent) => {
-    event.preventDefault()
-    if (event.deltaY > 0) {
-        // 向下滚动，下一页
-        carouselRef.value?.next()
-    } else {
-        // 向上滚动，上一页
-        carouselRef.value?.prev()
-    }
-}
+  event.preventDefault();
+  if (event.deltaY > 0) {
+    // 向下滚动，下一页
+    carouselRef.value?.next();
+  } else {
+    // 向上滚动，上一页
+    carouselRef.value?.prev();
+  }
+};
 
 const emit = defineEmits<{
     'click-tool': [tool: Tool]
-}>()
+}>();
 
 // 处理遮罩层点击事件，关闭对话框
 const handleMaskClick = () => {
-    visible.value = false
-}
+  visible.value = false;
+};
 
 const handleClickTool = (tool: Tool) => {
-    if (typeof tool.onClick === 'function') {
-        tool.onClick()
-    } else {
-        emit('click-tool', tool)
-    }
-    visible.value = false
-    // maLogger.info("点击了工具：", tool.label)
-}
+  if (typeof tool.onClick === 'function') {
+    tool.onClick();
+  } else {
+    emit('click-tool', tool);
+  }
+  visible.value = false;
+  // maLogger.info("点击了工具：", tool.label)
+};
 </script>
 
 <style scoped>

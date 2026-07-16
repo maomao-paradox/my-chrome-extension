@@ -10,18 +10,18 @@
 import { type XhrRulesMap } from '@/types';
 
 export const rules: XhrRulesMap = {
-    '/api/qa-pro/form/one/query': {
-        // 拦截响应数据 - 使用JSON指令格式
-        responseRules: [
-            {
-                type: 'setField',
-                params: {
-                    path: 'response.detail.form_status',
-                    value: 1
-                }
-            }
-        ]
-    }
-}
+  '/api/qa-pro/form/one/query': {
+    // 拦截响应数据 - 使用JSON指令格式
+    responseRules: [
+      {
+        type: 'setField',
+        params: {
+          path: 'response.detail.form_status',
+          value: 1
+        }
+      }
+    ]
+  }
+};
 
 export default rules;

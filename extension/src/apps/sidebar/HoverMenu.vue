@@ -1,12 +1,12 @@
 <template>
   <!-- 只在expanded为true时显示整个菜单容器 -->
-  <div class="dock" ref="dockRef" style="position: fixed; right: 0;top:50%;">
+  <div ref="dockRef" class="dock" style="position: fixed; right: 0;top:50%;">
     <div
       v-show="mikuTriggerVisible"
       class="miku-trigger"
       aria-label="打开 Miku 对话"
-      @click.stop="toggleMikuChat"
       style="position: absolute; right: -84px; width: 126px; height: auto"
+      @click.stop="toggleMikuChat"
     >
       <img :src="mikuSrc" alt="Miku trigger" aria-hidden="true" width="100%"/>
     </div>
@@ -33,28 +33,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
-import { Tool } from "@/types";
-import { IconCommunity } from "@icons/index";
-import { eventManager } from "@/event";
-import MikuChatWindow from "./MikuChatWindow.vue";
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { Tool } from '@/types';
+import { IconCommunity } from '@icons/index';
+import { eventManager } from '@/event';
+import MikuChatWindow from './MikuChatWindow.vue';
 
 // Props定义
 const props = defineProps<{
   items: Tool[];
-  layout?: "vertical" | "horizontal" | "fold";
+  layout?: 'vertical' | 'horizontal' | 'fold';
   visible?: boolean;
 }>();
 
 // 彩虹色数组
 const rainbowColors = [
-  "#FF0000", // 红色
-  "#FF7F00", // 橙色
-  "#FFFF00", // 黄色
-  "#00FF00", // 绿色
-  "#0000FF", // 蓝色
-  "#4B0082", // 靛蓝色
-  "#9400D3", // 紫色
+  '#FF0000', // 红色
+  '#FF7F00', // 橙色
+  '#FFFF00', // 黄色
+  '#00FF00', // 绿色
+  '#0000FF', // 蓝色
+  '#4B0082', // 靛蓝色
+  '#9400D3' // 紫色
 ];
 
 // 根据索引获取彩虹色
@@ -67,7 +67,7 @@ const hoverIdx = ref<number>(-1); // 用于控制悬浮效果和提示文本
 const mikuTriggerVisible = ref(false);
 const mikuChatVisible = ref(false);
 
-const mikuSrc = chrome.runtime.getURL("static/img/miku.png");
+const mikuSrc = chrome.runtime.getURL('static/img/miku.png');
 
 // 鼠标进入一级菜单 - 控制悬浮效果和提示文本
 const onMouseEnter = (i: number) => {
@@ -91,7 +91,7 @@ const toggleMikuChat = () => {
 const onClick = (i: number) => {
   const item = props.items[i];
   // 发出点击事件
-  emit("click", item);
+  emit('click', item);
   // 点击已经激活的菜单项，不做任何操作
   if (hoverIdx.value === i) {
     return;
@@ -102,29 +102,29 @@ const dockRef = ref<HTMLDivElement>();
 
 // 显示整个菜单
 const show = () => {
-  dockRef.value?.classList.add("active");
+  dockRef.value?.classList.add('active');
 };
 
 // 隐藏整个菜单
 const hide = () => {
-  dockRef.value?.classList.remove("active");
+  dockRef.value?.classList.remove('active');
 };
 
 // 处理键盘事件 - 监听Ctrl+Q快捷键
 const handleKeyDown = (event: KeyboardEvent) => {
   // 添加调试日志
-  maLogger.log("Key pressed:", event.key, "ctrlKey:", event.ctrlKey);
+  maLogger.log('Key pressed:', event.key, 'ctrlKey:', event.ctrlKey);
   // 检查是否按下了Ctrl+Q
-  if (event.ctrlKey && event.key.toLowerCase() === "q") {
+  if (event.ctrlKey && event.key.toLowerCase() === 'q') {
     // 阻止默认行为
     event.preventDefault();
     // 显示菜单
-    dockRef.value?.classList.toggle("hover");
+    dockRef.value?.classList.toggle('hover');
   }
 };
 
 eventManager.useBus({ show: show, hide: hide });
-eventManager.useListener("keydown", handleKeyDown);
+eventManager.useListener('keydown', handleKeyDown);
 
 // 组件生命周期
 onMounted(() => {

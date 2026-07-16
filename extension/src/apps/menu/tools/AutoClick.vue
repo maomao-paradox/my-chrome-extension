@@ -21,19 +21,19 @@
                 <label for="intervalInput">
                     ⏱️ 间隔 (ms)
                 </label>
-                <input type="number" id="intervalInput" v-model.number="intervalMs" :min="50" :max="10000" step="50"
+                <input id="intervalInput" v-model.number="intervalMs" type="number" :min="50" :max="10000" step="50"
                     @change="onIntervalChange">
                 <span class="unit-label">ms</span>
             </div>
 
             <div class="btn-group">
-                <button class="btn btn-primary" @click="startPlayback" :disabled="isPlaying || isRecording">
+                <button class="btn btn-primary" :disabled="isPlaying || isRecording" @click="startPlayback">
                     ▶ 播放
                 </button>
-                <button class="btn btn-danger" @click="stopPlayback" :disabled="!isPlaying">
+                <button class="btn btn-danger" :disabled="!isPlaying" @click="stopPlayback">
                     ⏹ 停止
                 </button>
-                <button class="btn btn-success" @click="toggleRecording" :class="{ 'btn-recording': isRecording }">
+                <button class="btn btn-success" :class="{ 'btn-recording': isRecording }" @click="toggleRecording">
                     {{ isRecording ? '⏹ 停止录制' : '🔴 录制' }}
                 </button>
                 <button class="btn btn-outline" @click="resetCounter">
@@ -103,403 +103,403 @@ const buttonSelector = 'button, [role="button"], input[type="button"], input[typ
 
 // 监听鼠标点击
 const recordingListener = function (e: MouseEvent) {
-    if (!isRecording.value) return;
-    const x = e.clientX;
-    const y = e.clientY;
-    recordedSteps.value.push({ x, y });
+  if (!isRecording.value) {return;}
+  const x = e.clientX;
+  const y = e.clientY;
+  recordedSteps.value.push({ x, y });
 };
 
 // ---------- 计算属性 ----------
 const statusText = computed(() => {
-    if (isRecording.value) return '录制中';
-    if (isPlaying.value) return '播放中';
-    return '空闲';
+  if (isRecording.value) {return '录制中';}
+  if (isPlaying.value) {return '播放中';}
+  return '空闲';
 });
 
 const statusDotClass = computed(() => {
-    if (isRecording.value) return 'recording';
-    if (isPlaying.value) return 'active';
-    return 'inactive';
+  if (isRecording.value) {return 'recording';}
+  if (isPlaying.value) {return 'active';}
+  return 'inactive';
 });
 
 const crosshairSegments = computed(() => {
-    const pointer = recordingPointerPosition.value;
-    if (!pointer) return [];
+  const pointer = recordingPointerPosition.value;
+  if (!pointer) {return [];}
 
-    const buttonRect = hoveredButtonRect.value;
-    const x = `${pointer.x}px`;
-    const y = `${pointer.y}px`;
+  const buttonRect = hoveredButtonRect.value;
+  const x = `${pointer.x}px`;
+  const y = `${pointer.y}px`;
 
-    if (!buttonRect) {
-        return [
-            {
-                key: 'vertical',
-                className: 'recording-crosshair-line--vertical',
-                style: {
-                    left: x,
-                    top: '0px',
-                    height: '100vh',
-                },
-            },
-            {
-                key: 'horizontal',
-                className: 'recording-crosshair-line--horizontal',
-                style: {
-                    left: '0px',
-                    top: y,
-                    width: '100vw',
-                },
-            },
-        ];
-    }
-
+  if (!buttonRect) {
     return [
-        {
-            key: 'vertical-top',
-            className: 'recording-crosshair-line--vertical',
-            style: {
-                left: x,
-                top: '0px',
-                height: `${Math.max(0, buttonRect.top)}px`,
-            },
-        },
-        {
-            key: 'vertical-bottom',
-            className: 'recording-crosshair-line--vertical',
-            style: {
-                left: x,
-                top: `${buttonRect.bottom}px`,
-                height: `calc(100vh - ${buttonRect.bottom}px)`,
-            },
-        },
-        {
-            key: 'horizontal-left',
-            className: 'recording-crosshair-line--horizontal',
-            style: {
-                left: '0px',
-                top: y,
-                width: `${Math.max(0, buttonRect.left)}px`,
-            },
-        },
-        {
-            key: 'horizontal-right',
-            className: 'recording-crosshair-line--horizontal',
-            style: {
-                left: `${buttonRect.right}px`,
-                top: y,
-                width: `calc(100vw - ${buttonRect.right}px)`,
-            },
-        },
+      {
+        key: 'vertical',
+        className: 'recording-crosshair-line--vertical',
+        style: {
+          left: x,
+          top: '0px',
+          height: '100vh'
+        }
+      },
+      {
+        key: 'horizontal',
+        className: 'recording-crosshair-line--horizontal',
+        style: {
+          left: '0px',
+          top: y,
+          width: '100vw'
+        }
+      }
     ];
+  }
+
+  return [
+    {
+      key: 'vertical-top',
+      className: 'recording-crosshair-line--vertical',
+      style: {
+        left: x,
+        top: '0px',
+        height: `${Math.max(0, buttonRect.top)}px`
+      }
+    },
+    {
+      key: 'vertical-bottom',
+      className: 'recording-crosshair-line--vertical',
+      style: {
+        left: x,
+        top: `${buttonRect.bottom}px`,
+        height: `calc(100vh - ${buttonRect.bottom}px)`
+      }
+    },
+    {
+      key: 'horizontal-left',
+      className: 'recording-crosshair-line--horizontal',
+      style: {
+        left: '0px',
+        top: y,
+        width: `${Math.max(0, buttonRect.left)}px`
+      }
+    },
+    {
+      key: 'horizontal-right',
+      className: 'recording-crosshair-line--horizontal',
+      style: {
+        left: `${buttonRect.right}px`,
+        top: y,
+        width: `calc(100vw - ${buttonRect.right}px)`
+      }
+    }
+  ];
 });
 
 const coordinateBadgeStyle = computed(() => {
-    const pointer = recordingPointerPosition.value;
-    if (!pointer) return {};
+  const pointer = recordingPointerPosition.value;
+  if (!pointer) {return {};}
 
-    return {
-        left: `max(8px, min(calc(100vw - 132px), ${pointer.x + 12}px))`,
-        top: `max(8px, min(calc(100vh - 42px), ${pointer.y + 12}px))`,
-    };
+  return {
+    left: `max(8px, min(calc(100vw - 132px), ${pointer.x + 12}px))`,
+    top: `max(8px, min(calc(100vh - 42px), ${pointer.y + 12}px))`
+  };
 });
 
 const buttonOutlineStyle = computed(() => {
-    const buttonRect = hoveredButtonRect.value;
-    if (!buttonRect) return {};
+  const buttonRect = hoveredButtonRect.value;
+  if (!buttonRect) {return {};}
 
-    return {
-        left: `${buttonRect.left}px`,
-        top: `${buttonRect.top}px`,
-        width: `${buttonRect.width}px`,
-        height: `${buttonRect.height}px`,
-    };
+  return {
+    left: `${buttonRect.left}px`,
+    top: `${buttonRect.top}px`,
+    width: `${buttonRect.width}px`,
+    height: `${buttonRect.height}px`
+  };
 });
 
 // ---------- 核心功能 ----------
 // 执行一次点击 (指定坐标)
 function performClickAt(x: number, y: number) {
-    const eventOptions = {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: x,
-        clientY: y,
-        screenX: window.screenX + x || x,
-        screenY: window.screenY + y || y,
-        buttons: 1,
-        button: 0,
-    };
+  const eventOptions = {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+    clientX: x,
+    clientY: y,
+    screenX: window.screenX + x || x,
+    screenY: window.screenY + y || y,
+    buttons: 1,
+    button: 0
+  };
 
-    // mousedown
-    const downEvent = new MouseEvent('mousedown', eventOptions);
-    document.dispatchEvent(downEvent);
+  // mousedown
+  const downEvent = new MouseEvent('mousedown', eventOptions);
+  document.dispatchEvent(downEvent);
 
-    // mouseup (buttons: 0)
-    const upOptions = { ...eventOptions, buttons: 0 };
-    const upEvent = new MouseEvent('mouseup', upOptions);
-    document.dispatchEvent(upEvent);
+  // mouseup (buttons: 0)
+  const upOptions = { ...eventOptions, buttons: 0 };
+  const upEvent = new MouseEvent('mouseup', upOptions);
+  document.dispatchEvent(upEvent);
 
-    // click
-    const clickEvent = new MouseEvent('click', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: x,
-        clientY: y,
-        screenX: window.screenX + x || x,
-        screenY: window.screenY + y || y,
-        button: 0,
-        buttons: 0,
-    });
-    document.dispatchEvent(clickEvent);
+  // click
+  const clickEvent = new MouseEvent('click', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+    clientX: x,
+    clientY: y,
+    screenX: window.screenX + x || x,
+    screenY: window.screenY + y || y,
+    button: 0,
+    buttons: 0
+  });
+  document.dispatchEvent(clickEvent);
 
-    clickCounter.value++;
+  clickCounter.value++;
 }
 
 // 播放下一个步骤
 function playNextStep() {
-    if (!isPlaying.value) return;
-    if (recordedSteps.value.length === 0) {
-        stopPlayback();
-        return;
-    }
+  if (!isPlaying.value) {return;}
+  if (recordedSteps.value.length === 0) {
+    stopPlayback();
+    return;
+  }
 
-    // 执行当前步骤
-    const step = recordedSteps.value[currentStepIndex.value];
-    performClickAt(step.x, step.y);
+  // 执行当前步骤
+  const step = recordedSteps.value[currentStepIndex.value];
+  performClickAt(step.x, step.y);
 
-    // 移动到下一步（循环）
-    currentStepIndex.value++;
-    if (currentStepIndex.value >= recordedSteps.value.length) {
-        currentStepIndex.value = 0;
-    }
+  // 移动到下一步（循环）
+  currentStepIndex.value++;
+  if (currentStepIndex.value >= recordedSteps.value.length) {
+    currentStepIndex.value = 0;
+  }
 }
 
 // 开始播放
 function startPlayback() {
-    if (isPlaying.value) return;
-    if (isRecording.value) {
-        stopRecording();
-    }
-    if (recordedSteps.value.length === 0) {
-        // 可以添加提示
-        return;
-    }
+  if (isPlaying.value) {return;}
+  if (isRecording.value) {
+    stopRecording();
+  }
+  if (recordedSteps.value.length === 0) {
+    // 可以添加提示
+    return;
+  }
 
-    // 重置步骤索引
-    currentStepIndex.value = 0;
-    isPlaying.value = true;
+  // 重置步骤索引
+  currentStepIndex.value = 0;
+  isPlaying.value = true;
 
-    // 清除旧定时器
-    if (intervalId.value) {
-        clearInterval(intervalId.value);
-        intervalId.value = null;
-    }
+  // 清除旧定时器
+  if (intervalId.value) {
+    clearInterval(intervalId.value);
+    intervalId.value = null;
+  }
 
-    // 创建新定时器
-    intervalId.value = setInterval(playNextStep, intervalMs.value);
+  // 创建新定时器
+  intervalId.value = setInterval(playNextStep, intervalMs.value);
 
-    // 立即执行第一步
-    playNextStep();
+  // 立即执行第一步
+  playNextStep();
 }
 
 // 停止播放
 function stopPlayback() {
-    if (intervalId.value) {
-        clearInterval(intervalId.value);
-        intervalId.value = null;
-    }
-    isPlaying.value = false;
+  if (intervalId.value) {
+    clearInterval(intervalId.value);
+    intervalId.value = null;
+  }
+  isPlaying.value = false;
 }
 
 // ---------- 录制功能 ----------
 function getViewportRect(rect: DOMRect): ViewportRect {
-    const left = Math.max(0, rect.left);
-    const top = Math.max(0, rect.top);
-    const right = Math.min(window.innerWidth, rect.right);
-    const bottom = Math.min(window.innerHeight, rect.bottom);
+  const left = Math.max(0, rect.left);
+  const top = Math.max(0, rect.top);
+  const right = Math.min(window.innerWidth, rect.right);
+  const bottom = Math.min(window.innerHeight, rect.bottom);
 
-    return {
-        left,
-        top,
-        right,
-        bottom,
-        width: Math.max(0, right - left),
-        height: Math.max(0, bottom - top),
-    };
+  return {
+    left,
+    top,
+    right,
+    bottom,
+    width: Math.max(0, right - left),
+    height: Math.max(0, bottom - top)
+  };
 }
 
 function getButtonRectAtPoint(x: number, y: number) {
-    const pointedElement = document.elementFromPoint(x, y);
-    const buttonElement = pointedElement instanceof Element
-        ? pointedElement.closest(buttonSelector)
-        : null;
+  const pointedElement = document.elementFromPoint(x, y);
+  const buttonElement = pointedElement instanceof Element
+    ? pointedElement.closest(buttonSelector)
+    : null;
 
-    if (!(buttonElement instanceof HTMLElement)) {
-        return null;
-    }
+  if (!(buttonElement instanceof HTMLElement)) {
+    return null;
+  }
 
-    const rect = buttonElement.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) {
-        return null;
-    }
+  const rect = buttonElement.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) {
+    return null;
+  }
 
-    return getViewportRect(rect);
+  return getViewportRect(rect);
 }
 
 function updateRecordingPointer(x: number, y: number) {
-    const pointer = {
-        x: Math.round(x),
-        y: Math.round(y),
-    };
+  const pointer = {
+    x: Math.round(x),
+    y: Math.round(y)
+  };
 
-    recordingPointerPosition.value = pointer;
-    hoveredButtonRect.value = getButtonRectAtPoint(pointer.x, pointer.y);
+  recordingPointerPosition.value = pointer;
+  hoveredButtonRect.value = getButtonRectAtPoint(pointer.x, pointer.y);
 }
 
 function handleRecordingPointerMove(e: MouseEvent) {
-    if (!isRecording.value) return;
-    updateRecordingPointer(e.clientX, e.clientY);
+  if (!isRecording.value) {return;}
+  updateRecordingPointer(e.clientX, e.clientY);
 }
 
 function refreshRecordingPointerTarget() {
-    if (!isRecording.value || !recordingPointerPosition.value) return;
-    const { x, y } = recordingPointerPosition.value;
-    hoveredButtonRect.value = getButtonRectAtPoint(x, y);
+  if (!isRecording.value || !recordingPointerPosition.value) {return;}
+  const { x, y } = recordingPointerPosition.value;
+  hoveredButtonRect.value = getButtonRectAtPoint(x, y);
 }
 
 function addRecordingPointerListeners() {
-    document.addEventListener('mousemove', handleRecordingPointerMove, { passive: true });
-    document.addEventListener('scroll', refreshRecordingPointerTarget, true);
-    window.addEventListener('resize', refreshRecordingPointerTarget);
+  document.addEventListener('mousemove', handleRecordingPointerMove, { passive: true });
+  document.addEventListener('scroll', refreshRecordingPointerTarget, true);
+  window.addEventListener('resize', refreshRecordingPointerTarget);
 }
 
 function removeRecordingPointerListeners() {
-    document.removeEventListener('mousemove', handleRecordingPointerMove);
-    document.removeEventListener('scroll', refreshRecordingPointerTarget, true);
-    window.removeEventListener('resize', refreshRecordingPointerTarget);
+  document.removeEventListener('mousemove', handleRecordingPointerMove);
+  document.removeEventListener('scroll', refreshRecordingPointerTarget, true);
+  window.removeEventListener('resize', refreshRecordingPointerTarget);
 }
 
 function addRecordingClickListener(defer: boolean) {
-    if (recordingClickListenerTimer.value !== null) {
-        window.clearTimeout(recordingClickListenerTimer.value);
-        recordingClickListenerTimer.value = null;
-    }
+  if (recordingClickListenerTimer.value !== null) {
+    window.clearTimeout(recordingClickListenerTimer.value);
+    recordingClickListenerTimer.value = null;
+  }
 
-    if (!defer) {
-        document.addEventListener('click', recordingListener);
-        return;
-    }
+  if (!defer) {
+    document.addEventListener('click', recordingListener);
+    return;
+  }
 
-    recordingClickListenerTimer.value = window.setTimeout(() => {
-        recordingClickListenerTimer.value = null;
-        if (isRecording.value) {
-            document.addEventListener('click', recordingListener);
-        }
-    }, 0);
+  recordingClickListenerTimer.value = window.setTimeout(() => {
+    recordingClickListenerTimer.value = null;
+    if (isRecording.value) {
+      document.addEventListener('click', recordingListener);
+    }
+  }, 0);
 }
 
 function removeRecordingClickListener() {
-    if (recordingClickListenerTimer.value !== null) {
-        window.clearTimeout(recordingClickListenerTimer.value);
-        recordingClickListenerTimer.value = null;
-    }
-    document.removeEventListener('click', recordingListener);
+  if (recordingClickListenerTimer.value !== null) {
+    window.clearTimeout(recordingClickListenerTimer.value);
+    recordingClickListenerTimer.value = null;
+  }
+  document.removeEventListener('click', recordingListener);
 }
 
 function startRecording(e?: MouseEvent) {
-    if (isRecording.value) return;
-    if (isPlaying.value) {
-        stopPlayback();
-    }
+  if (isRecording.value) {return;}
+  if (isPlaying.value) {
+    stopPlayback();
+  }
 
-    // 清空之前的录制
-    recordedSteps.value = [];
-    currentStepIndex.value = 0;
-    isRecording.value = true;
+  // 清空之前的录制
+  recordedSteps.value = [];
+  currentStepIndex.value = 0;
+  isRecording.value = true;
 
-    if (e) {
-        updateRecordingPointer(e.clientX, e.clientY);
-    }
+  if (e) {
+    updateRecordingPointer(e.clientX, e.clientY);
+  }
 
-    addRecordingClickListener(Boolean(e));
-    addRecordingPointerListeners();
+  addRecordingClickListener(Boolean(e));
+  addRecordingPointerListeners();
 }
 
 function stopRecording() {
-    if (!isRecording.value) return;
-    isRecording.value = false;
-    removeRecordingClickListener();
-    removeRecordingPointerListeners();
-    recordingPointerPosition.value = null;
-    hoveredButtonRect.value = null;
-    console.warn(recordedSteps.value);
+  if (!isRecording.value) {return;}
+  isRecording.value = false;
+  removeRecordingClickListener();
+  removeRecordingPointerListeners();
+  recordingPointerPosition.value = null;
+  hoveredButtonRect.value = null;
+  console.warn(recordedSteps.value);
 }
 
 function toggleRecording(e?: MouseEvent) {
-    if (isRecording.value) {
-        stopRecording();
-    } else {
-        startRecording(e);
-    }
+  if (isRecording.value) {
+    stopRecording();
+  } else {
+    startRecording(e);
+  }
 }
 
 // ---------- 其他功能 ----------
 function resetCounter() {
-    clickCounter.value = 0;
+  clickCounter.value = 0;
 }
 
 function onIntervalChange() {
-    // 确保值在有效范围内
-    if (intervalMs.value < 50) intervalMs.value = 50;
-    if (intervalMs.value > 10000) intervalMs.value = 10000;
+  // 确保值在有效范围内
+  if (intervalMs.value < 50) {intervalMs.value = 50;}
+  if (intervalMs.value > 10000) {intervalMs.value = 10000;}
 
-    // 如果正在播放，重启以应用新间隔
-    if (isPlaying.value) {
-        stopPlayback();
-        startPlayback();
-    }
+  // 如果正在播放，重启以应用新间隔
+  if (isPlaying.value) {
+    stopPlayback();
+    startPlayback();
+  }
 }
 
 // ---------- 键盘快捷键 ----------
 function handleKeydown(e: KeyboardEvent) {
-    const isCtrl = e.ctrlKey || e.metaKey;
-    const isShift = e.shiftKey;
+  const isCtrl = e.ctrlKey || e.metaKey;
+  const isShift = e.shiftKey;
 
-    // Ctrl+Shift+L: 播放/停止
-    if (isCtrl && isShift && (e.key === 'l' || e.key === 'L')) {
-        e.preventDefault();
-        if (isRecording.value) {
-            stopRecording();
-        }
-        if (isPlaying.value) {
-            stopPlayback();
-        } else {
-            startPlayback();
-        }
+  // Ctrl+Shift+L: 播放/停止
+  if (isCtrl && isShift && (e.key === 'l' || e.key === 'L')) {
+    e.preventDefault();
+    if (isRecording.value) {
+      stopRecording();
     }
+    if (isPlaying.value) {
+      stopPlayback();
+    } else {
+      startPlayback();
+    }
+  }
 
-    // Ctrl+Shift+R: 录制/停止录制
-    if (isCtrl && isShift && (e.key === 'r' || e.key === 'R')) {
-        e.preventDefault();
-        toggleRecording();
-    }
+  // Ctrl+Shift+R: 录制/停止录制
+  if (isCtrl && isShift && (e.key === 'r' || e.key === 'R')) {
+    e.preventDefault();
+    toggleRecording();
+  }
 }
 
 // ---------- 生命周期 ----------
 onBeforeUnmount(() => {
-    // 清理定时器和事件监听
-    if (intervalId.value) {
-        clearInterval(intervalId.value);
-        intervalId.value = null;
-    }
-    removeRecordingClickListener();
-    removeRecordingPointerListeners();
-    document.removeEventListener('keydown', handleKeydown);
+  // 清理定时器和事件监听
+  if (intervalId.value) {
+    clearInterval(intervalId.value);
+    intervalId.value = null;
+  }
+  removeRecordingClickListener();
+  removeRecordingPointerListeners();
+  document.removeEventListener('keydown', handleKeydown);
 });
 
 onMounted(() => {
-    document.addEventListener('keydown', handleKeydown);
+  document.addEventListener('keydown', handleKeydown);
 });
 </script>
 

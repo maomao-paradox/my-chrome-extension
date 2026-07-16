@@ -6,13 +6,23 @@ export const popupThemes = [
   {
     key: 'midnight',
     label: '深海',
-    description: '深色高对比',
+    description: '深色高对比'
   },
   {
     key: 'daylight',
     label: '晨雾',
-    description: '浅色柔和',
+    description: '浅色柔和'
   },
+  {
+    key: 'jungle-knot',
+    label: '故障结',
+    description: '青紫故障色'
+  },
+  {
+    key: 'retro-terminal',
+    label: '绿屏',
+    description: '80s 极简终端'
+  }
 ] as const;
 
 export type PopupThemeKey = (typeof popupThemes)[number]['key'];
@@ -102,6 +112,6 @@ export const usePopupTheme = () => {
     isLoaded,
     popupThemes,
     loadPopupTheme,
-    setPopupTheme,
+    setPopupTheme
   };
 };

@@ -1,6 +1,6 @@
 <template>
   <!-- <Teleport to="body"> -->
-  <Draggable ref="draggableRef" v-if="visible" :initial-position="'center'" :enable-adsorption="false"
+  <Draggable v-if="visible" ref="draggableRef" :initial-position="'center'" :enable-adsorption="false"
     :drag-handle="'.glass-card-header'" :can-overflow="false" :container-style="{ '--z-index': 2147483646 }" width="360"
     height="280" @drag-start="handleDragStart" @drag-end="handleDragEnd">
     <div class="glass-card" :class="{ 'glass-card--expanded': isCardExpanded }" :style="cardStyle" @dblclick="closeCard"
@@ -65,8 +65,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import {Draggable} from '@components/index'
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import {Draggable} from '@components/index';
 
 interface Props {
   visible?: boolean
@@ -74,29 +74,29 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   visible: false
-})
+});
 
 const emit = defineEmits<{
   'update:visible': [value: boolean]
-}>()
+}>();
 
-const draggableRef = ref<any>(null)
-const width = ref(360)
-const height = ref(280)
-const tint = ref('#8ec5ff')
-const opacity = ref(0.24)
-const stylePreset = ref<'frosted' | 'crystal' | 'aurora' | 'smoke'>('frosted')
-const isHovered = ref(false)
-const isDragging = ref(false)
-const isResizing = ref(false)
+const draggableRef = ref<any>(null);
+const width = ref(360);
+const height = ref(280);
+const tint = ref('#8ec5ff');
+const opacity = ref(0.24);
+const stylePreset = ref<'frosted' | 'crystal' | 'aurora' | 'smoke'>('frosted');
+const isHovered = ref(false);
+const isDragging = ref(false);
+const isResizing = ref(false);
 
-const MIN_WIDTH = 260
-const MAX_WIDTH = 760
-const MIN_HEIGHT = 220
-const MAX_HEIGHT = 600
+const MIN_WIDTH = 260;
+const MAX_WIDTH = 760;
+const MIN_HEIGHT = 220;
+const MAX_HEIGHT = 600;
 type ResizeDirection = 'nw' | 'ne' | 'sw' | 'se'
 
-let activePointerId: number | null = null
+let activePointerId: number | null = null;
 let resizeState: {
   direction: ResizeDirection
   startX: number
@@ -105,7 +105,7 @@ let resizeState: {
   startHeight: number
   startLeft: number
   startTop: number
-} | null = null
+} | null = null;
 
 const presetConfig = computed(() => {
   switch (stylePreset.value) {
@@ -115,45 +115,45 @@ const presetConfig = computed(() => {
         saturate: 180,
         borderAlpha: 0.42,
         shadow: '0 28px 60px rgba(15, 23, 42, 0.2)',
-        sheen: 'linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.08))',
-      }
+        sheen: 'linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.08))'
+      };
     case 'aurora':
       return {
         blur: 26,
         saturate: 205,
         borderAlpha: 0.3,
         shadow: '0 28px 68px rgba(29, 78, 216, 0.22)',
-        sheen: 'linear-gradient(135deg, rgba(255,255,255,0.32), rgba(76, 201, 240, 0.18) 45%, rgba(167, 139, 250, 0.18))',
-      }
+        sheen: 'linear-gradient(135deg, rgba(255,255,255,0.32), rgba(76, 201, 240, 0.18) 45%, rgba(167, 139, 250, 0.18))'
+      };
     case 'smoke':
       return {
         blur: 18,
         saturate: 125,
         borderAlpha: 0.22,
         shadow: '0 24px 52px rgba(15, 23, 42, 0.28)',
-        sheen: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(15,23,42,0.14))',
-      }
+        sheen: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(15,23,42,0.14))'
+      };
     default:
       return {
         blur: 20,
         saturate: 155,
         borderAlpha: 0.34,
         shadow: '0 24px 56px rgba(15, 23, 42, 0.18)',
-        sheen: 'linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.08))',
-      }
+        sheen: 'linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.08))'
+      };
   }
-})
+});
 
-const opacityLabel = computed(() => `${Math.round(opacity.value * 100)}%`)
-const isCardExpanded = computed(() => isHovered.value || isDragging.value || isResizing.value)
+const opacityLabel = computed(() => `${Math.round(opacity.value * 100)}%`);
+const isCardExpanded = computed(() => isHovered.value || isDragging.value || isResizing.value);
 
 const cardStyle = computed<Record<string, string>>(() => {
-  const rgb = hexToRgb(tint.value)
-  const panelOpacity = opacity.value
-  const opacityProgress = clamp((panelOpacity - 0.02) / 0.96, 0, 1)
-  const blurStrength = 0.4 + presetConfig.value.blur * opacityProgress
-  const saturateStrength = 100 + (presetConfig.value.saturate - 100) * opacityProgress
-  const borderOpacity = Math.min(panelOpacity + presetConfig.value.borderAlpha, 0.9)
+  const rgb = hexToRgb(tint.value);
+  const panelOpacity = opacity.value;
+  const opacityProgress = clamp((panelOpacity - 0.02) / 0.96, 0, 1);
+  const blurStrength = 0.4 + presetConfig.value.blur * opacityProgress;
+  const saturateStrength = 100 + (presetConfig.value.saturate - 100) * opacityProgress;
+  const borderOpacity = Math.min(panelOpacity + presetConfig.value.borderAlpha, 0.9);
 
   return {
     width: `${width.value}px`,
@@ -162,64 +162,64 @@ const cardStyle = computed<Record<string, string>>(() => {
     border: `1px solid rgba(255, 255, 255, ${borderOpacity})`,
     boxShadow: presetConfig.value.shadow,
     backdropFilter: `blur(${blurStrength.toFixed(2)}px) saturate(${saturateStrength.toFixed(0)}%)`,
-    WebkitBackdropFilter: `blur(${blurStrength.toFixed(2)}px) saturate(${saturateStrength.toFixed(0)}%)`,
-  }
-})
+    WebkitBackdropFilter: `blur(${blurStrength.toFixed(2)}px) saturate(${saturateStrength.toFixed(0)}%)`
+  };
+});
 
 function hexToRgb(hex: string) {
-  const normalized = hex.replace('#', '')
+  const normalized = hex.replace('#', '');
   const safeHex = normalized.length === 3
     ? normalized.split('').map(char => `${char}${char}`).join('')
-    : normalized
+    : normalized;
 
-  const value = Number.parseInt(safeHex, 16)
+  const value = Number.parseInt(safeHex, 16);
 
   return {
     r: (value >> 16) & 255,
     g: (value >> 8) & 255,
-    b: value & 255,
-  }
+    b: value & 255
+  };
 }
 
 function closeCard() {
-  emit('update:visible', false)
+  emit('update:visible', false);
 }
 
 function resetCard() {
-  width.value = 360
-  height.value = 280
-  tint.value = '#8ec5ff'
-  opacity.value = 0.24
-  stylePreset.value = 'frosted'
+  width.value = 360;
+  height.value = 280;
+  tint.value = '#8ec5ff';
+  opacity.value = 0.24;
+  stylePreset.value = 'frosted';
 }
 
 function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max)
+  return Math.min(Math.max(value, min), max);
 }
 
 function getCurrentPosition() {
   if (!draggableRef.value?.getCurrentPosition) {
-    return { x: 0, y: 0 }
+    return { x: 0, y: 0 };
   }
 
-  return draggableRef.value.getCurrentPosition() as { x: number, y: number }
+  return draggableRef.value.getCurrentPosition() as { x: number, y: number };
 }
 
 function setCurrentPosition(x: number, y: number) {
   if (draggableRef.value?.setPositionImmediate) {
-    draggableRef.value.setPositionImmediate(x, y)
-    return
+    draggableRef.value.setPositionImmediate(x, y);
+    return;
   }
 
   if (!draggableRef.value?.setPosition) {
-    return
+    return;
   }
 
-  draggableRef.value.setPosition(x, y)
+  draggableRef.value.setPosition(x, y);
 }
 
 function startResize(direction: ResizeDirection, event: PointerEvent) {
-  const position = getCurrentPosition()
+  const position = getCurrentPosition();
   resizeState = {
     direction,
     startX: event.clientX,
@@ -227,91 +227,91 @@ function startResize(direction: ResizeDirection, event: PointerEvent) {
     startWidth: width.value,
     startHeight: height.value,
     startLeft: position.x,
-    startTop: position.y,
-  }
+    startTop: position.y
+  };
 
-  isResizing.value = true
-  activePointerId = event.pointerId
-  window.addEventListener('pointermove', handleResizeMove, { capture: true })
-  window.addEventListener('pointerup', stopResize, { capture: true })
-  window.addEventListener('pointercancel', stopResize, { capture: true })
-  document.body.style.userSelect = 'none'
+  isResizing.value = true;
+  activePointerId = event.pointerId;
+  window.addEventListener('pointermove', handleResizeMove, { capture: true });
+  window.addEventListener('pointerup', stopResize, { capture: true });
+  window.addEventListener('pointercancel', stopResize, { capture: true });
+  document.body.style.userSelect = 'none';
 }
 
 function handleResizeMove(event: PointerEvent) {
   if (!resizeState || activePointerId !== event.pointerId) {
-    return
+    return;
   }
 
-  const deltaX = event.clientX - resizeState.startX
-  const deltaY = event.clientY - resizeState.startY
+  const deltaX = event.clientX - resizeState.startX;
+  const deltaY = event.clientY - resizeState.startY;
 
-  let nextWidth = resizeState.startWidth
-  let nextHeight = resizeState.startHeight
-  let nextLeft = resizeState.startLeft
-  let nextTop = resizeState.startTop
+  let nextWidth = resizeState.startWidth;
+  let nextHeight = resizeState.startHeight;
+  let nextLeft = resizeState.startLeft;
+  let nextTop = resizeState.startTop;
 
   if (resizeState.direction.includes('e')) {
-    nextWidth = clamp(resizeState.startWidth + deltaX, MIN_WIDTH, MAX_WIDTH)
+    nextWidth = clamp(resizeState.startWidth + deltaX, MIN_WIDTH, MAX_WIDTH);
   }
 
   if (resizeState.direction.includes('s')) {
-    nextHeight = clamp(resizeState.startHeight + deltaY, MIN_HEIGHT, MAX_HEIGHT)
+    nextHeight = clamp(resizeState.startHeight + deltaY, MIN_HEIGHT, MAX_HEIGHT);
   }
 
   if (resizeState.direction.includes('w')) {
-    nextWidth = clamp(resizeState.startWidth - deltaX, MIN_WIDTH, MAX_WIDTH)
-    nextLeft = resizeState.startLeft + (resizeState.startWidth - nextWidth)
+    nextWidth = clamp(resizeState.startWidth - deltaX, MIN_WIDTH, MAX_WIDTH);
+    nextLeft = resizeState.startLeft + (resizeState.startWidth - nextWidth);
   }
 
   if (resizeState.direction.includes('n')) {
-    nextHeight = clamp(resizeState.startHeight - deltaY, MIN_HEIGHT, MAX_HEIGHT)
-    nextTop = resizeState.startTop + (resizeState.startHeight - nextHeight)
+    nextHeight = clamp(resizeState.startHeight - deltaY, MIN_HEIGHT, MAX_HEIGHT);
+    nextTop = resizeState.startTop + (resizeState.startHeight - nextHeight);
   }
 
-  nextLeft = clamp(nextLeft, 0, Math.max(window.innerWidth - nextWidth, 0))
-  nextTop = clamp(nextTop, 0, Math.max(window.innerHeight - nextHeight, 0))
+  nextLeft = clamp(nextLeft, 0, Math.max(window.innerWidth - nextWidth, 0));
+  nextTop = clamp(nextTop, 0, Math.max(window.innerHeight - nextHeight, 0));
 
-  width.value = nextWidth
-  height.value = nextHeight
-  setCurrentPosition(nextLeft, nextTop)
-  event.preventDefault()
+  width.value = nextWidth;
+  height.value = nextHeight;
+  setCurrentPosition(nextLeft, nextTop);
+  event.preventDefault();
 }
 
 function stopResize(event?: PointerEvent) {
   if (event && activePointerId !== event.pointerId) {
-    return
+    return;
   }
 
-  isResizing.value = false
-  activePointerId = null
-  resizeState = null
-  window.removeEventListener('pointermove', handleResizeMove, { capture: true })
-  window.removeEventListener('pointerup', stopResize, { capture: true })
-  window.removeEventListener('pointercancel', stopResize, { capture: true })
-  document.body.style.userSelect = ''
+  isResizing.value = false;
+  activePointerId = null;
+  resizeState = null;
+  window.removeEventListener('pointermove', handleResizeMove, { capture: true });
+  window.removeEventListener('pointerup', stopResize, { capture: true });
+  window.removeEventListener('pointercancel', stopResize, { capture: true });
+  document.body.style.userSelect = '';
 }
 
 function handleDragStart() {
-  isDragging.value = true
+  isDragging.value = true;
 }
 
 function handleDragEnd() {
-  isDragging.value = false
+  isDragging.value = false;
 }
 
 watch(() => props.visible, visible => {
   if (!visible) {
-    isHovered.value = false
-    isDragging.value = false
-    isResizing.value = false
-    stopResize()
+    isHovered.value = false;
+    isDragging.value = false;
+    isResizing.value = false;
+    stopResize();
   }
-})
+});
 
 onBeforeUnmount(() => {
-  stopResize()
-})
+  stopResize();
+});
 </script>
 
 <style scoped>

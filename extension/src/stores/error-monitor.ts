@@ -11,7 +11,7 @@ import { ref, computed } from 'vue';
 import type { MonitorConfig, ConfigValidationResult } from '@/types/error-monitor';
 import {
   DEFAULT_MONITOR_CONFIG,
-  MonitorConfigUtils,
+  MonitorConfigUtils
 } from '@/types/error-monitor';
 
 /** Storage 键名 */
@@ -92,7 +92,7 @@ export const useErrorMonitorStore = defineStore('errorMonitor', () => {
       await chrome.runtime.sendMessage({
         type: 'UPDATE_ERROR_MONITOR_CONFIG',
         payload: config.value,
-        target: 'background',
+        target: 'background'
       });
 
       return true;
@@ -263,7 +263,7 @@ export const useErrorMonitorStore = defineStore('errorMonitor', () => {
     setDingTalkKeyword,
     setDingTalkToken,
     setThrottleInterval,
-    setMaxScreenshotSize,
+    setMaxScreenshotSize
   };
 });
 

@@ -8,8 +8,8 @@
  */
 
 import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/logger';
-import { createApp } from 'vue'
-import App from './App2.vue'
+import { createApp } from 'vue';
+import App from './App2.vue';
 // import ElementPlus from 'element-plus'
 // import 'element-plus/dist/index.css'
 import { pinia } from '@/stores';

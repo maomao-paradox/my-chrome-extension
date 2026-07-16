@@ -57,7 +57,7 @@ const glassFollowSpeed = 0.1;
 
 // 鼠标移动事件处理
 const handleMouseMove = (event: MouseEvent) => {
-  if (!isVisible.value) return;
+  if (!isVisible.value) {return;}
 
   // 随机生成星星粒子
   if (Math.random() < 0.1) {

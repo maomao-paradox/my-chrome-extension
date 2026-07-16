@@ -53,7 +53,7 @@ export async function createTOTPAccount(body: CreateTOTPAccountRequest): Promise
     digits: normalized.digits,
     period: normalized.period,
     createdAt: now,
-    updatedAt: now,
+    updatedAt: now
   };
 
   await writeStoredAccounts([account, ...accounts]);
@@ -79,7 +79,7 @@ export async function getTOTPCode(id: string): Promise<TOTPCode> {
     code,
     period: account.period,
     expiresIn: Math.max(0, Math.ceil((expiresAtMs - now) / 1000)),
-    expiresAt: new Date(expiresAtMs).toISOString(),
+    expiresAt: new Date(expiresAtMs).toISOString()
   };
 }
 
@@ -129,7 +129,7 @@ function normalizeCreateRequest(body: CreateTOTPAccountRequest): Required<Create
     otpauthUrl: '',
     algorithm,
     digits,
-    period,
+    period
   };
 }
 
@@ -162,7 +162,7 @@ function parseOTPAUTHURL(raw: string): Required<CreateTOTPAccountRequest> {
     otpauthUrl: '',
     algorithm,
     digits,
-    period,
+    period
   };
 }
 

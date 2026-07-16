@@ -174,7 +174,7 @@ class Finder {
 
       let currentNode = node.firstChild;
       do {
-        if (!currentNode) break;
+        if (!currentNode) {break;}
 
         if (currentNode.nodeType === Node.TEXT_NODE) {
           txt[i] = (txt[i] as string) + (currentNode as Text).data;
@@ -224,7 +224,7 @@ class Finder {
     const nodeStack: Node[] = [node];
 
     out: while (true) {
-      if (!curNode) break;
+      if (!curNode) {break;}
 
       if (curNode.nodeType === Node.TEXT_NODE) {
         const textNode = curNode as Text;

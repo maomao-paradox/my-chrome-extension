@@ -136,7 +136,7 @@
      * 在 iframe 中替换文本
      */
     replaceTextInIframe(iframeDom: Document, oldText: any, newText: any) {
-      if (!oldText) return;
+      if (!oldText) {return;}
 
       const selectors = ['#title', '#precondition', '.form-control.autosize', 'textarea', 'input[type="text"]'];
 
@@ -216,12 +216,12 @@
   };
 
   // 注册 Web Component
-  console.log("准备注册ZentaoContentReplace组件");
+  console.log('准备注册ZentaoContentReplace组件');
   if (customElements.get('zentao-content-replace')) {
     console.log('组件已存在');
   } else {
     customElements.define('zentao-content-replace', ZentaoContentReplace);
-    console.log("ZentaoContentReplace组件注册成功");
+    console.log('ZentaoContentReplace组件注册成功');
   }
   // const currentScript = document.currentScript;
   // // console.log("currentScript:", currentScript);
@@ -237,4 +237,4 @@
   //   });
   //   currentScript.parentElement?.insertAdjacentElement('afterbegin', el);
   // }
-}())
+}());

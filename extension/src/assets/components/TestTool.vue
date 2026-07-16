@@ -14,37 +14,37 @@
 
     <div class="form-group" style="margin-top: 25px">
       <label>响应结果</label>
-      <textarea readonly v-model="output" style="min-height:200px;background:#f8f9fa;overflow-y:visible" />
+      <textarea v-model="output" readonly style="min-height:200px;background:#f8f9fa;overflow-y:visible" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 
-const url    = ref('https://jsonplaceholder.typicode.com/todos/1')
-const output = ref('')
+const url    = ref('https://jsonplaceholder.typicode.com/todos/1');
+const output = ref('');
 
 function send () {
-  if (!url.value) return alert('请输入测试 URL')
-  output.value = '发送请求中...'
-  const xhr = new XMLHttpRequest()
-  xhr.open('GET', url.value)
+  if (!url.value) {return alert('请输入测试 URL');}
+  output.value = '发送请求中...';
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', url.value);
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
-      let res = `=== 响应信息 ===\nURL: ${url.value}\n状态: ${xhr.status} ${xhr.statusText}\n响应头: ${xhr.getAllResponseHeaders()}\n\n=== 响应数据 ===\n`
+      let res = `=== 响应信息 ===\nURL: ${url.value}\n状态: ${xhr.status} ${xhr.statusText}\n响应头: ${xhr.getAllResponseHeaders()}\n\n=== 响应数据 ===\n`;
       try {
-        res += JSON.stringify(JSON.parse(xhr.responseText), null, 2)
+        res += JSON.stringify(JSON.parse(xhr.responseText), null, 2);
       } catch {
-        res += xhr.responseText
+        res += xhr.responseText;
       }
-      output.value = res
+      output.value = res;
     }
-  }
-  xhr.send()
+  };
+  xhr.send();
 }
 
-function clear () { output.value = '' }
+function clear () { output.value = ''; }
 </script>
 
 <style scoped>

@@ -32,7 +32,7 @@
 
     // 简易解压实现（仅支持部分简单的zlib数据）
     // 注意：这只是一个非常简化的实现，实际使用中应优先使用pako
-    let result = [];
+    const result = [];
     let i = 2; // 跳过zlib头部
 
     while (i < compressedData.length - 4) {
@@ -217,19 +217,19 @@
 
   // 生成项目信息和文件列表
   function generateProjectInfo(fileEntries) {
-    let info = `# GitHack 项目信息\n\n`;
-    info += `## 基本信息\n`;
+    let info = '# GitHack 项目信息\n\n';
+    info += '## 基本信息\n';
     info += `- 检测时间: ${new Date().toLocaleString()}\n`;
     info += `- 项目URL: ${window.location.href}\n`;
     info += `- 发现文件数量: ${fileEntries.length}\n\n`;
 
-    info += `## 文件列表\n`;
+    info += '## 文件列表\n';
     fileEntries.forEach(entry => {
       info += `- ${entry.path}\n`;
     });
 
-    info += `\n## 安全提示\n`;
-    info += `此工具仅用于安全测试和学习目的。发现.git泄露后，请及时通知网站管理员修复漏洞。\n`;
+    info += '\n## 安全提示\n';
+    info += '此工具仅用于安全测试和学习目的。发现.git泄露后，请及时通知网站管理员修复漏洞。\n';
 
     return info;
   }

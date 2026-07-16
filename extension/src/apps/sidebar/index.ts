@@ -7,17 +7,17 @@
  * @date 2026-02-05T02:38:01.692Z
  */
 
-import { createApp } from "vue";
-import { createShadowHost, injectCssDom } from "@/utils/shadow-dom";
-import { addElementToDom, $id } from "@/utils/element-control";
-import { Tool, AppModule, Bookmark } from "@/types";
-import App from "./App.vue";
-import { bus } from "@/event";
-import { getAssetsAbstractPathSync } from "@/utils/common";
-import { storage } from "@/stores";
-import { shadowHostId, appConfigKey } from "@/config";
-import { IconDocument, IconBookmark } from "@/assets/icons";
-import { BookmarkStorage } from "@/services/bookmarkStorage";
+import { createApp } from 'vue';
+import { createShadowHost, injectCssDom } from '@/utils/shadow-dom';
+import { addElementToDom, $id } from '@/utils/element-control';
+import { Tool, AppModule, Bookmark } from '@/types';
+import App from './App.vue';
+import { bus } from '@/event';
+import { getAssetsAbstractPathSync } from '@/utils/common';
+import { storage } from '@/stores';
+import { shadowHostId, appConfigKey } from '@/config';
+import { IconDocument, IconBookmark } from '@/assets/icons';
+import { BookmarkStorage } from '@/services/bookmarkStorage';
 
 /**
  * @author 不可以是我吗
@@ -27,7 +27,7 @@ import { BookmarkStorage } from "@/services/bookmarkStorage";
  */
 
 declare interface SideBarOptions {
-  layout?: "vertical" | "horizontal" | "fold";
+  layout?: 'vertical' | 'horizontal' | 'fold';
   tools?: Tool[];
   visible?: boolean;
 }
@@ -54,48 +54,48 @@ class SideBar implements AppModule {
     this.visible = options?.visible || false;
     this.customTools = options?.tools || [
       {
-        id: "1",
-        label: "关于",
+        id: '1',
+        label: '关于',
         icon: IconDocument,
-        color: "#409eff",
-        children: [{ id: "hello", label: "bug", icon: IconDocument }],
+        color: '#409eff',
+        children: [{ id: 'hello', label: 'bug', icon: IconDocument }]
       },
       {
-        id: "2",
-        label: "从三个选项中发现一个",
+        id: '2',
+        label: '从三个选项中发现一个',
         icon: IconDocument,
-        color: "#67c23a",
+        color: '#67c23a',
         children: [
           {
-            id: "2-1",
-            label: "喝一口水",
-            details: "补充水分，保持身体水分平衡，提高工作效率",
+            id: '2-1',
+            label: '喝一口水',
+            details: '补充水分，保持身体水分平衡，提高工作效率'
           },
           {
-            id: "2-2",
-            label: "伸个懒腰",
-            details: "缓解肌肉紧张，促进血液循环，减轻久坐带来的疲劳",
+            id: '2-2',
+            label: '伸个懒腰',
+            details: '缓解肌肉紧张，促进血液循环，减轻久坐带来的疲劳'
           },
           {
-            id: "2-3",
-            label: "眺望窗外",
-            details: "放松眼部肌肉，缓解视疲劳，调节心情，提高工作效率",
-          },
-        ],
-      },
+            id: '2-3',
+            label: '眺望窗外',
+            details: '放松眼部肌肉，缓解视疲劳，调节心情，提高工作效率'
+          }
+        ]
+      }
     ];
 
     // 初始化自定义事件
-    this.loadSidebarEvent = new CustomEvent("load-sidebar", {
-      detail: { message: "Hello, World!" },
+    this.loadSidebarEvent = new CustomEvent('load-sidebar', {
+      detail: { message: 'Hello, World!' },
       bubbles: true,
-      cancelable: true,
+      cancelable: true
     });
 
-    this.unloadSidebarEvent = new CustomEvent("unload-sidebar", {
-      detail: { message: "Hello, World!" },
+    this.unloadSidebarEvent = new CustomEvent('unload-sidebar', {
+      detail: { message: 'Hello, World!' },
       bubbles: true,
-      cancelable: true,
+      cancelable: true
     });
   }
 
@@ -114,17 +114,17 @@ class SideBar implements AppModule {
         id: `bookmark-${bookmark.id}`,
         label:
           bookmark.text.length > 30
-            ? bookmark.text.substring(0, 28) + "..."
+            ? bookmark.text.substring(0, 28) + '...'
             : bookmark.text,
         icon: IconBookmark,
-        color: "#f59e0b",
+        color: '#f59e0b',
         details: new Date(bookmark.timestamp).toLocaleString(),
-        onClick: () => this.openBookmark(bookmark),
+        onClick: () => this.openBookmark(bookmark)
       }));
 
       return bookmarkTools;
     } catch (error) {
-      maLogger.error("转换书签失败:", error);
+      maLogger.error('转换书签失败:', error);
       return [];
     }
   }
@@ -134,9 +134,9 @@ class SideBar implements AppModule {
    */
   private openBookmark(bookmark: Bookmark): void {
     chrome.runtime.sendMessage({
-      type: "OPEN_BOOKMARK",
+      type: 'OPEN_BOOKMARK',
       payload: bookmark,
-      target: "background",
+      target: 'background'
     });
   }
 
@@ -149,19 +149,19 @@ class SideBar implements AppModule {
 
       // 更新工具列表，保留原有工具并添加书签
       const updatedTools = [
-        ...this.customTools.filter((tool) => !tool.id.startsWith("bookmark-")),
+        ...this.customTools.filter((tool) => !tool.id.startsWith('bookmark-')),
         {
-          id: "bookmarks",
-          label: "书签",
+          id: 'bookmarks',
+          label: '书签',
           icon: IconBookmark,
-          color: "#f59e0b",
-          children: bookmarkTools,
-        },
+          color: '#f59e0b',
+          children: bookmarkTools
+        }
       ];
 
       this.updateTools(updatedTools);
     } catch (error) {
-      maLogger.error("加载书签工具失败:", error);
+      maLogger.error('加载书签工具失败:', error);
     }
   }
 
@@ -194,7 +194,7 @@ class SideBar implements AppModule {
     try {
       // 只有在主页面才注入侧边工具栏
       if (window.self !== window.top) {
-        maLogger.log("不是主页面，不注入侧边工具栏");
+        maLogger.log('不是主页面，不注入侧边工具栏');
         return;
       }
 
@@ -227,7 +227,7 @@ class SideBar implements AppModule {
 
       if (!this.shadowRoot) {
         // 创建Shadow DOM
-        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
+        const { shadowRoot } = createShadowHost(this.shadowHostId, 'open');
         this.shadowRoot = shadowRoot;
       }
 
@@ -236,22 +236,22 @@ class SideBar implements AppModule {
         // maLogger.log("注入侧边工具栏样式");
         injectCssDom(
           this.shadowRoot as ShadowRoot,
-          getAssetsAbstractPathSync("css/sidebar"),
+          getAssetsAbstractPathSync('css/sidebar')
         );
         this.isInjected = true;
       }
 
       if (
         !this.vueContainer &&
-        !this.shadowRoot?.getElementById("shadow-app-sidebar")
+        !this.shadowRoot?.getElementById('shadow-app-sidebar')
       ) {
         // maLogger.log("创建Vue容器");
         this.vueContainer = addElementToDom({
-          tag: "div",
+          tag: 'div',
           attrs: {
-            id: "shadow-app-sidebar",
+            id: 'shadow-app-sidebar'
           },
-          style: "position: fixed; z-index: var(--z-index);",
+          style: 'position: fixed; z-index: var(--z-index);'
         })(this.shadowRoot as ShadowRoot);
       }
       // 设置事件监听器
@@ -264,16 +264,16 @@ class SideBar implements AppModule {
       // 创建并挂载Vue应用
       this.appInstance = createApp(App, {
         ...{
-          layout: "vertical",
+          layout: 'vertical',
           tools: this.customTools,
-          visible: this.visible,
+          visible: this.visible
         },
-        ...options,
+        ...options
       });
 
       this.appInstance.mount(this.vueContainer);
     } catch (error) {
-      maLogger.error("注入侧边工具栏失败:", error);
+      maLogger.error('注入侧边工具栏失败:', error);
     }
   }
 
@@ -285,7 +285,7 @@ class SideBar implements AppModule {
       // 如果未注入，则先注入
       if (!this.isInjected || !$id(this.shadowHostId)) {
         await this.inject({
-          visible: true,
+          visible: true
         });
       } else {
         // 触发加载事件
@@ -296,12 +296,12 @@ class SideBar implements AppModule {
 
         // 直接操作DOM，确保组件显示
         if (this.vueContainer) {
-          this.vueContainer.style.display = "block";
+          this.vueContainer.style.display = 'block';
           // maLogger.info('侧边栏已直接显示');
         }
       }
     } catch (error) {
-      maLogger.error("启用侧边工具栏失败:", error);
+      maLogger.error('启用侧边工具栏失败:', error);
     }
   }
 
@@ -315,11 +315,11 @@ class SideBar implements AppModule {
 
       // 直接操作DOM，确保组件被隐藏
       if (this.vueContainer) {
-        this.vueContainer.style.display = "none";
-        maLogger.info("侧边栏已直接隐藏");
+        this.vueContainer.style.display = 'none';
+        maLogger.info('侧边栏已直接隐藏');
       }
     } catch (error) {
-      maLogger.error("禁用侧边工具栏失败:", error);
+      maLogger.error('禁用侧边工具栏失败:', error);
     }
   }
 
@@ -328,7 +328,7 @@ class SideBar implements AppModule {
    */
   public async init(options?: SideBarOptions): Promise<void> {
     try {
-      maLogger.log("初始化侧边工具栏");
+      maLogger.log('初始化侧边工具栏');
       this.visible = options?.visible || false;
       this.customTools = options?.tools || this.customTools;
 
@@ -346,7 +346,7 @@ class SideBar implements AppModule {
       // 监听书签变化
       this.setupBookmarkListeners();
     } catch (error) {
-      maLogger.error("初始化侧边工具栏失败:", error);
+      maLogger.error('初始化侧边工具栏失败:', error);
     }
   }
 
@@ -356,8 +356,8 @@ class SideBar implements AppModule {
   private setupBookmarkListeners(): void {
     // 监听存储变化，当书签数据更新时重新加载
     chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === "local" && changes.bookmarks) {
-        maLogger.log("书签数据已更新，重新加载");
+      if (areaName === 'local' && changes.bookmarks) {
+        maLogger.log('书签数据已更新，重新加载');
         this.loadBookmarkTools();
       }
     });
@@ -380,29 +380,29 @@ class SideBar implements AppModule {
    */
   public updateTools(tools: Tool[]): void {
     try {
-      maLogger.log("开始更新侧边工具栏工具列表", tools);
+      maLogger.log('开始更新侧边工具栏工具列表', tools);
 
       if (!tools || tools.length === 0) {
-        maLogger.warn("更新侧边工具栏工具列表：工具列表为空");
+        maLogger.warn('更新侧边工具栏工具列表：工具列表为空');
         return;
       }
 
       // 更新内部工具列表
       this.customTools = [...tools];
-      maLogger.log("已更新内部工具列表", this.customTools);
+      maLogger.log('已更新内部工具列表', this.customTools);
 
       // 使用事件总线发送更新事件
-      maLogger.log("通过事件总线发送tools更新事件");
-      bus.emit("update:sidebar:tools", this.customTools);
+      maLogger.log('通过事件总线发送tools更新事件');
+      bus.emit('update:sidebar:tools', this.customTools);
 
       // 如果工具栏还未注入，则注入
       if (!this.appInstance) {
         this.inject({
-          tools: this.customTools,
+          tools: this.customTools
         });
       }
     } catch (error) {
-      maLogger.error("更新侧边工具栏工具列表失败:", error);
+      maLogger.error('更新侧边工具栏工具列表失败:', error);
     }
   }
 }

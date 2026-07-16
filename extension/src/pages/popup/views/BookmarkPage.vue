@@ -24,13 +24,13 @@
           {{ filterSummary }}
         </div>
         <div class="section-actions" aria-label="锚点数据操作">
-          <button class="toolbar-btn toolbar-btn--export" @click="exportBookmarks" title="导出锚点" aria-label="导出锚点">
+          <button class="toolbar-btn toolbar-btn--export" title="导出锚点" aria-label="导出锚点" @click="exportBookmarks">
             <IconDownload />
           </button>
-          <button class="toolbar-btn toolbar-btn--import" @click="triggerImport" title="导入锚点" aria-label="导入锚点">
+          <button class="toolbar-btn toolbar-btn--import" title="导入锚点" aria-label="导入锚点" @click="triggerImport">
             <IconUpload />
           </button>
-          <input type="file" ref="fileInput" class="visually-hidden" accept=".json" @change="importBookmarks" />
+          <input ref="fileInput" type="file" class="visually-hidden" accept=".json" @change="importBookmarks" />
         </div>
       </section>
 
@@ -63,10 +63,10 @@
             </div>
 
             <div class="bookmark-actions">
-              <button class="icon-btn icon-btn--open" @click="openBookmark(bookmark)" title="打开锚点">
+              <button class="icon-btn icon-btn--open" title="打开锚点" @click="openBookmark(bookmark)">
                 <IconOpen />
               </button>
-              <button class="icon-btn icon-btn--delete" @click="confirmDelete(bookmark.id)" title="删除锚点">
+              <button class="icon-btn icon-btn--delete" title="删除锚点" @click="confirmDelete(bookmark.id)">
                 <IconDelete />
               </button>
             </div>
@@ -121,7 +121,7 @@ const filteredBookmarks = computed(() => {
       bookmark.text,
       bookmark.title || '',
       bookmark.url,
-      domain,
+      domain
     ].some((value) => value.toLowerCase().includes(keyword));
   });
 });
@@ -153,7 +153,7 @@ const confirmDelete = (id: string) => {
 };
 
 const deleteBookmark = async () => {
-  if (!bookmarkToDelete.value) return;
+  if (!bookmarkToDelete.value) {return;}
 
   try {
     await BookmarkStorage.deleteBookmark(bookmarkToDelete.value);
@@ -214,7 +214,7 @@ const saveImportedBookmarks = async (bookmarks: Bookmark[]): Promise<void> => {
 const importBookmarks = async (event: Event): Promise<void> => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
-  if (!file) return;
+  if (!file) {return;}
 
   try {
     const content = await readFileAsText(file);
@@ -228,7 +228,7 @@ const importBookmarks = async (event: Event): Promise<void> => {
 };
 
 const truncateUrl = (url: string, maxLength: number = 40) => {
-  if (url.length <= maxLength) return url;
+  if (url.length <= maxLength) {return url;}
   return `${url.substring(0, maxLength)}...`;
 };
 

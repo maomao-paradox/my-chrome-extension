@@ -19,7 +19,7 @@ const fetchAndDecodeAudioBuffer = async (
 ): Promise<{ buffer: AudioBuffer | null; ok: boolean }> => {
   const soundUrl = getStaticAbstractPath(`keytone/Piano/${soundFile}`);
   const response = await fetch(soundUrl);
-  if (!response.ok) return { buffer: null, ok: false };
+  if (!response.ok) {return { buffer: null, ok: false };}
   const arrayBuffer = await response.arrayBuffer();
   const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
   return { buffer: audioBuffer, ok: true };
@@ -27,7 +27,7 @@ const fetchAndDecodeAudioBuffer = async (
 
 
 class PianoEffect implements AppModule {
-  _context: any = null
+  _context: any = null;
   shadowHostId: string = '';
   isInjected: boolean = false;
   vueContainer: HTMLElement | null = null;
@@ -85,7 +85,7 @@ class PianoEffect implements AppModule {
         if (soundFile && !this.soundBuffers.has(soundFile) && this.audioContext) {
           try {
             const { buffer, ok } = await fetchAndDecodeAudioBuffer(soundFile, this.audioContext);
-            if (ok && buffer) this.soundBuffers.set(soundFile, buffer);
+            if (ok && buffer) {this.soundBuffers.set(soundFile, buffer);}
           } catch { }
         }
       });
@@ -96,7 +96,7 @@ class PianoEffect implements AppModule {
   // 播放音效
   private async playSound(key: string): Promise<void> {
     const soundFile = this.keySoundMap.get(key);
-    if (!soundFile) return;
+    if (!soundFile) {return;}
 
     // 快速路径：已缓存且上下文正常就立即播放
     if (this.canPlayImmediately(soundFile)) {
@@ -105,7 +105,7 @@ class PianoEffect implements AppModule {
     }
 
     // 初始化上下文并恢复状态
-    if (!(await this.ensureAudioContextReady())) return;
+    if (!(await this.ensureAudioContextReady())) {return;}
 
     // 有缓存就播放
     if (this.soundBuffers.has(soundFile)) {
@@ -132,8 +132,8 @@ class PianoEffect implements AppModule {
   }
 
   private async ensureAudioContextReady(): Promise<boolean> {
-    if (!this.audioContext) await this.initAudioContext();
-    if (!this.audioContext) return false;
+    if (!this.audioContext) {await this.initAudioContext();}
+    if (!this.audioContext) {return false;}
     if (this.audioContext.state === 'suspended') {
       try { await this.audioContext.resume(); } catch { return false; }
     }
@@ -142,10 +142,10 @@ class PianoEffect implements AppModule {
 
   // 从缓存的音频数据播放
   private playFromBuffer(soundFile: string): void {
-    if (!this.audioContext) return;
+    if (!this.audioContext) {return;}
 
     const buffer = this.soundBuffers.get(soundFile);
-    if (!buffer) return;
+    if (!buffer) {return;}
 
     const source = this.audioContext.createBufferSource();
     source.buffer = buffer;
@@ -155,13 +155,13 @@ class PianoEffect implements AppModule {
 
   // 键盘事件处理
   private handleKeyPress = (event: KeyboardEvent): void => {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled) {return;}
     const target = event.target as HTMLElement;
     const isInputElement = target.tagName === 'INPUT' ||
       target.tagName === 'TEXTAREA' ||
       target.isContentEditable;
 
-    if (isInputElement) return;
+    if (isInputElement) {return;}
 
     // 确保rainTextModule存在且方法有效
     const hasRainModule = this.rainTextModule && typeof this.rainTextModule.addCharDrop === 'function';
@@ -191,11 +191,11 @@ class PianoEffect implements AppModule {
     } catch (error) {
       maLogger.error('[PianoEffect] 处理按键事件时出错:', error);
     }
-  }
+  };
 
   // 启用钢琴音效
   public async enable(): Promise<void> {
-    if (this.isEnabled) return;
+    if (this.isEnabled) {return;}
 
     this.initAudioContext();
     this.preloadSounds().catch(() => {});
@@ -306,4 +306,4 @@ export default (ctx: AppContext, options?: any): AppModule => {
   const appInstance = new PianoEffect();
   appInstance.init();
   return appInstance;
-}
+};

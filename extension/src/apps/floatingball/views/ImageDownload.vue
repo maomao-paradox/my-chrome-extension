@@ -1,5 +1,5 @@
 <template>
-    <div class="image-zip-downloader scifi-container" ref="containerRef">
+    <div ref="containerRef" class="image-zip-downloader scifi-container">
         <header class="scifi-header">
             <div class="scifi-title-wrapper">
                 <el-icon class="scifi-icon">
@@ -65,7 +65,7 @@
                     <p>共找到 {{ images.length }} 张图片 ({{ filteredImages.length }} 张显示)</p>
                 </div>
 
-                <div class="progress-container scifi-progress-container" v-if="running">
+                <div v-if="running" class="progress-container scifi-progress-container">
                     <div class="progress-bg">
                         <div class="progress-bar scifi-progress-bar" :style="{ width: progress + '%' }" />
                     </div>
@@ -80,14 +80,14 @@
                     <div class="image-wrapper">
                         <img :src="img.src" :alt="`Image ${idx}`" @load="img.loaded = true">
                         <div class="image-overlay scifi-overlay">
-                            <button class="delete-btn scifi-icon-btn scifi-icon-btn-danger" @click="removeImage(idx)"
-                                title="删除图片">
+                            <button class="delete-btn scifi-icon-btn scifi-icon-btn-danger" title="删除图片"
+                                @click="removeImage(idx)">
                                 <el-icon class="scifi-icon-small">
                                     <IconDelete />
                                 </el-icon>
                             </button>
                             <button class="download-single-btn scifi-icon-btn scifi-icon-btn-primary"
-                                @click="downloadSingle(img)" title="单独下载">
+                                title="单独下载" @click="downloadSingle(img)">
                                 <el-icon class="scifi-icon-small">
                                     <IconDownload />
                                 </el-icon>
@@ -148,183 +148,183 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { IconDownload, IconSearch, IconDelete, IconInfo, IconSetting, IconDocument, IconLoading, IconCircleCheck } from '@icons/index'
-import { scanImages, downloadAllImages, downloadSingleImage } from '@/utils/image-zip-download'
-import { SciFiConfirmDialog } from '@components/index'
-import { ImageInfo } from '@/types/utils'
+import { ref, onMounted, computed } from 'vue';
+import { IconDownload, IconSearch, IconDelete, IconInfo, IconSetting, IconDocument, IconLoading, IconCircleCheck } from '@icons/index';
+import { scanImages, downloadAllImages, downloadSingleImage } from '@/utils/image-zip-download';
+import { SciFiConfirmDialog } from '@components/index';
+import { ImageInfo } from '@/types/utils';
 
-const containerRef = ref<HTMLElement | null>(null)
+const containerRef = ref<HTMLElement | null>(null);
 
-const emit = defineEmits(['add-message'])
+const emit = defineEmits(['add-message']);
 
 // 使用说明
 const instructions = ref([
-    "点击'重新扫描图片'可刷新检测",
-    "支持 Base64 图片和普通 URL 图片",
-    "可以删除不需要下载的图片",
-    "支持单独下载某张图片",
-    "点击'下载所有图片'即可打包为 ZIP"
-])
+  "点击'重新扫描图片'可刷新检测",
+  '支持 Base64 图片和普通 URL 图片',
+  '可以删除不需要下载的图片',
+  '支持单独下载某张图片',
+  "点击'下载所有图片'即可打包为 ZIP"
+]);
 
 // 消息框状态管理
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const dialogMessage = ref('')
-let dialogCallback: (() => void) | null = null
+const dialogVisible = ref(false);
+const dialogTitle = ref('');
+const dialogMessage = ref('');
+let dialogCallback: (() => void) | null = null;
 
 // 自定义消息框函数
 const $msgbox = (title: string, message: string, confirmCallback: () => void) => {
-    dialogTitle.value = title
-    dialogMessage.value = message
-    dialogCallback = confirmCallback
-    dialogVisible.value = true
-}
+  dialogTitle.value = title;
+  dialogMessage.value = message;
+  dialogCallback = confirmCallback;
+  dialogVisible.value = true;
+};
 
 // 处理对话框确认
 const handleDialogConfirm = () => {
-    if (dialogCallback) {
-        dialogCallback()
-    }
-    dialogVisible.value = false
-    dialogCallback = null
-}
+  if (dialogCallback) {
+    dialogCallback();
+  }
+  dialogVisible.value = false;
+  dialogCallback = null;
+};
 
 // 处理对话框取消
 const handleDialogCancel = () => {
-    dialogVisible.value = false
-    dialogCallback = null
-}
+  dialogVisible.value = false;
+  dialogCallback = null;
+};
 
-const images = ref<ImageInfo[]>([])
-const progress = ref(0)
-const running = ref(false)
-const scanned = ref(false)
-const includeBase64 = ref(true)
-const filterText = ref('')
+const images = ref<ImageInfo[]>([]);
+const progress = ref(0);
+const running = ref(false);
+const scanned = ref(false);
+const includeBase64 = ref(true);
+const filterText = ref('');
 
 // 过滤后的图片列表
 const filteredImages = computed(() => {
-    let result = images.value
+  let result = images.value;
 
-    // 过滤 Base64 图片
-    if (!includeBase64.value) {
-        result = result.filter(img => !img.isBase64)
-    }
+  // 过滤 Base64 图片
+  if (!includeBase64.value) {
+    result = result.filter(img => !img.isBase64);
+  }
 
-    // 关键词过滤
-    if (filterText.value) {
-        const keyword = filterText.value.toLowerCase()
-        result = result.filter(img =>
-            img.src.toLowerCase().includes(keyword) ||
+  // 关键词过滤
+  if (filterText.value) {
+    const keyword = filterText.value.toLowerCase();
+    result = result.filter(img =>
+      img.src.toLowerCase().includes(keyword) ||
             (img.alt && img.alt.toLowerCase().includes(keyword))
-        )
-    }
+    );
+  }
 
-    return result
-})
+  return result;
+});
 
 async function onScan() {
-    images.value = scanImages(document) as ImageInfo[]
-    scanned.value = true
+  images.value = scanImages(document) as ImageInfo[];
+  scanned.value = true;
 
-    if (images.value.length > 0) {
-        emit('add-message', {
-            message: `找到 ${images.value.length} 张图片`,
-            type: "success"
-        })
-    } else {
-        emit('add-message', {
-            message: '未找到图片',
-            type: "info"
-        })
-    }
+  if (images.value.length > 0) {
+    emit('add-message', {
+      message: `找到 ${images.value.length} 张图片`,
+      type: 'success'
+    });
+  } else {
+    emit('add-message', {
+      message: '未找到图片',
+      type: 'info'
+    });
+  }
 }
 
 async function onDownload() {
-    if (!images.value.length) {
-        emit('add-message', {
-            message: '没有找到可下载的图片！',
-            type: "warning"
-        })
-        return
-    }
+  if (!images.value.length) {
+    emit('add-message', {
+      message: '没有找到可下载的图片！',
+      type: 'warning'
+    });
+    return;
+  }
 
-    running.value = true
-    progress.value = 0
+  running.value = true;
+  progress.value = 0;
 
-    try {
-        await downloadAllImages(images.value, {
-            onProgress: (p: number) => (progress.value = p),
-            fileName: 'page_images.zip'
-        })
-        emit('add-message', {
-            message: '图片打包下载完成！',
-            type: "success"
-        })
-    } catch (e: any) {
-        maLogger.error(e)
-        emit('add-message', {
-            message: '打包失败: ' + e.message,
-            type: "error"
-        })
-    } finally {
-        running.value = false
-    }
+  try {
+    await downloadAllImages(images.value, {
+      onProgress: (p: number) => (progress.value = p),
+      fileName: 'page_images.zip'
+    });
+    emit('add-message', {
+      message: '图片打包下载完成！',
+      type: 'success'
+    });
+  } catch (e: any) {
+    maLogger.error(e);
+    emit('add-message', {
+      message: '打包失败: ' + e.message,
+      type: 'error'
+    });
+  } finally {
+    running.value = false;
+  }
 }
 
 // 单独下载图片
 async function downloadSingle(img: ImageInfo) {
-    try {
-        await downloadSingleImage(img.src, img.name)
-        emit('add-message', {   
-            message: '图片下载完成！',
-            type: "success"
-        })
-    } catch (error: any) {
-        emit('add-message', {   
-            message: '下载失败: ' + error.message,
-            type: "error"
-        })
-        maLogger.error('下载错误:', error)
-    }
+  try {
+    await downloadSingleImage(img.src, img.name);
+    emit('add-message', {   
+      message: '图片下载完成！',
+      type: 'success'
+    });
+  } catch (error: any) {
+    emit('add-message', {   
+      message: '下载失败: ' + error.message,
+      type: 'error'
+    });
+    maLogger.error('下载错误:', error);
+  }
 }
 
 // 移除单张图片
 function removeImage(index: number) {
-    $msgbox('确定删除',
-        '确定要删除这张图片吗？',
-        () => {
-            images.value.splice(index, 1)
-            emit('add-message', {   
-                message: '图片已删除',
-                type: "success"
-            })
-        })
+  $msgbox('确定删除',
+    '确定要删除这张图片吗？',
+    () => {
+      images.value.splice(index, 1);
+      emit('add-message', {   
+        message: '图片已删除',
+        type: 'success'
+      });
+    });
 }
 
 // 移除所有图片
 function removeAllImages() {
-    if (!images.value.length) return
+  if (!images.value.length) {return;}
 
-    $msgbox('确定删除',
-        '确定要清空所有图片吗？',
-        () => {
-            images.value = []
-            emit('add-message', {   
-                message: '已清空所有图片',
-                type: "success"
-            })
-        })
+  $msgbox('确定删除',
+    '确定要清空所有图片吗？',
+    () => {
+      images.value = [];
+      emit('add-message', {   
+        message: '已清空所有图片',
+        type: 'success'
+      });
+    });
 }
 
 // 截断长URL显示
 function truncateUrl(url: string, maxLength: number = 30): string {
-    if (url.length <= maxLength) return url
-    return url.substring(0, maxLength) + '...'
+  if (url.length <= maxLength) {return url;}
+  return url.substring(0, maxLength) + '...';
 }
 
-onMounted(onScan)
+onMounted(onScan);
 </script>
 
 <style scoped>

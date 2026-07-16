@@ -15,18 +15,18 @@
         </div>
         <div class="replace-modal__input-group">
           <label class="replace-modal__label" for="replace-modal-input">替换为</label>
-          <input ref="inputRef" v-model="replaceText" type="text" class="replace-modal__input" placeholder="请输入替换后的文本"
-            id="replace-modal-input"
+          <input id="replace-modal-input" ref="inputRef" v-model="replaceText" type="text" class="replace-modal__input"
+            placeholder="请输入替换后的文本"
             @keydown.enter="handleReplace" />
         </div>
         <div class="replace-modal__options">
           <label class="replace-modal__checkbox">
-            <input type="checkbox" v-model="caseSensitive" />
+            <input v-model="caseSensitive" type="checkbox" />
             <span class="replace-modal__checkbox-box"></span>
             <span class="replace-modal__checkbox-label">区分大小写</span>
           </label>
           <label class="replace-modal__checkbox">
-            <input type="checkbox" v-model="wholeWord" />
+            <input v-model="wholeWord" type="checkbox" />
             <span class="replace-modal__checkbox-box"></span>
             <span class="replace-modal__checkbox-label">全词匹配</span>
           </label>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick } from 'vue';
 
 const props = withDefaults(defineProps<{
   visible: boolean
@@ -49,52 +49,52 @@ const props = withDefaults(defineProps<{
   searchText: string
 }>(), {
   title: '替换文本'
-})
+});
 
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'replace', replaceText: string, options: { caseSensitive: boolean; wholeWord: boolean }): void
-}>()
+}>();
 
-const inputRef = ref<HTMLInputElement | null>(null)
-const replaceText = ref('')
-const caseSensitive = ref(false)
-const wholeWord = ref(false)
-const isShaking = ref(false)
+const inputRef = ref<HTMLInputElement | null>(null);
+const replaceText = ref('');
+const caseSensitive = ref(false);
+const wholeWord = ref(false);
+const isShaking = ref(false);
 
 watch(() => props.visible, (visible) => {
   if (visible) {
     nextTick(() => {
-      inputRef.value?.focus()
-    })
-    replaceText.value = ''
+      inputRef.value?.focus();
+    });
+    replaceText.value = '';
   }
-})
+});
 
 const triggerShake = () => {
-  isShaking.value = false
+  isShaking.value = false;
   requestAnimationFrame(() => {
-    isShaking.value = true
+    isShaking.value = true;
     setTimeout(() => {
-      isShaking.value = false
-    }, 420)
-  })
-}
+      isShaking.value = false;
+    }, 420);
+  });
+};
 
 const handleClose = () => {
-  emit('close')
-}
+  emit('close');
+};
 
 const handleReplace = () => {
   if (!replaceText.value.trim()) {
-    triggerShake()
-    return
+    triggerShake();
+    return;
   }
   emit('replace', replaceText.value, {
     caseSensitive: caseSensitive.value,
     wholeWord: wholeWord.value
-  })
-}
+  });
+};
 </script>
 
 <style scoped lang="scss">

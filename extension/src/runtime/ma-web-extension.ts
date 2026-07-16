@@ -33,7 +33,7 @@ import elementPlusCss from 'element-plus/dist/index.css?raw';
         position: 'absolute',
         top: '0px',
         left: '0px',
-        display: 'block',
+        display: 'block'
       });
     }
 

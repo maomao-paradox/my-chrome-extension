@@ -1,7 +1,7 @@
 <template>
   <el-dialog v-model="visible" :title="title" :width="width" :modal="false" :close-on-click-modal="false"
-    :close-on-press-escape="true" :draggable="true" :resizable="true" :center="false" @close="handleClose"
-    custom-class="context-menu-dialog">
+    :close-on-press-escape="true" :draggable="true" :resizable="true" :center="false" custom-class="context-menu-dialog"
+    @close="handleClose">
     <!-- 菜单内容 -->
     <!-- 如果 toolId 为 hello，则展示默认欢迎界面 -->
     <Transition name="fade" mode="out-in">
@@ -14,7 +14,7 @@
       <div v-else key="menu" class="context-menu-content">
         <div class="context-menu-grid">
           <div v-for="item in menuItems" :key="item.id" class="context-menu-block" @click="handleItemClick(item)">
-            <component v-if="item.icon" :is="item.icon" class="menu-block-icon" />
+            <component :is="item.icon" v-if="item.icon" class="menu-block-icon" />
             <span class="menu-block-label">{{ item.label }}</span>
           </div>
         </div>
@@ -24,8 +24,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { Tool } from '@/types'
+import { ref, computed } from 'vue';
+import { Tool } from '@/types';
 
 // Props定义
 const props = withDefaults(defineProps<{
@@ -39,27 +39,27 @@ const props = withDefaults(defineProps<{
   title: '上下文菜单',
   width: '300px',
   menuItems: () => []
-})
+});
 
 // Emits定义
 const emit = defineEmits<{
   'update:visible': [value: boolean]
   'item-click': [item: Tool]
   'close': []
-}>()
+}>();
 
 // 响应式数据
 const visible = computed({
   get: () => props.visible,
   set: (value: boolean) => {
-    emit('update:visible', value)
+    emit('update:visible', value);
   }
-})
+});
 
 // 事件处理
 const handleClose = () => {
-  emit('close')
-}
+  emit('close');
+};
 
 const handleItemClick = (item: Tool) => {
   // 发送消息到后台脚本
@@ -70,10 +70,10 @@ const handleItemClick = (item: Tool) => {
       itemLabel: item.label,
       toolId: props.toolId
     },
-    target: "background"
-  })
-  emit('item-click', item)
-}
+    target: 'background'
+  });
+  emit('item-click', item);
+};
 </script>
 
 <style scoped>

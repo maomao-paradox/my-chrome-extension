@@ -13,7 +13,7 @@ export {
   type ResourceErrorInfo,
   type ConsoleErrorInfo,
   type ErrorInfo,
-  ErrorInfoUtils,
+  ErrorInfoUtils
 } from './ErrorInfo';
 
 // 监控配置类型
@@ -21,7 +21,7 @@ export {
   type MonitorConfig,
   type ConfigValidationResult,
   DEFAULT_MONITOR_CONFIG,
-  MonitorConfigUtils,
+  MonitorConfigUtils
 } from './MonitorConfig';
 
 // WebSocket 消息类型
@@ -37,5 +37,5 @@ export {
   type WebSocketMessage,
   type WebSocketClientConfig,
   DEFAULT_WS_CONFIG,
-  WebSocketMessageUtils,
+  WebSocketMessageUtils
 } from './WebSocketMessage';

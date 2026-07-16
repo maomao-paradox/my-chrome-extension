@@ -6,7 +6,7 @@
     <section class="rotation3d-stage" aria-label="3D 功能模块展示">
       <div class="rotation3D-baseMap" aria-hidden="true"></div>
 
-      <div ref="rotationRoot" id="rotation3D" class="rotation3D">
+      <div id="rotation3D" ref="rotationRoot" class="rotation3D">
         <button class="center" type="button">中心</button>
 
         <div class="itemList">
@@ -97,7 +97,7 @@ const defaultItemList: RotationItem[] = [
   { name: 'GPS服务', type: 'green', icon: 'icon-GPS', fallbackIcon: 'GPS' },
   { name: '路基施工', type: 'yellow', icon: 'icon-a-lujishigong2x', fallbackIcon: '基' },
   { name: '数据服务中心', type: 'blue', icon: 'icon-shujufuwuzhongxin', fallbackIcon: '数' },
-  { name: '智慧梁场', type: 'blue', icon: 'icon-liangchang', fallbackIcon: '梁' },
+  { name: '智慧梁场', type: 'blue', icon: 'icon-liangchang', fallbackIcon: '梁' }
 ];
 
 const props = defineProps<{
@@ -118,7 +118,7 @@ const itemList = computed<RotationItem[]>(() => {
     name: item.name,
     type: item.type,
     icon: item.icon ?? '',
-    fallbackIcon: item.fallbackIcon ?? item.name.slice(0, 1),
+    fallbackIcon: item.fallbackIcon ?? item.name.slice(0, 1)
   }));
 });
 
@@ -170,7 +170,7 @@ async function initRotation3D() {
     id: '#rotation3D',
     farScale: 0.6,
     xRadius: 0,
-    yRadius: 220,
+    yRadius: 220
   });
 }
 

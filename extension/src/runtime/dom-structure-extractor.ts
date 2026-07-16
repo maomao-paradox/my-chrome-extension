@@ -136,7 +136,7 @@ class DomStructureExtractor {
   }
 
   private extractElement(element: Element, depth: number): DomStructureNode | null {
-    if (this.shouldSkipElement(element)) return null;
+    if (this.shouldSkipElement(element)) {return null;}
 
     if (this.extractedNodes >= this.options.maxNodes) {
       this.omittedNodes += 1;
@@ -144,7 +144,7 @@ class DomStructureExtractor {
     }
 
     const hidden = this.isHidden(element);
-    if (hidden && !this.options.includeHidden) return null;
+    if (hidden && !this.options.includeHidden) {return null;}
 
     this.extractedNodes += 1;
 
@@ -156,7 +156,7 @@ class DomStructureExtractor {
     this.assignText(node, element);
     this.assignAttributes(node, element);
 
-    if (hidden) node.hidden = true;
+    if (hidden) {node.hidden = true;}
     if (depth >= this.options.maxDepth) {
       const childElementCount = this.getVisibleChildren(element).length;
       if (childElementCount > 0) {
@@ -172,7 +172,7 @@ class DomStructureExtractor {
       .map(child => this.extractElement(child, depth + 1))
       .filter((child): child is DomStructureNode => Boolean(child));
 
-    if (extractedChildren.length > 0) node.children = extractedChildren;
+    if (extractedChildren.length > 0) {node.children = extractedChildren;}
     if (children.length > limitedChildren.length) {
       node.omittedChildren = children.length - limitedChildren.length;
       this.omittedNodes += node.omittedChildren;
@@ -188,14 +188,14 @@ class DomStructureExtractor {
 
   private getVisibleChildren(element: Element): Element[] {
     return Array.from(element.children).filter(child => {
-      if (this.shouldSkipElement(child)) return false;
+      if (this.shouldSkipElement(child)) {return false;}
       return this.options.includeHidden || !this.isHidden(child);
     });
   }
 
   private isHidden(element: Element): boolean {
-    if (element.hasAttribute('hidden')) return true;
-    if (element.getAttribute('aria-hidden') === 'true') return true;
+    if (element.hasAttribute('hidden')) {return true;}
+    if (element.getAttribute('aria-hidden') === 'true') {return true;}
 
     const style = window.getComputedStyle(element);
     if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
@@ -214,10 +214,10 @@ class DomStructureExtractor {
     const role = element.getAttribute('role') || '';
     const name = this.getAccessibleName(element);
 
-    if (id) node.id = id;
-    if (classes.length > 0) node.classes = classes;
-    if (role) node.role = role;
-    if (name) node.name = this.truncate(name, this.options.maxTextLength);
+    if (id) {node.id = id;}
+    if (classes.length > 0) {node.classes = classes;}
+    if (role) {node.role = role;}
+    if (name) {node.name = this.truncate(name, this.options.maxTextLength);}
   }
 
   private assignText(node: DomStructureNode, element: Element): void {
@@ -227,7 +227,7 @@ class DomStructureExtractor {
       .join(' ');
     const normalized = this.normalizeText(directText);
 
-    if (normalized) node.text = this.truncate(normalized, this.options.maxTextLength);
+    if (normalized) {node.text = this.truncate(normalized, this.options.maxTextLength);}
   }
 
   private assignAttributes(node: DomStructureNode, element: Element): void {
@@ -263,7 +263,7 @@ class DomStructureExtractor {
       attrs.required = (element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).required || false;
     }
 
-    if (Object.keys(attrs).length > 0) node.attrs = attrs;
+    if (Object.keys(attrs).length > 0) {node.attrs = attrs;}
   }
 
   private extractLandmarks(): string[] {
@@ -327,7 +327,7 @@ class DomStructureExtractor {
 
   private getAccessibleName(element: Element): string {
     const ariaLabel = element.getAttribute('aria-label');
-    if (ariaLabel) return this.normalizeText(ariaLabel);
+    if (ariaLabel) {return this.normalizeText(ariaLabel);}
 
     const labelledBy = element.getAttribute('aria-labelledby');
     if (labelledBy) {
@@ -335,10 +335,10 @@ class DomStructureExtractor {
         .split(/\s+/)
         .map(id => document.getElementById(id)?.textContent || '')
         .join(' ');
-      if (text.trim()) return this.normalizeText(text);
+      if (text.trim()) {return this.normalizeText(text);}
     }
 
-    if (element instanceof HTMLImageElement) return this.normalizeText(element.alt || element.title || '');
+    if (element instanceof HTMLImageElement) {return this.normalizeText(element.alt || element.title || '');}
     if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) {
       return this.getFieldLabel(element) || this.normalizeText(this.getFieldPlaceholder(element));
     }
@@ -353,11 +353,11 @@ class DomStructureExtractor {
   private getFieldLabel(field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): string {
     if (field.id) {
       const label = document.querySelector<HTMLLabelElement>(`label[for="${this.escapeSelectorValue(field.id)}"]`);
-      if (label?.innerText) return this.normalizeText(label.innerText);
+      if (label?.innerText) {return this.normalizeText(label.innerText);}
     }
 
     const parentLabel = field.closest('label');
-    if (parentLabel?.textContent) return this.normalizeText(parentLabel.textContent);
+    if (parentLabel?.textContent) {return this.normalizeText(parentLabel.textContent);}
 
     return this.normalizeText(field.getAttribute('aria-label') || this.getFieldPlaceholder(field) || '');
   }
@@ -386,11 +386,11 @@ class DomStructureExtractor {
     lines.push('## 页面信息');
     lines.push(`- title: ${summary.page.title || '(无)'}`);
     lines.push(`- url: ${summary.page.url}`);
-    if (summary.page.lang) lines.push(`- lang: ${summary.page.lang}`);
-    if (summary.page.description) lines.push(`- description: ${summary.page.description}`);
-    if (summary.page.canonical) lines.push(`- canonical: ${summary.page.canonical}`);
+    if (summary.page.lang) {lines.push(`- lang: ${summary.page.lang}`);}
+    if (summary.page.description) {lines.push(`- description: ${summary.page.description}`);}
+    if (summary.page.canonical) {lines.push(`- canonical: ${summary.page.canonical}`);}
     lines.push(`- extractedNodes: ${summary.stats.extractedNodes}`);
-    if (summary.stats.omittedNodes > 0) lines.push(`- omittedNodes: ${summary.stats.omittedNodes}`);
+    if (summary.stats.omittedNodes > 0) {lines.push(`- omittedNodes: ${summary.stats.omittedNodes}`);}
     lines.push('');
 
     if (summary.landmarks.length > 0) {
@@ -440,11 +440,11 @@ class DomStructureExtractor {
 
   private writeNode(lines: string[], node: DomStructureNode, depth: number): void {
     const parts = [node.tag];
-    if (node.id) parts.push(`#${node.id}`);
-    if (node.classes?.length) parts.push(`.${node.classes.join('.')}`);
-    if (node.role) parts.push(`[role="${node.role}"]`);
-    if (node.name) parts.push(`name="${node.name}"`);
-    if (node.text) parts.push(`text="${node.text}"`);
+    if (node.id) {parts.push(`#${node.id}`);}
+    if (node.classes?.length) {parts.push(`.${node.classes.join('.')}`);}
+    if (node.role) {parts.push(`[role="${node.role}"]`);}
+    if (node.name) {parts.push(`name="${node.name}"`);}
+    if (node.text) {parts.push(`text="${node.text}"`);}
     if (node.attrs) {
       Object.entries(node.attrs).forEach(([key, value]) => {
         if (value !== '' && value !== false && value !== null) {
@@ -466,12 +466,12 @@ class DomStructureExtractor {
 
   private copyAttr(attrs: Record<string, DomStructurePrimitive>, element: Element, attrName: string): void {
     const value = element.getAttribute(attrName);
-    if (value) attrs[attrName] = this.truncate(this.normalizeText(value), 200);
+    if (value) {attrs[attrName] = this.truncate(this.normalizeText(value), 200);}
   }
 
   private copyUrlAttr(attrs: Record<string, DomStructurePrimitive>, element: Element, attrName: string): void {
     const value = element.getAttribute(attrName);
-    if (!value) return;
+    if (!value) {return;}
 
     const absoluteValue = attrName in element ? String((element as unknown as Record<string, unknown>)[attrName] || value) : value;
     attrs[attrName] = this.truncate(absoluteValue, 300);
@@ -482,12 +482,12 @@ class DomStructureExtractor {
   }
 
   private truncate(text: string, maxLength: number): string {
-    if (text.length <= maxLength) return text;
+    if (text.length <= maxLength) {return text;}
     return `${text.slice(0, Math.max(maxLength - 1, 0))}…`;
   }
 
   private escapeSelectorValue(value: string): string {
-    if (window.CSS?.escape) return window.CSS.escape(value);
+    if (window.CSS?.escape) {return window.CSS.escape(value);}
     return value.replace(/["\\]/g, '\\$&');
   }
 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="container" ref="container">
+    <div ref="container" class="container">
         <header class="cd-header">
             <div class="header-wrapper">
                 <div class="logo-wrap">
@@ -35,66 +35,66 @@
             </div>
         </div>
 
-        <div class='cursor' ref="cursor1"></div>
-        <div class='cursor2' ref="cursor2"></div>
-        <div class='cursor3' ref="cursor3"></div>
+        <div ref="cursor1" class='cursor'></div>
+        <div ref="cursor2" class='cursor2'></div>
+        <div ref="cursor3" class='cursor3'></div>
     </div>
 </template>
 
 <script setup lang="ts">
 /* Please ? this if you like it! */
 
-import { onMounted, useTemplateRef, ref } from 'vue'
+import { onMounted, useTemplateRef, ref } from 'vue';
 
 const menu = ref<string[]>([
-    "home",
-    "studio",
-    "news",
-    "contact",
+  'home',
+  'studio',
+  'news',
+  'contact'
 ]);
 
-const cursor1 = useTemplateRef("cursor1"),
-    cursor2 = useTemplateRef("cursor2"),
-    cursor3 = useTemplateRef("cursor3"),
-    container = useTemplateRef("container");
+const cursor1 = useTemplateRef('cursor1'),
+  cursor2 = useTemplateRef('cursor2'),
+  cursor3 = useTemplateRef('cursor3'),
+  container = useTemplateRef('container');
 
 function addMouseEvent(element: HTMLElement) {
-    element.addEventListener("mouseover", addHover), element.addEventListener("mouseout", removeHover)
+  element.addEventListener('mouseover', addHover), element.addEventListener('mouseout', removeHover);
 }
 
 function addHover() {
-    cursor2.value!.classList.add("hover"), cursor3.value!.classList.add("hover")
+    cursor2.value!.classList.add('hover'), cursor3.value!.classList.add('hover');
 }
 function removeHover() {
-    cursor2.value!.classList.remove("hover"), cursor3.value!.classList.remove("hover")
+    cursor2.value!.classList.remove('hover'), cursor3.value!.classList.remove('hover');
 }
 onMounted(() => {
-    document.querySelector<HTMLElement>('body')?.addEventListener("mousemove", function (event: MouseEvent) {
-        cursor1.value!.style.left = event.clientX + "px",
-            cursor1.value!.style.top = event.clientY + "px",
-            cursor2.value!.style.left = event.clientX + "px",
-            cursor2.value!.style.top = event.clientY + "px",
-            cursor3.value!.style.left = event.clientX + "px",
-            cursor3.value!.style.top = event.clientY + "px"
-    });
+  document.querySelector<HTMLElement>('body')?.addEventListener('mousemove', function (event: MouseEvent) {
+        cursor1.value!.style.left = event.clientX + 'px',
+            cursor1.value!.style.top = event.clientY + 'px',
+            cursor2.value!.style.left = event.clientX + 'px',
+            cursor2.value!.style.top = event.clientY + 'px',
+            cursor3.value!.style.left = event.clientX + 'px',
+            cursor3.value!.style.top = event.clientY + 'px';
+  });
 
-    removeHover();
-    for (var hoverTarget = document.querySelectorAll<HTMLElement>(".hover-target"), a = hoverTarget.length - 1; a >= 0; a--) {
-        addMouseEvent(hoverTarget[a])
-    }
-    //Navigation
-    document.querySelector<HTMLElement>('.menu-icon')?.addEventListener('click', function () {
-        return container.value!.classList.toggle('nav-active');
-    });
-    const menuItems = document.querySelectorAll<HTMLElement>('.nav__list-item');
-    menuItems[0].classList.add('active-nav');
+  removeHover();
+  for (let hoverTarget = document.querySelectorAll<HTMLElement>('.hover-target'), a = hoverTarget.length - 1; a >= 0; a--) {
+    addMouseEvent(hoverTarget[a]);
+  }
+  //Navigation
+  document.querySelector<HTMLElement>('.menu-icon')?.addEventListener('click', function () {
+    return container.value!.classList.toggle('nav-active');
+  });
+  const menuItems = document.querySelectorAll<HTMLElement>('.nav__list-item');
+  menuItems[0].classList.add('active-nav');
 
-    const switchEl = document.querySelector<HTMLElement>('#switch');
+  const switchEl = document.querySelector<HTMLElement>('#switch');
 
-    switchEl?.addEventListener('click', function () {
-        container.value!.classList.toggle("light");
-        switchEl.classList.toggle("switched");
-    });
+  switchEl?.addEventListener('click', function () {
+        container.value!.classList.toggle('light');
+        switchEl.classList.toggle('switched');
+  });
 }); 
 </script>
 

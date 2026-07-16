@@ -1,7 +1,7 @@
 <template>
   <div class="drop-area" @dragover.prevent @drop="handleDrop" @dragenter.prevent>
     <p>拖拽文件到此处或点击上传</p>
-    <input type="file" @change="handleFileChange" ref="fileInput" style="display: none;" multiple>
+    <input ref="fileInput" type="file" style="display: none;" multiple @change="handleFileChange">
     <el-button type="primary" @click="openFilePicker">
       上传文件<el-icon class="el-icon--right">
         <Upload />
@@ -78,7 +78,7 @@ async function uploadFile(file: File) {
     // 上传文件接口
     const response = await fetch('/api/upload', {
       method: 'POST',
-      body: formData,
+      body: formData
     });
 
     if (response.ok) {

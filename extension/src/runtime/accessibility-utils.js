@@ -20,15 +20,15 @@ class PageContentExtractor {
    */
   getDirectText(element) {
     // 修复：如果元素为 null 或 undefined，返回空字符串
-    if (!element) return '';
-    if (element.nodeType !== Node.ELEMENT_NODE) return '';
+    if (!element) {return '';}
+    if (element.nodeType !== Node.ELEMENT_NODE) {return '';}
     
     let text = '';
     try {
-      for (let node of element.childNodes) {
+      for (const node of element.childNodes) {
         if (node && node.nodeType === Node.TEXT_NODE) {
           const nodeText = node.textContent?.trim() || '';
-          if (nodeText) text += nodeText;
+          if (nodeText) {text += nodeText;}
         }
       }
     } catch (e) {
@@ -41,10 +41,10 @@ class PageContentExtractor {
    * 判断元素是否应该被忽略
    */
   shouldIgnore(element) {
-    if (!element) return true;
+    if (!element) {return true;}
     
     // 检查选择器
-    for (let selector of this.ignoreSelectors) {
+    for (const selector of this.ignoreSelectors) {
       try {
         if (element.matches && element.matches(selector)) {
           return true;
@@ -82,7 +82,7 @@ class PageContentExtractor {
         '#app', '#root', '#main'
       ];
       
-      for (let selector of mainSelectors) {
+      for (const selector of mainSelectors) {
         try {
           const el = document.querySelector(selector);
           if (el && el.innerText && el.innerText.length > 100) {
@@ -123,8 +123,8 @@ class PageContentExtractor {
       }
       
       text = text.replace(/\s+/g, ' ')
-                 .replace(/[\n\r\t]+/g, ' ')
-                 .trim();
+        .replace(/[\n\r\t]+/g, ' ')
+        .trim();
       
       // 4. 按段落分割
       const paragraphs = text.split(/[。！？；\n]{2,}/).filter(p => p && p.length > 20);
@@ -236,7 +236,7 @@ class PageContentExtractor {
    * 获取输入框的标签
    */
   getInputLabel(input) {
-    if (!input) return '';
+    if (!input) {return '';}
     
     try {
       // 通过 for 属性
@@ -244,7 +244,7 @@ class PageContentExtractor {
         const label = document.querySelector(`label[for="${input.id}"]`);
         if (label) {
           const labelText = label.innerText?.trim();
-          if (labelText) return labelText;
+          if (labelText) {return labelText;}
         }
       }
       
@@ -252,26 +252,26 @@ class PageContentExtractor {
       const parentLabel = input.closest('label');
       if (parentLabel) {
         const labelText = parentLabel.innerText?.trim();
-        if (labelText) return labelText;
+        if (labelText) {return labelText;}
       }
       
       // 通过 aria-label
       const ariaLabel = input.getAttribute('aria-label');
-      if (ariaLabel && ariaLabel.trim()) return ariaLabel.trim();
+      if (ariaLabel && ariaLabel.trim()) {return ariaLabel.trim();}
       
       // 通过 placeholder
-      if (input.placeholder && input.placeholder.trim()) return input.placeholder.trim();
+      if (input.placeholder && input.placeholder.trim()) {return input.placeholder.trim();}
       
       // 通过相邻文本（修复：检查元素是否存在）
       const prevElement = input.previousElementSibling;
       if (prevElement) {
         const prevText = this.getDirectText(prevElement);
-        if (prevText && prevText.trim()) return prevText.trim();
+        if (prevText && prevText.trim()) {return prevText.trim();}
       }
       
       // 通过父级文本（作为后备）
       const parentText = this.getDirectText(input.parentElement);
-      if (parentText && parentText.length < 50) return parentText.trim();
+      if (parentText && parentText.length < 50) {return parentText.trim();}
       
     } catch (e) {
       console.warn('获取输入框标签失败:', e);
@@ -295,20 +295,20 @@ class PageContentExtractor {
           // 提取表头
           table.querySelectorAll('th, [role="columnheader"]').forEach(th => {
             const text = th.innerText?.trim();
-            if (text) headers.push(text);
+            if (text) {headers.push(text);}
           });
           
           // 提取数据行（限制数量）
           const bodyRows = table.querySelectorAll('tbody tr, [role="row"]');
           bodyRows.forEach((row, idx) => {
-            if (idx >= 10) return; // 最多10行
+            if (idx >= 10) {return;} // 最多10行
             
             const rowData = [];
             row.querySelectorAll('td, [role="cell"]').forEach(cell => {
               const text = cell.innerText?.trim();
-              if (text) rowData.push(text);
+              if (text) {rowData.push(text);}
             });
-            if (rowData.length > 0) rows.push(rowData);
+            if (rowData.length > 0) {rows.push(rowData);}
           });
           
           if (headers.length > 0 || rows.length > 0) {
@@ -440,25 +440,25 @@ class PageContentExtractor {
     const lists = this.extractLists();
     const cards = this.extractCards();
     
-    let prompt = `# 页面内容摘要\n\n`;
+    let prompt = '# 页面内容摘要\n\n';
     
     // 页面信息
-    prompt += `## 页面信息\n`;
+    prompt += '## 页面信息\n';
     prompt += `- 标题: ${document.title || '无标题'}\n`;
     prompt += `- URL: ${window.location.href}\n`;
     prompt += `- 文本总长度: ${text.length} 字符\n\n`;
     
     // 标题结构
     if (headings.length > 0) {
-      prompt += `## 页面结构\n`;
+      prompt += '## 页面结构\n';
       headings.forEach(h => {
         prompt += `${'#'.repeat(h.level)} ${h.text}\n`;
       });
-      prompt += `\n`;
+      prompt += '\n';
     }
     
     // 主要内容（最重要）
-    prompt += `## 主要内容\n`;
+    prompt += '## 主要内容\n';
     if (text.paragraphs.length > 0) {
       text.paragraphs.forEach(p => {
         prompt += `${p}\n\n`;
@@ -469,7 +469,7 @@ class PageContentExtractor {
         prompt += `...(内容已截断，共 ${text.fullText.length} 字符)\n\n`;
       }
     } else {
-      prompt += `(未检测到文本内容)\n\n`;
+      prompt += '(未检测到文本内容)\n\n';
     }
     
     // 可操作元素
@@ -479,14 +479,14 @@ class PageContentExtractor {
     const hasSelects = interactive.selects.length > 0;
     
     if (hasButtons || hasLinks || hasInputs || hasSelects) {
-      prompt += `## 可操作元素\n`;
+      prompt += '## 可操作元素\n';
       
       if (hasButtons) {
         prompt += `### 按钮 (${interactive.buttons.length}个)\n`;
         interactive.buttons.slice(0, 20).forEach(btn => {
           prompt += `- [按钮] ${btn.text}${btn.disabled ? ' (禁用)' : ''}\n`;
         });
-        prompt += `\n`;
+        prompt += '\n';
       }
       
       if (hasLinks) {
@@ -494,18 +494,18 @@ class PageContentExtractor {
         interactive.links.slice(0, 15).forEach(link => {
           prompt += `- [链接] ${link.text}\n`;
         });
-        prompt += `\n`;
+        prompt += '\n';
       }
       
       if (hasInputs) {
         prompt += `### 输入框 (${interactive.inputs.length}个)\n`;
         interactive.inputs.slice(0, 10).forEach(input => {
           let desc = `- [输入框] ${input.label || input.placeholder || input.type}`;
-          if (input.required) desc += ' (必填)';
-          if (input.value) desc += `: ${input.value}`;
+          if (input.required) {desc += ' (必填)';}
+          if (input.value) {desc += `: ${input.value}`;}
           prompt += `${desc}\n`;
         });
-        prompt += `\n`;
+        prompt += '\n';
       }
       
       if (hasSelects) {
@@ -513,7 +513,7 @@ class PageContentExtractor {
         interactive.selects.slice(0, 5).forEach(select => {
           prompt += `- [下拉框] ${select.label}: ${select.options.slice(0, 5).join(', ')}${select.options.length > 5 ? '...' : ''}\n`;
         });
-        prompt += `\n`;
+        prompt += '\n';
       }
     }
     
@@ -531,19 +531,19 @@ class PageContentExtractor {
             prompt += `- ${row.join(' | ')}\n`;
           });
         }
-        prompt += `\n`;
+        prompt += '\n';
       });
     }
     
     // 列表
     if (lists.length > 0) {
-      prompt += `## 列表内容\n`;
+      prompt += '## 列表内容\n';
       lists.slice(0, 5).forEach(list => {
         list.items.slice(0, 10).forEach(item => {
           prompt += `- ${item}\n`;
         });
-        if (list.items.length > 10) prompt += `- ... 共 ${list.items.length} 项\n`;
-        prompt += `\n`;
+        if (list.items.length > 10) {prompt += `- ... 共 ${list.items.length} 项\n`;}
+        prompt += '\n';
       });
     }
     
@@ -551,9 +551,9 @@ class PageContentExtractor {
     if (cards.length > 0) {
       prompt += `## 内容卡片 (${cards.length}个)\n`;
       cards.slice(0, 10).forEach(card => {
-        if (card.title) prompt += `### ${card.title}\n`;
-        if (card.description) prompt += `${card.description}\n`;
-        prompt += `\n`;
+        if (card.title) {prompt += `### ${card.title}\n`;}
+        if (card.description) {prompt += `${card.description}\n`;}
+        prompt += '\n';
       });
     }
     

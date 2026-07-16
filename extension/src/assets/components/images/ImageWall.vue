@@ -9,7 +9,7 @@
             </div>
         </div>
         <div id="slides-cont">
-            <div v-for="(button, index) in ['next', 'prev']" :key="index" class="button" :id="button"></div>
+            <div v-for="(button, index) in ['next', 'prev']" :id="button" :key="index" class="button"></div>
             <div id="slides" ref="slidesRef">
                 <div v-for="(slide, index) in props.slides" :key="index" class="slide"
                     :style="{ backgroundImage: `url(${slide.url})` }">
@@ -23,13 +23,13 @@
                     </div>
                 </div>
             </div>
-            <div v-for="(button, index) in ['next-catch', 'prev-catch']" :key="index" :id="button"></div>
+            <div v-for="(button, index) in ['next-catch', 'prev-catch']" :id="button" :key="index"></div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue';
 
 interface Slide {
     url: string;
@@ -43,121 +43,121 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    autoPlay: true,
-    slides: () => {
-        const slide = {
-            url: 'https://www.dmoe.cc/random.php',
-            author: 'Benjamin Hung',
-            description: 'Photo by Benjamin Hung',
-        }
+  autoPlay: true,
+  slides: () => {
+    const slide = {
+      url: 'https://www.dmoe.cc/random.php',
+      author: 'Benjamin Hung',
+      description: 'Photo by Benjamin Hung'
+    };
 
-        var slides: Slide[] = []
+    const slides: Slide[] = [];
 
-        for (let i = 0; i < 10; i++) {
-            slides.push({
-                ...slide,
-                url: slide.url + '?t=' + i.toString()
-            })
-        }
-        return slides
-    },
-})
+    for (let i = 0; i < 10; i++) {
+      slides.push({
+        ...slide,
+        url: slide.url + '?t=' + i.toString()
+      });
+    }
+    return slides;
+  }
+});
 
-const heroRef = ref<HTMLElement>()
-const menuRef = ref<HTMLElement>()
-const slidesRef = ref<HTMLElement>()
-const currentPage = ref(0)
+const heroRef = ref<HTMLElement>();
+const menuRef = ref<HTMLElement>();
+const slidesRef = ref<HTMLElement>();
+const currentPage = ref(0);
 const slidesPerPage = () => window.innerWidth > 1700 ? 4 : window.innerWidth > 1200 ? 3 : 2;
 const maxPageCount = () => Math.max(0, (props.slides.length / slidesPerPage()) - 1);
 
 function goToPage(pageNumber = 0) {
-    maLogger.log("正在前往页面", pageNumber);
-    currentPage.value = Math.min(maxPageCount(), Math.max(0, pageNumber));
-    maLogger.log(currentPage.value);
-    heroRef.value?.style.setProperty('--page', currentPage.value.toString());
+  maLogger.log('正在前往页面', pageNumber);
+  currentPage.value = Math.min(maxPageCount(), Math.max(0, pageNumber));
+  maLogger.log(currentPage.value);
+  heroRef.value?.style.setProperty('--page', currentPage.value.toString());
 }
 
 function sleep(time: number) {
-    return new Promise(res => setTimeout(res, time));
+  return new Promise(res => setTimeout(res, time));
 }
 
 function hoverSlide(index: number) {
-    if (index >= 0 && index < props.slides.length) {
-        slidesRef.value?.children[index].classList.add('hover');
-    }
+  if (index >= 0 && index < props.slides.length) {
+    slidesRef.value?.children[index].classList.add('hover');
+  }
 }
 
 function unhoverSlide(index: number) {
-    if (index >= 0 && index < props.slides.length) {
-        slidesRef.value?.children[index].classList.remove('hover');
-    }
+  if (index >= 0 && index < props.slides.length) {
+    slidesRef.value?.children[index].classList.remove('hover');
+  }
 }
 function handleResize() {
-    // 重新计算当前页面，确保在窗口大小变化时保持正确的页面
-    goToPage(currentPage.value);
+  // 重新计算当前页面，确保在窗口大小变化时保持正确的页面
+  goToPage(currentPage.value);
 }
-const currentlyDemoing = ref<boolean>(false)
+const currentlyDemoing = ref<boolean>(false);
 async function demo() {
-    maLogger.log("demo", currentlyDemoing.value);
-    if (currentlyDemoing.value) {
-        return;
-    }
-    maLogger.log(currentPage.value);
-    currentlyDemoing.value = true;
-    if (currentPage.value !== 0) {
-        goToPage(0);
-        await sleep(800);
-    }
-    const slidesPerPageValue = slidesPerPage();
-    const pageSeq_ = { 2: [1, 2, 1], 3: [1, 2, 0], 4: [1, 1, 0] };
-    const pageSeq = pageSeq_[slidesPerPageValue] || pageSeq_[4];
-    const slideSeq_ = { 2: [2, 4, 3], 3: [3, 6, 2], 4: [3, 6, 2] };
-    const slideSeq = slideSeq_[slidesPerPageValue] || slideSeq_[2];
-    await sleep(300);
-    goToPage(pageSeq[0]);
-    await sleep(500);
-    hoverSlide(slideSeq[0]);
-    await sleep(1200);
-    goToPage(pageSeq[1]);
-    unhoverSlide(slideSeq[0]);
-    await sleep(500);
-    hoverSlide(slideSeq[1]);
-    await sleep(1200);
-    goToPage(pageSeq[2]);
-    unhoverSlide(slideSeq[1]);
-    await sleep(300);
-    hoverSlide(slideSeq[2]);
-    await sleep(1600);
+  maLogger.log('demo', currentlyDemoing.value);
+  if (currentlyDemoing.value) {
+    return;
+  }
+  maLogger.log(currentPage.value);
+  currentlyDemoing.value = true;
+  if (currentPage.value !== 0) {
     goToPage(0);
-    unhoverSlide(slideSeq[2]);
-    currentlyDemoing.value = false;
+    await sleep(800);
+  }
+  const slidesPerPageValue = slidesPerPage();
+  const pageSeq_ = { 2: [1, 2, 1], 3: [1, 2, 0], 4: [1, 1, 0] };
+  const pageSeq = pageSeq_[slidesPerPageValue] || pageSeq_[4];
+  const slideSeq_ = { 2: [2, 4, 3], 3: [3, 6, 2], 4: [3, 6, 2] };
+  const slideSeq = slideSeq_[slidesPerPageValue] || slideSeq_[2];
+  await sleep(300);
+  goToPage(pageSeq[0]);
+  await sleep(500);
+  hoverSlide(slideSeq[0]);
+  await sleep(1200);
+  goToPage(pageSeq[1]);
+  unhoverSlide(slideSeq[0]);
+  await sleep(500);
+  hoverSlide(slideSeq[1]);
+  await sleep(1200);
+  goToPage(pageSeq[2]);
+  unhoverSlide(slideSeq[1]);
+  await sleep(300);
+  hoverSlide(slideSeq[2]);
+  await sleep(1600);
+  goToPage(0);
+  unhoverSlide(slideSeq[2]);
+  currentlyDemoing.value = false;
 }
 
 onMounted(() => {
-    if (!heroRef.value || !menuRef.value || !slidesRef.value) return;
+  if (!heroRef.value || !menuRef.value || !slidesRef.value) {return;}
 
-    const next = ['next', 'next-catch'].map(n => document.getElementById(n));
-    const prev = ['prev', 'prev-catch'].map(n => document.getElementById(n));
+  const next = ['next', 'next-catch'].map(n => document.getElementById(n));
+  const prev = ['prev', 'prev-catch'].map(n => document.getElementById(n));
 
-    maLogger.log("next", next);
-    maLogger.log("prev", prev);
+  maLogger.log('next', next);
+  maLogger.log('prev', prev);
 
-    next.forEach(n => n?.addEventListener('click', () => !currentlyDemoing.value && goToPage(currentPage.value + 1)));
-    prev.forEach(n => n?.addEventListener('click', () => !currentlyDemoing.value && goToPage(currentPage.value - 1)));
-    menuRef.value?.addEventListener('click', demo);
-    window.addEventListener('resize', handleResize);
+  next.forEach(n => n?.addEventListener('click', () => !currentlyDemoing.value && goToPage(currentPage.value + 1)));
+  prev.forEach(n => n?.addEventListener('click', () => !currentlyDemoing.value && goToPage(currentPage.value - 1)));
+  menuRef.value?.addEventListener('click', demo);
+  window.addEventListener('resize', handleResize);
 
-    sleep(100).then(demo);
-})
+  sleep(100).then(demo);
+});
 // 清理事件监听器
 onUnmounted(() => {
-    const next = ['next', 'next-catch'].map(n => document.getElementById(n));
-    const prev = ['prev', 'prev-catch'].map(n => document.getElementById(n));
-    let currentlyDemoing = false;
-    next.forEach(n => n?.removeEventListener('click', () => !currentlyDemoing && goToPage(currentPage.value + 1)));
-    prev.forEach(n => n?.removeEventListener('click', () => !currentlyDemoing && goToPage(currentPage.value - 1)));
-    menuRef.value?.removeEventListener('click', demo);
-    window.removeEventListener('resize', handleResize);
+  const next = ['next', 'next-catch'].map(n => document.getElementById(n));
+  const prev = ['prev', 'prev-catch'].map(n => document.getElementById(n));
+  const currentlyDemoing = false;
+  next.forEach(n => n?.removeEventListener('click', () => !currentlyDemoing && goToPage(currentPage.value + 1)));
+  prev.forEach(n => n?.removeEventListener('click', () => !currentlyDemoing && goToPage(currentPage.value - 1)));
+  menuRef.value?.removeEventListener('click', demo);
+  window.removeEventListener('resize', handleResize);
 });
 
 </script>

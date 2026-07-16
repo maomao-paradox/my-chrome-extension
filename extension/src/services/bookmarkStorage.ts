@@ -17,7 +17,7 @@ export class BookmarkStorage {
         ...bookmark,
         id: generateId(),
         timestamp: Date.now(),
-        comments: [],
+        comments: []
       };
       
       bookmarks.push(newBookmark);
@@ -38,7 +38,7 @@ export class BookmarkStorage {
       const bookmarks = await storage.ext.local.get(BOOKMARKS_STORAGE_KEY, []);
       return Array.isArray(bookmarks) ? bookmarks.map(bookmark => ({
         ...bookmark,
-        comments: bookmark.comments || [],
+        comments: bookmark.comments || []
       })) : [];
     } catch (error) {
       maLogger.error('获取书签失败:', error);
@@ -107,7 +107,7 @@ export class BookmarkStorage {
       const newComment: BookmarkComment = {
         id: generateId(),
         comment: commentText,
-        timestamp: Date.now(),
+        timestamp: Date.now()
       };
       
       if (!bookmarks[index].comments) {

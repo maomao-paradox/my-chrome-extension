@@ -154,6 +154,153 @@
   --popup-theme-option-active-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(245, 158, 11, 0.12));
 }
 
+:root[data-popup-theme='jungle-knot'] {
+  color-scheme: dark;
+  --popup-bg-primary: #050308;
+  --popup-bg-secondary: #11101a;
+  --popup-page-background:
+    linear-gradient(90deg, rgba(0, 245, 255, 0.12), transparent 18%, rgba(255, 43, 214, 0.14) 52%, transparent 76%),
+    radial-gradient(circle at 12% 0%, rgba(0, 245, 255, 0.28), transparent 32%),
+    radial-gradient(circle at 92% 72%, rgba(255, 43, 214, 0.24), transparent 34%),
+    linear-gradient(145deg, #050308 0%, #11101a 48%, #030205 100%);
+  --popup-header-bg: linear-gradient(135deg, rgba(0, 245, 255, 0.13) 0%, rgba(10, 8, 18, 0.94) 48%, rgba(255, 43, 214, 0.13) 100%);
+  --popup-footer-bg: rgba(5, 3, 8, 0.76);
+  --popup-panel-bg: linear-gradient(180deg, rgba(18, 16, 30, 0.96) 0%, rgba(5, 3, 8, 0.94) 100%);
+  --popup-card-bg: linear-gradient(180deg, rgba(27, 24, 42, 0.94) 0%, rgba(8, 5, 14, 0.92) 100%);
+  --popup-card-bg-muted: linear-gradient(180deg, rgba(27, 24, 42, 0.58) 0%, rgba(8, 5, 14, 0.8) 100%);
+  --popup-control-bg: rgba(0, 245, 255, 0.07);
+  --popup-control-bg-strong: rgba(255, 43, 214, 0.1);
+  --popup-control-hover-bg: rgba(0, 245, 255, 0.13);
+  --popup-tab-bg: rgba(5, 3, 8, 0.56);
+  --popup-tab-hover-bg: rgba(0, 245, 255, 0.12);
+  --popup-tab-active-bg: linear-gradient(135deg, rgba(0, 245, 255, 0.22) 0%, rgba(255, 43, 214, 0.18) 54%, rgba(8, 5, 14, 0.92) 100%);
+  --popup-button-bg: linear-gradient(135deg, #00f5ff 0%, #7c3aed 48%, #ff2bd6 100%);
+  --popup-button-border: rgba(0, 245, 255, 0.54);
+  --popup-danger-button-bg: linear-gradient(135deg, #ff2bd6, #ff3864);
+  --popup-dialog-bg: linear-gradient(180deg, rgba(22, 10, 30, 0.98) 0%, rgba(5, 3, 8, 0.98) 100%);
+  --popup-orb-left: radial-gradient(circle, rgba(0, 245, 255, 0.34) 0%, rgba(0, 245, 255, 0) 72%);
+  --popup-orb-right: radial-gradient(circle, rgba(255, 43, 214, 0.28) 0%, rgba(255, 43, 214, 0) 72%);
+  --popup-divider-gradient: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.78), rgba(255, 43, 214, 0.72), transparent);
+  --popup-accent-gradient: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(255, 43, 214, 0.18));
+  --popup-accent-line-gradient: linear-gradient(180deg, #00f5ff, #ff2bd6);
+  --popup-text-primary: #f8fbff;
+  --popup-text-secondary: #dffaff;
+  --popup-text-muted: rgba(211, 237, 246, 0.8);
+  --popup-text-subtle: rgba(157, 169, 185, 0.88);
+  --popup-text-on-accent: #ffffff;
+  --popup-accent: #00f5ff;
+  --popup-accent-strong: #00f5ff;
+  --popup-accent-alt: #ff2bd6;
+  --popup-accent-soft: rgba(0, 245, 255, 0.14);
+  --popup-border: rgba(0, 245, 255, 0.16);
+  --popup-border-muted: rgba(255, 43, 214, 0.12);
+  --popup-border-strong: rgba(0, 245, 255, 0.42);
+  --popup-focus-ring: rgba(255, 43, 214, 0.24);
+  --popup-shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.36);
+  --popup-shadow-panel: 0 18px 40px rgba(0, 0, 0, 0.46);
+  --popup-shadow-strong: 0 28px 60px rgba(0, 0, 0, 0.64);
+  --popup-shadow-accent: 0 18px 34px rgba(0, 245, 255, 0.2), 0 0 28px rgba(255, 43, 214, 0.12);
+  --popup-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --popup-success-text: #d9fff4;
+  --popup-success-bg: rgba(0, 255, 133, 0.15);
+  --popup-success-border: rgba(0, 255, 133, 0.32);
+  --popup-success-dot: #00ff85;
+  --popup-info-text: #dffaff;
+  --popup-info-bg: rgba(0, 245, 255, 0.14);
+  --popup-info-border: rgba(0, 245, 255, 0.24);
+  --popup-info-dot: #00f5ff;
+  --popup-danger-text: #ffe4fb;
+  --popup-danger-strong: #ff8bea;
+  --popup-danger-bg: rgba(255, 43, 214, 0.16);
+  --popup-danger-border: rgba(255, 43, 214, 0.3);
+  --popup-danger-dot: #ff2bd6;
+  --popup-selection-bg: rgba(0, 245, 255, 0.26);
+  --popup-selection-text: #050308;
+  --popup-scrollbar-track: rgba(17, 16, 26, 0.7);
+  --popup-scrollbar-thumb: rgba(0, 245, 255, 0.28);
+  --popup-scrollbar-thumb-hover: rgba(255, 43, 214, 0.44);
+  --popup-switch-track-bg: linear-gradient(180deg, rgba(18, 16, 30, 0.98) 0%, rgba(5, 3, 8, 0.96) 100%);
+  --popup-switch-thumb-bg: linear-gradient(135deg, #475569, #94a3b8);
+  --popup-switch-active-bg: linear-gradient(135deg, rgba(0, 245, 255, 0.94), rgba(255, 43, 214, 0.88));
+  --popup-switch-active-border: rgba(0, 245, 255, 0.48);
+  --popup-switch-active-thumb-bg: linear-gradient(135deg, #ffffff, #dffaff);
+  --popup-theme-option-bg: rgba(0, 245, 255, 0.06);
+  --popup-theme-option-active-bg: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(255, 43, 214, 0.16));
+}
+
+:root[data-popup-theme='retro-terminal'] {
+  color-scheme: dark;
+  --popup-bg-primary: #030803;
+  --popup-bg-secondary: #061106;
+  --popup-page-background:
+    linear-gradient(180deg, rgba(126, 255, 99, 0.055) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 14% 0%, rgba(126, 255, 99, 0.18), transparent 32%),
+    linear-gradient(180deg, #030803 0%, #071207 50%, #020502 100%);
+  --popup-header-bg: linear-gradient(180deg, rgba(6, 17, 6, 0.98) 0%, rgba(3, 8, 3, 0.94) 100%);
+  --popup-footer-bg: rgba(3, 8, 3, 0.86);
+  --popup-panel-bg: linear-gradient(180deg, rgba(5, 18, 5, 0.96) 0%, rgba(3, 9, 3, 0.96) 100%);
+  --popup-card-bg: linear-gradient(180deg, rgba(8, 28, 8, 0.9) 0%, rgba(3, 10, 3, 0.92) 100%);
+  --popup-card-bg-muted: rgba(5, 17, 5, 0.78);
+  --popup-control-bg: rgba(126, 255, 99, 0.055);
+  --popup-control-bg-strong: rgba(126, 255, 99, 0.095);
+  --popup-control-hover-bg: rgba(126, 255, 99, 0.13);
+  --popup-tab-bg: rgba(3, 8, 3, 0.7);
+  --popup-tab-hover-bg: rgba(126, 255, 99, 0.1);
+  --popup-tab-active-bg: linear-gradient(180deg, rgba(126, 255, 99, 0.18) 0%, rgba(5, 18, 5, 0.94) 100%);
+  --popup-button-bg: linear-gradient(180deg, #7eff63 0%, #2ea043 100%);
+  --popup-button-border: rgba(126, 255, 99, 0.68);
+  --popup-danger-button-bg: linear-gradient(180deg, #ffbf3f, #c2410c);
+  --popup-dialog-bg: linear-gradient(180deg, rgba(18, 15, 4, 0.98) 0%, rgba(3, 8, 3, 0.98) 100%);
+  --popup-orb-left: radial-gradient(circle, rgba(126, 255, 99, 0.2) 0%, rgba(126, 255, 99, 0) 70%);
+  --popup-orb-right: radial-gradient(circle, rgba(255, 191, 63, 0.14) 0%, rgba(255, 191, 63, 0) 70%);
+  --popup-divider-gradient: linear-gradient(90deg, transparent, rgba(126, 255, 99, 0.72), transparent);
+  --popup-accent-gradient: linear-gradient(180deg, rgba(126, 255, 99, 0.16), rgba(255, 191, 63, 0.08));
+  --popup-accent-line-gradient: linear-gradient(180deg, #7eff63, #ffbf3f);
+  --popup-text-primary: #eaffdf;
+  --popup-text-secondary: #c9ffb5;
+  --popup-text-muted: rgba(201, 255, 181, 0.78);
+  --popup-text-subtle: rgba(144, 199, 132, 0.86);
+  --popup-text-on-accent: #021002;
+  --popup-accent: #7eff63;
+  --popup-accent-strong: #a6ff8a;
+  --popup-accent-alt: #ffbf3f;
+  --popup-accent-soft: rgba(126, 255, 99, 0.14);
+  --popup-border: rgba(126, 255, 99, 0.22);
+  --popup-border-muted: rgba(126, 255, 99, 0.14);
+  --popup-border-strong: rgba(126, 255, 99, 0.56);
+  --popup-focus-ring: rgba(126, 255, 99, 0.22);
+  --popup-shadow-soft: 0 0 0 1px rgba(126, 255, 99, 0.08), 0 12px 24px rgba(0, 0, 0, 0.42);
+  --popup-shadow-panel: 0 0 0 1px rgba(126, 255, 99, 0.12), 0 18px 34px rgba(0, 0, 0, 0.48);
+  --popup-shadow-strong: 0 0 0 1px rgba(126, 255, 99, 0.16), 0 28px 56px rgba(0, 0, 0, 0.62);
+  --popup-shadow-accent: 0 0 18px rgba(126, 255, 99, 0.22);
+  --popup-inset-highlight: inset 0 1px 0 rgba(234, 255, 223, 0.08);
+  --popup-success-text: #eaffdf;
+  --popup-success-bg: rgba(46, 160, 67, 0.18);
+  --popup-success-border: rgba(126, 255, 99, 0.34);
+  --popup-success-dot: #7eff63;
+  --popup-info-text: #eaffdf;
+  --popup-info-bg: rgba(126, 255, 99, 0.12);
+  --popup-info-border: rgba(126, 255, 99, 0.24);
+  --popup-info-dot: #a6ff8a;
+  --popup-danger-text: #fff4cf;
+  --popup-danger-strong: #ffcf66;
+  --popup-danger-bg: rgba(255, 191, 63, 0.14);
+  --popup-danger-border: rgba(255, 191, 63, 0.32);
+  --popup-danger-dot: #ffbf3f;
+  --popup-selection-bg: rgba(126, 255, 99, 0.28);
+  --popup-selection-text: #021002;
+  --popup-scrollbar-track: rgba(3, 8, 3, 0.72);
+  --popup-scrollbar-thumb: rgba(126, 255, 99, 0.32);
+  --popup-scrollbar-thumb-hover: rgba(126, 255, 99, 0.5);
+  --popup-switch-track-bg: linear-gradient(180deg, rgba(5, 18, 5, 0.98) 0%, rgba(3, 8, 3, 0.96) 100%);
+  --popup-switch-thumb-bg: linear-gradient(180deg, #425b3c, #9bcf8c);
+  --popup-switch-active-bg: linear-gradient(180deg, rgba(126, 255, 99, 0.92) 0%, rgba(46, 160, 67, 0.9) 100%);
+  --popup-switch-active-border: rgba(126, 255, 99, 0.58);
+  --popup-switch-active-thumb-bg: linear-gradient(180deg, #f5ffe8, #a6ff8a);
+  --popup-theme-option-bg: rgba(126, 255, 99, 0.055);
+  --popup-theme-option-active-bg: linear-gradient(180deg, rgba(126, 255, 99, 0.18), rgba(255, 191, 63, 0.08));
+}
+
 .theme-option--midnight {
   --theme-preview-bg: linear-gradient(135deg, #07111f, #12385b);
   --theme-preview-accent: #2dd4bf;
@@ -162,4 +309,90 @@
 .theme-option--daylight {
   --theme-preview-bg: linear-gradient(135deg, #ffffff, #dff4f7);
   --theme-preview-accent: #f59e0b;
+}
+
+.theme-option--jungle-knot {
+  --theme-preview-bg:
+    linear-gradient(90deg, rgba(0, 245, 255, 0.9) 0 12%, transparent 12% 18%, rgba(255, 43, 214, 0.82) 18% 32%, transparent 32%),
+    radial-gradient(circle at 18% 12%, #00f5ff, transparent 34%),
+    radial-gradient(circle at 86% 80%, #ff2bd6, transparent 38%),
+    #050308;
+  --theme-preview-accent: #00ff85;
+}
+
+.theme-option--retro-terminal {
+  --theme-preview-bg:
+    linear-gradient(180deg, rgba(126, 255, 99, 0.18) 0 2px, transparent 2px 6px),
+    linear-gradient(135deg, #030803, #071207);
+  --theme-preview-accent: #ffbf3f;
+}
+
+:root[data-popup-theme='jungle-knot'] .popup-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 5px),
+    linear-gradient(90deg, rgba(0, 245, 255, 0.08), transparent 36%, rgba(255, 43, 214, 0.08));
+  mix-blend-mode: screen;
+}
+
+:root[data-popup-theme='jungle-knot'] .popup-container {
+  z-index: 2;
+}
+
+:root[data-popup-theme='jungle-knot'] .logo {
+  text-shadow:
+    -1px 0 0 rgba(0, 245, 255, 0.78),
+    1px 0 0 rgba(255, 43, 214, 0.72),
+    0 0 16px rgba(0, 245, 255, 0.22);
+}
+
+:root[data-popup-theme='jungle-knot'] .tab-btn.active,
+:root[data-popup-theme='jungle-knot'] .primary-btn {
+  box-shadow:
+    -2px 0 0 rgba(0, 245, 255, 0.46),
+    2px 0 0 rgba(255, 43, 214, 0.38),
+    var(--popup-shadow-soft),
+    var(--popup-inset-highlight);
+}
+
+:root[data-popup-theme='retro-terminal'] .popup-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    repeating-linear-gradient(180deg, rgba(126, 255, 99, 0.06) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.18) 74%, rgba(0, 0, 0, 0.38) 100%);
+}
+
+:root[data-popup-theme='retro-terminal'] .popup-container {
+  z-index: 2;
+}
+
+:root[data-popup-theme='retro-terminal'] .popup-header,
+:root[data-popup-theme='retro-terminal'] .tab-navigation,
+:root[data-popup-theme='retro-terminal'] .settings-panel,
+:root[data-popup-theme='retro-terminal'] .theme-option,
+:root[data-popup-theme='retro-terminal'] .switch-row,
+:root[data-popup-theme='retro-terminal'] .primary-btn {
+  border-radius: 4px;
+}
+
+:root[data-popup-theme='retro-terminal'] .logo,
+:root[data-popup-theme='retro-terminal'] .section-title,
+:root[data-popup-theme='retro-terminal'] .card-title {
+  text-shadow: 0 0 10px rgba(126, 255, 99, 0.42);
+}
+
+:root[data-popup-theme='retro-terminal'] .tab-btn.active,
+:root[data-popup-theme='retro-terminal'] .primary-btn {
+  box-shadow:
+    0 0 0 1px rgba(126, 255, 99, 0.48),
+    0 0 18px rgba(126, 255, 99, 0.2),
+    var(--popup-inset-highlight);
 }

@@ -3,8 +3,8 @@
     <label v-if="label" :for="id" class="input-label">{{ label }}</label>
     <input
       :id="id"
-      :type="type"
       v-model="localValue"
+      :type="type"
       :placeholder="placeholder"
       :disabled="disabled"
       :class="['form-input', { 'has-error': error }]"

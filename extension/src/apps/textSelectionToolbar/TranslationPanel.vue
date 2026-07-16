@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue';
 
 type TranslationStatus = 'loading' | 'success' | 'error'
 
@@ -36,146 +36,146 @@ const props = withDefaults(defineProps<{
     top: 100
   }),
   shakeKey: 0
-})
+});
 
 defineEmits<{
   (e: 'close'): void
-}>()
+}>();
 
-const panelRef = ref<HTMLElement | null>(null)
-const isDragging = ref(false)
-const isShaking = ref(false)
+const panelRef = ref<HTMLElement | null>(null);
+const isDragging = ref(false);
+const isShaking = ref(false);
 const currentPosition = ref<TranslationPosition>({
   left: props.position.left,
   top: props.position.top
-})
+});
 
-let startX = 0
-let startY = 0
-let startLeft = 0
-let startTop = 0
-let previousUserSelect = ''
-let shakeTimer: ReturnType<typeof setTimeout> | number | null = null
+let startX = 0;
+let startY = 0;
+let startLeft = 0;
+let startTop = 0;
+let previousUserSelect = '';
+let shakeTimer: ReturnType<typeof setTimeout> | number | null = null;
 
 const clamp = (value: number, min: number, max: number): number => {
-  return Math.min(Math.max(value, min), max)
-}
+  return Math.min(Math.max(value, min), max);
+};
 
 const clampPosition = (left: number, top: number): TranslationPosition => {
-  const margin = 12
-  const panelWidth = panelRef.value?.offsetWidth ?? 560
-  const panelHeight = panelRef.value?.offsetHeight ?? 320
-  const maxLeft = Math.max(margin, window.innerWidth - panelWidth - margin)
-  const maxTop = Math.max(margin, window.innerHeight - panelHeight - margin)
+  const margin = 12;
+  const panelWidth = panelRef.value?.offsetWidth ?? 560;
+  const panelHeight = panelRef.value?.offsetHeight ?? 320;
+  const maxLeft = Math.max(margin, window.innerWidth - panelWidth - margin);
+  const maxTop = Math.max(margin, window.innerHeight - panelHeight - margin);
 
   return {
     left: Math.round(clamp(left, margin, maxLeft)),
     top: Math.round(clamp(top, margin, maxTop))
-  }
-}
+  };
+};
 
 const syncPosition = (position: TranslationPosition) => {
-  currentPosition.value = clampPosition(position.left, position.top)
-}
+  currentPosition.value = clampPosition(position.left, position.top);
+};
 
 const stopDragging = () => {
   if (!isDragging.value) {
-    return
+    return;
   }
 
-  isDragging.value = false
-  document.body.style.userSelect = previousUserSelect
-  window.removeEventListener('pointermove', handlePointerMove, true)
-  window.removeEventListener('pointerup', stopDragging, true)
-  window.removeEventListener('pointercancel', stopDragging, true)
-}
+  isDragging.value = false;
+  document.body.style.userSelect = previousUserSelect;
+  window.removeEventListener('pointermove', handlePointerMove, true);
+  window.removeEventListener('pointerup', stopDragging, true);
+  window.removeEventListener('pointercancel', stopDragging, true);
+};
 
 const handlePointerMove = (event: PointerEvent) => {
   if (!isDragging.value) {
-    return
+    return;
   }
 
-  const nextLeft = startLeft + event.clientX - startX
-  const nextTop = startTop + event.clientY - startY
-  currentPosition.value = clampPosition(nextLeft, nextTop)
-}
+  const nextLeft = startLeft + event.clientX - startX;
+  const nextTop = startTop + event.clientY - startY;
+  currentPosition.value = clampPosition(nextLeft, nextTop);
+};
 
 const handlePointerDown = (event: PointerEvent) => {
   if (event.button !== 0) {
-    return
+    return;
   }
 
-  const target = event.target as HTMLElement | null
+  const target = event.target as HTMLElement | null;
   if (target?.closest('button')) {
-    return
+    return;
   }
 
-  event.preventDefault()
+  event.preventDefault();
 
-  isDragging.value = true
-  startX = event.clientX
-  startY = event.clientY
-  startLeft = currentPosition.value.left
-  startTop = currentPosition.value.top
-  previousUserSelect = document.body.style.userSelect
-  document.body.style.userSelect = 'none'
+  isDragging.value = true;
+  startX = event.clientX;
+  startY = event.clientY;
+  startLeft = currentPosition.value.left;
+  startTop = currentPosition.value.top;
+  previousUserSelect = document.body.style.userSelect;
+  document.body.style.userSelect = 'none';
 
-  window.addEventListener('pointermove', handlePointerMove, true)
-  window.addEventListener('pointerup', stopDragging, true)
-  window.addEventListener('pointercancel', stopDragging, true)
-}
+  window.addEventListener('pointermove', handlePointerMove, true);
+  window.addEventListener('pointerup', stopDragging, true);
+  window.addEventListener('pointercancel', stopDragging, true);
+};
 
 watch(() => props.position, (position) => {
   if (!position || isDragging.value) {
-    return
+    return;
   }
 
-  syncPosition(position)
-}, { deep: true, immediate: true })
+  syncPosition(position);
+}, { deep: true, immediate: true });
 
 watch(() => props.visible, (visible) => {
   if (!visible || isDragging.value || !props.position) {
-    return
+    return;
   }
 
-  syncPosition(props.position)
-})
+  syncPosition(props.position);
+});
 
 const panelStyle = computed(() => ({
   left: `${currentPosition.value.left}px`,
   top: `${currentPosition.value.top}px`
-}))
+}));
 
 const triggerShake = () => {
   if (shakeTimer) {
-    clearTimeout(shakeTimer)
-    shakeTimer = null
+    clearTimeout(shakeTimer);
+    shakeTimer = null;
   }
 
-  isShaking.value = false
+  isShaking.value = false;
   requestAnimationFrame(() => {
-    isShaking.value = true
+    isShaking.value = true;
     shakeTimer = window.setTimeout(() => {
-      isShaking.value = false
-      shakeTimer = null
-    }, 420)
-  })
-}
+      isShaking.value = false;
+      shakeTimer = null;
+    }, 420);
+  });
+};
 
 watch(() => props.shakeKey, (nextValue, previousValue) => {
   if (nextValue === previousValue) {
-    return
+    return;
   }
 
-  triggerShake()
-})
+  triggerShake();
+});
 
 onUnmounted(() => {
-  stopDragging()
+  stopDragging();
   if (shakeTimer) {
-    clearTimeout(shakeTimer)
+    clearTimeout(shakeTimer);
   }
-})
+});
 </script>
 
 <style scoped lang="scss">

@@ -35,5 +35,5 @@ window.addEventListener('beforeunload', () => {
 app.mount('body');
 
 window.onclose = () => {
-    maLogger.info("关闭侧边栏")
-}
+  maLogger.info('关闭侧边栏');
+};

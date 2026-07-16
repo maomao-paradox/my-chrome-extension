@@ -79,7 +79,7 @@
      * 显示可爱的提示消息
      */
     showToast(message: string, type: 'success' | 'warning' = 'success') {
-      if (!this.shadowRoot) return;
+      if (!this.shadowRoot) {return;}
 
       // 移除已存在的 toast
       const existingToast = this.shadowRoot.querySelector('.toast-message');
@@ -91,8 +91,8 @@
       Object.assign(toast.style, {
         position: 'fixed',
         zIndex: '10000',
-        top: 'auto',
-      })
+        top: 'auto'
+      });
       toast.className = `toast-message toast-${type}`;
       toast.innerHTML = `
         <span class="toast-icon">${type === 'success' ? '✨' : '🌸'}</span>
@@ -249,7 +249,7 @@
      * 渲染组件
      */
     render() {
-      if (!this.shadowRoot) return;
+      if (!this.shadowRoot) {return;}
 
       this.shadowRoot.innerHTML = `
         <style>
@@ -464,11 +464,11 @@
   };
 
   // 注册 Web Component
-  console.log("准备注册 DockerPortainerButton 组件");
+  console.log('准备注册 DockerPortainerButton 组件');
   if (customElements.get('docker-portainer-button')) {
     console.log('组件已存在');
   } else {
     customElements.define('docker-portainer-button', DockerPortainerButton);
-    console.log("DockerPortainerButton 组件注册成功");
+    console.log('DockerPortainerButton 组件注册成功');
   }
 }());
