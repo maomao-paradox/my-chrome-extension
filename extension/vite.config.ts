@@ -30,7 +30,10 @@ export default defineConfig({
   cacheDir: "../node_modules/.vite",
   plugins: [
     vue(),
-    svgLoader(),
+    svgLoader({
+      defaultImport: "url", // 默认作为 URL
+      // 这样你可以通过 ?url 来获取 URL，通过 ?component 来获取组件
+    }),
     AutoImport({
       resolvers: [ElementPlusResolver()],
       dts: true,

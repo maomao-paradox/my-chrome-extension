@@ -3,7 +3,7 @@
   "version": "0.1.2",
   "private": true,
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort  --open /pages/profile.html",
     "dev:study": "vite --open /pages/study.html",
     "dev:popup": "vite --open /pages/popup/popup.html",
     "dev:options": "vite --open /pages/options.html",

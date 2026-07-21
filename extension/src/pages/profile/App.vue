@@ -9,7 +9,12 @@
     <div class="cursor-light" aria-hidden="true"></div>
 
     <nav class="topbar" aria-label="个人主页导航">
-      <a class="brand" href="#home" aria-label="回到首页" @click.prevent="scrollToSection('home')">
+      <a
+        class="brand"
+        href="#home"
+        aria-label="回到首页"
+        @click.prevent="scrollToSection('home')"
+      >
         <span class="brand-mark">K</span>
         <span>KIRA:NOVA</span>
       </a>
@@ -31,9 +36,14 @@
           aria-label="切换页面动效"
           @click="motionEnabled = !motionEnabled"
         >
-          {{ motionEnabled ? '动效' : '静态' }}
+          {{ motionEnabled ? "动效" : "静态" }}
         </button>
-        <a class="nav-action" href="#contact" @click.prevent="scrollToSection('contact')">联系</a>
+        <a
+          class="nav-action"
+          href="#contact"
+          @click.prevent="scrollToSection('contact')"
+          >联系</a
+        >
       </div>
     </nav>
 
@@ -44,22 +54,44 @@
 
       <div class="hero-content">
         <p class="eyebrow">Anime Interface Sorcerer / Motion Lab</p>
-        <h1 data-glitch="KIRA:NOVA 在霓虹界面里编排幻想。">KIRA:NOVA 在霓虹界面里编排幻想。</h1>
+        <h1 data-glitch="KIRA:NOVA 在霓虹界面里编排幻想。">
+          KIRA:NOVA 在霓虹界面里编排幻想。
+        </h1>
         <p class="hero-copy">
           一个脱离现实履历的虚构个人主页：半是动漫角色设定，半是交互实验场。光轨、故障字、漂浮卡片和舞台式滚动共同组成一个可玩的视觉名片。
         </p>
 
         <div class="hero-actions" aria-label="主要操作">
-          <a class="primary-action" href="#work" @click.prevent="scrollToSection('work')">进入展柜</a>
-          <a class="secondary-action" href="#skills" @click.prevent="scrollToSection('skills')">查看技法</a>
+          <a
+            class="primary-action"
+            href="#work"
+            @click.prevent="scrollToSection('work')"
+            >进入展柜</a
+          >
+          <a
+            class="secondary-action"
+            href="#skills"
+            @click.prevent="scrollToSection('skills')"
+            >查看技法</a
+          >
+          <a class="secondary-action" href="/pages/popup.html" target="_self"
+            >进入popup</a
+          >
+          <a class="secondary-action" href="/pages/options.html" target="_self"
+            >进入options</a
+          >
+          <a class="secondary-action" href="/pages/study.html" target="_self"
+            >进入study</a
+          >
         </div>
-
       </div>
 
       <div class="kinetic-strip" aria-label="视觉关键词">
         <div class="kinetic-track" aria-hidden="true">
           <div v-for="groupIndex in 3" :key="groupIndex" class="kinetic-group">
-            <span v-for="word in kineticWords" :key="`${word}-${groupIndex}`">{{ word }}</span>
+            <span v-for="word in kineticWords" :key="`${word}-${groupIndex}`">{{
+              word
+            }}</span>
           </div>
         </div>
       </div>
@@ -86,7 +118,11 @@
         <h2>这里不写项目经历，只展示一个会动的虚构人格。</h2>
       </div>
       <div class="about-grid">
-        <article v-for="item in principles" :key="item.title" class="principle-card">
+        <article
+          v-for="item in principles"
+          :key="item.title"
+          class="principle-card"
+        >
           <span class="card-index">{{ item.index }}</span>
           <h3>{{ item.title }}</h3>
           <p>{{ item.description }}</p>
@@ -161,7 +197,11 @@
       </div>
 
       <div class="skill-grid">
-        <article v-for="skill in filteredSkills" :key="skill.name" class="skill-card">
+        <article
+          v-for="skill in filteredSkills"
+          :key="skill.name"
+          class="skill-card"
+        >
           <div class="skill-card__label">
             <span>{{ skill.name }}</span>
             <strong>{{ skill.level }}%</strong>
@@ -178,104 +218,159 @@
       <div>
         <p class="eyebrow">Contact</p>
         <h2>想继续扩展这个幻想舞台？</h2>
-        <p>下一步可以加入音乐响应、WebGL 粒子、角色换装或章节式滚动叙事，把主页做成完整互动短片。</p>
+        <p>
+          下一步可以加入音乐响应、WebGL
+          粒子、角色换装或章节式滚动叙事，把主页做成完整互动短片。
+        </p>
       </div>
       <div class="contact-actions">
         <a href="mailto:hello@manteia.dev">hello@manteia.dev</a>
-        <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://github.com/" target="_blank" rel="noreferrer"
+          >GitHub</a
+        >
       </div>
     </section>
   </main>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 const navItems = [
-  { id: 'about', label: '设定' },
-  { id: 'work', label: '展柜' },
-  { id: 'skills', label: '技法' }
+  { id: "about", label: "设定" },
+  { id: "work", label: "展柜" },
+  { id: "skills", label: "技法" },
 ];
 
-const kineticWords = ['NEON', 'AURA', 'GLITCH', 'MANGA', 'HOLO', 'RHYTHM', 'PRISM', 'NOVA'];
+const kineticWords = [
+  "NEON",
+  "AURA",
+  "GLITCH",
+  "MANGA",
+  "HOLO",
+  "RHYTHM",
+  "PRISM",
+  "NOVA",
+];
 
 const principles = [
   {
-    index: '01',
-    title: '霓虹人格',
-    description: '角色不是头像，而是一套视觉语法：高反差轮廓、扫描光、能量环和带有节拍感的文字。'
+    index: "01",
+    title: "霓虹人格",
+    description:
+      "角色不是头像，而是一套视觉语法：高反差轮廓、扫描光、能量环和带有节拍感的文字。",
   },
   {
-    index: '02',
-    title: '舞台叙事',
-    description: '页面像一段开场动画，先给冲击力，再把设定、场景和技法拆成可探索的章节。'
+    index: "02",
+    title: "舞台叙事",
+    description:
+      "页面像一段开场动画，先给冲击力，再把设定、场景和技法拆成可探索的章节。",
   },
   {
-    index: '03',
-    title: '可控炫技',
-    description: '动效集中在主视觉、卡片和滚动入场，不让每个元素同时抢戏，保留静态模式作为出口。'
-  }
+    index: "03",
+    title: "可控炫技",
+    description:
+      "动效集中在主视觉、卡片和滚动入场，不让每个元素同时抢戏，保留静态模式作为出口。",
+  },
 ];
 
 const projects = [
   {
-    id: 'shrine',
-    short: 'SHR',
-    year: 'Scene 01',
-    type: 'Neon Shrine',
-    title: '电子神社',
-    description: '雨夜屋檐、赛博御守和漂浮符文组成的入口场景，适合做滚动首屏或音乐启动页。',
-    tags: ['Scanline', 'Glow', 'Parallax']
+    id: "shrine",
+    short: "SHR",
+    year: "Scene 01",
+    type: "Neon Shrine",
+    title: "电子神社",
+    description:
+      "雨夜屋檐、赛博御守和漂浮符文组成的入口场景，适合做滚动首屏或音乐启动页。",
+    tags: ["Scanline", "Glow", "Parallax"],
   },
   {
-    id: 'duel',
-    short: 'DUEL',
-    year: 'Scene 02',
-    type: 'Prism Duel',
-    title: '棱镜决斗场',
-    description: '卡片悬浮、边框脉冲和角色能量条同步变化，像一套轻量级网页战斗 UI。',
-    tags: ['Tilt', 'Pulse', 'HUD']
+    id: "duel",
+    short: "DUEL",
+    year: "Scene 02",
+    type: "Prism Duel",
+    title: "棱镜决斗场",
+    description:
+      "卡片悬浮、边框脉冲和角色能量条同步变化，像一套轻量级网页战斗 UI。",
+    tags: ["Tilt", "Pulse", "HUD"],
   },
   {
-    id: 'metro',
-    short: 'MET',
-    year: 'Scene 03',
-    type: 'Moon Metro',
-    title: '月面电车',
-    description: '银色轨道、窗外城市和字符雨从远景穿过，强调速度感和漫画分镜式构图。',
-    tags: ['Kinetic Type', 'Depth', 'Story']
-  }
+    id: "metro",
+    short: "MET",
+    year: "Scene 03",
+    type: "Moon Metro",
+    title: "月面电车",
+    description:
+      "银色轨道、窗外城市和字符雨从远景穿过，强调速度感和漫画分镜式构图。",
+    tags: ["Kinetic Type", "Depth", "Story"],
+  },
 ];
 
 const skills = [
-  { category: '视觉', name: '赛博动漫配色', level: 94, note: '深黑底、青蓝边光、品红高光和少量琥珀提示形成统一舞台。' },
-  { category: '视觉', name: 'SVG 角色造型', level: 88, note: '用矢量发束、轮廓光和服装切面建立不依赖图片的主视觉。' },
-  { category: '动效', name: '视差与漂浮层', level: 92, note: '鼠标位置驱动舞台层次，制造轻量但明显的空间感。' },
-  { category: '动效', name: '故障与扫描线', level: 84, note: '控制频率和透明度，保留动漫开场感，避免持续眩目。' },
-  { category: '结构', name: '响应式舞台', level: 86, note: '桌面双栏冲击力，移动端收拢为单栏角色海报。' },
-  { category: '结构', name: '可访问动效开关', level: 90, note: '静态模式与 reduced-motion 共同兜底，让炫技仍然可退出。' }
+  {
+    category: "视觉",
+    name: "赛博动漫配色",
+    level: 94,
+    note: "深黑底、青蓝边光、品红高光和少量琥珀提示形成统一舞台。",
+  },
+  {
+    category: "视觉",
+    name: "SVG 角色造型",
+    level: 88,
+    note: "用矢量发束、轮廓光和服装切面建立不依赖图片的主视觉。",
+  },
+  {
+    category: "动效",
+    name: "视差与漂浮层",
+    level: 92,
+    note: "鼠标位置驱动舞台层次，制造轻量但明显的空间感。",
+  },
+  {
+    category: "动效",
+    name: "故障与扫描线",
+    level: 84,
+    note: "控制频率和透明度，保留动漫开场感，避免持续眩目。",
+  },
+  {
+    category: "结构",
+    name: "响应式舞台",
+    level: 86,
+    note: "桌面双栏冲击力，移动端收拢为单栏角色海报。",
+  },
+  {
+    category: "结构",
+    name: "可访问动效开关",
+    level: 90,
+    note: "静态模式与 reduced-motion 共同兜底，让炫技仍然可退出。",
+  },
 ];
 
 const activeProject = ref(projects[0].id);
-const activeSkillCategory = ref('全部');
+const activeSkillCategory = ref("全部");
 const motionEnabled = ref(true);
 const pointerX = ref(50);
 const pointerY = ref(24);
 
-const skillCategories = computed(() => ['全部', ...Array.from(new Set(skills.map((skill) => skill.category)))]);
+const skillCategories = computed(() => [
+  "全部",
+  ...Array.from(new Set(skills.map((skill) => skill.category))),
+]);
 
 const filteredSkills = computed(() => {
-  if (activeSkillCategory.value === '全部') {
+  if (activeSkillCategory.value === "全部") {
     return skills;
   }
   return skills.filter((skill) => skill.category === activeSkillCategory.value);
 });
 
 const pageVars = computed(() => ({
-  '--pointer-x': `${pointerX.value}%`,
-  '--pointer-y': `${pointerY.value}%`,
-  '--ship-x': motionEnabled.value ? `${(pointerX.value - 50) * -0.18}px` : '0px',
-  '--ship-y': motionEnabled.value ? `${(pointerY.value - 50) * -0.1}px` : '0px'
+  "--pointer-x": `${pointerX.value}%`,
+  "--pointer-y": `${pointerY.value}%`,
+  "--ship-x": motionEnabled.value
+    ? `${(pointerX.value - 50) * -0.18}px`
+    : "0px",
+  "--ship-y": motionEnabled.value ? `${(pointerY.value - 50) * -0.1}px` : "0px",
 }));
 
 const handlePointerMove = (event: MouseEvent) => {
@@ -298,11 +393,12 @@ const scrollToSection = (sectionId: string) => {
   }
 
   const topbarOffset = 84;
-  const targetTop = target.getBoundingClientRect().top + window.scrollY - topbarOffset;
+  const targetTop =
+    target.getBoundingClientRect().top + window.scrollY - topbarOffset;
 
   window.scrollTo({
     top: Math.max(targetTop, 0),
-    behavior: motionEnabled.value ? 'smooth' : 'auto'
+    behavior: motionEnabled.value ? "smooth" : "auto",
   });
 };
 
@@ -314,33 +410,34 @@ const handleCardTilt = (event: MouseEvent) => {
   const rect = card.getBoundingClientRect();
   const x = ((event.clientX - rect.left) / rect.width - 0.5) * 10;
   const y = ((event.clientY - rect.top) / rect.height - 0.5) * -10;
-  card.style.setProperty('--tilt-x', `${y}deg`);
-  card.style.setProperty('--tilt-y', `${x}deg`);
+  card.style.setProperty("--tilt-x", `${y}deg`);
+  card.style.setProperty("--tilt-y", `${x}deg`);
 };
 
 const clearCardTilt = (event: MouseEvent) => {
   const card = event.currentTarget as HTMLElement;
-  card.style.setProperty('--tilt-x', '0deg');
-  card.style.setProperty('--tilt-y', '0deg');
+  card.style.setProperty("--tilt-x", "0deg");
+  card.style.setProperty("--tilt-y", "0deg");
 };
 
 let observer: IntersectionObserver | undefined;
 
 onMounted(() => {
-  motionEnabled.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  motionEnabled.value = !window.matchMedia("(prefers-reduced-motion: reduce)")
+    .matches;
 
   observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
+          entry.target.classList.add("is-visible");
         }
       });
     },
-    { threshold: 0.18 }
+    { threshold: 0.18 },
   );
 
-  document.querySelectorAll('.observe-section').forEach((section) => {
+  document.querySelectorAll(".observe-section").forEach((section) => {
     observer?.observe(section);
   });
 });
@@ -375,10 +472,23 @@ onUnmounted(() => {
   background:
     linear-gradient(90deg, rgba(1, 205, 254, 0.08) 1px, transparent 1px),
     linear-gradient(180deg, rgba(255, 113, 206, 0.06) 1px, transparent 1px),
-    radial-gradient(circle at 14% 18%, rgba(255, 113, 206, 0.2), transparent 24%),
-    radial-gradient(circle at 82% 10%, rgba(1, 205, 254, 0.18), transparent 28%),
+    radial-gradient(
+      circle at 14% 18%,
+      rgba(255, 113, 206, 0.2),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 82% 10%,
+      rgba(1, 205, 254, 0.18),
+      transparent 28%
+    ),
     linear-gradient(135deg, #090914 0%, #15102a 42%, #090914 100%);
-  background-size: 72px 72px, 72px 72px, auto, auto, auto;
+  background-size:
+    72px 72px,
+    72px 72px,
+    auto,
+    auto,
+    auto;
   color: var(--text);
 }
 
@@ -391,7 +501,12 @@ onUnmounted(() => {
   height: 420px;
   pointer-events: none;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(1, 205, 254, 0.18), rgba(255, 113, 206, 0.13) 38%, transparent 68%);
+  background: radial-gradient(
+    circle,
+    rgba(1, 205, 254, 0.18),
+    rgba(255, 113, 206, 0.13) 38%,
+    transparent 68%
+  );
   mix-blend-mode: screen;
   opacity: 0.75;
   transition: opacity 180ms ease;
@@ -419,7 +534,9 @@ onUnmounted(() => {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(9, 9, 20, 0.72);
-  box-shadow: 0 20px 60px rgba(1, 205, 254, 0.12), 0 20px 60px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 20px 60px rgba(1, 205, 254, 0.12),
+    0 20px 60px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(18px);
   transform: translateX(-50%);
 }
@@ -449,7 +566,11 @@ onUnmounted(() => {
   place-items: center;
   border: 1px solid rgba(1, 205, 254, 0.58);
   border-radius: 7px;
-  background: linear-gradient(135deg, rgba(1, 205, 254, 0.28), rgba(255, 113, 206, 0.16));
+  background: linear-gradient(
+    135deg,
+    rgba(1, 205, 254, 0.28),
+    rgba(255, 113, 206, 0.16)
+  );
   color: var(--accent-soft);
   box-shadow: 0 0 20px rgba(1, 205, 254, 0.18);
 }
@@ -470,7 +591,9 @@ onUnmounted(() => {
     font-weight: 700;
     text-align: center;
     text-decoration: none;
-    transition: color 180ms ease, background 180ms ease;
+    transition:
+      color 180ms ease,
+      background 180ms ease;
 
     &:hover {
       color: var(--text);
@@ -508,7 +631,10 @@ onUnmounted(() => {
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
 
   &:hover {
     border-color: rgba(1, 205, 254, 0.42);
@@ -537,7 +663,7 @@ onUnmounted(() => {
   overflow: hidden;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 50%;
     top: 50%;
@@ -547,7 +673,13 @@ onUnmounted(() => {
     border-radius: 50%;
     background:
       radial-gradient(circle, rgba(1, 205, 254, 0.14), transparent 42%),
-      conic-gradient(from 90deg, rgba(1, 205, 254, 0.36), rgba(255, 113, 206, 0.18), rgba(5, 255, 161, 0.14), rgba(1, 205, 254, 0.36));
+      conic-gradient(
+        from 90deg,
+        rgba(1, 205, 254, 0.36),
+        rgba(255, 113, 206, 0.18),
+        rgba(5, 255, 161, 0.14),
+        rgba(1, 205, 254, 0.36)
+      );
     opacity: 0.52;
     filter: blur(0.2px);
     transform: translate(-50%, -50%) rotate(0deg);
@@ -555,11 +687,16 @@ onUnmounted(() => {
   }
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(90deg, rgba(9, 9, 20, 0.94) 0%, rgba(9, 9, 20, 0.38) 46%, rgba(9, 9, 20, 0.9) 100%),
+      linear-gradient(
+        90deg,
+        rgba(9, 9, 20, 0.94) 0%,
+        rgba(9, 9, 20, 0.38) 46%,
+        rgba(9, 9, 20, 0.9) 100%
+      ),
       linear-gradient(180deg, rgba(9, 9, 20, 0.1), #090914 94%);
   }
 }
@@ -575,14 +712,19 @@ onUnmounted(() => {
 }
 
 .anime-stage::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 4%;
   right: 2%;
   bottom: 3%;
   height: 34%;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(1, 205, 254, 0.32), rgba(255, 113, 206, 0.16) 42%, transparent 68%);
+  background: radial-gradient(
+    ellipse,
+    rgba(1, 205, 254, 0.32),
+    rgba(255, 113, 206, 0.16) 42%,
+    transparent 68%
+  );
   filter: blur(10px);
 }
 
@@ -591,7 +733,9 @@ onUnmounted(() => {
   inset: 9% 5% 11%;
   border: 1px solid rgba(1, 205, 254, 0.5);
   border-radius: 44% 56% 52% 48%;
-  box-shadow: 0 0 30px rgba(1, 205, 254, 0.18), inset 0 0 26px rgba(255, 113, 206, 0.12);
+  box-shadow:
+    0 0 30px rgba(1, 205, 254, 0.18),
+    inset 0 0 26px rgba(255, 113, 206, 0.12);
 }
 
 .stage-ring--outer {
@@ -643,7 +787,8 @@ onUnmounted(() => {
   width: 78%;
   max-height: 92%;
   overflow: visible;
-  filter: drop-shadow(0 30px 45px rgba(0, 0, 0, 0.42)) drop-shadow(0 0 18px rgba(1, 205, 254, 0.16));
+  filter: drop-shadow(0 30px 45px rgba(0, 0, 0, 0.42))
+    drop-shadow(0 0 18px rgba(1, 205, 254, 0.16));
   transform: translateX(-50%);
   animation: avatarFloat 4s ease-in-out infinite;
 }
@@ -654,8 +799,8 @@ onUnmounted(() => {
 
 .avatar-hair-back,
 .avatar-bang {
-  fill: url('#hairGradient');
-  filter: url('#portraitGlow');
+  fill: url("#hairGradient");
+  filter: url("#portraitGlow");
 }
 
 .avatar-neck,
@@ -682,7 +827,7 @@ onUnmounted(() => {
 }
 
 .avatar-jacket {
-  fill: url('#jacketGradient');
+  fill: url("#jacketGradient");
   stroke: rgba(1, 205, 254, 0.42);
   stroke-width: 2;
 }
@@ -742,7 +887,12 @@ onUnmounted(() => {
 .hero-scanline {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(1, 205, 254, 0.13) 50%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(1, 205, 254, 0.13) 50%,
+    transparent 100%
+  );
   background-size: 100% 160px;
   opacity: 0.32;
   animation: scanline 680ms ease-out 1 both;
@@ -839,9 +989,20 @@ h3 {
   overflow: hidden;
   border-block: 1px solid rgba(1, 205, 254, 0.14);
   background:
-    linear-gradient(90deg, rgba(1, 205, 254, 0.08), rgba(255, 113, 206, 0.06), rgba(1, 205, 254, 0.08)),
+    linear-gradient(
+      90deg,
+      rgba(1, 205, 254, 0.08),
+      rgba(255, 113, 206, 0.06),
+      rgba(1, 205, 254, 0.08)
+    ),
     rgba(9, 9, 20, 0.34);
-  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
 
   &:hover,
   &:focus-within {
@@ -896,7 +1057,11 @@ h3 {
     border-radius: 8px;
     font-weight: 900;
     text-decoration: none;
-    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+    transition:
+      transform 180ms ease,
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease;
 
     &:hover {
       transform: translateY(-2px);
@@ -906,7 +1071,9 @@ h3 {
 
 .primary-action {
   background: var(--accent);
-  box-shadow: 0 18px 42px rgba(1, 205, 254, 0.24), 0 0 26px rgba(1, 205, 254, 0.18);
+  box-shadow:
+    0 18px 42px rgba(1, 205, 254, 0.24),
+    0 0 26px rgba(1, 205, 254, 0.18);
   color: #050511;
 }
 
@@ -964,11 +1131,16 @@ h3 {
     background: rgba(255, 255, 255, 0.08);
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0 18% 0 0;
       border-radius: inherit;
-      background: linear-gradient(90deg, var(--accent), var(--accent-soft), var(--amber));
+      background: linear-gradient(
+        90deg,
+        var(--accent),
+        var(--accent-soft),
+        var(--amber)
+      );
       animation: meterPulse 420ms ease-out 1 both;
     }
   }
@@ -1015,7 +1187,10 @@ h3 {
 .principle-card {
   min-height: 260px;
   padding: 22px;
-  transition: transform 220ms ease, border-color 220ms ease, background 220ms ease;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease;
 
   &:hover {
     border-color: rgba(1, 205, 254, 0.42);
@@ -1056,7 +1231,10 @@ h3 {
     color: var(--muted);
     font-weight: 900;
     cursor: pointer;
-    transition: color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+    transition:
+      color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease;
 
     &.active,
     &:hover {
@@ -1079,7 +1257,11 @@ h3 {
   padding: 22px;
   cursor: pointer;
   transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
-  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, opacity 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    opacity 180ms ease;
 
   &.active {
     border-color: rgba(1, 205, 254, 0.52);
@@ -1169,7 +1351,12 @@ h3 {
     width: var(--level);
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--accent), var(--accent-soft), var(--green));
+    background: linear-gradient(
+      90deg,
+      var(--accent),
+      var(--accent-soft),
+      var(--green)
+    );
     transform-origin: left;
     animation: skillReveal 460ms ease both;
   }
@@ -1209,10 +1396,12 @@ h3 {
     color: var(--text);
     font-weight: 900;
     text-decoration: none;
-    transition: transform 180ms ease, background 180ms ease;
+    transition:
+      transform 180ms ease,
+      background 180ms ease;
 
     &::after {
-      content: '↗';
+      content: "↗";
       font-size: 14px;
     }
 
@@ -1226,7 +1415,9 @@ h3 {
 .observe-section {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 420ms ease, transform 420ms ease;
+  transition:
+    opacity 420ms ease,
+    transform 420ms ease;
 
   &.is-visible {
     opacity: 1;

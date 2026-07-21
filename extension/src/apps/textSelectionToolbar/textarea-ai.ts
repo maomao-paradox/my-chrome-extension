@@ -7,37 +7,37 @@
  * @date 2026-07-07T00:00:00.000Z
  */
 
-import { loadAIConfig } from '@/utils/ai-config';
+import { loadAIConfig } from "@/utils/ai-config";
 
 type TextareaAIState =
-  | 'pending'
-  | 'generating'
-  | 'filled'
-  | 'skipped'
-  | 'error';
+  | "pending"
+  | "generating"
+  | "filled"
+  | "skipped"
+  | "error";
 
-const STATE_ATTR = 'data-ma-textarea-ai-state';
-const ERROR_ATTR = 'data-ma-textarea-ai-error';
+const STATE_ATTR = "data-ma-textarea-ai-state";
+const ERROR_ATTR = "data-ma-textarea-ai-error";
 const GENERATE_TIMEOUT_MS = 60000;
 
 const SYSTEM_PROMPT = [
-  '你是一个网页表单写作助手。',
-  '请根据输入框 placeholder 生成可直接填入 textarea 的正文。',
-  '只输出正文，不要解释、不要 Markdown 代码块、不要添加前后缀说明。'
-].join('\n');
+  "你是一个网页表单写作助手。",
+  "请根据输入框 placeholder 生成可直接填入 textarea 的正文。",
+  "只输出正文，不要解释、不要 Markdown 代码块、不要添加前后缀说明。",
+].join("\n");
 
 const createMessageId = (): string =>
   `textarea-ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const getTextareaState = (
-  textarea: HTMLTextAreaElement
+  textarea: HTMLTextAreaElement,
 ): TextareaAIState | null =>
   textarea.getAttribute(STATE_ATTR) as TextareaAIState | null;
 
 const setTextareaState = (
   textarea: HTMLTextAreaElement,
   state: TextareaAIState,
-  error?: string
+  error?: string,
 ): void => {
   textarea.setAttribute(STATE_ATTR, state);
   if (error) {
@@ -49,8 +49,8 @@ const setTextareaState = (
 
 const normalizeForCompare = (value: string): string =>
   value
-    .replace(/\s+/g, '')
-    .replace(/[，。！？、；：,.!?;:\-—'"“”‘’`]/g, '')
+    .replace(/\s+/g, "")
+    .replace(/[，。！？、；：,.!?;:\-—'"“”‘’`]/g, "")
     .toLowerCase();
 
 const removeRepeatedWholeContent = (value: string): string => {
@@ -73,7 +73,7 @@ const removeRepeatedWholeContent = (value: string): string => {
     const isRepeated = Array.from({ length: repeatCount - 1 }).every(
       (_, index) =>
         text.slice((index + 1) * partLength, (index + 2) * partLength) ===
-        firstPart
+        firstPart,
     );
 
     if (isRepeated) {
@@ -87,7 +87,7 @@ const removeRepeatedWholeContent = (value: string): string => {
 const dedupeAdjacentSegments = (
   value: string,
   splitter: RegExp,
-  joiner: string
+  joiner: string,
 ): string => {
   const segments = value
     .split(splitter)
@@ -101,7 +101,7 @@ const dedupeAdjacentSegments = (
   for (const segment of segments) {
     const previous = deduped[deduped.length - 1];
     const currentKey = normalizeForCompare(segment);
-    const previousKey = previous ? normalizeForCompare(previous) : '';
+    const previousKey = previous ? normalizeForCompare(previous) : "";
 
     if (previousKey && previousKey === currentKey && currentKey.length >= 8) {
       continue;
@@ -118,16 +118,16 @@ const normalizeGeneratedContent = (value: string): string => {
   const withoutRepeatedParagraphs = dedupeAdjacentSegments(
     text,
     /\n{2,}/,
-    '\n\n'
+    "\n\n",
   );
-  return dedupeAdjacentSegments(withoutRepeatedParagraphs, /\n/, '\n').trim();
+  return dedupeAdjacentSegments(withoutRepeatedParagraphs, /\n/, "\n").trim();
 };
 
 const isElementVisible = (element: HTMLElement): boolean => {
   const style = window.getComputedStyle(element);
   if (
-    style.display === 'none' ||
-    style.visibility === 'hidden' ||
+    style.display === "none" ||
+    style.visibility === "hidden" ||
     Number(style.opacity) === 0
   ) {
     return false;
@@ -154,7 +154,7 @@ const shouldFillTextarea = (textarea: HTMLTextAreaElement): boolean => {
     return false;
   }
 
-  return getTextareaState(textarea) !== 'generating';
+  return getTextareaState(textarea) !== "generating";
 };
 
 const findLabelText = (textarea: HTMLTextAreaElement): string => {
@@ -163,24 +163,24 @@ const findLabelText = (textarea: HTMLTextAreaElement): string => {
     .filter(Boolean);
 
   if (labels.length > 0) {
-    return labels.join(' / ');
+    return labels.join(" / ");
   }
 
-  const ariaLabel = textarea.getAttribute('aria-label')?.trim();
+  const ariaLabel = textarea.getAttribute("aria-label")?.trim();
   if (ariaLabel) {
     return ariaLabel;
   }
 
-  const labelledBy = textarea.getAttribute('aria-labelledby')?.trim();
+  const labelledBy = textarea.getAttribute("aria-labelledby")?.trim();
   if (!labelledBy) {
-    return '';
+    return "";
   }
 
   return labelledBy
     .split(/\s+/)
     .map((id) => document.getElementById(id)?.textContent?.trim())
     .filter(Boolean)
-    .join(' / ');
+    .join(" / ");
 };
 
 const buildPrompt = (textarea: HTMLTextAreaElement): string => {
@@ -189,34 +189,34 @@ const buildPrompt = (textarea: HTMLTextAreaElement): string => {
   const maxLength = textarea.maxLength > 0 ? textarea.maxLength : null;
 
   return [
-    `页面标题：${document.title || '未命名页面'}`,
+    `页面标题：${document.title || "未命名页面"}`,
     `页面地址：${location.href}`,
-    label ? `输入框标签：${label}` : '',
+    label ? `输入框标签：${label}` : "",
     `placeholder：${placeholder}`,
-    maxLength ? `最大长度：${maxLength} 个字符` : '',
-    '',
-    '请生成一段适合填入该 textarea 的内容。内容需要贴合 placeholder 的要求，语气自然、具体、可直接提交。'
+    maxLength ? `最大长度：${maxLength} 个字符` : "",
+    "",
+    "请生成一段适合填入该 textarea 的内容。内容需要贴合 placeholder 的要求，语气自然、具体，只输出正文，不要解释、不要 Markdown 代码块、不要添加前后缀说明。",
   ]
     .filter(Boolean)
-    .join('\n');
+    .join("\n");
 };
 
 const setNativeTextareaValue = (
   textarea: HTMLTextAreaElement,
-  value: string
+  value: string,
 ): void => {
   const descriptor = Object.getOwnPropertyDescriptor(
     HTMLTextAreaElement.prototype,
-    'value'
+    "value",
   );
   descriptor?.set?.call(textarea, value);
-  textarea.dispatchEvent(new Event('input', { bubbles: true }));
-  textarea.dispatchEvent(new Event('change', { bubbles: true }));
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  textarea.dispatchEvent(new Event("change", { bubbles: true }));
 };
 
 const generateTextareaContent = async (
   textarea: HTMLTextAreaElement,
-  onContent?: (content: string) => void
+  onContent?: (content: string) => void,
 ): Promise<string> => {
   const messageId = createMessageId();
   const config = await loadAIConfig();
@@ -224,7 +224,7 @@ const generateTextareaContent = async (
   const prompt = buildPrompt(textarea);
 
   return new Promise((resolve, reject) => {
-    let content = '';
+    let content = "";
     let settled = false;
 
     const settle = (handler: () => void): void => {
@@ -243,7 +243,7 @@ const generateTextareaContent = async (
     };
 
     const timeoutId = window.setTimeout(() => {
-      settle(() => reject(new Error('AI 生成超时')));
+      settle(() => reject(new Error("AI 生成超时")));
     }, GENERATE_TIMEOUT_MS);
 
     port.onMessage.addListener((message) => {
@@ -251,8 +251,8 @@ const generateTextareaContent = async (
         return;
       }
 
-      if (message.type === 'AI_CONVERSATION_STREAM_DATA') {
-        const chunk = message.payload.content || '';
+      if (message.type === "AI_CONVERSATION_STREAM_DATA") {
+        const chunk = message.payload.content || "";
         if (!chunk) {
           return;
         }
@@ -262,39 +262,39 @@ const generateTextareaContent = async (
         return;
       }
 
-      if (message.type === 'AI_CONVERSATION_COMPLETE') {
+      if (message.type === "AI_CONVERSATION_COMPLETE") {
         const generated = normalizeGeneratedContent(content);
         settle(() => {
           generated
             ? resolve(generated)
-            : reject(new Error('AI 没有返回可填入内容'));
+            : reject(new Error("AI 没有返回可填入内容"));
         });
         return;
       }
 
-      if (message.type === 'AI_CONVERSATION_ERROR') {
-        settle(() => reject(new Error(message.payload.error || 'AI 生成失败')));
+      if (message.type === "AI_CONVERSATION_ERROR") {
+        settle(() => reject(new Error(message.payload.error || "AI 生成失败")));
       }
     });
 
     port.onDisconnect.addListener(() => {
       if (!settled) {
-        settle(() => reject(new Error('AI 连接已断开')));
+        settle(() => reject(new Error("AI 连接已断开")));
       }
     });
 
     port.postMessage({
-      type: 'START_AI_CONVERSATION',
+      type: "START_AI_CONVERSATION",
       payload: {
         prompt,
         messageId,
-        role: 'textarea_ai_autofill',
+        role: "textarea_ai_autofill",
         provider: config.provider,
         model: config.modelId,
         apiKey: config.apiKey,
         apiBaseUrl: config.apiBaseUrl,
-        systemPrompt: config.systemPrompt || SYSTEM_PROMPT
-      }
+        systemPrompt: config.systemPrompt || SYSTEM_PROMPT,
+      },
     });
   });
 };
@@ -306,7 +306,7 @@ const fillTextarea = async (textarea: HTMLTextAreaElement): Promise<void> => {
 
   const valueBeforeGeneration = textarea.value;
   const shouldReplaceExistingValue = Boolean(valueBeforeGeneration.trim());
-  let lastStreamedValue = '';
+  let lastStreamedValue = "";
   let userEditedDuringGeneration = false;
 
   const writeStreamContent = (content: string): void => {
@@ -323,15 +323,18 @@ const fillTextarea = async (textarea: HTMLTextAreaElement): Promise<void> => {
     setNativeTextareaValue(textarea, content);
   };
 
-  setTextareaState(textarea, 'generating');
+  setTextareaState(textarea, "generating");
   if (shouldReplaceExistingValue) {
-    setNativeTextareaValue(textarea, '');
+    setNativeTextareaValue(textarea, "");
   }
 
   try {
-    const generated = await generateTextareaContent(textarea, writeStreamContent);
+    const generated = await generateTextareaContent(
+      textarea,
+      writeStreamContent,
+    );
     if (userEditedDuringGeneration || textarea.value !== lastStreamedValue) {
-      setTextareaState(textarea, 'skipped');
+      setTextareaState(textarea, "skipped");
       return;
     }
 
@@ -339,7 +342,7 @@ const fillTextarea = async (textarea: HTMLTextAreaElement): Promise<void> => {
       lastStreamedValue = generated;
       setNativeTextareaValue(textarea, generated);
     }
-    setTextareaState(textarea, 'filled');
+    setTextareaState(textarea, "filled");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (
@@ -349,8 +352,8 @@ const fillTextarea = async (textarea: HTMLTextAreaElement): Promise<void> => {
     ) {
       setNativeTextareaValue(textarea, valueBeforeGeneration);
     }
-    setTextareaState(textarea, 'error', message);
-    maLogger.warn('[TextareaAI] 自动填充失败:', message);
+    setTextareaState(textarea, "error", message);
+    maLogger.warn("[TextareaAI] 自动填充失败:", message);
   }
 };
 
@@ -360,22 +363,22 @@ export type TextareaAIMessagePayload = {
 };
 
 const getCandidateTextareas = (
-  root: ParentNode = document
+  root: ParentNode = document,
 ): HTMLTextAreaElement[] => {
   const textareas: HTMLTextAreaElement[] = [];
 
   if (
     root instanceof HTMLTextAreaElement &&
-    root.matches('textarea[placeholder]')
+    root.matches("textarea[placeholder]")
   ) {
     textareas.push(root);
   }
 
-  if ('querySelectorAll' in root) {
+  if ("querySelectorAll" in root) {
     textareas.push(
       ...Array.from(
-        root.querySelectorAll<HTMLTextAreaElement>('textarea[placeholder]')
-      )
+        root.querySelectorAll<HTMLTextAreaElement>("textarea[placeholder]"),
+      ),
     );
   }
 
@@ -383,7 +386,7 @@ const getCandidateTextareas = (
 };
 
 const getMessageTextarea = (
-  payload: TextareaAIMessagePayload = {}
+  payload: TextareaAIMessagePayload = {},
 ): HTMLTextAreaElement | null => {
   if (payload.selector) {
     let element: Element | null = null;
@@ -397,7 +400,7 @@ const getMessageTextarea = (
       return element;
     }
 
-    const textarea = element?.querySelector?.('textarea[placeholder]');
+    const textarea = element?.querySelector?.("textarea[placeholder]");
     if (textarea instanceof HTMLTextAreaElement) {
       return textarea;
     }
@@ -414,44 +417,44 @@ const getMessageTextarea = (
 };
 
 export const fillTextareaByAI = async (
-  payload: TextareaAIMessagePayload = {}
+  payload: TextareaAIMessagePayload = {},
 ) => {
   const textarea = getMessageTextarea(payload);
   if (!textarea) {
-    return { success: false, msg: '未找到可填入的 textarea' };
+    return { success: false, msg: "未找到可填入的 textarea" };
   }
 
   if (!shouldFillTextarea(textarea)) {
-    return { success: false, msg: 'textarea 当前不可填入 AI 内容' };
+    return { success: false, msg: "textarea 当前不可填入 AI 内容" };
   }
 
   await fillTextarea(textarea);
   return {
-    success: getTextareaState(textarea) !== 'error',
-    msg: textarea.getAttribute(ERROR_ATTR) || 'textarea AI 填入完成',
+    success: getTextareaState(textarea) !== "error",
+    msg: textarea.getAttribute(ERROR_ATTR) || "textarea AI 填入完成",
     result: {
-      state: getTextareaState(textarea)
-    }
+      state: getTextareaState(textarea),
+    },
   };
 };
 
 export const fillTextareaElementByAI = async (
-  textarea: HTMLTextAreaElement
+  textarea: HTMLTextAreaElement,
 ) => {
   if (!isTextareaCandidate(textarea)) {
-    return { success: false, msg: 'textarea 当前不可填入 AI 内容' };
+    return { success: false, msg: "textarea 当前不可填入 AI 内容" };
   }
 
   if (!shouldFillTextarea(textarea)) {
-    return { success: false, msg: 'textarea 正在生成中' };
+    return { success: false, msg: "textarea 正在生成中" };
   }
 
   await fillTextarea(textarea);
   return {
-    success: getTextareaState(textarea) !== 'error',
-    msg: textarea.getAttribute(ERROR_ATTR) || 'textarea AI 填入完成',
+    success: getTextareaState(textarea) !== "error",
+    msg: textarea.getAttribute(ERROR_ATTR) || "textarea AI 填入完成",
     result: {
-      state: getTextareaState(textarea)
-    }
+      state: getTextareaState(textarea),
+    },
   };
 };
