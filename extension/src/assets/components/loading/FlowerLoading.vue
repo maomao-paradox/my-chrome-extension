@@ -1,412 +1,202 @@
 <template>
-    <div class="out">
-        <div class="fade-in">
-            <div class="container">
-                <div class="one common"></div>
-                <div class="two common"></div>
-                <div class="three common"></div>
-                <div class="four common"></div>
-                <div class="five common"></div>
-                <div class="six common"></div>
-                <div class="seven common"></div>
-                <div class="eight common"></div>
-            </div>
-            <div class="bar">
-                <div class="progress"></div>
-            </div>
-        </div>
+  <Transition name="fade">
+    <div class="container">
+      <div class="item-container">
+        <div
+          v-for="i in 8"
+          :key="i"
+          :class="['common', `item${i}`]"
+          :style="getItemStyle(i)"
+        ></div>
+      </div>
+
+      <div class="bar">
+        <div class="progress"></div>
+      </div>
     </div>
+  </Transition>
 </template>
 
-<style scoped>
+<script setup lang="ts">
+import { Transition } from "vue";
+const getItemStyle = (index: number) => {
+  return {
+    "--rotate": 45 * index + "deg",
+    "--delay": 0.125 * (index - 1) + "s",
+  };
+};
+</script>
+
+<style lang="scss" scoped>
+// 变量定义
+$bg-color: #161b29;
+$pink: #e645d0;
+$cyan: #17e1e6;
+$container-size: 40vw;
+$bar-height: 5vw;
+$bar-width: 2vw;
+
+// 基础布局
 body {
-    background: #161B29;
-    margin: 0 auto;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+  background: $bg-color;
+  margin: 0 auto;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
-.container {
-    width: 40vw;
-    height: 40vw;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-    overflow: hidden;
+.item-container {
+  width: $container-size;
+  height: $container-size;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  overflow: hidden;
+  animation: container 5s linear infinite;
 }
 
+// 通用条状样式
 .common {
-    height: 5vw;
-    max-height: 100%;
-    overflow: auto;
-    width: 2vw;
-    margin: auto;
-    max-width: 100%;
-    position: absolute;
-    background-color: "";
-    border-radius: 0vw 10vw 0vw 10vw;
-    box-shadow: inset 0vw 0vw 0vw .1vw #E645D0, 0vw 0vw 1.5vw 0vw #E645D0;
+  height: $bar-height;
+  max-height: 100%;
+  overflow: auto;
+  width: $bar-width;
+  margin: auto;
+  max-width: 100%;
+  position: absolute;
+  background-color: transparent;
+  border-radius: 0vw 10vw 0vw 10vw;
+  box-shadow:
+    inset 0vw 0vw 0vw 0.1vw $pink,
+    0vw 0vw 1.5vw 0vw $pink;
 }
 
-.one {
-    transform: rotate(45deg);
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 7.5vw;
-}
+// 位置和旋转 - 使用循环生成
+$positions: (
+  1: (
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 7.5vw,
+  ),
+  2: (
+    left: 5.5vw,
+    right: 0,
+    top: 0,
+    bottom: 5.5vw,
+  ),
+  3: (
+    left: 7.5vw,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  ),
+  4: (
+    left: 5.5vw,
+    right: 0,
+    top: 5.5vw,
+    bottom: 0,
+  ),
+  5: (
+    left: 0,
+    right: 0,
+    top: 7.5vw,
+    bottom: 0,
+  ),
+  6: (
+    left: 0,
+    right: 5.5vw,
+    top: 5.5vw,
+    bottom: 0,
+  ),
+  7: (
+    left: 0,
+    right: 7.5vw,
+    top: 0,
+    bottom: 0,
+  ),
+  8: (
+    left: 0,
+    right: 5.5vw,
+    top: 0,
+    bottom: 5.5vw,
+  ),
+);
 
-.two {
-    transform: rotate(90deg);
-    left: 5.5vw;
-    right: 0;
-    top: 0;
-    bottom: 5.5vw;
-}
+// 生成每个条状元素的位置和动画
+@each $name, $props in $positions {
+  .item#{$name} {
+    transform: rotate(var(--rotate));
+    left: map-get($props, left);
+    right: map-get($props, right);
+    top: map-get($props, top);
+    bottom: map-get($props, bottom);
+    animation: animation#{$name} 5s var(--delay) ease infinite;
+  }
 
-.three {
-    transform: rotate(135deg);
-    left: 7.5vw;
-    right: 0;
-    top: 0;
-    bottom: 0;
-}
-
-.four {
-    transform: rotate(180deg);
-    left: 5.5vw;
-    right: 0;
-    top: 5.5vw;
-    bottom: 0;
-}
-
-.five {
-    transform: rotate(225deg);
-    left: 0;
-    right: 0;
-    top: 7.5vw;
-    bottom: 0;
-}
-
-.six {
-    transform: rotate(270deg);
-    left: 0;
-    right: 5.5vw;
-    top: 5.5vw;
-    bottom: 0;
-}
-
-.seven {
-    transform: rotate(315deg);
-    left: 0;
-    right: 7.5vw;
-    top: 0;
-    bottom: 0;
-}
-
-.eight {
-    transform: rotate(360deg);
-    left: 0;
-    right: 5.5vw;
-    top: 0;
-    bottom: 5.5vw;
-}
-
-.bar {
-    width: 12vw;
-    height: .25vw;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 16vw;
-    bottom: 0;
-    margin: auto;
-    overflow: hidden;
-    background: #E645D0;
-}
-
-.progress {
-    width: 12vw;
-    height: .5vw;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-    overflow: hidden;
-    background: #17E1E6;
-}
-
-.one {
-    animation: one 1s ease infinite;
-    -moz-animation: one 1s ease infinite;
-    /* Firefox */
-    -webkit-animation: one 1s ease infinite;
-    /* Safari and Chrome */
-    -o-animation: one 1s ease infinite;
-    /* Opera */
-}
-
-@keyframes one {
-
+  @keyframes animation#{$name} {
     0%,
-    100% {}
-
-    50% {
-        background: "";
-        box-shadow: inset 0vw 0vw 0vw .1vw #17E1E6, 0vw 0vw 1.5vw 0vw #17E1E6;
-    }
-}
-
-.two {
-    animation: two 1s .125s ease infinite;
-    -moz-animation: two 1s .125s ease infinite;
-    /* Firefox */
-    -webkit-animation: two 1s .125s ease infinite;
-    /* Safari and Chrome */
-    -o-animation: two 1s .125s ease infinite;
-    /* Opera */
-}
-
-@keyframes two {
-
-    0%,
-    100% {}
-
-    50% {
-        background: "";
-        box-shadow: inset 0vw 0vw 0vw .1vw #17E1E6, 0vw 0vw 1.5vw 0vw #17E1E6;
-    }
-}
-
-.three {
-    animation: three 1s .25s ease infinite;
-    -moz-animation: three 1s .25s ease infinite;
-    /* Firefox */
-    -webkit-animation: three 1s .25s ease infinite;
-    /* Safari and Chrome */
-    -o-animation: three 1s .25s ease infinite;
-    /* Opera */
-}
-
-@keyframes three {
-
-    0%,
-    100% {}
-
-    50% {
-        background: "";
-        box-shadow: inset 0vw 0vw 0vw .1vw #17E1E6, 0vw 0vw 1.5vw 0vw #17E1E6;
-    }
-}
-
-.four {
-    animation: four 1s .375s ease infinite;
-    -moz-animation: four 1s .375s ease infinite;
-    /* Firefox */
-    -webkit-animation: four 1s .375s ease infinite;
-    /* Safari and Chrome */
-    -o-animation: four 1s .375s ease infinite;
-    /* Opera */
-}
-
-@keyframes four {
-
-    0%,
-    100% {}
-
-    50% {
-        background: "";
-        box-shadow: inset 0vw 0vw 0vw .1vw #17E1E6, 0vw 0vw 1.5vw 0vw #17E1E6;
-    }
-}
-
-.five {
-    animation: five 1s .5s ease infinite;
-    -moz-animation: five 1s .5s ease infinite;
-    /* Firefox */
-    -webkit-animation: five 1s .5s ease infinite;
-    /* Safari and Chrome */
-    -o-animation: five 1s .5s ease infinite;
-    /* Opera */
-}
-
-@keyframes five {
-
-    0%,
-    100% {}
-
-    50% {
-        background: "";
-        box-shadow: inset 0vw 0vw 0vw .1vw #17E1E6, 0vw 0vw 1.5vw 0vw #17E1E6;
-    }
-}
-
-.six {
-    animation: six 1s .625s ease infinite;
-    -moz-animation: six 1s .625s ease infinite;
-    /* Firefox */
-    -webkit-animation: six 1s .625s ease infinite;
-    /* Safari and Chrome */
-    -o-animation: six 1s .625s ease infinite;
-    /* Opera */
-}
-
-@keyframes six {
-
-    0%,
-    100% {}
-
-    50% {
-        background: "";
-        box-shadow: inset 0vw 0vw 0vw .1vw #17E1E6, 0vw 0vw 1.5vw 0vw #17E1E6;
-    }
-}
-
-.seven {
-    animation: seven 1s .750s ease infinite;
-    -moz-animation: seven 1s .750s ease infinite;
-    /* Firefox */
-    -webkit-animation: seven 1s .750s ease infinite;
-    /* Safari and Chrome */
-    -o-animation: seven 1s .750s ease infinite;
-    /* Opera */
-}
-
-@keyframes seven {
-
-    0%,
-    100% {}
-
-    50% {
-        background: "";
-        box-shadow: inset 0vw 0vw 0vw .1vw #17E1E6, 0vw 0vw 1.5vw 0vw #17E1E6;
-    }
-}
-
-.eight {
-    animation: eight 1s .875s ease infinite;
-    -moz-animation: eight 1s .875s ease infinite;
-    /* Firefox */
-    -webkit-animation: eight 1s .875s ease infinite;
-    /* Safari and Chrome */
-    -o-animation: eight 1s .875s ease infinite;
-    /* Opera */
-}
-
-@keyframes eight {
-
-    0%,
-    100% {}
-
-    50% {
-        background: "";
-        box-shadow: inset 0vw 0vw 0vw .1vw #17E1E6, 0vw 0vw 1.5vw 0vw #17E1E6;
-    }
-}
-
-.container {
-    animation: container 5s linear infinite;
-    -moz-animation: container 5s linear infinite;
-    /* Firefox */
-    -webkit-animation: container 5s linear infinite;
-    /* Safari and Chrome */
-    -o-animation: container 5s linear infinite;
-    /* Opera */
-}
-
-@keyframes container {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(-360deg);
-    }
-}
-
-.progress {
-    animation: progress 15s ease;
-    -moz-animation: progress 15s ease;
-    /* Firefox */
-    -webkit-animation: progress 15s ease;
-    /* Safari and Chrome */
-    -o-animation: progress 15s ease;
-    /* Opera */
-}
-
-@keyframes progress {
-    0% {
-        left: -24vw;
-    }
-
-    10% {
-        left: -20vw;
-    }
-
-    30% {
-        left: -16vw;
-    }
-
-    50% {
-        left: -12vw;
-    }
-
-    65% {
-        left: -10vw;
-    }
-
-    80% {
-        left: -4vw;
-    }
-
     100% {
-        left: 0;
     }
+    50% {
+      background: transparent;
+      box-shadow:
+        inset 0vw 0vw 0vw 0.1vw $cyan,
+        0vw 0vw 1.5vw 0vw $cyan;
+    }
+  }
 }
 
-.fade-in {
-    animation: fade-in 2s ease;
-    -moz-animation: fade-in 2s ease;
-    /* Firefox */
-    -webkit-animation: fade-in 2s ease;
-    /* Safari and Chrome */
-    -o-animation: fade-in 2s ease;
-    /* Opera */
+// 进度条
+.bar {
+  width: 12vw;
+  height: 0.25vw;
+  position: absolute;
+  inset: 0;
+  top: 16vw;
+  margin: auto;
+  overflow: hidden;
+  background: $pink;
 }
 
-@keyframes fade-in {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+.progress {
+  width: 12vw;
+  height: 0.5vw;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  overflow: hidden;
+  background: $cyan;
+  animation: progress 5s ease;
 }
 
-.out {
-    animation: out 2s 15s ease;
-    -moz-animation: out 2s 15s ease;
-    /* Firefox */
-    -webkit-animation: out 2s 15s ease;
-    /* Safari and Chrome */
-    -o-animation: out 2s 15s ease;
-    /* Opera */
+// 旋转容器动画
+@keyframes container {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
-@keyframes out {
-    from {
-        opacity: 1;
-    }
+// 进度条动画
+@keyframes progress {
+  0% {
+    left: -24vw;
+  }
+  100% {
+    left: 0;
+  }
+}
 
-    to {
-        opacity: 0;
-    }
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
