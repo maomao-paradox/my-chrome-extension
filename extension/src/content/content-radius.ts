@@ -278,10 +278,8 @@ export default (ctx: AppContext, config = {}) => {
         addLoadingMask(".el-table__inner-wrapper");
         // 调用AI生成JSON数据
         const result = await requestAI(
-          `请根据表头 \`${headerTitle.map((item) =>
-            item.textContent.startsWith("*")
-              ? item.textContent.slice(1)
-              : item.textContent || "",
+          `请根据表头 \`${headerTitle.map(
+            (item) => item.textContent,
           )}\` 和表体${bodyRows.length}行，生成一个合法的JSON字符串。JSON输出结构如下：[{"key1": "value1", "key2": "value2", "..."}, {...}, {...} ...]`,
           {
             systemPrompt:
