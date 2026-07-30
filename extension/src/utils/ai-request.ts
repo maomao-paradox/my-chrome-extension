@@ -88,8 +88,16 @@ export async function requestAI(
   prompt: string,
   options: AIRequestOptions = {}
 ): Promise<AIRequestResult> {
+  // 记录请求开始时间
+  const startTime = performance.now();
+
   // 参数验证
   if (!prompt || typeof prompt !== 'string') {
+    const elapsed = Math.round(performance.now() - startTime);
+    maLogger.log('[AI Request] 参数验证失败:', {
+      error: 'prompt必须是非空字符串',
+      elapsed: `${elapsed}ms`
+    });
     return {
       success: false,
       content: '',
@@ -118,10 +126,49 @@ export async function requestAI(
 
   const messageId = createMessageId();
 
+  // 打印请求开始日志
+  maLogger.log('[AI Request] 发起请求:', {
+    messageId,
+    promptPreview: prompt.length > 100 ? `${prompt.slice(0, 100)}...` : prompt,
+    promptLength: prompt.length,
+    provider: effectiveProvider,
+    model: effectiveModel,
+    role,
+    timeout: timeoutMs,
+    hasSystemPrompt: !!effectiveSystemPrompt,
+    timestamp: new Date().toISOString()
+  });
+
   return new Promise((resolve) => {
+    // 记录请求完成日志的辅助函数（含分阶段耗时分析）
+    const logAndResolve = (result: AIRequestResult): void => {
+      const totalElapsed = Math.round(performance.now() - startTime);
+      const ttfb = firstChunkTime ? Math.round(firstChunkTime - startTime) : null;
+      const generationTime = firstChunkTime ? Math.round(performance.now() - firstChunkTime) : null;
+      
+      maLogger.log(`[AI Request] 请求${result.success ? '成功' : '失败'}:`, {
+        messageId,
+        status: result.success ? 'success' : 'failed',
+        model: effectiveModel,
+        provider: effectiveProvider,
+        contentLength: result.content.length,
+        contentPreview: result.content.length > 100 ? `${result.content.slice(0, 100)}...` : result.content,
+        error: result.error || undefined,
+        // 分阶段耗时分析
+        breakdown: {
+          total: `${totalElapsed}ms`,
+          ttfb: ttfb !== null ? `${ttfb}ms` : 'N/A',  // 首包延迟 (Time To First Byte)
+          generation: generationTime !== null ? `${generationTime}ms` : 'N/A',  // 内容生成耗时
+          overhead: ttfb !== null ? `${ttfb}ms` : `${totalElapsed}ms`  // 连接/处理开销
+        },
+        timestamp: new Date().toISOString()
+      });
+      resolve(result);
+    };
+
     // 检查是否在Chrome扩展环境中
     if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.connect) {
-      resolve({
+      logAndResolve({
         success: false,
         content: '',
         error: '当前环境不支持Chrome扩展API'
@@ -134,6 +181,7 @@ export async function requestAI(
 
     let content = '';
     let settled = false;
+    let firstChunkTime: number | null = null;
 
     /**
      * 完成请求，清理资源
@@ -157,7 +205,7 @@ export async function requestAI(
      */
     const timeoutId = window.setTimeout(() => {
       settle(() => {
-        resolve({
+        logAndResolve({
           success: false,
           content: content, // 返回已获取的部分内容
           error: `AI请求超时（${timeoutMs}ms）`
@@ -178,6 +226,16 @@ export async function requestAI(
         const chunk = message.payload.content || '';
         if (chunk) {
           content += chunk;
+          // 首包日志 - 记录首次收到数据的时间
+          if (!firstChunkTime) {
+            firstChunkTime = performance.now();
+            const ttfb = Math.round(firstChunkTime - startTime);
+            maLogger.log('[AI Request] 首包延迟(TTFB):', {
+              messageId,
+              ttfb: `${ttfb}ms`,
+              timestamp: new Date().toISOString()
+            });
+          }
         }
         return;
       }
@@ -186,12 +244,12 @@ export async function requestAI(
       if (message.type === 'AI_CONVERSATION_COMPLETE') {
         settle(() => {
           if (content.trim()) {
-            resolve({
+            logAndResolve({
               success: true,
               content: content.trim()
             });
           } else {
-            resolve({
+            logAndResolve({
               success: false,
               content: '',
               error: 'AI没有返回有效内容'
@@ -204,7 +262,7 @@ export async function requestAI(
       // 请求错误
       if (message.type === 'AI_CONVERSATION_ERROR') {
         settle(() => {
-          resolve({
+          logAndResolve({
             success: false,
             content: content, // 返回已获取的部分内容
             error: message.payload.error || 'AI请求失败'
@@ -221,12 +279,12 @@ export async function requestAI(
         settle(() => {
           if (content.trim()) {
             // 如果已有内容，视为部分成功
-            resolve({
+            logAndResolve({
               success: true,
               content: content.trim()
             });
           } else {
-            resolve({
+            logAndResolve({
               success: false,
               content: '',
               error: 'AI连接已断开'

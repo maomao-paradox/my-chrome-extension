@@ -334,14 +334,22 @@ export class DeepSeekClient {
     systemPrompt?: string,
     context?: DeepSeekExecutionContext
   ): Promise<unknown> {
+    const flowStart = performance.now();
     const normalizedRole = normalizeRole(role);
     const preparedPrompt = buildPromptWithSystemPrompt(prompt, systemPrompt);
+    let stageTimings: Record<string, number> = {};
 
     for (let attempt = 0; attempt < 2; attempt += 1) {
+      const attemptStart = performance.now();
       try {
+        // 阶段1: 获取会话数据
+        const sessionStart = performance.now();
         let sessionData = await this.getSessionData(normalizedRole);
+        stageTimings['getSession'] = Math.round(performance.now() - sessionStart);
 
+        // 阶段2: 创建会话（如果需要）
         if (!sessionData.sessionId) {
+          const createSessionStart = performance.now();
           const createSessionResult = await this.createSession() as {
                         data?: { biz_data?: { id?: string } };
                     };
@@ -349,10 +357,13 @@ export class DeepSeekClient {
           if (!newSessionId) {
             throw new Error('Failed to create session');
           }
+          stageTimings['createSession'] = Math.round(performance.now() - createSessionStart);
 
           sessionData = await this.updateSessionData(normalizedRole, { sessionId: newSessionId });
         }
 
+        // 阶段3: 创建POW挑战
+        const powChallengeStart = performance.now();
         const challengeResponse = await this.createPowChallenge() as {
                     data?: { biz_data?: { challenge?: DeepSeekPowChallenge } };
                 };
@@ -360,11 +371,15 @@ export class DeepSeekClient {
         if (!challenge) {
           throw new Error('Failed to create POW challenge');
         }
+        stageTimings['createPowChallenge'] = Math.round(performance.now() - powChallengeStart);
 
+        // 阶段4: 解决POW挑战（计算耗时）
+        const powSolveStart = performance.now();
         const powResponse = await this.powSolver.solve(challenge, context);
         if (!powResponse) {
           throw new Error('Failed to generate POW response');
         }
+        stageTimings['powSolve'] = Math.round(performance.now() - powSolveStart);
 
         const currentParentMessageId = sessionData.parentMessageId;
         const sessionId = sessionData.sessionId;
@@ -372,6 +387,8 @@ export class DeepSeekClient {
           throw new Error('DeepSeek session is missing after initialization');
         }
 
+        // 阶段5: 发送完成请求（AI模型调用）
+        const completionStart = performance.now();
         const response = await this.completion(
           {
             prompt: preparedPrompt,
@@ -381,15 +398,40 @@ export class DeepSeekClient {
           powResponse,
           callbacks
         );
+        stageTimings['completion'] = Math.round(performance.now() - completionStart);
 
+        // 阶段6: 更新会话数据
+        const updateStart = performance.now();
         await this.updateSessionData(normalizedRole, {
           parentMessageId: nextParentMessageId(currentParentMessageId)
+        });
+        stageTimings['updateSession'] = Math.round(performance.now() - updateStart);
+
+        // 打印完整的分阶段耗时分析
+        const totalTime = Math.round(performance.now() - flowStart);
+        console.log(`[DeepSeek Flow] ${role} 完成 (attempt ${attempt + 1}):`, {
+          totalTime: `${totalTime}ms`,
+          stages: {
+            getSession: `${stageTimings['getSession'] || 0}ms`,
+            createSession: `${stageTimings['createSession'] || 'skipped'}`,
+            createPowChallenge: `${stageTimings['createPowChallenge'] || 0}ms`,
+            powSolve: `${stageTimings['powSolve'] || 0}ms`,
+            completion: `${stageTimings['completion'] || 0}ms`,
+            updateSession: `${stageTimings['updateSession'] || 0}ms`
+          },
+          // 瓶颈分析
+          bottleneck: this.analyzeBottleneck(stageTimings),
+          timestamp: new Date().toISOString()
         });
 
         callbacks?.onComplete?.();
         return response;
       } catch (error) {
+        const attemptTime = Math.round(performance.now() - attemptStart);
+        console.error(`[DeepSeek Flow] ${role} 失败 (attempt ${attempt + 1}, ${attemptTime}ms):`, error);
+        
         if (attempt === 0 && isInvalidChatSessionError(error)) {
+          console.log(`[DeepSeek Flow] ${role} 会话无效，清除后重试...`);
           await this.clearSessionData(normalizedRole);
           continue;
         }
@@ -400,6 +442,29 @@ export class DeepSeekClient {
     }
 
     throw new Error('DeepSeek chat flow failed after retry');
+  }
+
+  /**
+   * 分析各阶段耗时，找出可能的瓶颈
+   */
+  private analyzeBottleneck(timings: Record<string, number>): string {
+    const entries = Object.entries(timings)
+      .filter(([_, v]) => typeof v === 'number')
+      .sort((a, b) => b[1] - a[1]);
+    
+    if (entries.length === 0) {
+      return 'unknown';
+    }
+
+    const [slowestStage, slowestTime] = entries[0];
+    const totalTime = entries.reduce((sum, [_, v]) => sum + v, 0);
+    const percentage = totalTime > 0 ? Math.round((slowestTime / totalTime) * 100) : 0;
+
+    if (percentage > 50) {
+      return `bottleneck: ${slowestStage} (${slowestTime}ms, ${percentage}%)`;
+    }
+    
+    return `slowest: ${slowestStage} (${slowestTime}ms, ${percentage}%)`;
   }
 
   async sendStreamingRequest(
