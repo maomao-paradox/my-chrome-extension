@@ -11,7 +11,149 @@ import { addElementToDom, waitForSelector } from "@/utils/element-control";
 import { Tool } from "@/types";
 import messenger from "@/message";
 import { requestAI } from "@/utils/ai-request";
-import { event } from "jquery";
+
+function addLoadingMask(selector: string, loadingText: string = "加载中...") {
+  const elements = document.querySelectorAll<HTMLElement>(selector);
+  if (!elements.length) {
+    console.warn(`[addLoadingMask] 未找到匹配 "${selector}" 的元素`);
+    return 0;
+  }
+  // 注入全局动画样式 (只注入一次)
+  const styleId = "lmask-global-styles";
+  if (!document.getElementById(styleId)) {
+    const styleSheet = document.createElement("style");
+    styleSheet.id = styleId;
+    styleSheet.textContent = `
+          @keyframes lmask-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes lmask-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+          .lmask-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            pointer-events: auto;
+            box-sizing: border-box;
+          }
+          .lmask-spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(37, 99, 235, 0.12);
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: lmask-spin 0.8s linear infinite;
+            margin-bottom: 14px;
+            flex-shrink: 0;
+          }
+          .lmask-spinner-sm {
+            width: 32px;
+            height: 32px;
+            border-width: 3px;
+          }
+          .lmask-text {
+            font-weight: 500;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 6px 20px;
+            border-radius: 60px;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            color: #249bd9;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            animation: lmask-pulse 1.5s ease-in-out infinite;
+          }
+          .lmask-dots::after {
+            content: '';
+            animation: lmask-dots 1.2s steps(3, end) infinite;
+          }
+          @keyframes lmask-dots {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+          }
+        `;
+    document.head.appendChild(styleSheet);
+  }
+
+  let count = 0;
+  elements.forEach((el) => {
+    // 如果已有遮罩，更新文案并返回
+    const existing = el.querySelector<HTMLElement>(".lmask-overlay");
+    if (existing) {
+      const txt = existing.querySelector(".lmask-text");
+      if (txt) {
+        // 保留文案但更新内容
+        const textNode = txt.childNodes[0];
+        if (textNode) textNode.textContent = loadingText;
+      }
+      existing.style.display = "flex";
+      existing.style.opacity = "1";
+      count++;
+      return;
+    }
+
+    // 确保父元素有定位上下文
+    const style = window.getComputedStyle(el);
+    if (style.position === "static") {
+      el.style.position = "relative";
+    }
+
+    // 创建遮罩容器
+    const mask = document.createElement("div");
+    mask.className = "lmask-overlay";
+
+    // 创建 spinner
+    const spinner = document.createElement("div");
+    spinner.className = "lmask-spinner";
+
+    // 创建文字
+    const textEl = document.createElement("div");
+    textEl.className = "lmask-text";
+    textEl.textContent = loadingText;
+
+    mask.appendChild(spinner);
+    mask.appendChild(textEl);
+    el.appendChild(mask);
+    count++;
+  });
+
+  return count;
+}
+
+function removeLoadingMask(selector: string): number {
+  const elements = document.querySelectorAll<HTMLElement>(selector);
+  if (!elements.length) {
+    console.warn(`[removeLoadingMask] 未找到匹配 "${selector}" 的元素`);
+    return 0;
+  }
+
+  let removedCount = 0;
+  elements.forEach((el) => {
+    const masks = el.querySelectorAll(".lmask-overlay");
+    if (masks.length) {
+      masks.forEach((mask) => mask.remove());
+      removedCount += masks.length;
+    }
+  });
+  return removedCount;
+}
 
 export default (ctx: AppContext, config = {}) => {
   const tools: Tool[] = [
@@ -98,7 +240,9 @@ export default (ctx: AppContext, config = {}) => {
     selector:
       "#app > div > div > div.top-menu-bar > div.top-menu-bar__left > span",
     timeout: 10000,
-    callback: switchVersion,
+    callback: (element: HTMLElement) => {
+      element.innerText = "内测版";
+    },
   });
 
   // cypress();
@@ -131,13 +275,14 @@ export default (ctx: AppContext, config = {}) => {
 
     return async () => {
       try {
+        addLoadingMask(".el-table__inner-wrapper");
         // 调用AI生成JSON数据
         const result = await requestAI(
           `请根据表头 \`${headerTitle.map((item) =>
             item.textContent.startsWith("*")
               ? item.textContent.slice(1)
               : item.textContent || "",
-          )}\` 和表体${bodyRows.length}行，生成一个合法的JSON字符串。JSON输出结构如下：[{"${headerTitle[0].textContent}": "value1", "${headerTitle[1].textContent}": "value2", "..."}]`,
+          )}\` 和表体${bodyRows.length}行，生成一个合法的JSON字符串。JSON输出结构如下：[{"key1": "value1", "key2": "value2", "..."}, {...}, {...} ...]`,
           {
             systemPrompt:
               "你是一个数据处理助手，请只输出合法的JSON字符串，不要包含任何其他文字或解释。",
@@ -158,21 +303,20 @@ export default (ctx: AppContext, config = {}) => {
           if (!rowData) {
             return;
           }
+          maLogger.log("rowData:", rowData);
           cells.forEach((cell, index) => {
             const input = cell.querySelector("input");
             if (input && headerTitle[index]) {
               input.value = rowData[headerTitle[index].textContent || ""] || "";
               const event = new Event("input", { bubbles: true });
               input.dispatchEvent(event);
-              maLogger.log(
-                `已填入${headerTitle[index].textContent || ""},输入框值:`,
-                input.value,
-              );
             }
           });
         });
       } catch (error) {
         console.error("处理表格数据失败:", error);
+      } finally {
+        removeLoadingMask(".el-table__inner-wrapper");
       }
     };
   };
