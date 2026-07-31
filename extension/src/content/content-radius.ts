@@ -350,5 +350,26 @@ export default (ctx: AppContext, config = {}) => {
     },
   });
 
+  waitForSelector({
+    selector:
+      "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-source-header > span",
+    timeout: 10000,
+    callback: (element: HTMLElement) => {
+      addElementToDom({
+        tag: "a",
+        attrs: {
+          href: "/#/datalake/config-driven-designer",
+          target: "_self",
+          innerText: "通用配置",
+        },
+        style: {
+          marginLeft: "10px",
+          color: "var(--el-color-primary)",
+          fontSize: "14px",
+        },
+      })(element, "afterend");
+    },
+  });
+
   return {};
 };
