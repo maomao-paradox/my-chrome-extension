@@ -12,10 +12,9 @@ import { Tool } from "@/types";
 import messenger from "@/message";
 import { requestAI } from "@/utils/ai-request";
 
-function addLoadingMask(selector: string, loadingText: string = "加载中...") {
-  const elements = document.querySelectorAll<HTMLElement>(selector);
-  if (!elements.length) {
-    console.warn(`[addLoadingMask] 未找到匹配 "${selector}" 的元素`);
+function addLoadingMask(el: HTMLElement, loadingText: string = "填写中...") {
+  if (!el) {
+    console.warn(`[addLoadingMask] 未找到元素`);
     return 0;
   }
   // 注入全局动画样式 (只注入一次)
@@ -93,65 +92,61 @@ function addLoadingMask(selector: string, loadingText: string = "加载中...") 
   }
 
   let count = 0;
-  elements.forEach((el) => {
-    // 如果已有遮罩，更新文案并返回
-    const existing = el.querySelector<HTMLElement>(".lmask-overlay");
-    if (existing) {
-      const txt = existing.querySelector(".lmask-text");
-      if (txt) {
-        // 保留文案但更新内容
-        const textNode = txt.childNodes[0];
-        if (textNode) textNode.textContent = loadingText;
-      }
-      existing.style.display = "flex";
-      existing.style.opacity = "1";
-      count++;
-      return;
+
+  // 如果已有遮罩，更新文案并返回
+  const existing = el.querySelector<HTMLElement>(".lmask-overlay");
+  if (existing) {
+    const txt = existing.querySelector(".lmask-text");
+    if (txt) {
+      // 保留文案但更新内容
+      const textNode = txt.childNodes[0];
+      if (textNode) textNode.textContent = loadingText;
     }
-
-    // 确保父元素有定位上下文
-    const style = window.getComputedStyle(el);
-    if (style.position === "static") {
-      el.style.position = "relative";
-    }
-
-    // 创建遮罩容器
-    const mask = document.createElement("div");
-    mask.className = "lmask-overlay";
-
-    // 创建 spinner
-    const spinner = document.createElement("div");
-    spinner.className = "lmask-spinner";
-
-    // 创建文字
-    const textEl = document.createElement("div");
-    textEl.className = "lmask-text";
-    textEl.textContent = loadingText;
-
-    mask.appendChild(spinner);
-    mask.appendChild(textEl);
-    el.appendChild(mask);
+    existing.style.display = "flex";
+    existing.style.opacity = "1";
     count++;
-  });
+    return;
+  }
+
+  // 确保父元素有定位上下文
+  const style = window.getComputedStyle(el);
+  if (style.position === "static") {
+    el.style.position = "relative";
+  }
+
+  // 创建遮罩容器
+  const mask = document.createElement("div");
+  mask.className = "lmask-overlay";
+
+  // 创建 spinner
+  const spinner = document.createElement("div");
+  spinner.className = "lmask-spinner";
+
+  // 创建文字
+  const textEl = document.createElement("div");
+  textEl.className = "lmask-text";
+  textEl.textContent = loadingText;
+
+  mask.appendChild(spinner);
+  mask.appendChild(textEl);
+  el.appendChild(mask);
+  count++;
 
   return count;
 }
 
-function removeLoadingMask(selector: string): number {
-  const elements = document.querySelectorAll<HTMLElement>(selector);
-  if (!elements.length) {
-    console.warn(`[removeLoadingMask] 未找到匹配 "${selector}" 的元素`);
+function removeLoadingMask(el: HTMLElement): number {
+  if (!el) {
+    console.warn(`[removeLoadingMask] 未找到元素`);
     return 0;
   }
 
   let removedCount = 0;
-  elements.forEach((el) => {
-    const masks = el.querySelectorAll(".lmask-overlay");
-    if (masks.length) {
-      masks.forEach((mask) => mask.remove());
-      removedCount += masks.length;
-    }
-  });
+  const masks = el.querySelectorAll(".lmask-overlay");
+  if (masks.length) {
+    masks.forEach((mask) => mask.remove());
+    removedCount += masks.length;
+  }
   return removedCount;
 }
 
@@ -253,7 +248,10 @@ export default (ctx: AppContext, config = {}) => {
     const EL_TABLE_BODY = "table.el-table__body";
 
     const tableEl =
-      tableElement || document.querySelector(".el-table__inner-wrapper");
+      tableElement ||
+      document.querySelector<HTMLElement>(".el-table__inner-wrapper");
+
+    maLogger.log("tableEl:", tableEl);
     if (!tableEl) {
       return () => Promise.resolve(null);
     }
@@ -275,7 +273,7 @@ export default (ctx: AppContext, config = {}) => {
 
     return async () => {
       try {
-        addLoadingMask(".el-table__inner-wrapper");
+        addLoadingMask(tableEl);
         // 调用AI生成JSON数据
         const result = await requestAI(
           `请根据表头 \`${headerTitle.map(
@@ -314,26 +312,39 @@ export default (ctx: AppContext, config = {}) => {
       } catch (error) {
         console.error("处理表格数据失败:", error);
       } finally {
-        removeLoadingMask(".el-table__inner-wrapper");
+        removeLoadingMask(tableEl);
       }
     };
   };
 
   waitForSelector({
-    selector:
+    selector: [
       "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div",
+      "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div > div.el-overlay.el-modal-dialog > div > div > div.el-dialog__body",
+    ],
     timeout: 10000,
     callback: (el: HTMLElement) => {
-      const buttonEl = el.querySelector<HTMLButtonElement>(
-        ".operation-buttons-wrapper > div > button:nth-child(3)",
+      const buttonEl =
+        el.querySelector<HTMLButtonElement>(
+          ".operation-buttons-wrapper > div > button:nth-child(3)",
+        ) ||
+        el.querySelector<HTMLButtonElement>(
+          ".sub-form-toolbar > .el-button--primary",
+        )!;
+      maLogger.log("buttonEl:", buttonEl);
+      const tableEl = el.querySelector<HTMLElement>(
+        ".el-table__inner-wrapper",
       )!;
+      if (!tableEl) {
+        return;
+      }
       addElementToDom({
         tag: buttonEl,
         attrs: {
           innerText: "填充表单",
         },
         eventlistener: {
-          click: handleFillForm(el),
+          click: handleFillForm(tableEl),
         },
       })(buttonEl, "afterend");
     },
