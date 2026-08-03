@@ -28,6 +28,7 @@ const getItemStyle = (index: number) => {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:map";
 // 变量定义
 $bg-color: #161b29;
 $pink: #e645d0;
@@ -127,10 +128,10 @@ $positions: (
 @each $name, $props in $positions {
   .item#{$name} {
     transform: rotate(var(--rotate));
-    left: map-get($props, left);
-    right: map-get($props, right);
-    top: map-get($props, top);
-    bottom: map-get($props, bottom);
+    left: map.get($props, left);
+    right: map.get($props, right);
+    top: map.get($props, top);
+    bottom: map.get($props, bottom);
     animation: animation#{$name} 5s var(--delay) ease infinite;
   }
 

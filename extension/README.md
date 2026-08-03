@@ -32,6 +32,33 @@ npm run build:enc
 
 扩展加载: 打开 `chrome://extensions` → 开启开发者模式 → 加载已解压的扩展程序 → 选择 `dist` 文件夹
 
+## 测试
+
+项目使用 [Vitest](https://vitest.dev/) + [happy-dom](https://github.com/capricorn86/happy-dom) 进行单元测试。
+
+```bash
+# 运行全部测试（一次性）
+npm test -- run
+
+# 进入 watch 模式
+npm test
+
+# 指定测试文件
+npx vitest run test/element-control.spec.ts
+```
+
+### 测试基础设施
+
+- `vitest.config.ts` — 独立的 Vitest 配置，复用 `@` 路径别名并启用 happy-dom 环境
+- `test/setup.ts` — 全局 setup，注入 `maLogger`、`chrome.*` API、`requestIdleCallback` 等 chrome 扩展运行时依赖
+- `test/**/*.spec.ts` — 测试用例目录
+
+### 已覆盖模块
+
+| 模块 | 测试文件 | 用例数 |
+| --- | --- | --- |
+| `src/utils/element-control.ts` | `test/element-control.spec.ts` | 91 |
+
 ## 核心功能
 
 ### AI 智能助手

@@ -9,6 +9,7 @@
     "dev:options": "vite --open /pages/options.html",
     "dp": "npx depcruise --output-type json src > src/deps.json && vite --open /interactive-graph.html",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "test": "vitest",
     "build": "vite build && cp -rf ./dist/ /mnt/h/my-chrome-extension/",
     "build:enc": "ENCRYPT_FILE_MAP=true VITE_FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef yarn build"
   },
@@ -49,6 +50,7 @@
     "eslint": "^10.5.0",
     "eslint-plugin-vue": "^10.9.2",
     "globals": "^17.7.0",
+    "happy-dom": "^20.11.1",
     "javascript-obfuscator": "^5.4.3",
     "jiti": "^2.7.0",
     "less": "^4.6.4",
@@ -61,6 +63,7 @@
     "vite": "^7.1.4",
     "vite-plugin-remove-console": "^2.2.0",
     "vite-svg-loader": "^5.1.1",
+    "vitest": "^4.1.10",
     "vue-eslint-parser": "^10.4.1"
   },
   "eslintConfig": {
