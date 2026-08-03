@@ -50,7 +50,7 @@
 import { computed, onMounted, ref } from "vue";
 import type { ExtMessage } from "@/types";
 import { useDomainState } from "../composables/useDomainState";
-import TableContainer from "./TableContainer.vue";
+import TableContainer from "../components/TableContainer.vue";
 import { IconCapture } from "@icons/index";
 
 const { isDomainDisabled, checkDomainStatus } = useDomainState();

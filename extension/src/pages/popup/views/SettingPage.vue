@@ -214,7 +214,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
 import { MASwitch } from "@components/index";
-import TableContainer from "./TableContainer.vue";
+import TableContainer from "../components/TableContainer.vue";
 import { appConfigKey, domainConfigsKey } from "@/config";
 import {
   IconConfirm,

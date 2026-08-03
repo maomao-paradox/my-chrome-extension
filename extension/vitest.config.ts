@@ -10,9 +10,12 @@
  */
 
 import { defineConfig } from "vitest/config";
+import vue from "@vitejs/plugin-vue";
 import path from "path";
 
 export default defineConfig({
+  // 启用 Vue SFC 支持（单文件组件测试必需）
+  plugins: [vue()],
   // 解析与 vite.config.ts 保持一致的路径别名
   resolve: {
     alias: {

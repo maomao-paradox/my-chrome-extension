@@ -92,7 +92,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
-import TableContainer from './TableContainer.vue';
+import TableContainer from "../components/TableContainer.vue";
 import { IconTime } from '@icons/index';
 import jsQR from 'jsqr';
 import {

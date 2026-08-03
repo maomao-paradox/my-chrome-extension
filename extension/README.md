@@ -34,7 +34,7 @@ npm run build:enc
 
 ## 测试
 
-项目使用 [Vitest](https://vitest.dev/) + [happy-dom](https://github.com/capricorn86/happy-dom) 进行单元测试。
+项目使用 [Vitest](https://vitest.dev/) + [happy-dom](https://github.com/capricorn86/happy-dom) + [Vue Test Utils](https://test-utils.vuejs.org/) 进行单元测试和组件测试。
 
 ```bash
 # 运行全部测试（一次性）
@@ -45,19 +45,29 @@ npm test
 
 # 指定测试文件
 npx vitest run test/element-control.spec.ts
+npx vitest run test/BookmarkPage.spec.ts
 ```
+
+### 测试框架说明
+
+- **Vitest**：与 Vite 深度集成的下一代测试框架，速度极快，完全兼容 Jest API
+- **Vue Test Utils**：Vue 官方推荐的组件测试库，提供 `mount`/`shallowMount` 方法来渲染和交互组件
+- **happy-dom**：轻量级 DOM 模拟环境，替代 jsdom 以获得更好的性能
 
 ### 测试基础设施
 
-- `vitest.config.ts` — 独立的 Vitest 配置，复用 `@` 路径别名并启用 happy-dom 环境
+- `vitest.config.ts` — 独立的 Vitest 配置，复用 `@` 路径别名、启用 Vue SFC 支持和 happy-dom 环境
 - `test/setup.ts` — 全局 setup，注入 `maLogger`、`chrome.*` API、`requestIdleCallback` 等 chrome 扩展运行时依赖
 - `test/**/*.spec.ts` — 测试用例目录
 
 ### 已覆盖模块
 
-| 模块 | 测试文件 | 用例数 |
-| --- | --- | --- |
-| `src/utils/element-control.ts` | `test/element-control.spec.ts` | 91 |
+| 模块 | 测试文件 | 类型 | 用例数 |
+| --- | --- | --- | --- |
+| `src/utils/element-control.ts` | `test/element-control.spec.ts` | 单元测试 | 91 |
+| `src/pages/popup/composables/useDomainState.ts` | `test/useDomainState.spec.ts` | 单元测试 | 15 |
+| `src/pages/popup/views/BookmarkPage.vue` | `test/BookmarkPage.spec.ts` | 组件测试 | 36 |
+| `src/message/index.ts` | `test/message.spec.ts` | 单元测试 | 32 |
 
 ## 核心功能
 
