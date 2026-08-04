@@ -33,12 +33,12 @@ const getItemStyle = (index: number) => {
 $bg-color: #161b29;
 $pink: #e645d0;
 $cyan: #17e1e6;
-$container-size: 40vw;
+$container-size: 20vw;
 $bar-height: 5vw;
 $bar-width: 2vw;
 
 // 基础布局
-body {
+.container {
   background: $bg-color;
   margin: 0 auto;
   height: 100%;

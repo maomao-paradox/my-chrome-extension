@@ -27,7 +27,7 @@ const fetchAndDecodeAudioBuffer = async (
 
 
 class PianoEffect implements AppModule {
-  _context: any = null;
+  _ctx: any = null;
   shadowHostId: string = '';
   isInjected: boolean = false;
   vueContainer: HTMLElement | null = null;

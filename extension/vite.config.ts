@@ -11,6 +11,7 @@ import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import svgLoader from "vite-svg-loader";
+import preact from '@preact/preset-vite';
 
 const isProduction = process.env.NODE_ENV === "production";
 const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
@@ -30,6 +31,7 @@ export default defineConfig({
   cacheDir: "../node_modules/.vite",
   plugins: [
     vue(),
+    preact(),
     svgLoader({
       defaultImport: "url", // 默认作为 URL
       // 这样你可以通过 ?url 来获取 URL，通过 ?component 来获取组件

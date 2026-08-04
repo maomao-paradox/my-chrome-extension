@@ -142,10 +142,6 @@ const isTextareaCandidate = (textarea: HTMLTextAreaElement): boolean => {
     return false;
   }
 
-  if (!textarea.placeholder?.trim()) {
-    return false;
-  }
-
   return isElementVisible(textarea);
 };
 
@@ -183,22 +179,37 @@ const findLabelText = (textarea: HTMLTextAreaElement): string => {
     .join(" / ");
 };
 
-const buildPrompt = (textarea: HTMLTextAreaElement): string => {
+/**
+ * 根据 textarea 元数据构建 AI 提示词
+ * @param textarea 目标 textarea 元素
+ * @param userPrompt 用户自定义的补充提示信息（可选），会追加到提示词末尾
+ */
+export const buildPrompt = (
+  textarea: HTMLTextAreaElement,
+  userPrompt?: string,
+): string => {
   const placeholder = textarea.placeholder.trim();
   const label = findLabelText(textarea);
   const maxLength = textarea.maxLength > 0 ? textarea.maxLength : null;
 
-  return [
+  const baseParts = [
     `页面标题：${document.title || "未命名页面"}`,
     `页面地址：${location.href}`,
     label ? `输入框标签：${label}` : "",
-    `placeholder：${placeholder}`,
+    placeholder ? `placeholder：${placeholder}` : "",
     maxLength ? `最大长度：${maxLength} 个字符` : "",
     "",
-    "请生成一段适合填入该 textarea 的内容。内容需要贴合 placeholder 的要求，语气自然、具体，只输出正文，不要解释、不要 Markdown 代码块、不要添加前后缀说明。",
   ]
     .filter(Boolean)
     .join("\n");
+
+  const instruction = userPrompt?.trim()
+    ? `请根据以下要求生成一段适合填入该 textarea 的内容：\n${userPrompt.trim()}\n\n只输出正文，不要解释、不要 Markdown 代码块、不要添加前后缀说明。`
+    : placeholder
+      ? "请生成一段适合填入该 textarea 的内容。内容需要贴合 placeholder 的要求，语气自然、具体，只输出正文，不要解释、不要 Markdown 代码块、不要添加前后缀说明。"
+      : "请生成一段适合填入该 textarea 的内容。语气自然、具体，只输出正文，不要解释、不要 Markdown 代码块、不要添加前后缀说明。";
+
+  return `${baseParts}\n${instruction}`;
 };
 
 const setNativeTextareaValue = (
@@ -214,14 +225,21 @@ const setNativeTextareaValue = (
   textarea.dispatchEvent(new Event("change", { bubbles: true }));
 };
 
+/**
+ * 调用 AI 生成 textarea 填充内容
+ * @param textarea 目标 textarea 元素
+ * @param onContent 流式内容回调（可选）
+ * @param userPrompt 用户自定义的补充提示信息（可选）
+ */
 const generateTextareaContent = async (
   textarea: HTMLTextAreaElement,
   onContent?: (content: string) => void,
+  userPrompt?: string,
 ): Promise<string> => {
   const messageId = createMessageId();
   const config = await loadAIConfig();
   const port = chrome.runtime.connect({ name: `ai-conversation-${messageId}` });
-  const prompt = buildPrompt(textarea);
+  const prompt = buildPrompt(textarea, userPrompt);
 
   return new Promise((resolve, reject) => {
     let content = "";
@@ -299,7 +317,15 @@ const generateTextareaContent = async (
   });
 };
 
-const fillTextarea = async (textarea: HTMLTextAreaElement): Promise<void> => {
+/**
+ * 执行 textarea AI 自动填充
+ * @param textarea 目标 textarea 元素
+ * @param userPrompt 用户自定义的补充提示信息（可选）
+ */
+const fillTextarea = async (
+  textarea: HTMLTextAreaElement,
+  userPrompt?: string,
+): Promise<void> => {
   if (!shouldFillTextarea(textarea)) {
     return;
   }
@@ -332,6 +358,7 @@ const fillTextarea = async (textarea: HTMLTextAreaElement): Promise<void> => {
     const generated = await generateTextareaContent(
       textarea,
       writeStreamContent,
+      userPrompt,
     );
     if (userEditedDuringGeneration || textarea.value !== lastStreamedValue) {
       setTextareaState(textarea, "skipped");
@@ -360,6 +387,8 @@ const fillTextarea = async (textarea: HTMLTextAreaElement): Promise<void> => {
 export type TextareaAIMessagePayload = {
   selector?: string;
   index?: number;
+  /** 用户自定义的补充提示信息，用于指导 AI 生成特定内容 */
+  prompt?: string;
 };
 
 const getCandidateTextareas = (
@@ -367,17 +396,14 @@ const getCandidateTextareas = (
 ): HTMLTextAreaElement[] => {
   const textareas: HTMLTextAreaElement[] = [];
 
-  if (
-    root instanceof HTMLTextAreaElement &&
-    root.matches("textarea[placeholder]")
-  ) {
+  if (root instanceof HTMLTextAreaElement) {
     textareas.push(root);
   }
 
   if ("querySelectorAll" in root) {
     textareas.push(
       ...Array.from(
-        root.querySelectorAll<HTMLTextAreaElement>("textarea[placeholder]"),
+        root.querySelectorAll<HTMLTextAreaElement>("textarea"),
       ),
     );
   }
@@ -400,7 +426,7 @@ const getMessageTextarea = (
       return element;
     }
 
-    const textarea = element?.querySelector?.("textarea[placeholder]");
+    const textarea = element?.querySelector?.("textarea");
     if (textarea instanceof HTMLTextAreaElement) {
       return textarea;
     }
@@ -428,7 +454,7 @@ export const fillTextareaByAI = async (
     return { success: false, msg: "textarea 当前不可填入 AI 内容" };
   }
 
-  await fillTextarea(textarea);
+  await fillTextarea(textarea, payload.prompt);
   return {
     success: getTextareaState(textarea) !== "error",
     msg: textarea.getAttribute(ERROR_ATTR) || "textarea AI 填入完成",
@@ -440,6 +466,7 @@ export const fillTextareaByAI = async (
 
 export const fillTextareaElementByAI = async (
   textarea: HTMLTextAreaElement,
+  userPrompt?: string,
 ) => {
   if (!isTextareaCandidate(textarea)) {
     return { success: false, msg: "textarea 当前不可填入 AI 内容" };
@@ -449,7 +476,7 @@ export const fillTextareaElementByAI = async (
     return { success: false, msg: "textarea 正在生成中" };
   }
 
-  await fillTextarea(textarea);
+  await fillTextarea(textarea, userPrompt);
   return {
     success: getTextareaState(textarea) !== "error",
     msg: textarea.getAttribute(ERROR_ATTR) || "textarea AI 填入完成",
