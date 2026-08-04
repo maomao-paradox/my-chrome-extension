@@ -1,0 +1,81 @@
+/**
+ * App 组件样式 - Preact 版本
+ * 从 Vue 版本迁移的 SCSS 样式
+ */
+
+.toolbar-root {
+  position: relative;
+}
+
+.animation-container {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999998;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.animation-container.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.red-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.94);
+  background: linear-gradient(135deg, #f97316, #0d9488);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow:
+    0 6px 16px rgba(15, 23, 42, 0.18),
+    0 0 0 4px rgba(13, 148, 136, 0.14);
+  animation: pulse 2s infinite;
+  z-index: 999999;
+  transition: transform 0.2s ease;
+}
+
+.red-dot:hover {
+  transform: scale(1.15);
+}
+
+.red-dot:focus-visible {
+  outline: 2px solid rgba(249, 115, 22, 0.8);
+  outline-offset: 3px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow:
+      0 6px 16px rgba(15, 23, 42, 0.18),
+      0 0 0 4px rgba(13, 148, 136, 0.14);
+  }
+
+  50% {
+    box-shadow:
+      0 8px 18px rgba(15, 23, 42, 0.2),
+      0 0 0 7px rgba(13, 148, 136, 0.1),
+      0 0 0 11px rgba(249, 115, 22, 0.08);
+  }
+
+  100% {
+    box-shadow:
+      0 6px 16px rgba(15, 23, 42, 0.18),
+      0 0 0 4px rgba(13, 148, 136, 0.14);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animation-container,
+  .red-dot {
+    animation: none;
+    transition: none;
+  }
+}

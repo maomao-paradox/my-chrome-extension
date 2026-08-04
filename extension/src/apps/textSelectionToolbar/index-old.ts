@@ -1,17 +1,17 @@
 /**
  * @author Zero
- * @version v2.0.0
+ * @version v1.0.0
  * @license MIT
- * @file src/apps/textSelectionToolbar/index-preact.ts
- * @description Preact 版本的文本选择工具栏入口
+ * @sequence X
+ * @file src/apps/textSelectionToolbar/index.ts
+ * @date 2026-02-05T02:38:01.692Z
  */
 
-import { AppModule } from "@/types/index.js";
+import { AppModule, TextTool } from "@/types";
 import { shadowHostId } from "@/config";
-import { h, render } from "preact";
-import App from "./preact/App";
+import TextSelectionToolbarApp from "./App.vue";
 import { createShadowHost, injectCssDom } from "@/utils/shadow-dom";
-import { storage } from "@/stores";
+import { storage, pinia } from "@/stores";
 import {
   debounce,
   ElementPositionInfo,
@@ -19,21 +19,18 @@ import {
   PositionStrategy,
   showSuccessMessage,
 } from "@/utils";
+import { createApp } from "vue";
 import { componentManager } from "@/utils/componentManager";
-import { TextTool } from "@/types";
 import { getAssetsAbstractPathSync } from "@/utils/common";
 import { generateId } from "@/utils/base";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
 import { loadAIConfig } from "@/utils/ai-config";
-import { fillTextareaElementByAI } from "./textarea-ai";
+import { fillTextareaElementByAI, buildPrompt } from "./textarea-ai.js";
 
 const appName = "textSelectionToolbar";
 
 const TRANSLATOR_ROLE_PREFIX = "translator";
 
-/**
- * 获取翻译会话角色
- */
 const getTranslationSessionRole = (): string => {
   const hostname = location.hostname.trim().toLowerCase();
   const fallbackScope = location.protocol.replace(/:$/, "") || "page";
@@ -42,9 +39,6 @@ const getTranslationSessionRole = (): string => {
   return `${TRANSLATOR_ROLE_PREFIX}_${safeScope}`;
 };
 
-/**
- * 创建翻译流端口
- */
 const createTranslationStreamPort = (messageId: string) => {
   const port = chrome.runtime.connect({ name: `ai-conversation-${messageId}` });
   maLogger.log("创建端口连接成功:", port);
@@ -53,9 +47,6 @@ const createTranslationStreamPort = (messageId: string) => {
 
 type OnStreamUpdate = (content: string, status: TranslationPanelStatus) => void;
 
-/**
- * 设置翻译流处理器
- */
 const setupTranslationStreamHandlers = (
   port: chrome.runtime.Port,
   messageId: string,
@@ -98,9 +89,6 @@ const setupTranslationStreamHandlers = (
   return fullTranslation;
 };
 
-/**
- * 文本选择工具栏选项接口
- */
 declare interface TextSelectionToolbarOptions {
   enabled?: boolean;
   tools?: TextTool[];
@@ -125,15 +113,15 @@ interface TranslationPanelPayload {
 
 type TextareaAIDotState = "idle" | "generating" | "filled" | "error";
 
-/**
- * 文本选择工具栏模块 - Preact 版本
- */
+// 文本选择工具栏模块
 class TextSelectionToolbarModule implements AppModule {
   shadowHostId: string = shadowHostId;
   isInjected: boolean = false;
-  preactContainer: HTMLElement | null = null;
+  vueContainer: HTMLElement | null = null;
   shadowRoot: ShadowRoot | null = null;
+  appInstance: ReturnType<typeof createApp> | null = null;
   isEnabled: boolean = false;
+  _ctx: any = null;
   private isVisible: boolean = false;
   private positionTimer: ReturnType<typeof setTimeout> | null = null;
   private customTools: TextTool[] = [];
@@ -316,6 +304,7 @@ class TextSelectionToolbarModule implements AppModule {
         return;
       }
 
+      // 获取当前网页信息
       const url = window.location.href;
       const title = document.title;
       const scrollPosition = {
@@ -325,6 +314,7 @@ class TextSelectionToolbarModule implements AppModule {
 
       maLogger.log("保存书签信息:", { text, url, title, scrollPosition });
 
+      // 保存书签
       const bookmark = await BookmarkStorage.saveBookmark({
         text,
         url,
@@ -333,14 +323,20 @@ class TextSelectionToolbarModule implements AppModule {
       });
 
       maLogger.log("书签保存成功:", bookmark);
+
+      // 显示保存成功的反馈
       this.showBookmarkSuccess();
     } catch (error) {
       maLogger.error("书签保存失败:", error);
+      // 显示错误信息
       const errorContainer = this.createErrorContainer(error);
       document.body.appendChild(errorContainer);
     }
   }
 
+  /**
+   * 显示书签保存成功的反馈
+   */
   private showBookmarkSuccess(): void {
     showSuccessMessage("书签保存成功！");
   }
@@ -563,7 +559,7 @@ class TextSelectionToolbarModule implements AppModule {
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
       }
     `;
-    this.shadowRoot!.appendChild(style);
+    this.shadowRoot.appendChild(style);
   }
 
   private setTextareaAIDotState(
@@ -650,6 +646,7 @@ class TextSelectionToolbarModule implements AppModule {
     if (this.textareaAIPositionTimer) {
       clearTimeout(this.textareaAIPositionTimer);
     }
+    //@ts-ignore
     this.textareaAIPositionTimer = window.setTimeout(() => {
       this.textareaAIPositionTimer = null;
       this.syncTextareaAIDots();
@@ -665,14 +662,18 @@ class TextSelectionToolbarModule implements AppModule {
     }
 
     this.promptTargetTextarea = textarea;
+    // 只显示 placeholder 内容，没有则为空白
     const defaultPrompt = textarea.placeholder || "";
 
+    // 创建遮罩层
     const overlay = document.createElement("div");
     overlay.className = "textarea-ai-prompt-overlay";
 
+    // 创建对话框
     const dialog = document.createElement("div");
     dialog.className = "textarea-ai-prompt-dialog";
 
+    // 头部
     const header = document.createElement("div");
     header.className = "textarea-ai-prompt-header";
 
@@ -689,11 +690,13 @@ class TextSelectionToolbarModule implements AppModule {
     header.appendChild(title);
     header.appendChild(closeBtn);
 
+    // 提示词输入框
     const promptTextarea = document.createElement("textarea");
     promptTextarea.className = "textarea-ai-prompt-textarea";
     promptTextarea.value = defaultPrompt;
     promptTextarea.spellcheck = false;
 
+    // 底部按钮
     const footer = document.createElement("div");
     footer.className = "textarea-ai-prompt-footer";
 
@@ -708,6 +711,7 @@ class TextSelectionToolbarModule implements AppModule {
       "textarea-ai-prompt-btn textarea-ai-prompt-btn-confirm";
     confirmBtn.textContent = "确定生成";
     confirmBtn.addEventListener("click", () => {
+      // 先保存 textarea 引用和 prompt，因为 closePromptDialog 会清空 promptTargetTextarea
       const targetTextarea = this.promptTargetTextarea;
       const finalPrompt = promptTextarea.value.trim();
       this.closePromptDialog();
@@ -717,22 +721,26 @@ class TextSelectionToolbarModule implements AppModule {
     footer.appendChild(cancelBtn);
     footer.appendChild(confirmBtn);
 
+    // 组装
     dialog.appendChild(header);
     dialog.appendChild(promptTextarea);
     dialog.appendChild(footer);
     overlay.appendChild(dialog);
 
+    // 点击遮罩关闭
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) {
         this.closePromptDialog();
       }
     });
 
+    // ESC 关闭
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         this.closePromptDialog();
         document.removeEventListener("keydown", handleKeydown);
       } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        // 先保存引用，避免 closePromptDialog 清空 promptTargetTextarea
         const targetTextarea = this.promptTargetTextarea;
         const finalPrompt = promptTextarea.value.trim();
         this.closePromptDialog();
@@ -750,6 +758,7 @@ class TextSelectionToolbarModule implements AppModule {
     this.promptDialog = overlay;
     this.promptTextarea = promptTextarea;
 
+    // 自动聚焦并选中用户指令部分
     setTimeout(() => {
       promptTextarea.focus();
     }, 100);
@@ -769,6 +778,8 @@ class TextSelectionToolbarModule implements AppModule {
 
   /**
    * 提交 Prompt 并执行 AI 填充
+   * @param textarea 目标 textarea（由调用方传入，避免被 closePromptDialog 清空）
+   * @param userPrompt 用户编辑后的提示词
    */
   private async submitPromptAndFill(
     textarea: HTMLTextAreaElement | null,
@@ -785,6 +796,7 @@ class TextSelectionToolbarModule implements AppModule {
     }
 
     try {
+      // 用户修改后的内容直接作为 userPrompt 传递
       const result = await fillTextareaElementByAI(
         textarea,
         userPrompt || undefined,
@@ -815,6 +827,7 @@ class TextSelectionToolbarModule implements AppModule {
       return;
     }
 
+    // 显示 Prompt 编辑弹窗，让用户确认/修改后再提交
     this.showPromptDialog(textarea);
   }
 
@@ -866,18 +879,16 @@ class TextSelectionToolbarModule implements AppModule {
   }
 
   constructor(options?: TextSelectionToolbarOptions) {
+    //@ts-ignore 初始化自定义工具配置
     this.customTools = options?.tools || [
       {
         id: "copy",
         label: "复制",
         handler: (text: string) => {
           const textToCopy = text || this.selectedText;
-          navigator.clipboard
-            .writeText(textToCopy)
-            .then(() => showSuccessMessage("复制成功！"))
-            .catch((err) => {
-              showSuccessMessage(`复制失败: ${err}`);
-            });
+          navigator.clipboard.writeText(textToCopy).catch((err) => {
+            maLogger.error("复制失败:", err);
+          });
         },
       },
       {
@@ -987,8 +998,8 @@ class TextSelectionToolbarModule implements AppModule {
    * 显示并定位组件
    */
   private showAndPositionComponent = () => {
-    if (!this.shadowRoot || !this.preactContainer || !this.selectionRange) {
-      maLogger.error("Shadow DOM、Preact 容器或选区不存在");
+    if (!this.shadowRoot || !this.vueContainer || !this.selectionRange) {
+      maLogger.error("Shadow DOM、Vue 容器或选区不存在");
       return;
     }
 
@@ -1004,7 +1015,7 @@ class TextSelectionToolbarModule implements AppModule {
     });
 
     positionInfo.positionElement({
-      targetElement: this.preactContainer,
+      targetElement: this.vueContainer,
       strategy: PositionStrategy.Down,
       alignment: "center",
       offset: { x: 0, y: 10 },
@@ -1021,7 +1032,7 @@ class TextSelectionToolbarModule implements AppModule {
    * 隐藏组件
    */
   private hideComponent = () => {
-    if (!this.preactContainer) {
+    if (!this.vueContainer) {
       return;
     }
 
@@ -1033,16 +1044,23 @@ class TextSelectionToolbarModule implements AppModule {
    * 清理组件资源
    */
   private cleanupComponent = () => {
+    // 清除定时器
     this.clearPositionTimer();
 
+    // 卸载Vue应用
+    if (this.appInstance) {
+      this.appInstance.unmount();
+      this.appInstance = null;
+    }
+
     // 移除容器元素
-    if (this.preactContainer) {
+    if (this.vueContainer) {
       try {
-        this.preactContainer.remove();
+        this.vueContainer.remove();
       } catch (error) {
         // 元素可能已经被移除
       }
-      this.preactContainer = null;
+      this.vueContainer = null;
     }
   };
 
@@ -1056,6 +1074,9 @@ class TextSelectionToolbarModule implements AppModule {
     }
   }
 
+  /**
+   * 创建临时元素用于定位
+   */
   private createTempElement(
     x: number,
     y: number,
@@ -1075,6 +1096,9 @@ class TextSelectionToolbarModule implements AppModule {
     return tempElement;
   }
 
+  /**
+   * 移除临时元素
+   */
   private removeTempElement(element: HTMLElement): void {
     setTimeout(() => {
       try {
@@ -1085,6 +1109,9 @@ class TextSelectionToolbarModule implements AppModule {
     }, 1000);
   }
 
+  /**
+   * 处理文本选择事件
+   */
   // 防抖处理的文本选择事件
   private handleSelectionChange = debounce(() => {
     const selection = window.getSelection();
@@ -1110,8 +1137,11 @@ class TextSelectionToolbarModule implements AppModule {
       this.selectionRange = null;
       this.hideComponent();
     }
-  }, 100);
+  }, 100); // 100ms 防抖延迟
 
+  /**
+   * 处理来自iframe的选择事件
+   */
   private handleIframeSelectionChange = debounce((event: CustomEvent) => {
     maLogger.log("收到来自iframe的选择事件:", event);
     const { text, selectionRect } = event.detail;
@@ -1120,6 +1150,7 @@ class TextSelectionToolbarModule implements AppModule {
       maLogger.log("iframe中选中的文本:", text);
       maLogger.log("选中文本的位置:", selectionRect);
 
+      // 创建临时元素用于保存选区位置
       const tempElement = this.createTempElement(
         selectionRect.left,
         selectionRect.top,
@@ -1127,6 +1158,7 @@ class TextSelectionToolbarModule implements AppModule {
         selectionRect.height,
       );
 
+      // 调用组件的showWithIframeText方法保存选中文本
       componentManager.call("TextSelectionToolbar", "updateText", text);
 
       try {
@@ -1138,6 +1170,7 @@ class TextSelectionToolbarModule implements AppModule {
         maLogger.error("创建iframe选择的临时Range失败:", error);
       }
 
+      // 移除临时元素
       setTimeout(() => {
         try {
           document.body.removeChild(tempElement);
@@ -1154,11 +1187,13 @@ class TextSelectionToolbarModule implements AppModule {
    */
   async inject(): Promise<void> {
     try {
+      // 只有在主页面才注入
       if (window.self !== window.top) {
         maLogger.log("不是主页面，不注入文本选择工具栏");
         return;
       }
 
+      // 确保DOM准备好
       if (!document.body) {
         await new Promise((resolve) => {
           const checkBody = () => {
@@ -1172,7 +1207,9 @@ class TextSelectionToolbarModule implements AppModule {
         });
       }
 
-      // 注入选中文本样式
+      // maLogger.log("开始注入文本选择工具栏")
+
+      // 注入选中文本样式到页面body
       if (!document.head.querySelector("#selection-custom-style")) {
         const selectionStyle = document.createElement("style");
         selectionStyle.id = "selection-custom-style";
@@ -1190,7 +1227,8 @@ class TextSelectionToolbarModule implements AppModule {
       // 如果已经注入，则不重复注入
       if (
         this.isInjected &&
-        this.preactContainer &&
+        this.appInstance &&
+        this.vueContainer &&
         this.shadowRoot &&
         document.getElementById(this.shadowHostId)
       ) {
@@ -1198,11 +1236,14 @@ class TextSelectionToolbarModule implements AppModule {
       }
 
       if (!this.shadowRoot) {
+        // maLogger.log("创建Shadow DOM")
         const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
         this.shadowRoot = shadowRoot;
       }
 
       if (!this.isInjected) {
+        // 注入样式
+        // maLogger.log("注入悬浮球样式");
         injectCssDom(
           this.shadowRoot!,
           getAssetsAbstractPathSync(`css/${appName}`),
@@ -1210,12 +1251,12 @@ class TextSelectionToolbarModule implements AppModule {
         this.isInjected = true;
       }
 
-      // 创建Preact容器
+      // 创建Vue容器
       if (
-        !this.preactContainer &&
+        !this.vueContainer &&
         !this.shadowRoot?.getElementById(`shadow-app-${appName}`)
       ) {
-        this.preactContainer = addElementToDom({
+        this.vueContainer = addElementToDom({
           tag: "div",
           attrs: {
             id: `shadow-app-${appName}`,
@@ -1224,17 +1265,19 @@ class TextSelectionToolbarModule implements AppModule {
         })(this.shadowRoot!);
       }
 
-      // 渲染Preact应用
-      if (this.preactContainer) {
-        render(
-          h(App, {
-            initialText: "",
-            customTools: this.customTools,
-            showCloseBtn: this.showCloseBtn,
-          }),
-          this.preactContainer,
-        );
+      // 创建并挂载Vue应用
+      if (this.appInstance) {
+        this.appInstance.unmount();
+        this.appInstance = null;
       }
+
+      // 使用TextSelectionToolbarApp组件
+      this.appInstance = createApp(TextSelectionToolbarApp, {
+        customTools: this.customTools,
+        showCloseBtn: this.showCloseBtn,
+      });
+      this.appInstance.use(pinia);
+      this.appInstance.mount(this.vueContainer!);
     } catch (error) {
       maLogger.error("注入文本选择工具栏失败:", error);
     }
@@ -1245,11 +1288,7 @@ class TextSelectionToolbarModule implements AppModule {
       const selection = window.getSelection();
       const selectedText = selection?.toString().trim() || this.selectedText;
 
-      if (
-        selectedText.length > 0 &&
-        this.selectionRange &&
-        this.preactContainer
-      ) {
+      if (selectedText.length > 0 && this.selectionRange && this.vueContainer) {
         maLogger.log("用户按下 ~ 键，显示工具栏");
         this.showAndPositionComponent();
       }
@@ -1257,7 +1296,7 @@ class TextSelectionToolbarModule implements AppModule {
   };
 
   private handleScroll = () => {
-    if (this.isVisible && this.selectionRange && this.preactContainer) {
+    if (this.isVisible && this.selectionRange && this.vueContainer) {
       const rect = this.selectionRange.getBoundingClientRect();
       if (rect.width > 0 || rect.height > 0) {
         const positionInfo = new ElementPositionInfo({
@@ -1272,7 +1311,7 @@ class TextSelectionToolbarModule implements AppModule {
         });
 
         positionInfo.positionElement({
-          targetElement: this.preactContainer,
+          targetElement: this.vueContainer,
           strategy: PositionStrategy.Down,
           alignment: "center",
           offset: { x: 0, y: 10 },
@@ -1288,11 +1327,14 @@ class TextSelectionToolbarModule implements AppModule {
    */
   enable(options?: any): void {
     try {
+      // 确保ShadowRoot存在
       if (!this.shadowRoot) {
+        // maLogger.log("创建Shadow DOM")
         const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
         this.shadowRoot = shadowRoot;
       }
 
+      // 如果未注入，则先注入
       if (!this.isInjected || !document.getElementById(this.shadowHostId)) {
         this.inject().catch((error) => {
           maLogger.error("注入文本选择工具栏失败:", error);
@@ -1322,7 +1364,7 @@ class TextSelectionToolbarModule implements AppModule {
       }
 
       this.isEnabled = true;
-      maLogger.log("文本选择工具栏已启用(Preact版本)");
+      maLogger.log("文本选择工具栏已启用");
     } catch (error) {
       maLogger.error("启用文本选择工具栏失败:", error);
     }
@@ -1337,15 +1379,20 @@ class TextSelectionToolbarModule implements AppModule {
         "selectionchange",
         this.handleSelectionChange as EventListener,
       );
+      // document.removeEventListener("dblclick", this.handleDoubleClick);
       document.removeEventListener("keydown", this.handleKeyDown);
       window.removeEventListener("scroll", this.handleScroll, true);
+      //@ts-ignore  移除来自iframe的选择事件监听
       window.removeEventListener(
         "iframe-selectionchange",
         this.handleIframeSelectionChange,
       );
 
+      // 隐藏组件
       this.hideComponent();
       this.disableTextareaAI();
+
+      // 清理组件资源
       this.cleanupComponent();
 
       this.isEnabled = false;
@@ -1367,6 +1414,7 @@ class TextSelectionToolbarModule implements AppModule {
         this.customTools = [...options.tools];
       }
 
+      // 可以从存储中加载配置
       const config = await storage.ext.local.get("appConfig");
       if (config?.appConfig?.textSelectionToolbar !== false) {
         this.enable();
@@ -1388,7 +1436,7 @@ class TextSelectionToolbarModule implements AppModule {
   }
 }
 
-// 导出 Preact 版本
+// 导出接口，兼容ESMModuleLoader
 export default (ctx: AppContext, options?: any): AppModule => {
   const appInstance = new TextSelectionToolbarModule(options);
   appInstance.init(ctx);

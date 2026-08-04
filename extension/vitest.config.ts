@@ -11,11 +11,12 @@
 
 import { defineConfig } from "vitest/config";
 import vue from "@vitejs/plugin-vue";
+import preact from "@preact/preset-vite";
 import path from "path";
 
 export default defineConfig({
-  // 启用 Vue SFC 支持（单文件组件测试必需）
-  plugins: [vue()],
+  // 启用 Vue SFC 支持（单文件组件测试必需）和 Preact 支持
+  plugins: [vue(), preact()],
   // 解析与 vite.config.ts 保持一致的路径别名
   resolve: {
     alias: {
@@ -35,7 +36,7 @@ export default defineConfig({
       },
     },
     // 测试文件匹配规则
-    include: ["test/**/*.spec.ts", "test/**/*.test.ts"],
+    include: ["test/**/*.spec.ts", "test/**/*.spec.tsx", "test/**/*.test.ts", "test/**/*.test.tsx"],
     // 全局 setup：注入 maLogger / chrome API 等 chrome 扩展运行时
     setupFiles: ["./test/setup.ts"],
     // 测试覆盖率配置（可选，未来扩展使用）
