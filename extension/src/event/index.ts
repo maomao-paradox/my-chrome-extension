@@ -1,7 +1,10 @@
 import { onMounted, onUnmounted } from 'vue';
-import mitt, { Emitter } from 'mitt';
+import { Emitter } from 'mitt';
+import { bus } from './bus';
 
-export const bus = mitt();
+// re-export bus 保持向后兼容（但从此处导入 bus 会引入 vue chunk，
+// React/Preact 应用应直接从 @/event/bus 导入）
+export { bus };
 
 export interface EventManager {
     useBus(busName: string, handler: (...args: any[]) => void): Emitter<any> | void

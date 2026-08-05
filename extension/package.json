@@ -10,7 +10,10 @@
     "dp": "npx depcruise --output-type json src > src/deps.json && vite --open /interactive-graph.html",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "vitest",
-    "build": "vite build && cp -rf ./dist/ /mnt/h/my-chrome-extension/",
+    "test:react": "vitest --config vitest.config.react.ts",
+    "test:react:run": "vitest run --config vitest.config.react.ts",
+    "test:all": "vitest run; vitest run --config vitest.config.react.ts",
+    "build": "vite build && rm -rf /mnt/h/my-chrome-extension/* && cp -rf ./dist/ /mnt/h/my-chrome-extension/",
     "build:enc": "ENCRYPT_FILE_MAP=true VITE_FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef yarn build"
   },
   "license": "MIT",

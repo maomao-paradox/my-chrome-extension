@@ -37,6 +37,16 @@ export default defineConfig({
     },
     // 测试文件匹配规则
     include: ["test/**/*.spec.ts", "test/**/*.spec.tsx", "test/**/*.test.ts", "test/**/*.test.tsx"],
+    // 排除 React 专用测试（由 vitest.config.react.ts 单独处理）
+    // 避免在没有 plugin-react 的环境下编译 .tsx 失败
+    exclude: [
+      "node_modules/**",
+      "dist/**",
+      "test/react-*.spec.ts",
+      "test/react-*.spec.tsx",
+      "test/react-*.test.ts",
+      "test/react-*.test.tsx",
+    ],
     // 全局 setup：注入 maLogger / chrome API 等 chrome 扩展运行时
     setupFiles: ["./test/setup.ts"],
     // 测试覆盖率配置（可选，未来扩展使用）

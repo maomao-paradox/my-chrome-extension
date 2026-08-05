@@ -33,7 +33,11 @@ export default defineConfig({
   plugins: [
     vue(),
     react(),
-    preact(),
+    preact({
+      exclude: [
+        /src\/pages\/popup\/.*\.(tsx|ts)$/,
+      ],
+    }),
     svgLoader({
       defaultImport: "url", // 默认作为 URL
       // 这样你可以通过 ?url 来获取 URL，通过 ?component 来获取组件
