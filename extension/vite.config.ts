@@ -11,7 +11,7 @@ import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import svgLoader from "vite-svg-loader";
-import preact from '@preact/preset-vite';
+import preact from "@preact/preset-vite";
 
 const isProduction = process.env.NODE_ENV === "production";
 const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
@@ -124,6 +124,7 @@ export default defineConfig({
         manualChunks: isProduction
           ? {
               vue: ["vue", "vue-router", "pinia"],
+              react: ["preact", "preact/compat", "preact/hooks"],
               "element-plus": ["element-plus", "@element-plus/icons-vue"],
               // 基础设施 - 纯函数工具，可在 Service Worker 中使用
               "infrastructure-pure": ["@/utils/pure-utils"],
@@ -183,7 +184,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["vue", "pinia", "vue-router", "element-plus"],
+    include: ["vue", "pinia", "vue-router", "element-plus", "preact", "preact/compat", "preact/hooks"],
     esbuildOptions: {
       target: "es2022",
     },

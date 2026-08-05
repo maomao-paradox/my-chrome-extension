@@ -60,6 +60,48 @@ vi.mock('@/utils', () => ({
   showSuccessMessage: mocks.showSuccessMessage,
 }));
 
+// Mock lazy loaded components to resolve immediately
+vi.mock('@/apps/textSelectionToolbar/preact/TranslationPanel', () => ({
+  default: ({ visible, content, status, position, shakeKey, onClose }: any) => {
+    if (!visible) return null;
+    return h('div', { className: 'translation-panel' }, [
+      h('div', { className: 'translation-panel__header' }, 'AI解释'),
+      h('div', { className: `translation-panel__body is-${status}` }, content),
+    ]);
+  },
+}));
+
+vi.mock('@/apps/textSelectionToolbar/preact/ReplaceModal', () => ({
+  default: ({ visible, onClose, onReplace, searchText }: any) => {
+    if (!visible) return null;
+    return h('div', { className: 'replace-modal' }, [
+      h('button', { className: 'replace-modal__close', onClick: onClose }, '×'),
+      h('div', { className: 'replace-modal__body' }, searchText),
+    ]);
+  },
+}));
+
+vi.mock('@/apps/textSelectionToolbar/preact/CommentModal', () => ({
+  default: ({ visible, onClose, onSave, onDelete, selectedText }: any) => {
+    if (!visible) return null;
+    return h('div', { className: 'comment-modal' }, [
+      h('textarea', { className: 'comment-textarea' }),
+      h('div', { className: 'comment-modal-footer' }, [
+        h('button', { className: 'btn-primary', onClick: () => onSave?.({ text: selectedText, comment: 'test' }) }, '保存'),
+      ]),
+    ]);
+  },
+}));
+
+vi.mock('@/apps/textSelectionToolbar/preact/CommentDisplay', () => ({
+  default: ({ visible, comment, onClose, onEdit }: any) => {
+    if (!visible) return null;
+    return h('div', { className: 'comment-display' }, [
+      h('div', { className: 'comment-display__content' }, comment?.comment),
+    ]);
+  },
+}));
+
 describe('App 组件', () => {
   const mockTools: TextTool[] = [
     { id: 'copy', label: '复制', handler: vi.fn() },

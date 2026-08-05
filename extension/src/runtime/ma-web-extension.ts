@@ -10,9 +10,9 @@
 
 // 直接导入CSS文件内容，Vite会将其转换为字符串
 //@ts-ignore
-import shadowThemeCss from '@/assets/styles/shadow-theme.css?raw';
+import shadowThemeCss from "@/assets/styles/shadow-theme.css?raw";
 //@ts-ignore
-import elementPlusCss from 'element-plus/dist/index.css?raw';
+import elementPlusCss from "element-plus/dist/index.css?raw";
 (function () {
   class MaWebExtension extends HTMLElement {
     private _shadowRoot: ShadowRoot | null = null;
@@ -21,7 +21,7 @@ import elementPlusCss from 'element-plus/dist/index.css?raw';
       super();
 
       // 创建 Shadow Root
-      this.setShadowRoot(this.attachShadow({ mode: 'open' }));
+      this.setShadowRoot(this.attachShadow({ mode: "open" }));
 
       // 注入样式
       this.injectStyles(elementPlusCss, true);
@@ -29,11 +29,11 @@ import elementPlusCss from 'element-plus/dist/index.css?raw';
 
       // 设置默认样式
       Object.assign(this.style, {
-        overflow: 'visible',
-        position: 'absolute',
-        top: '0px',
-        left: '0px',
-        display: 'block'
+        overflow: "visible",
+        position: "absolute",
+        top: "0px",
+        left: "0px",
+        display: "block",
       });
     }
 
@@ -58,13 +58,16 @@ import elementPlusCss from 'element-plus/dist/index.css?raw';
      * @param {string} styles - CSS 字符串
      * @param {boolean} replaceRootSelector - 是否将 :root 替换为 :host (默认: false)
      */
-    private injectStyles(styles: string, replaceRootSelector: boolean = false): void {
+    private injectStyles(
+      styles: string,
+      replaceRootSelector: boolean = false,
+    ): void {
       // 如果需要替换 :root 选择器为 :host
       if (replaceRootSelector) {
-        styles = styles.replace(/:root/g, ':host');
+        styles = styles.replace(/:root/g, ":host");
       }
 
-      const styleElement = document.createElement('style');
+      const styleElement = document.createElement("style");
       styleElement.textContent = styles;
       this._shadowRoot?.appendChild(styleElement);
     }
@@ -74,8 +77,8 @@ import elementPlusCss from 'element-plus/dist/index.css?raw';
      * @param {string} href - 样式文件URL
      */
     public injectStyleLink(href: string): void {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
       link.href = href;
       this._shadowRoot?.appendChild(link);
     }
@@ -86,19 +89,19 @@ import elementPlusCss from 'element-plus/dist/index.css?raw';
      */
     public async injectCssDom(cssUrl: string): Promise<string> {
       try {
-        const cssContent = await fetch(cssUrl).then(res => res.text());
+        const cssContent = await fetch(cssUrl).then((res) => res.text());
         this.injectStyles(cssContent);
         return cssContent;
       } catch (error) {
-        console.error('Error reading and injecting CSS:', error);
+        console.error("Error reading and injecting CSS:", error);
         throw error;
       }
     }
   }
 
   // 注册自定义元素
-  if (!customElements.get('ma-web-extension')) {
-    customElements.define('ma-web-extension', MaWebExtension);
-    console.log('ma-web-extension custom element registered');
+  if (!customElements.get("ma-web-extension")) {
+    customElements.define("ma-web-extension", MaWebExtension);
+    console.log("ma-web-extension custom element registered");
   }
-}());
+})();

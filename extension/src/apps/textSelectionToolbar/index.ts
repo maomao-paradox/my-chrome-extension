@@ -364,206 +364,11 @@ class TextSelectionToolbarModule implements AppModule {
   }
 
   private ensureTextareaAIStyle(): void {
-    if (
-      !this.shadowRoot ||
-      this.shadowRoot.getElementById(this.textareaAIStyleId)
-    ) {
+    if (!this.shadowRoot) {
       return;
     }
-
-    const style = document.createElement("style");
-    style.id = this.textareaAIStyleId;
-    style.textContent = `
-      .textarea-ai-dot {
-        position: fixed;
-        width: 16px;
-        height: 16px;
-        padding: 0;
-        border: 2px solid rgba(255, 255, 255, 0.96);
-        border-radius: 999px;
-        background: linear-gradient(135deg, #2563eb, #0d9488);
-        box-shadow:
-          0 6px 14px rgba(15, 23, 42, 0.2),
-          0 0 0 4px rgba(37, 99, 235, 0.12);
-        cursor: pointer;
-        pointer-events: auto;
-        z-index: 2147483647;
-        transition:
-          background 0.2s ease,
-          box-shadow 0.2s ease,
-          opacity 0.2s ease;
-      }
-
-      .textarea-ai-dot:hover {
-        box-shadow:
-          0 8px 18px rgba(15, 23, 42, 0.24),
-          0 0 0 5px rgba(13, 148, 136, 0.16);
-      }
-
-      .textarea-ai-dot:focus-visible {
-        outline: 2px solid rgba(249, 115, 22, 0.85);
-        outline-offset: 3px;
-      }
-
-      .textarea-ai-dot[data-state="generating"] {
-        cursor: progress;
-        opacity: 0.86;
-        background: linear-gradient(135deg, #f97316, #2563eb);
-        animation: textarea-ai-pulse 1.2s ease-in-out infinite;
-      }
-
-      .textarea-ai-dot[data-state="filled"] {
-        background: linear-gradient(135deg, #16a34a, #0d9488);
-      }
-
-      .textarea-ai-dot[data-state="error"] {
-        background: linear-gradient(135deg, #dc2626, #f97316);
-      }
-
-      @keyframes textarea-ai-pulse {
-        0% {
-          box-shadow:
-            0 6px 14px rgba(15, 23, 42, 0.2),
-            0 0 0 4px rgba(37, 99, 235, 0.12);
-        }
-        50% {
-          box-shadow:
-            0 8px 18px rgba(15, 23, 42, 0.24),
-            0 0 0 8px rgba(249, 115, 22, 0.14);
-        }
-        100% {
-          box-shadow:
-            0 6px 14px rgba(15, 23, 42, 0.2),
-            0 0 0 4px rgba(37, 99, 235, 0.12);
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        .textarea-ai-dot {
-          transition: none;
-        }
-
-        .textarea-ai-dot[data-state="generating"] {
-          animation: none;
-        }
-      }
-
-      .textarea-ai-prompt-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2147483646;
-      }
-
-      .textarea-ai-prompt-dialog {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-        padding: 24px;
-        width: 480px;
-        max-width: calc(100vw - 32px);
-        max-height: calc(100vh - 64px);
-        display: flex;
-        flex-direction: column;
-      }
-
-      .textarea-ai-prompt-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-      }
-
-      .textarea-ai-prompt-title {
-        font-size: 16px;
-        font-weight: 600;
-        color: #1f2937;
-        margin: 0;
-      }
-
-      .textarea-ai-prompt-close {
-        width: 28px;
-        height: 28px;
-        border: none;
-        background: #f3f4f6;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        color: #6b7280;
-        transition: background 0.15s ease;
-      }
-
-      .textarea-ai-prompt-close:hover {
-        background: #e5e7eb;
-      }
-
-      .textarea-ai-prompt-textarea {
-        width: 100%;
-        min-height: 160px;
-        max-height: 320px;
-        padding: 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 14px;
-        line-height: 1.6;
-        color: #374151;
-        resize: vertical;
-        font-family: inherit;
-        box-sizing: border-box;
-        outline: none;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
-      }
-
-      .textarea-ai-prompt-textarea:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-      }
-
-      .textarea-ai-prompt-footer {
-        display: flex;
-        gap: 8px;
-        margin-top: 16px;
-        justify-content: flex-end;
-      }
-
-      .textarea-ai-prompt-btn {
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        border: none;
-        transition: all 0.15s ease;
-      }
-
-      .textarea-ai-prompt-btn-cancel {
-        background: #f3f4f6;
-        color: #374151;
-      }
-
-      .textarea-ai-prompt-btn-cancel:hover {
-        background: #e5e7eb;
-      }
-
-      .textarea-ai-prompt-btn-confirm {
-        background: linear-gradient(135deg, #2563eb, #0d9488);
-        color: #ffffff;
-      }
-
-      .textarea-ai-prompt-btn-confirm:hover {
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-      }
-    `;
-    this.shadowRoot!.appendChild(style);
+    // 样式已通过 SCSS 文件注入到 Shadow DOM，无需额外的内联样式
+    // 此方法保留用于向后兼容
   }
 
   private setTextareaAIDotState(
@@ -1207,7 +1012,28 @@ class TextSelectionToolbarModule implements AppModule {
           this.shadowRoot!,
           getAssetsAbstractPathSync(`css/${appName}`),
         );
+        // 注入懒加载组件的 CSS 到 Shadow DOM，避免 Vite preload helper 使用相对路径报错
+        // file-map.json 中记录了各懒加载组件的 CSS 路径，通过 injectCssDom 从 chrome-extension:// 加载
+        const lazyComponentCssList = [
+          "css/TranslationPanel",
+          "css/ReplaceModal",
+          "css/CommentModal",
+          "css/CommentDisplay",
+        ];
+        lazyComponentCssList.forEach((cssKey) => {
+          injectCssDom(this.shadowRoot!, getAssetsAbstractPathSync(cssKey));
+        });
         this.isInjected = true;
+      }
+
+      // 阻止 Vite 的 CSS preload 错误（动态导入组件时 Vite 会尝试通过 <link> 预加载 CSS，
+      // 但路径是相对的，在 content script 场景下会请求网站资源失败）
+      // CSS 已通过 injectCssDom 注入到 Shadow DOM，无需 Vite 的预加载
+      if (!(window as any).__vitePreloadErrorHandler) {
+        (window as any).__vitePreloadErrorHandler = true;
+        window.addEventListener("vite:preloadError", (event) => {
+          event.preventDefault();
+        });
       }
 
       // 创建Preact容器

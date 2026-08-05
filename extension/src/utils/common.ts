@@ -220,6 +220,7 @@ export const getAssetsAbstractPath = async (path: string) => {
 export const getAssetsAbstractPathSync = (path: string) => {
   try {
     const map = getChunkFileMap() as FileMap;
+    maLogger.info("获取资产路径:", path, map);
     if (map && map[path]) {
       return chrome.runtime.getURL(map[path]);
     }
