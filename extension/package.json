@@ -13,7 +13,7 @@
     "test:react": "vitest --config vitest.config.react.ts",
     "test:react:run": "vitest run --config vitest.config.react.ts",
     "test:all": "vitest run; vitest run --config vitest.config.react.ts",
-    "build": "vite build && rm -rf /mnt/h/my-chrome-extension/* && cp -rf ./dist/ /mnt/h/my-chrome-extension/",
+    "build": "vite build && du -sh dist && rm -rf /mnt/h/my-chrome-extension/* && cp -rf ./dist/ /mnt/h/my-chrome-extension/ ",
     "build:enc": "ENCRYPT_FILE_MAP=true VITE_FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef yarn build"
   },
   "license": "MIT",
@@ -71,7 +71,6 @@
     "javascript-obfuscator": "^5.4.3",
     "jiti": "^2.7.0",
     "less": "^4.6.4",
-    "preact": "^10.29.8",
     "puppeteer-core": "^24.36.0",
     "sass-embedded": "^1.92.1",
     "tanstack": "^2.0.7",

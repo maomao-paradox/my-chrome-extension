@@ -12,7 +12,6 @@ import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import svgLoader from "vite-svg-loader";
-import preact from "@preact/preset-vite";
 
 const isProduction = process.env.NODE_ENV === "production";
 const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
@@ -32,11 +31,8 @@ export default defineConfig({
   cacheDir: "../node_modules/.vite",
   plugins: [
     vue(),
-    react(),
-    preact({
-      exclude: [
-        /src\/pages\/popup\/.*\.(tsx|ts)$/,
-      ],
+    react({
+      fastRefresh: true,
     }),
     svgLoader({
       defaultImport: "url", // 默认作为 URL
@@ -192,7 +188,15 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["vue", "pinia", "vue-router", "element-plus", "preact", "preact/compat", "preact/hooks"],
+    include: [
+      "vue",
+      "pinia",
+      "vue-router",
+      "element-plus",
+      "preact",
+      "preact/compat",
+      "preact/hooks",
+    ],
     esbuildOptions: {
       target: "es2022",
     },

@@ -44,7 +44,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/types/*"
-, "src/pages/study-table.jsx"  ],
+, "src/pages/study-table.tsx"  ],
   "exclude": [
     "node_modules",
     "dist",

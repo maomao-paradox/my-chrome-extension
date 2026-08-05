@@ -2,62 +2,110 @@
   <div class="subrule-card">
     <div class="subrule-header">
       <span class="subrule-index">#{{ index + 1 }}</span>
-      <MRIconButton icon="🗑️" tooltip="删除子规则" variant="danger" @click="emit('remove')" />
+      <MRIconButton
+        icon="🗑️"
+        tooltip="删除子规则"
+        variant="danger"
+        @click="emit('remove')"
+      />
     </div>
 
     <div class="subrule-content">
       <div class="form-group subrule-form-group">
         <label>操作类型:</label>
-        <MRSelect v-model="subRule.type" :options="[
-          { label: '替换URL', value: 'replaceUrl' },
-          { label: '设置参数', value: 'setParam' },
-          { label: '删除参数', value: 'deleteParam' },
-          { label: '设置字段', value: 'setField' },
-          { label: '删除字段', value: 'deleteField' },
-          { label: '追加数组', value: 'appendArray' },
-          { label: '设置状态码', value: 'setStatus' }
-        ]" @change="handleTypeChange(subRule.type)" />
+        <MRSelect
+          v-model="subRule.type"
+          :options="[
+            { label: '替换URL', value: 'replaceUrl' },
+            { label: '设置参数', value: 'setParam' },
+            { label: '删除参数', value: 'deleteParam' },
+            { label: '设置字段', value: 'setField' },
+            { label: '删除字段', value: 'deleteField' },
+            { label: '追加数组', value: 'appendArray' },
+            { label: '设置状态码', value: 'setStatus' },
+          ]"
+          @change="handleTypeChange(subRule.type)"
+        />
       </div>
 
       <!-- 替换URL特殊处理 -->
-      <div v-if="subRule.type === 'replaceUrl'" class="form-group subrule-form-group">
+      <div
+        v-if="subRule.type === 'replaceUrl'"
+        class="form-group subrule-form-group"
+      >
         <label>搜索字符串:</label>
-        <MRInput v-model="subRule.params.search" placeholder="可选，指定要替换的URL部分" />
+        <MRInput
+          v-model="subRule.params.search"
+          placeholder="可选，指定要替换的URL部分"
+        />
       </div>
-      
-      <div v-if="subRule.type === 'replaceUrl'" class="form-group subrule-form-group">
+
+      <div
+        v-if="subRule.type === 'replaceUrl'"
+        class="form-group subrule-form-group"
+      >
         <label>替换值(新URL):</label>
         <MRInput v-model="subRule.params.value" placeholder="输入新URL" />
       </div>
-      
+
       <!-- 其他类型的通用path输入 -->
-      <div v-else-if="subRule.type !== 'setStatus'" class="form-group subrule-form-group">
-        <label v-if="subRule.type === 'setParam' || subRule.type === 'deleteParam'">参数名:</label>
+      <div
+        v-else-if="subRule.type !== 'setStatus'"
+        class="form-group subrule-form-group"
+      >
+        <label
+          v-if="subRule.type === 'setParam' || subRule.type === 'deleteParam'"
+          >参数名:</label
+        >
         <label v-else>字段路径:</label>
-        <MRInput v-model="subRule.params.path" :placeholder="subRule.type === 'setParam' || subRule.type === 'deleteParam' ? '输入参数名' : '输入字段路径'" />
+        <MRInput
+          v-model="subRule.params.path"
+          :placeholder="
+            subRule.type === 'setParam' || subRule.type === 'deleteParam'
+              ? '输入参数名'
+              : '输入字段路径'
+          "
+        />
       </div>
 
       <!-- 非replaceUrl类型的值输入 -->
-      <div v-if="subRule.type === 'setField' || subRule.type === 'appendArray' || subRule.type === 'setParam'"
-        class="form-group subrule-form-group">
+      <div
+        v-if="
+          subRule.type === 'setField' ||
+          subRule.type === 'appendArray' ||
+          subRule.type === 'setParam'
+        "
+        class="form-group subrule-form-group"
+      >
         <label>值:</label>
-        <MRInput v-model="valueDisplay" placeholder="输入值 (支持JSON格式)" @change="handleValueChange" />
+        <MRInput
+          v-model="valueDisplay"
+          placeholder="输入值 (支持JSON格式)"
+          @change="handleValueChange"
+        />
       </div>
 
-      <div v-if="subRule.type === 'setStatus'" class="form-group subrule-form-group">
+      <div
+        v-if="subRule.type === 'setStatus'"
+        class="form-group subrule-form-group"
+      >
         <label>状态码:</label>
-        <MRInput v-model.number="subRule.params.statusCode" type="number" placeholder="例如: 200" />
+        <MRInput
+          v-model.number="subRule.params.statusCode"
+          type="number"
+          placeholder="例如: 200"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch, computed } from 'vue';
-import MRIconButton from './MRIconButton.vue';
-import MRInput from './MRInput.vue';
-import MRSelect from './MRSelect.vue';
-import { RuleInstruction } from '@/types/index.js';
+import { watch, computed } from "vue";
+import MRIconButton from "./MRIconButton.vue";
+import MRInput from "./MRInput.vue";
+import MRSelect from "./MRSelect.vue";
+import { RuleInstruction } from "@/types";
 
 interface Props {
   index: number;
@@ -72,36 +120,44 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 // 确保params对象存在
-watch(() => props.subRule, (newRule) => {
-  if (!newRule.params) {
-    (newRule as any).params = {};
-  }
-}, { immediate: true, deep: true });
+watch(
+  () => props.subRule,
+  (newRule) => {
+    if (!newRule.params) {
+      (newRule as any).params = {};
+    }
+  },
+  { immediate: true, deep: true },
+);
 
 // 监听subRule.type的变化，确保在类型改变时调用handleTypeChange函数
-watch(() => props.subRule.type, (newType) => {
-  handleTypeChange(newType);
-}, { immediate: true });
+watch(
+  () => props.subRule.type,
+  (newType) => {
+    handleTypeChange(newType);
+  },
+  { immediate: true },
+);
 
 // 计算属性，用于处理JSON对象的显示
 const valueDisplay = computed({
   get: () => {
     const value = props.subRule.params?.value;
     // 如果值是对象，将其转换为JSON字符串
-    if (value !== null && typeof value === 'object') {
+    if (value !== null && typeof value === "object") {
       return JSON.stringify(value, null, 2);
     }
-    return value !== undefined ? value : '';
+    return value !== undefined ? value : "";
   },
   set: (newValue) => {
     // 临时设置，等待用户确认后再解析
     // 这个setter主要用于v-model的双向绑定，实际解析在handleValueChange中处理
-    if (typeof newValue === 'object' && newValue !== null) {
+    if (typeof newValue === "object" && newValue !== null) {
       props.subRule.params.value = JSON.parse(JSON.stringify(newValue));
     } else {
       props.subRule.params.value = newValue;
     }
-  }
+  },
 });
 
 // 处理值的变更，解析JSON字符串
@@ -117,9 +173,13 @@ const handleValueChange = () => {
 };
 
 // 监听原始值的变化，确保正确显示
-watch(() => props.subRule.params?.value, () => {
-  // 触发重新计算
-}, { deep: true });
+watch(
+  () => props.subRule.params?.value,
+  () => {
+    // 触发重新计算
+  },
+  { deep: true },
+);
 
 // 当类型改变时，初始化对应的参数
 const handleTypeChange = (newType: string) => {
@@ -129,7 +189,7 @@ const handleTypeChange = (newType: string) => {
   }
 
   // 根据类型设置默认参数
-  if (newType === 'replaceUrl') {
+  if (newType === "replaceUrl") {
     // replaceUrl 使用 search 和 value 参数，不使用 path
     if (subRule.params.path) {
       // 如果有旧的 path 值，将其转换为 value
@@ -137,19 +197,31 @@ const handleTypeChange = (newType: string) => {
       delete subRule.params.path;
     }
     // 初始化 search 和 value 参数
-    if (subRule.params.search === undefined) {subRule.params.search = '';}
-    if (subRule.params.value === undefined) {subRule.params.value = '';}
-  } else if (newType === 'setParam' || newType === 'deleteParam') {
-    if (!subRule.params.path) {subRule.params.path = '';}
-    if (newType === 'setParam' && !subRule.params.value) {
-      subRule.params.value = '';
+    if (subRule.params.search === undefined) {
+      subRule.params.search = "";
     }
-  } else if (newType === 'setField' || newType === 'appendArray') {
-    if (!subRule.params.path) {subRule.params.path = '';}
-    if (!subRule.params.value) {subRule.params.value = '';}
-  } else if (newType === 'deleteField') {
-    if (!subRule.params.path) {subRule.params.path = '';}
-  } else if (newType === 'setStatus') {
+    if (subRule.params.value === undefined) {
+      subRule.params.value = "";
+    }
+  } else if (newType === "setParam" || newType === "deleteParam") {
+    if (!subRule.params.path) {
+      subRule.params.path = "";
+    }
+    if (newType === "setParam" && !subRule.params.value) {
+      subRule.params.value = "";
+    }
+  } else if (newType === "setField" || newType === "appendArray") {
+    if (!subRule.params.path) {
+      subRule.params.path = "";
+    }
+    if (!subRule.params.value) {
+      subRule.params.value = "";
+    }
+  } else if (newType === "deleteField") {
+    if (!subRule.params.path) {
+      subRule.params.path = "";
+    }
+  } else if (newType === "setStatus") {
     if (subRule.params.statusCode === undefined) {
       subRule.params.statusCode = 200;
     }
