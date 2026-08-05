@@ -5,7 +5,7 @@
  * @file src/pages/popup/App.tsx
  * @description React 版 Popup 主组件 - 包含 tab 导航和页面切换
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SettingOutlined,
   CameraOutlined,
@@ -140,7 +140,9 @@ const App: React.FC = () => {
 
         {/* 内容区 */}
         <main className="popup-content">
-          <CurrentComponent key={activeTab} />
+          <div key={activeTab} className="tab-content-enter">
+            <CurrentComponent />
+          </div>
         </main>
 
         {/* 底部 */}

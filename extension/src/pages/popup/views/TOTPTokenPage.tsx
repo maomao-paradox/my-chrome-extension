@@ -31,6 +31,81 @@ interface TOTPForm {
 }
 
 /**
+ * Token 卡片 Props 类型
+ */
+interface TokenCardProps {
+  account: TOTPAccount;
+  code: TOTPCode | undefined;
+  remaining: number;
+  progressPercent: number;
+  onCopy: () => void;
+  onDelete: () => void;
+}
+
+/**
+ * Token 卡片组件（使用 React.memo 优化）
+ */
+const TokenCard: React.FC<TokenCardProps> = React.memo(({
+  account,
+  code,
+  remaining,
+  progressPercent,
+  onCopy,
+  onDelete,
+}) => {
+  const displayIssuer = account.issuer || '未命名';
+  const remainingText = remaining > 0 ? `${remaining}s` : '刷新中';
+
+  return (
+    <article className="token-card">
+      <div className="token-card__main">
+        <div className="token-meta">
+          <strong>{displayIssuer}</strong>
+          <span>{account.accountName}</span>
+        </div>
+        <div
+          className={`token-code ${!code?.code ? 'token-code--empty' : ''}`}
+        >
+          {code?.code || '------'}
+        </div>
+      </div>
+
+      <div className="token-card__bottom">
+        <div className="timer">
+          <span className="timer-track">
+            <span
+              className="timer-fill"
+              style={{ width: `${progressPercent}%` }}
+            ></span>
+          </span>
+          <span>{remainingText}</span>
+        </div>
+        <div className="token-actions">
+          <Button
+            className="text-btn"
+            htmlType="button"
+            disabled={!code?.code}
+            onClick={onCopy}
+          >
+            复制
+          </Button>
+          <Button
+            className="text-btn text-btn--danger"
+            htmlType="button"
+            danger
+            onClick={onDelete}
+          >
+            删除
+          </Button>
+        </div>
+      </div>
+    </article>
+  );
+});
+
+TokenCard.displayName = 'TokenCard';
+
+/**
  * TOTP 动态令牌页面组件
  */
 export const TOTPTokenPage: React.FC = () => {
@@ -58,11 +133,6 @@ export const TOTPTokenPage: React.FC = () => {
   const isSubmitDisabled = useMemo(() => {
     return isSubmitting || (!form.otpauthUrl && (!form.accountName || !form.secret));
   }, [isSubmitting, form]);
-
-  /** 显示发行方 */
-  const displayIssuer = useCallback((account: TOTPAccount): string => {
-    return account.issuer || '未命名';
-  }, []);
 
   /** 清空状态消息 */
   const clearStatus = useCallback(() => {
@@ -131,21 +201,6 @@ export const TOTPTokenPage: React.FC = () => {
     }
   }, [decodeQRCodeFromImage, clearStatus]);
 
-  /** 加载账户列表 */
-  const loadAccounts = useCallback(async (): Promise<void> => {
-    setIsLoading(true);
-    clearStatus();
-    try {
-      const loadedAccounts = await listTOTPAccounts();
-      setAccounts(loadedAccounts);
-      await refreshCodesForAccounts(loadedAccounts);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '加载令牌失败');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [clearStatus]);
-
   /** 刷新单个账户的验证码 */
   const refreshCode = useCallback(async (accountId: string): Promise<void> => {
     try {
@@ -160,6 +215,21 @@ export const TOTPTokenPage: React.FC = () => {
   const refreshCodesForAccounts = useCallback(async (accountsList: TOTPAccount[]): Promise<void> => {
     await Promise.all(accountsList.map((account) => refreshCode(account.id)));
   }, [refreshCode]);
+
+  /** 加载账户列表 */
+  const loadAccounts = useCallback(async (): Promise<void> => {
+    setIsLoading(true);
+    clearStatus();
+    try {
+      const loadedAccounts = await listTOTPAccounts();
+      setAccounts(loadedAccounts);
+      await refreshCodesForAccounts(loadedAccounts);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '加载令牌失败');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [clearStatus, refreshCodesForAccounts]);
 
   /** 刷新所有验证码 */
   const refreshAll = useCallback(async (): Promise<void> => {
@@ -227,30 +297,23 @@ export const TOTPTokenPage: React.FC = () => {
     }
   }, [codes, clearStatus, messageApi]);
 
-  /** 计算剩余秒数 */
-  const remainingSeconds = useCallback((account: TOTPAccount): number => {
+  /** 计算账户剩余秒数 */
+  const getRemainingSeconds = useCallback((account: TOTPAccount, codes: Record<string, TOTPCode>, nowMs: number): number => {
     const code = codes[account.id];
     if (!code) return account.period;
     const expiresAt = new Date(code.expiresAt).getTime();
     return Math.max(0, Math.ceil((expiresAt - nowMs) / 1000));
-  }, [codes, nowMs]);
+  }, []);
 
-  /** 计算进度百分比 */
-  const progressPercent = useCallback((account: TOTPAccount): number => {
-    const remaining = remainingSeconds(account);
-    return Math.max(0, Math.min(100, (remaining / account.period) * 100));
-  }, [remainingSeconds]);
-
-  /** 剩余时间文本 */
-  const remainingText = useCallback((account: TOTPAccount): string => {
-    const remaining = remainingSeconds(account);
-    return remaining > 0 ? `${remaining}s` : '刷新中';
-  }, [remainingSeconds]);
-
-  /** 定时器回调 */
-  const tick = useCallback(async (): Promise<void> => {
+  /** 定时器回调 - 使用 ref 存储避免依赖重建 */
+  const tickRef = useRef<() => Promise<void>>(async () => {});
+  tickRef.current = async () => {
     setNowMs(Date.now());
-    const expiredAccounts = accounts.filter((account) => remainingSeconds(account) <= 0);
+    const currentNowMs = Date.now();
+    const expiredAccounts = accounts.filter((account) => {
+      const remaining = getRemainingSeconds(account, codes, currentNowMs);
+      return remaining <= 0;
+    });
     if (expiredAccounts.length === 0) return;
 
     try {
@@ -258,13 +321,13 @@ export const TOTPTokenPage: React.FC = () => {
     } catch (error) {
       maLogger.warn('刷新 TOTP 动态码失败:', error);
     }
-  }, [accounts, remainingSeconds, refreshCode]);
+  };
 
-  /** 初始化加载 */
+  /** 初始化加载 - 只执行一次 */
   useEffect(() => {
     loadAccounts();
     timerRef.current = window.setInterval(() => {
-      tick();
+      tickRef.current();
     }, 1000);
 
     return () => {
@@ -272,7 +335,18 @@ export const TOTPTokenPage: React.FC = () => {
         window.clearInterval(timerRef.current);
       }
     };
-  }, [loadAccounts, tick]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** 计算每个账户的卡片数据 */
+  const accountCardsData = useMemo(() => {
+    return accounts.map((account) => {
+      const code = codes[account.id];
+      const remaining = getRemainingSeconds(account, codes, nowMs);
+      const progress = Math.max(0, Math.min(100, (remaining / account.period) * 100));
+      return { account, code, remaining, progress };
+    });
+  }, [accounts, codes, nowMs, getRemainingSeconds]);
 
   return (
     <TableContainer
@@ -397,54 +471,18 @@ export const TOTPTokenPage: React.FC = () => {
         <div className="empty-state">暂无令牌</div>
       )}
 
-      {accounts.length > 0 && (
+      {accountCardsData.length > 0 && (
         <div className="token-list">
-          {accounts.map((account) => (
-            <article key={account.id} className="token-card">
-              <div className="token-card__main">
-                <div className="token-meta">
-                  <strong>{displayIssuer(account)}</strong>
-                  <span>{account.accountName}</span>
-                </div>
-                <div
-                  className={`token-code ${
-                    !codes[account.id]?.code ? 'token-code--empty' : ''
-                  }`}
-                >
-                  {codes[account.id]?.code || '------'}
-                </div>
-              </div>
-
-              <div className="token-card__bottom">
-                <div className="timer">
-                  <span className="timer-track">
-                    <span
-                      className="timer-fill"
-                      style={{ width: `${progressPercent(account)}%` }}
-                    ></span>
-                  </span>
-                  <span>{remainingText(account)}</span>
-                </div>
-                <div className="token-actions">
-                  <Button
-                    className="text-btn"
-                    htmlType="button"
-                    disabled={!codes[account.id]?.code}
-                    onClick={() => copyCode(account.id)}
-                  >
-                    复制
-                  </Button>
-                  <Button
-                    className="text-btn text-btn--danger"
-                    htmlType="button"
-                    danger
-                    onClick={() => removeAccount(account.id)}
-                  >
-                    删除
-                  </Button>
-                </div>
-              </div>
-            </article>
+          {accountCardsData.map(({ account, code, remaining, progress }) => (
+            <TokenCard
+              key={account.id}
+              account={account}
+              code={code}
+              remaining={remaining}
+              progressPercent={progress}
+              onCopy={() => copyCode(account.id)}
+              onDelete={() => removeAccount(account.id)}
+            />
           ))}
         </div>
       )}
