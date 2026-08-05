@@ -19,16 +19,14 @@ void syncGlobalLoggerFromStorage();
 // 创建Vue应用
 const app = createApp(App);
 
-// 使用Pinia
+// 使用Pinia（App.vue 可能还使用其他 pinia store，保留）
 app.use(pinia);
 
-// 获取floatingball store实例
-const floatingballStore = useFloatingballStore(pinia);
-
 // 监听侧边栏关闭事件
+// floatingball store 已迁移为 Zustand（框架无关），通过 getState() 调用
 window.addEventListener('beforeunload', () => {
   // 当侧边栏页面即将关闭时，将侧边栏激活状态设为false
-  floatingballStore.toggleSidepanel(false);
+  useFloatingballStore.getState().toggleSidepanel(false);
 });
 
 // 挂载应用到DOM

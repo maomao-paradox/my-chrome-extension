@@ -5,22 +5,33 @@
  * @sequence X
  * @file src/apps/floatingball/index.ts
  * @date 2026-02-05T02:38:01.689Z
+ *
+ * Floatingball 应用入口（React 版）
+ * 从 Vue 版 index.ts 迁移而来
+ *
+ * 关键变更：
+ * - createApp → createRoot（react-dom/client）
+ * - Vue 应用实例 → React Root
+ * - CSS 通过 chrome-extension:// 加载 → 通过 ?inline SCSS 注入 shadow root
+ *   （避免 Vite CSS 代码分割创建 <link> 标签导致相对路径请求失败）
+ * - Drawer 通过 getContainer 挂载到 shadow root 内，确保样式生效
  */
 
-import { pinia } from "@/stores";
-import FloatBallApp from "./App.vue";
-import { createApp } from "vue";
+import React from "react";
+import { createRoot, type Root } from "react-dom/client";
+import App from "./App";
+import type { Tool } from "@/types/index.js";
 import { $id, addElementToDom } from "@/utils/element-control";
-import { createShadowHost, injectCssDom } from "@/utils/shadow-dom";
-import { Tool } from "@/types/index.js";
-import {
-  getAssetsAbstractPathSync,
-  getStaticAbstractPath,
-} from "@/utils/common";
+import { createShadowHost, injectStyles } from "@/utils/shadow-dom";
+import { getStaticAbstractPath } from "@/utils/common";
 import { storage } from "@/stores";
 import { appConfigKey } from "@/config";
-import { AppModule } from "@/types/utils/index.js";
 import { shadowHostId } from "@/config";
+import type { AppModule } from "@/types/utils/index.js";
+
+// 通过 ?inline 导入所有聚合 SCSS 为字符串
+// 这样 Vite 会把所有样式打包到当前 chunk，避免创建 <link> 标签
+import floatingballStyles from "./styles/index.scss?inline";
 
 /**
  * @author 月光下的牧师
@@ -29,15 +40,14 @@ import { shadowHostId } from "@/config";
  * @sequence Ⅲ 牧师
  */
 
-// export const shadowHostId = "floating-shadow"
-
-// 定义悬浮球选项接口
+// 悬浮球选项接口
 declare interface FloatingBallOptions {
   tools?: Tool[];
   visible?: boolean;
   icon?: string;
 }
 
+/** 等待 body 就绪 */
 const waitForBodyReady = async (): Promise<void> => {
   if (document.body) {
     return;
@@ -49,14 +59,21 @@ const waitForBodyReady = async (): Promise<void> => {
   });
 };
 
+/**
+ * FloatingBall - 悬浮球应用模块
+ * 实现 AppModule 接口，支持注入/启用/禁用/初始化
+ */
 class FloatingBall implements AppModule {
   _ctx: any = null;
   shadowHostId: string = shadowHostId;
   isInjected: boolean = false;
-  vueContainer: HTMLElement | null = null;
+  reactContainer: HTMLElement | null = null;
+  drawerContainer: HTMLElement | null = null;
   shadowRoot: ShadowRoot | null = null;
-  appInstance: any | null = null;
+  appRoot: Root | null = null;
   isEnabled: boolean = false;
+  stylesInjected: boolean = false;
+
   // 自定义工具配置
   private customTools: Tool[] = [
     {
@@ -132,61 +149,80 @@ class FloatingBall implements AppModule {
    */
   async inject(options?: FloatingBallOptions): Promise<void> {
     try {
+      // 仅主页面注入
       if (window.self !== window.top) {
         return (maLogger.log("不是主页面，不注入悬浮球"), void 0);
       }
       await waitForBodyReady();
+
+      // 已注入则跳过
       if (
         this.isInjected &&
-        this.appInstance &&
-        this.vueContainer &&
+        this.appRoot &&
+        this.reactContainer &&
         this.shadowRoot &&
         $id(this.shadowHostId)
       ) {
         return;
       }
 
+      // 创建 shadow root
       if (!this.shadowRoot) {
         const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
         this.shadowRoot = shadowRoot;
       }
 
-      const { tools, visible = true, icon } = options || {};
-
-      if (!this.isInjected) {
-        injectCssDom(
-          this.shadowRoot as ShadowRoot,
-          getAssetsAbstractPathSync("css/floatingball"),
-        );
-        this.isInjected = true;
+      // 注入聚合 SCSS（?inline 导入的字符串）
+      if (!this.stylesInjected && this.shadowRoot) {
+        injectStyles(this.shadowRoot, floatingballStyles);
+        this.stylesInjected = true;
       }
 
+      const { tools, visible = true, icon } = options || {};
+
+      // 创建 React 容器（用于渲染 App）
       if (
-        !this.vueContainer &&
+        !this.reactContainer &&
         !this.shadowRoot?.getElementById("shadow-app-floatingball")
       ) {
-        this.vueContainer = addElementToDom({
+        this.reactContainer = addElementToDom({
           tag: "div",
           attrs: { id: "shadow-app-floatingball" },
           style: "position: fixed; z-index: var(--z-index);",
         })(this.shadowRoot as ShadowRoot);
       }
 
-      this.setupEventListeners();
-
-      if (this.appInstance) {
-        this.appInstance.unmount();
-        this.appInstance = null;
+      // 创建 Drawer 专用容器（antd Drawer 通过 getContainer 挂载到此处）
+      // 确保 Drawer 的 portal 元素在 shadow root 内，样式才能生效
+      if (
+        !this.drawerContainer &&
+        !this.shadowRoot?.getElementById("shadow-drawer-floatingball")
+      ) {
+        this.drawerContainer = addElementToDom({
+          tag: "div",
+          attrs: { id: "shadow-drawer-floatingball" },
+          style: "position: fixed; top: 0; left: 0; width: 0; height: 0;",
+        })(this.shadowRoot as ShadowRoot);
       }
 
-      this.appInstance = createApp(FloatBallApp, {
-        tools: tools || this.customTools,
-        visible,
-        icon: icon || getStaticAbstractPath("icons/floatingball.png"),
-      });
+      this.setupEventListeners();
 
-      this.appInstance.use(pinia);
-      this.appInstance.mount(this.vueContainer);
+      // 卸载旧的 React root
+      if (this.appRoot) {
+        this.appRoot.unmount();
+        this.appRoot = null;
+      }
+
+      // 创建 React root 并渲染 App
+      this.appRoot = createRoot(this.reactContainer!);
+      this.appRoot.render(
+        React.createElement(App, {
+          tools: tools || this.customTools,
+          visible,
+          icon: icon || getStaticAbstractPath("icons/floatingball.png"),
+          drawerContainer: this.drawerContainer,
+        })
+      );
     } catch (error) {
       maLogger.error("注入悬浮球失败:", error);
     }
@@ -196,20 +232,20 @@ class FloatingBall implements AppModule {
    * 设置事件监听器
    */
   private setupEventListeners(): void {
-    if (!this.vueContainer) {
+    if (!this.reactContainer) {
       return;
     }
 
     // 监听显示/隐藏事件
     window.addEventListener("unload-floatingball", () => {
-      if (this.vueContainer) {
-        this.vueContainer.style.display = "none";
+      if (this.reactContainer) {
+        this.reactContainer.style.display = "none";
       }
     });
 
     window.addEventListener("load-floatingball", () => {
-      if (this.vueContainer) {
-        this.vueContainer.style.display = "block";
+      if (this.reactContainer) {
+        this.reactContainer.style.display = "block";
       }
     });
   }
@@ -238,9 +274,9 @@ class FloatingBall implements AppModule {
       // 触发卸载事件
       window.dispatchEvent(this.unloadFloatingballEvent);
 
-      // 直接操作DOM，确保组件被隐藏
-      if (this.vueContainer) {
-        this.vueContainer.style.display = "none";
+      // 直接操作 DOM，确保组件被隐藏
+      if (this.reactContainer) {
+        this.reactContainer.style.display = "none";
         maLogger.info("悬浮球已直接隐藏");
       }
     } catch (error) {
@@ -253,7 +289,7 @@ class FloatingBall implements AppModule {
    */
   async init(): Promise<void> {
     try {
-      // 可以从存储中加载配置
+      // 从 storage 加载配置
       const config = await storage.ext.local.get(appConfigKey);
       if (
         config &&
@@ -280,7 +316,7 @@ class FloatingBall implements AppModule {
   }
 }
 
-// 导出默认函数，兼容ESMModuleLoader
+// 导出默认函数，兼容 ESMModuleLoader
 export default (ctx: AppContext, options?: any): AppModule => {
   const appInstance = new FloatingBall();
   appInstance.init();

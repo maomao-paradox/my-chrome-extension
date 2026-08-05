@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import react from "@vitejs/plugin-react";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
@@ -31,6 +32,7 @@ export default defineConfig({
   cacheDir: "../node_modules/.vite",
   plugins: [
     vue(),
+    react(),
     preact(),
     svgLoader({
       defaultImport: "url", // 默认作为 URL
@@ -124,7 +126,9 @@ export default defineConfig({
         manualChunks: isProduction
           ? {
               vue: ["vue", "vue-router", "pinia"],
-              react: ["preact", "preact/compat", "preact/hooks"],
+              preact: ["preact", "preact/hooks"],
+              react: ["react", "react-dom/client"],
+              antd: ["antd", "@ant-design/icons"],
               "element-plus": ["element-plus", "@element-plus/icons-vue"],
               // 基础设施 - 纯函数工具，可在 Service Worker 中使用
               "infrastructure-pure": ["@/utils/pure-utils"],

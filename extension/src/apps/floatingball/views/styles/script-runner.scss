@@ -1,0 +1,190 @@
+/**
+ * ScriptRunner 组件样式
+ * 从 Vue 版 ScriptRunner.vue 的 scoped 样式迁移而来
+ */
+
+.script-runner {
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  header {
+    margin-bottom: 24px;
+    text-align: center;
+    color: #303133;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f5f7fa;
+    border: 1px solid #e4e7ed;
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+  }
+
+  .content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .control-panel {
+    margin-bottom: 20px;
+  }
+
+  .control-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tab-container {
+    margin-bottom: 20px;
+  }
+
+  .script-input-container,
+  .file-upload-container,
+  .url-script-container,
+  .output-container {
+    margin-bottom: 20px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #303133;
+  }
+
+  .code-editor,
+  .output-content {
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    outline: none;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    font-size: 14px;
+    resize: vertical;
+    background-color: #fafafa;
+
+    &:read-only {
+      background-color: #f5f7fa;
+      cursor: not-allowed;
+    }
+  }
+
+  .upload-area {
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    padding: 20px;
+    background-color: #fafafa;
+  }
+
+  .file-info {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #ecf5ff;
+    border: 1px solid #d9ecff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .upload-hint {
+    margin-top: 10px;
+    color: #909399;
+    font-size: 0.9rem;
+  }
+
+  .url-input-area {
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    padding: 20px;
+    background-color: #fafafa;
+  }
+
+  .url-info {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #ecf5ff;
+    border: 1px solid #d9ecff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .url-hint {
+    margin-top: 10px;
+    color: #909399;
+    font-size: 0.9rem;
+  }
+
+  .output-content {
+    min-height: 200px;
+    background-color: #fafafa;
+    position: relative;
+  }
+
+  .output-text {
+    margin: 0;
+    padding: 12px;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #303133;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .no-output {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #909399;
+    font-style: italic;
+  }
+
+  /* 滚动条样式 */
+  .output-text::-webkit-scrollbar,
+  textarea::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .output-text::-webkit-scrollbar-track,
+  textarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  .output-text::-webkit-scrollbar-thumb,
+  textarea::-webkit-scrollbar-thumb {
+    background: #c0c4cc;
+    border-radius: 4px;
+
+    &:hover {
+      background: #909399;
+    }
+  }
+}
+
+/* antd Tabs 样式覆盖（原 :deep(.el-tabs__header)）*/
+.script-runner .ant-tabs-nav {
+  margin-bottom: 20px;
+}

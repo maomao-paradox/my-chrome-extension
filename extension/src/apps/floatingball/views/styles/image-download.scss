@@ -1,0 +1,720 @@
+/**
+ * ImageDownload 组件样式
+ * 从 Vue 版 ImageDownload.vue 的 scoped 样式迁移而来
+ */
+
+/* 组件局部样式变量 */
+.image-zip-downloader {
+  --scifi-primary: #3b82f6;
+  --scifi-secondary: #8b5cf6;
+  --scifi-accent: #10b981;
+  --scifi-danger: #ef4444;
+  --scifi-bg: #050a14;
+  --scifi-card-bg: #0a1122;
+  --scifi-text: #ffffff;
+  --scifi-text-secondary: #e0e7ff;
+  --scifi-text-tertiary: #c7d2fe;
+  --scifi-border: #2563eb;
+  --scifi-glow: 0 0 8px rgba(59, 130, 246, 0.5);
+  --scifi-glow-secondary: 0 0 12px rgba(139, 92, 246, 0.5);
+
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, var(--scifi-bg) 0%, #0f172a 100%);
+  color: var(--scifi-text);
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+
+  /* 图标样式 */
+  .scifi-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+    margin-right: 6px;
+    color: var(--scifi-primary);
+    font-size: 20px;
+    filter: drop-shadow(0 0 2px var(--scifi-primary));
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120%;
+      height: 120%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover::after {
+      opacity: 1;
+    }
+  }
+
+  .scifi-icon-small {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+    margin-right: 4px;
+    color: var(--scifi-primary);
+    font-size: 16px;
+  }
+
+  .scifi-icon-large {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+    color: var(--scifi-primary);
+    font-size: 24px;
+  }
+
+  /* 科幻风格头部 */
+  .scifi-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 20px;
+    background: rgba(10, 17, 34, 0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    backdrop-filter: blur(10px);
+  }
+
+  .scifi-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  .scifi-header h1 {
+    font-size: 2rem;
+    margin: 0;
+    background: linear-gradient(90deg, var(--scifi-primary) 0%, var(--scifi-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    position: relative;
+    font-weight: 700;
+    color: var(--scifi-primary);
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+    filter: none;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--scifi-primary) 0%, var(--scifi-secondary) 100%);
+      filter: blur(2px);
+      box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
+    }
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    color: var(--scifi-text-secondary);
+    max-width: 600px;
+    margin: 12px auto 0;
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 30px;
+    justify-content: center;
+  }
+
+  /* 科幻风格控制面板 */
+  .scifi-panel {
+    background: rgba(10, 17, 34, 0.8);
+    border-radius: 12px;
+    padding: 25px;
+    width: 320px;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--scifi-primary) 50%, transparent 100%);
+    }
+  }
+
+  .scifi-panel-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--scifi-text);
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      margin-left: 8px;
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.7) 0%, transparent 100%);
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  .control-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  /* 科幻风格按钮 */
+  .scifi-btn {
+    padding: 12px 18px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: rgba(10, 17, 34, 0.8);
+    color: var(--scifi-text);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    font-weight: 500;
+    text-shadow: 0 0 6px rgba(59, 130, 246, 0.3);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    &:hover::before {
+      left: 100%;
+    }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  }
+
+  .scifi-btn-primary {
+    border-color: var(--scifi-primary);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%);
+
+    &:hover:not(:disabled) {
+      border-color: var(--scifi-secondary);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%);
+    }
+  }
+
+  .scifi-btn-secondary {
+    border-color: rgba(59, 130, 246, 0.5);
+
+    &:hover:not(:disabled) {
+      border-color: var(--scifi-primary);
+    }
+  }
+
+  .scifi-btn-danger {
+    border-color: var(--scifi-danger);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+
+    &:hover:not(:disabled) {
+      border-color: var(--scifi-danger);
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+    }
+  }
+
+  .filters {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* 科幻风格状态信息 */
+  .scifi-status {
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    background: rgba(10, 17, 34, 0.7);
+    text-align: center;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+
+    .scifi-status-title {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 1rem;
+      color: var(--scifi-text);
+      font-weight: 500;
+      text-shadow: 0 0 6px rgba(59, 130, 246, 0.3);
+    }
+
+    p {
+      color: var(--scifi-text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      text-shadow: 0 0 6px rgba(59, 130, 246, 0.2);
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+
+  /* 科幻风格进度条 */
+  .scifi-progress-container {
+    width: 100%;
+    height: 28px;
+    position: relative;
+    border-radius: 14px;
+    margin-bottom: 20px;
+  }
+
+  .progress-bg {
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 17, 34, 0.7);
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .scifi-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--scifi-primary) 0%, var(--scifi-secondary) 100%);
+    border-radius: 14px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: progressShine 2s infinite;
+    }
+  }
+
+  @keyframes progressShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .scifi-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--scifi-text);
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    letter-spacing: 0.5px;
+  }
+
+  /* 科幻风格图片库 */
+  .scifi-gallery {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    min-height: 300px;
+  }
+
+  /* 科幻风格图片卡片 */
+  .scifi-card {
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: var(--scifi-card-bg);
+    backdrop-filter: blur(5px);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--scifi-primary), transparent);
+      z-index: 2;
+      transform: scaleX(0.8);
+      transition: all 0.3s ease;
+    }
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+      border-color: var(--scifi-primary);
+
+      &::before {
+        height: 2px;
+        background: linear-gradient(90deg, var(--scifi-primary), var(--scifi-secondary));
+        transform: scaleX(1);
+        box-shadow: var(--scifi-glow);
+      }
+
+      .image-wrapper img {
+        transform: scale(1.05);
+      }
+
+      .scifi-overlay {
+        opacity: 1;
+      }
+    }
+  }
+
+  .scifi-card-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+    z-index: 0;
+  }
+
+  .image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+    z-index: 1;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: rgba(10, 17, 34, 0.5);
+      transition: transform 0.5s ease;
+    }
+  }
+
+  /* 科幻风格覆盖层 */
+  .scifi-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(2px);
+    z-index: 2;
+  }
+
+  /* 科幻风格图标按钮 */
+  .scifi-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(10, 17, 34, 0.8);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    &:hover::before {
+      left: 100%;
+    }
+  }
+
+  .scifi-icon-btn-primary {
+    border-color: var(--scifi-primary);
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    }
+  }
+
+  .scifi-icon-btn-danger {
+    border-color: var(--scifi-danger);
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.2);
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    }
+  }
+
+  .image-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .scifi-loading-spin {
+    animation: scifiSpin 1s linear infinite;
+  }
+
+  @keyframes scifiSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .image-info {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+  }
+
+  .image-type {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--scifi-primary);
+    color: white;
+    margin-right: 8px;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 700;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+
+    &.base64 {
+      background: var(--scifi-accent);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+    }
+  }
+
+  .image-url {
+    font-size: 13px;
+    color: var(--scifi-text-secondary);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 8px;
+    font-family: "Courier New", monospace;
+    line-height: 1.4;
+    text-shadow: 0 0 5px rgba(59, 130, 246, 0.2);
+    font-weight: 500;
+  }
+
+  .scifi-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    padding: 30px;
+    background: rgba(10, 17, 34, 0.7);
+    border-radius: 12px;
+    border: 1px dashed rgba(59, 130, 246, 0.3);
+  }
+
+  .scifi-empty-content {
+    text-align: center;
+  }
+
+  .scifi-empty-text {
+    margin-top: 15px;
+    color: var(--scifi-text-secondary);
+    font-size: 1.2rem;
+    line-height: 1.5;
+  }
+
+  .scifi-instructions {
+    background: rgba(10, 17, 34, 0.8);
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+    backdrop-filter: blur(5px);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--scifi-primary), transparent);
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  .scifi-instructions-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--scifi-text);
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      margin-left: 8px;
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.7), transparent);
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  .scifi-instructions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .scifi-instruction-item {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--scifi-text);
+    padding: 8px 0;
+    position: relative;
+    transition: transform 0.3s ease;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-shadow: 0 0 6px rgba(59, 130, 246, 0.2);
+    font-weight: 500;
+
+    &:hover {
+      transform: translateX(5px);
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+    }
+  }
+
+  .scifi-footer {
+    text-align: center;
+    opacity: 0.9;
+    padding: 15px;
+    color: var(--scifi-text-secondary);
+    border-top: 1px solid rgba(59, 130, 246, 0.2);
+    margin-top: 20px;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--scifi-primary), transparent);
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  .scifi-footer-content {
+    font-size: 0.9rem;
+    letter-spacing: 0.6px;
+    line-height: 1.5;
+    text-shadow: 0 0 6px rgba(59, 130, 246, 0.3);
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 768px) {
+  .image-zip-downloader {
+    .content {
+      flex-direction: column;
+    }
+
+    .control-panel {
+      width: 100%;
+    }
+
+    .image-gallery {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .filters {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+}
