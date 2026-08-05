@@ -1,181 +1,216 @@
 <template>
-  <div v-if="visible" ref="panelRef" class="translation-panel" :class="{ 'is-shaking': isShaking }" :style="panelStyle">
-    <div class="translation-panel__header" :class="{ 'is-dragging': isDragging }" @pointerdown="handlePointerDown">
+  <div
+    v-if="visible"
+    ref="panelRef"
+    class="translation-panel"
+    :class="{ 'is-shaking': isShaking }"
+    :style="panelStyle"
+  >
+    <div
+      class="translation-panel__header"
+      :class="{ 'is-dragging': isDragging }"
+      @pointerdown="handlePointerDown"
+    >
       <div class="translation-panel__title">{{ title }}</div>
-      <button class="translation-panel__close" type="button" aria-label="关闭翻译结果" @pointerdown.stop
-        @click="$emit('close')">×</button>
+      <button
+        class="translation-panel__close"
+        type="button"
+        aria-label="关闭翻译结果"
+        @pointerdown.stop
+        @click="$emit('close')"
+      >
+        ×
+      </button>
     </div>
-    <div class="translation-panel__body" :class="`is-${status}`" role="status" aria-live="polite">
+    <div
+      class="translation-panel__body"
+      :class="`is-${status}`"
+      role="status"
+      aria-live="polite"
+    >
       {{ content }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from "vue";
 
-type TranslationStatus = 'loading' | 'success' | 'error'
+type TranslationStatus = "loading" | "success" | "error";
 
 interface TranslationPosition {
-  left: number
-  top: number
+  left: number;
+  top: number;
 }
 
-const props = withDefaults(defineProps<{
-  visible: boolean
-  title?: string
-  content: string
-  status?: TranslationStatus
-  position?: TranslationPosition
-  shakeKey?: number
-}>(), {
-  title: 'AI解释',
-  status: 'loading',
-  position: () => ({
-    left: 100,
-    top: 100
-  }),
-  shakeKey: 0
-})
+const props = withDefaults(
+  defineProps<{
+    visible: boolean;
+    title?: string;
+    content: string;
+    status?: TranslationStatus;
+    position?: TranslationPosition;
+    shakeKey?: number;
+  }>(),
+  {
+    title: "AI解释",
+    status: "loading",
+    position: () => ({
+      left: 100,
+      top: 100,
+    }),
+    shakeKey: 0,
+  },
+);
 
 defineEmits<{
-  (e: 'close'): void
-}>()
+  (e: "close"): void;
+}>();
 
-const panelRef = ref<HTMLElement | null>(null)
-const isDragging = ref(false)
-const isShaking = ref(false)
+const panelRef = ref<HTMLElement | null>(null);
+const isDragging = ref(false);
+const isShaking = ref(false);
 const currentPosition = ref<TranslationPosition>({
   left: props.position.left,
-  top: props.position.top
-})
+  top: props.position.top,
+});
 
-let startX = 0
-let startY = 0
-let startLeft = 0
-let startTop = 0
-let previousUserSelect = ''
-let shakeTimer: ReturnType<typeof setTimeout> | number | null = null
+let startX = 0;
+let startY = 0;
+let startLeft = 0;
+let startTop = 0;
+let previousUserSelect = "";
+let shakeTimer: ReturnType<typeof setTimeout> | number | null = null;
 
 const clamp = (value: number, min: number, max: number): number => {
-  return Math.min(Math.max(value, min), max)
-}
+  return Math.min(Math.max(value, min), max);
+};
 
 const clampPosition = (left: number, top: number): TranslationPosition => {
-  const margin = 12
-  const panelWidth = panelRef.value?.offsetWidth ?? 560
-  const panelHeight = panelRef.value?.offsetHeight ?? 320
-  const maxLeft = Math.max(margin, window.innerWidth - panelWidth - margin)
-  const maxTop = Math.max(margin, window.innerHeight - panelHeight - margin)
+  const margin = 12;
+  const panelWidth = panelRef.value?.offsetWidth ?? 560;
+  const panelHeight = panelRef.value?.offsetHeight ?? 320;
+  const maxLeft = Math.max(margin, window.innerWidth - panelWidth - margin);
+  const maxTop = Math.max(margin, window.innerHeight - panelHeight - margin);
 
   return {
     left: Math.round(clamp(left, margin, maxLeft)),
-    top: Math.round(clamp(top, margin, maxTop))
-  }
-}
+    top: Math.round(clamp(top, margin, maxTop)),
+  };
+};
 
 const syncPosition = (position: TranslationPosition) => {
-  currentPosition.value = clampPosition(position.left, position.top)
-}
+  currentPosition.value = clampPosition(position.left, position.top);
+};
 
 const stopDragging = () => {
   if (!isDragging.value) {
-    return
+    return;
   }
 
-  isDragging.value = false
-  document.body.style.userSelect = previousUserSelect
-  window.removeEventListener('pointermove', handlePointerMove, true)
-  window.removeEventListener('pointerup', stopDragging, true)
-  window.removeEventListener('pointercancel', stopDragging, true)
-}
+  isDragging.value = false;
+  document.body.style.userSelect = previousUserSelect;
+  window.removeEventListener("pointermove", handlePointerMove, true);
+  window.removeEventListener("pointerup", stopDragging, true);
+  window.removeEventListener("pointercancel", stopDragging, true);
+};
 
 const handlePointerMove = (event: PointerEvent) => {
   if (!isDragging.value) {
-    return
+    return;
   }
 
-  const nextLeft = startLeft + event.clientX - startX
-  const nextTop = startTop + event.clientY - startY
-  currentPosition.value = clampPosition(nextLeft, nextTop)
-}
+  const nextLeft = startLeft + event.clientX - startX;
+  const nextTop = startTop + event.clientY - startY;
+  currentPosition.value = clampPosition(nextLeft, nextTop);
+};
 
 const handlePointerDown = (event: PointerEvent) => {
   if (event.button !== 0) {
-    return
+    return;
   }
 
-  const target = event.target as HTMLElement | null
-  if (target?.closest('button')) {
-    return
+  const target = event.target as HTMLElement | null;
+  if (target?.closest("button")) {
+    return;
   }
 
-  event.preventDefault()
+  event.preventDefault();
 
-  isDragging.value = true
-  startX = event.clientX
-  startY = event.clientY
-  startLeft = currentPosition.value.left
-  startTop = currentPosition.value.top
-  previousUserSelect = document.body.style.userSelect
-  document.body.style.userSelect = 'none'
+  isDragging.value = true;
+  startX = event.clientX;
+  startY = event.clientY;
+  startLeft = currentPosition.value.left;
+  startTop = currentPosition.value.top;
+  previousUserSelect = document.body.style.userSelect;
+  document.body.style.userSelect = "none";
 
-  window.addEventListener('pointermove', handlePointerMove, true)
-  window.addEventListener('pointerup', stopDragging, true)
-  window.addEventListener('pointercancel', stopDragging, true)
-}
+  window.addEventListener("pointermove", handlePointerMove, true);
+  window.addEventListener("pointerup", stopDragging, true);
+  window.addEventListener("pointercancel", stopDragging, true);
+};
 
-watch(() => props.position, (position) => {
-  if (!position || isDragging.value) {
-    return
-  }
+watch(
+  () => props.position,
+  (position) => {
+    if (!position || isDragging.value) {
+      return;
+    }
 
-  syncPosition(position)
-}, { deep: true, immediate: true })
+    syncPosition(position);
+  },
+  { deep: true, immediate: true },
+);
 
-watch(() => props.visible, (visible) => {
-  if (!visible || isDragging.value || !props.position) {
-    return
-  }
+watch(
+  () => props.visible,
+  (visible) => {
+    if (!visible || isDragging.value || !props.position) {
+      return;
+    }
 
-  syncPosition(props.position)
-})
+    syncPosition(props.position);
+  },
+);
 
 const panelStyle = computed(() => ({
   left: `${currentPosition.value.left}px`,
-  top: `${currentPosition.value.top}px`
-}))
+  top: `${currentPosition.value.top}px`,
+}));
 
 const triggerShake = () => {
   if (shakeTimer) {
-    clearTimeout(shakeTimer)
-    shakeTimer = null
+    clearTimeout(shakeTimer);
+    shakeTimer = null;
   }
 
-  isShaking.value = false
+  isShaking.value = false;
   requestAnimationFrame(() => {
-    isShaking.value = true
+    isShaking.value = true;
     shakeTimer = window.setTimeout(() => {
-      isShaking.value = false
-      shakeTimer = null
-    }, 420)
-  })
-}
+      isShaking.value = false;
+      shakeTimer = null;
+    }, 420);
+  });
+};
 
-watch(() => props.shakeKey, (nextValue, previousValue) => {
-  if (nextValue === previousValue) {
-    return
-  }
+watch(
+  () => props.shakeKey,
+  (nextValue, previousValue) => {
+    if (nextValue === previousValue) {
+      return;
+    }
 
-  triggerShake()
-})
+    triggerShake();
+  },
+);
 
 onUnmounted(() => {
-  stopDragging()
+  stopDragging();
   if (shakeTimer) {
-    clearTimeout(shakeTimer)
+    clearTimeout(shakeTimer);
   }
-})
+});
 </script>
 
 <style scoped lang="scss">
@@ -200,9 +235,14 @@ onUnmounted(() => {
   border: 1px solid var(--panel-border);
   border-radius: 12px;
   background: var(--panel-surface);
-  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.22), 0 4px 16px rgba(13, 148, 136, 0.12);
+  box-shadow:
+    0 22px 50px rgba(15, 23, 42, 0.22),
+    0 4px 16px rgba(13, 148, 136, 0.12);
   backdrop-filter: blur(18px) saturate(1.2);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
   color: var(--panel-text);
   font-family: "Plus Jakarta Sans", "Inter", "Segoe UI", Arial, sans-serif;
 }
@@ -210,7 +250,9 @@ onUnmounted(() => {
 .translation-panel.is-shaking {
   animation: translation-panel-shake 0.42s ease;
   border-color: rgba(249, 115, 22, 0.55);
-  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.24), 0 0 0 2px rgba(249, 115, 22, 0.16);
+  box-shadow:
+    0 22px 54px rgba(15, 23, 42, 0.24),
+    0 0 0 2px rgba(249, 115, 22, 0.16);
 }
 
 .translation-panel__header {
@@ -223,7 +265,9 @@ onUnmounted(() => {
   user-select: none;
   border-bottom: 1px solid rgba(15, 118, 110, 0.14);
   background: linear-gradient(180deg, #ffffff, #f0fdfa);
-  transition: background 0.22s ease, border-color 0.22s ease;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .translation-panel__header.is-dragging {
@@ -240,7 +284,9 @@ onUnmounted(() => {
   font-weight: 700;
   letter-spacing: 0;
   color: var(--panel-text);
-  transition: color 0.22s ease, text-shadow 0.22s ease;
+  transition:
+    color 0.22s ease,
+    text-shadow 0.22s ease;
 }
 
 .translation-panel.is-shaking .translation-panel__title {
@@ -262,7 +308,11 @@ onUnmounted(() => {
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .translation-panel.is-shaking .translation-panel__close {
@@ -290,7 +340,9 @@ onUnmounted(() => {
   line-height: 1.7;
   font-size: 14px;
   font-family: "Plus Jakarta Sans", "Inter", "Segoe UI", Arial, sans-serif;
-  transition: color 0.22s ease, background 0.22s ease;
+  transition:
+    color 0.22s ease,
+    background 0.22s ease;
   background: linear-gradient(180deg, #ffffff, var(--panel-surface-muted));
 }
 
@@ -311,7 +363,6 @@ onUnmounted(() => {
 }
 
 @keyframes translation-panel-shake {
-
   0%,
   100% {
     transform: translateX(0);
@@ -339,7 +390,6 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .translation-panel,
   .translation-panel__header,
   .translation-panel__close,

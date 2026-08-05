@@ -39,7 +39,7 @@ const MAX_DEVICE_PIXEL_RATIO = 2;
 const TRAIL_SYMBOLS: Record<MouseTrailPreset, string[]> = {
   star: ['✦', '✧', '✡', '⚝', '✩'],
   snowflake: ['❄', '❅', '❆', '✻'],
-  music: ['♩', '♪', '♫', '♬', '♯', '♭', '♮', '𝄞', '𝄢'],
+  music: ['♩', '♪', '♫', '♬', '♯', '♭', '♮', '𝄞', '𝄢']
 };
 
 let activeControls: MusicNoteTrailControls | null = null;
@@ -63,7 +63,7 @@ class MusicNoteParticle {
     private x: number,
     private y: number,
     preset: MouseTrailPreset,
-    burst = false,
+    burst = false
   ) {
     this.preset = preset;
     this.size = this.createSize();
@@ -194,7 +194,7 @@ const createNoopControls = (): MusicNoteTrailControls => ({
   canvas: null,
   start: () => undefined,
   stop: () => undefined,
-  isRunning: () => false,
+  isRunning: () => false
 });
 
 const getEventPoint = (event: MouseEvent | TouchEvent): { x: number; y: number } | null => {
@@ -238,7 +238,7 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
       height: '100vh',
       overflow: 'hidden',
       pointerEvents: 'none',
-      zIndex: String(options.zIndex ?? DEFAULT_Z_INDEX),
+      zIndex: String(options.zIndex ?? DEFAULT_Z_INDEX)
     });
   }
 
@@ -261,7 +261,7 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
     height: '100vh',
     display: 'block',
     pointerEvents: 'none',
-    zIndex: String(options.zIndex ?? DEFAULT_Z_INDEX),
+    zIndex: String(options.zIndex ?? DEFAULT_Z_INDEX)
   });
 
   const ctx = canvas.getContext('2d');
@@ -274,7 +274,7 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
     active: false,
-    moved: false,
+    moved: false
   };
   const cleanupFns: Array<() => void> = [];
   const maxParticles = options.maxParticles ?? options.maxStars ?? DEFAULT_MAX_PARTICLES;
@@ -292,7 +292,7 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
   const addWindowListener = <K extends keyof WindowEventMap>(
     type: K,
     handler: (event: WindowEventMap[K]) => void,
-    listenerOptions?: AddEventListenerOptions,
+    listenerOptions?: AddEventListenerOptions
   ): void => {
     window.addEventListener(type, handler as EventListener, listenerOptions);
     cleanupFns.push(() => window.removeEventListener(type, handler as EventListener, listenerOptions));
@@ -322,8 +322,8 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
         x + (Math.random() - 0.5) * jitter,
         y + (Math.random() - 0.5) * jitter,
         preset,
-        burst,
-      ),
+        burst
+      )
     );
     trimParticles(particles, maxParticles);
   };
@@ -424,7 +424,7 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
         activeControls = null;
       }
     },
-    isRunning: () => running,
+    isRunning: () => running
   };
 
   controls.start();

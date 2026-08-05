@@ -11,9 +11,12 @@
           </div>
 
           <div class="header-meta">
-            <div class="status-chip" :class="isDomainDisabled ? 'status-chip--off' : 'status-chip--on'">
+            <div
+              class="status-chip"
+              :class="isDomainDisabled ? 'status-chip--off' : 'status-chip--on'"
+            >
               <span class="status-dot"></span>
-              <span>{{ isDomainDisabled ? '停用' : '可用' }}</span>
+              <span>{{ isDomainDisabled ? "停用" : "可用" }}</span>
             </div>
             <span class="header-version">v1.0.0</span>
           </div>
@@ -21,9 +24,18 @@
       </header>
 
       <nav class="tab-navigation" aria-label="Popup navigation" role="tablist">
-        <button v-for="tab in tabs" :key="tab.key" class="tab-btn" :class="{ active: activeTab === tab.key }" role="tab"
-          type="button" :aria-selected="activeTab === tab.key" :aria-controls="`popup-panel-${tab.key}`"
-          :title="tab.label" @click="activeTab = tab.key">
+        <button
+          v-for="tab in tabs"
+          :key="tab.key"
+          class="tab-btn"
+          :class="{ active: activeTab === tab.key }"
+          role="tab"
+          type="button"
+          :aria-selected="activeTab === tab.key"
+          :aria-controls="`popup-panel-${tab.key}`"
+          :title="tab.label"
+          @click="activeTab = tab.key"
+        >
           <span class="tab-icon">
             <component :is="tab.icon" />
           </span>
@@ -48,57 +60,62 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
-import BookmarkPage from './views/BookmarkPage.vue';
-import SettingPage from './views/SettingPage.vue';
-import CapturePage from './views/CapturePage.vue';
-import { IconSetting, IconCapture, IconBookmark } from '@icons/index';
-import { useDomainState } from './composables/useDomainState.js';
-import { usePopupTheme } from './composables/usePopupTheme.js';
-import { usePopupMouseTrail } from './composables/usePopupMouseTrail.js';
+import { computed, onMounted, ref } from "vue";
+import BookmarkPage from "./views/BookmarkPage.vue";
+import SettingPage from "./views/SettingPage.vue";
+import CapturePage from "./views/CapturePage.vue";
+import TOTPTokenPage from "./views/TOTPTokenPage.vue";
+import { IconSetting, IconCapture, IconBookmark, IconTime } from "@icons/index";
+import { useDomainState } from "./composables/useDomainState.js";
+import { usePopupTheme } from "./composables/usePopupTheme.js";
+import { usePopupMouseTrail } from "./composables/usePopupMouseTrail.js";
 
 const { isDomainDisabled, checkDomainStatus } = useDomainState();
 const { loadPopupTheme } = usePopupTheme();
 const { loadPopupMouseTrail } = usePopupMouseTrail();
 
-const popupTitle = computed(() => chrome.i18n.getMessage('popupTitle'));
+const popupTitle = computed(
+  () => chrome.i18n?.getMessage("popupTitle") ?? "POPUP测试页",
+);
 
 const tabs = [
   {
-    key: 'bookmarks',
-    label: '锚点',
-    hint: '管理片段书签，快速回到对应页面。',
+    key: "bookmarks",
+    label: "笔记",
+    hint: "管理片段笔记，快速回溯对应页面。",
     icon: IconBookmark,
     tabPage: BookmarkPage,
   },
   {
-    key: 'capture',
-    label: '捕获',
-    hint: '从当前页面拾取组件，结果同步到开发者工具。',
+    key: "capture",
+    label: "捕获",
+    hint: "从当前页面拾取组件，结果同步到开发者工具。",
     icon: IconCapture,
     tabPage: CapturePage,
   },
-  // {
-  //   key: 'accessibility',
-  //   label: '理解',
-  //   hint: '查看当前页面的可访问性树，辅助理解页面结构。',
-  //   icon: IconDocument,
-  //   tabPage: AccessibilityTreePage,
-  // },
   {
-    key: 'settings',
-    label: '设置',
-    hint: '管理内容脚本与插件默认打开方式。',
+    key: "tokens",
+    label: "令牌",
+    hint: "查看后端生成的动态验证码。",
+    icon: IconTime,
+    tabPage: TOTPTokenPage,
+  },
+  {
+    key: "settings",
+    label: "设置",
+    hint: "管理内容脚本与插件默认打开方式。",
     icon: IconSetting,
     tabPage: SettingPage,
   },
 ] as const;
 
-type TabKey = (typeof tabs)[number]['key'];
+type TabKey = (typeof tabs)[number]["key"];
 
 const activeTab = ref<TabKey>(tabs[0].key);
 
-const activeTabPage = computed(() => tabs.find((tab) => tab.key === activeTab.value)?.tabPage);
+const activeTabPage = computed(
+  () => tabs.find((tab) => tab.key === activeTab.value)?.tabPage,
+);
 
 const activeTabHint = computed(() => {
   return tabs.find((tab) => tab.key === activeTab.value)?.hint ?? tabs[0].hint;
@@ -114,8 +131,8 @@ onMounted(async () => {
 <style scoped lang="scss">
 .popup-shell {
   position: relative;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background: var(--popup-page-background);
 }
@@ -126,7 +143,6 @@ onMounted(async () => {
   filter: blur(0);
   pointer-events: none;
   opacity: 0.45;
-
 
   &--left {
     top: -68px;
@@ -161,9 +177,8 @@ onMounted(async () => {
   background: var(--popup-header-bg);
   border-bottom: 1px solid var(--popup-border);
 
-
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: auto 16px 0;
     height: 1px;
@@ -175,11 +190,12 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 5vh;
-  padding: 0 8px;
-  border-radius: 999px;
+  min-height: 0;
+  padding: 5px 8px;
+  border-radius: var(--popup-radius-sm);
   font-size: 10px;
   font-weight: 700;
+  line-height: 15px;
   letter-spacing: 0.08em;
   border: 1px solid var(--popup-border);
   background: var(--popup-control-bg);
@@ -198,14 +214,14 @@ onMounted(async () => {
 }
 
 @font-face {
-  font-family: 'EagleLake';
-  src: url('/static/fonts/EagleLake-Regular.ttf') format('truetype');
+  font-family: "EagleLake";
+  src: url("/static/fonts/EagleLake-Regular.ttf") format("truetype");
   font-weight: 400;
 }
 
 .logo {
   margin: 0;
-  font-family: 'EagleLake', sans-serif;
+  font-family: "EagleLake", sans-serif;
   font-size: 20px;
   letter-spacing: 0.02em;
   line-height: 1.1;
@@ -224,9 +240,9 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 5vh;
-  padding: 0 10px;
-  border-radius: 12px;
+  min-height: 0;
+  padding: 5px 10px;
+  border-radius: var(--popup-radius-sm);
   font-size: 11px;
   font-weight: 600;
   border: 1px solid transparent;
@@ -239,7 +255,8 @@ onMounted(async () => {
 
     .status-dot {
       background: var(--popup-success-dot);
-      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-success-dot) 18%, transparent);
+      box-shadow: 0 0 0 5px
+        color-mix(in srgb, var(--popup-success-dot) 18%, transparent);
     }
   }
 
@@ -250,7 +267,8 @@ onMounted(async () => {
 
     .status-dot {
       background: var(--popup-danger-dot);
-      box-shadow: 0 0 0 5px color-mix(in srgb, var(--popup-danger-dot) 18%, transparent);
+      box-shadow: 0 0 0 5px
+        color-mix(in srgb, var(--popup-danger-dot) 18%, transparent);
     }
   }
 }
@@ -258,7 +276,7 @@ onMounted(async () => {
 .status-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--popup-radius-sm);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
@@ -269,9 +287,12 @@ onMounted(async () => {
   margin: 8px 12px 0;
   padding: 4px;
   border: 1px solid var(--popup-border);
-  border-radius: 14px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--popup-control-bg-strong) 84%, transparent), var(--popup-tab-bg));
+  border-radius: var(--popup-radius-md);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--popup-control-bg-strong) 84%, transparent),
+    var(--popup-tab-bg)
+  );
   box-shadow: var(--popup-inset-highlight);
 }
 
@@ -286,7 +307,7 @@ onMounted(async () => {
   gap: 5px;
   min-height: 34px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--popup-radius-sm);
   background-color: transparent;
   color: var(--popup-text-muted);
   cursor: pointer;
@@ -311,9 +332,7 @@ onMounted(async () => {
     border: 1px solid var(--popup-border-strong);
     color: var(--popup-text-primary);
     background: var(--popup-tab-active-bg);
-    box-shadow:
-      var(--popup-shadow-soft),
-      var(--popup-inset-highlight);
+    box-shadow: var(--popup-shadow-soft), var(--popup-inset-highlight);
 
     .tab-icon {
       color: var(--popup-text-primary);
@@ -334,7 +353,7 @@ onMounted(async () => {
   justify-content: center;
   width: 20px;
   height: 20px;
-  border-radius: 8px;
+  border-radius: var(--popup-radius-sm);
   color: var(--popup-text-subtle);
   background: transparent;
 
@@ -379,13 +398,13 @@ onMounted(async () => {
 .footer-signal {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--popup-radius-sm);
   background: var(--popup-accent-line-gradient);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--popup-accent-strong) 45%, transparent);
+  box-shadow: 0 0 12px
+    color-mix(in srgb, var(--popup-accent-strong) 45%, transparent);
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 1;
@@ -417,5 +436,16 @@ onMounted(async () => {
 .tab-fade-leave-to {
   opacity: 0;
   transform: translateY(4px);
+}
+
+:global(:root[data-popup-theme="retro-terminal"]) {
+  .tab-btn.active {
+    color: var(--popup-text-on-accent);
+
+    .tab-icon,
+    .tab-label {
+      color: var(--popup-text-on-accent);
+    }
+  }
 }
 </style>

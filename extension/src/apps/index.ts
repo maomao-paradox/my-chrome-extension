@@ -14,7 +14,7 @@ export const defaultPluginConfigs: PluginConfigMap = {
     id: "floatingball",
     name: "悬浮球",
     type: "floating",
-    enabled: false
+    enabled: false,
   },
 
   pianoEffect: {

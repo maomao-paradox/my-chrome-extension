@@ -31,39 +31,55 @@
           <strong>SYS-01</strong>
         </header>
 
-        <el-form :model="settings" label-width="132px" class="settings-form">
-          <el-form-item label="开启调试模式">
+        <ElForm :model="settings" label-width="132px" class="settings-form">
+          <ElFormItem label="开启调试模式">
             <div class="field-block">
-              <el-switch v-model="settings.debugMode" @change="saveSettings" />
+              <ElSwitch v-model="settings.debugMode" @change="saveSettings" />
               <p class="field-hint">启用后将提高可见性并暴露更多调试链路。</p>
             </div>
-          </el-form-item>
+          </ElFormItem>
 
-          <el-form-item label="自动检查更新">
+          <ElFormItem label="自动检查更新">
             <div class="field-block">
-              <el-switch v-model="settings.autoCheckUpdate" @change="saveSettings" />
-              <p class="field-hint">维持自动巡检时，扩展会周期性检查新版本信号。</p>
+              <ElSwitch
+                v-model="settings.autoCheckUpdate"
+                @change="saveSettings"
+              />
+              <p class="field-hint">
+                维持自动巡检时，扩展会周期性检查新版本信号。
+              </p>
             </div>
-          </el-form-item>
+          </ElFormItem>
 
-          <el-form-item label="通知超时时间">
+          <ElFormItem label="通知超时时间">
             <div class="field-block field-block--compact">
-              <el-input-number v-model="settings.notificationTimeout" :min="1" :max="60" @change="saveSettings" />
-              <p class="field-hint">单位为秒，决定 HUD 弹窗在当前甲板上的保留时间。</p>
+              <ElInputNumber
+                v-model="settings.notificationTimeout"
+                :min="1"
+                :max="60"
+                @change="saveSettings"
+              />
+              <p class="field-hint">
+                单位为秒，决定 HUD 弹窗在当前甲板上的保留时间。
+              </p>
             </div>
-          </el-form-item>
+          </ElFormItem>
 
-          <el-form-item label="性能档位">
+          <ElFormItem label="性能档位">
             <div class="field-block">
-              <el-radio-group v-model="settings.performanceMode" class="performance-mode-group" @change="saveSettings">
-                <el-radio value="low" border>低</el-radio>
-                <el-radio value="medium" border>中</el-radio>
-                <el-radio value="high" border>高</el-radio>
-              </el-radio-group>
+              <ElRadioGroup
+                v-model="settings.performanceMode"
+                class="performance-mode-group"
+                @change="saveSettings"
+              >
+                <ElRadio value="low" border>低</ElRadio>
+                <ElRadio value="medium" border>中</ElRadio>
+                <ElRadio value="high" border>高</ElRadio>
+              </ElRadioGroup>
               <p class="field-hint">{{ performanceModeHint }}</p>
             </div>
-          </el-form-item>
-        </el-form>
+          </ElFormItem>
+        </ElForm>
       </section>
 
       <section class="settings-panel">
@@ -76,7 +92,10 @@
         </header>
 
         <div class="theme-signal">
-          <div class="theme-signal__swatch" :style="{ '--signal-color': themeColor }"></div>
+          <div
+            class="theme-signal__swatch"
+            :style="{ '--signal-color': themeColor }"
+          ></div>
           <div class="theme-signal__meta">
             <span>Theme Signal</span>
             <strong>{{ themeColorDisplay }}</strong>
@@ -84,24 +103,30 @@
           </div>
         </div>
 
-        <el-form label-width="132px" class="settings-form">
-          <el-form-item label="主题颜色">
+        <ElForm label-width="132px" class="settings-form">
+          <ElFormItem label="主题颜色">
             <div class="field-block">
-              <el-color-picker v-model="themeColor" @change="saveThemeColor" />
+              <ElColorPicker v-model="themeColor" @change="saveThemeColor" />
               <p class="field-hint">控制终端主色调与局部高亮信号色。</p>
             </div>
-          </el-form-item>
+          </ElFormItem>
 
-          <el-form-item label="语言协议">
+          <ElFormItem label="语言协议">
             <div class="field-block field-block--compact">
-              <el-select v-model="language" placeholder="选择语言" @change="saveLanguage">
-                <el-option label="简体中文" value="zh_CN" />
-                <el-option label="English" value="en" />
-              </el-select>
-              <p class="field-hint">切换显示语言后，部分模块需要刷新当前页面才会重载。</p>
+              <ElSelect
+                v-model="language"
+                placeholder="选择语言"
+                @change="saveLanguage"
+              >
+                <ElOption label="简体中文" value="zh_CN" />
+                <ElOption label="English" value="en" />
+              </ElSelect>
+              <p class="field-hint">
+                切换显示语言后，部分模块需要刷新当前页面才会重载。
+              </p>
             </div>
-          </el-form-item>
-        </el-form>
+          </ElFormItem>
+        </ElForm>
       </section>
     </div>
 
@@ -116,9 +141,11 @@
 
       <div class="ops-layout">
         <div class="action-matrix">
-          <el-button type="primary" @click="exportSettings">导出设置矩阵</el-button>
-          <el-button @click="showImportDialog = true">导入设置矩阵</el-button>
-          <el-button type="danger" @click="resetSettings">恢复默认协议</el-button>
+          <ElButton type="primary" @click="exportSettings"
+            >导出设置矩阵</ElButton
+          >
+          <ElButton @click="showImportDialog = true">导入设置矩阵</ElButton>
+          <ElButton type="danger" @click="resetSettings">恢复默认协议</ElButton>
         </div>
 
         <div class="ops-support">
@@ -135,34 +162,62 @@
         </div>
       </div>
 
-      <input type="file" ref="importInput" class="hidden-input" accept=".json" @change="importSettings">
+      <input
+        ref="importInput"
+        type="file"
+        class="hidden-input"
+        accept=".json"
+        @change="importSettings"
+      />
     </section>
 
-    <el-dialog v-model="showImportDialog" title="导入设置矩阵" width="420px" append-to-body>
+    <ElDialog
+      v-model="showImportDialog"
+      title="导入设置矩阵"
+      width="420px"
+      append-to-body
+    >
       <div class="import-dialog">
-        <p>请选择一份 `JSON` 设置快照。导入后会覆盖当前扩展设置、主题颜色与语言协议。</p>
+        <p>
+          请选择一份 `JSON`
+          设置快照。导入后会覆盖当前扩展设置、主题颜色与语言协议。
+        </p>
       </div>
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="showImportDialog = false">取消</el-button>
-          <el-button type="primary" @click="triggerImport">选择文件</el-button>
+          <ElButton @click="showImportDialog = false">取消</ElButton>
+          <ElButton type="primary" @click="triggerImport">选择文件</ElButton>
         </div>
       </template>
-    </el-dialog>
+    </ElDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
-import { storage } from '@/stores';
-import { ElMessage, ElMessageBox, ElSwitch, ElDialog, ElButton, ElRadioGroup, ElRadio, ElForm, ElFormItem, ElInputNumber, ElColorPicker, ElSelect, ElOption } from 'element-plus';
+import { computed, ref, onMounted } from "vue";
+import { storage } from "@/stores";
+import {
+  ElMessage,
+  ElMessageBox,
+  ElSwitch,
+  ElDialog,
+  ElButton,
+  ElRadioGroup,
+  ElRadio,
+  ElForm,
+  ElFormItem,
+  ElInputNumber,
+  ElColorPicker,
+  ElSelect,
+  ElOption,
+} from "element-plus";
 import {
   DEFAULT_OPTIONS_PERFORMANCE_LEVEL,
   normalizeOptionsPerformanceLevel,
   syncOptionsPerformanceMirror,
   type OptionsPerformanceLevel,
-} from '../composables/useOptionsPerformance';
+} from "../composables/useOptionsPerformance";
 
 // 定义设置类型
 interface ExtensionSettings {
@@ -181,39 +236,44 @@ const settings = ref<ExtensionSettings>({
 });
 
 // 界面设置
-const themeColor = ref<string>('#409EFF');
-const language = ref<string>('zh_CN');
+const themeColor = ref<string>("#409EFF");
+const language = ref<string>("zh_CN");
 
-const languageLabel = computed(() => language.value === 'en' ? 'English' : '简体中文');
+const languageLabel = computed(() =>
+  language.value === "en" ? "English" : "简体中文",
+);
 const themeColorDisplay = computed(() => themeColor.value.toUpperCase());
 const performanceModeHint = computed(() => {
   const hints: Record<OptionsPerformanceLevel, string> = {
-    low: '低: 关闭页面动画、光标特效和大部分动态联动，优先保证低配机器流畅。',
-    medium: '中: 保留基础切换和表单交互，关闭持续性的氛围动画与高频视觉效果。',
-    high: '高: 保持当前完整视觉效果，自定义光标、扫描动效和动态联动全部开启。',
+    low: "低: 关闭页面动画、光标特效和大部分动态联动，优先保证低配机器流畅。",
+    medium: "中: 保留基础切换和表单交互，关闭持续性的氛围动画与高频视觉效果。",
+    high: "高: 保持当前完整视觉效果，自定义光标、扫描动效和动态联动全部开启。",
   };
 
   return hints[settings.value.performanceMode];
 });
+
 const statusCards = computed(() => {
   return [
     {
-      label: 'MODE',
-      value: settings.value.debugMode ? 'DEBUG' : 'STABLE',
-      detail: settings.value.debugMode ? '调试链路开放' : '运行参数已锁定',
-      tone: settings.value.debugMode ? 'amber' : 'blue',
+      label: "MODE",
+      value: settings.value.debugMode ? "DEBUG" : "STABLE",
+      detail: settings.value.debugMode ? "调试链路开放" : "运行参数已锁定",
+      tone: settings.value.debugMode ? "amber" : "blue",
     },
     {
-      label: 'UPDATE',
-      value: settings.value.autoCheckUpdate ? 'AUTO' : 'MANUAL',
-      detail: settings.value.autoCheckUpdate ? '自动巡检在线' : '仅手动检查版本',
-      tone: settings.value.autoCheckUpdate ? 'green' : 'blue',
+      label: "UPDATE",
+      value: settings.value.autoCheckUpdate ? "AUTO" : "MANUAL",
+      detail: settings.value.autoCheckUpdate
+        ? "自动巡检在线"
+        : "仅手动检查版本",
+      tone: settings.value.autoCheckUpdate ? "green" : "blue",
     },
     {
-      label: 'NOTICE',
+      label: "NOTICE",
       value: `${settings.value.notificationTimeout}s`,
       detail: `${languageLabel.value} / HUD 通知窗口`,
-      tone: 'blue',
+      tone: "blue",
     },
   ];
 });
@@ -227,74 +287,84 @@ const importInput = ref<HTMLInputElement | null>(null);
 // 加载所有设置
 const loadAllSettings = async () => {
   if (!chrome.storage) {
-    ElMessage({ message: '开发环境无法访问后台存储，请到生产环境测试', type: 'warning' });
+    ElMessage({
+      message: "开发环境无法访问后台存储，请到生产环境测试",
+      type: "warning",
+    });
     return;
   }
   try {
     // 加载基本设置
-    const savedSettings = await storage.ext.local.get('extensionSettings', null);
+    const savedSettings = await storage.ext.local.get(
+      "extensionSettings",
+      null,
+    );
     if (savedSettings) {
       settings.value = { ...settings.value, ...savedSettings };
     }
-    settings.value.performanceMode = normalizeOptionsPerformanceLevel(settings.value.performanceMode);
+    settings.value.performanceMode = normalizeOptionsPerformanceLevel(
+      settings.value.performanceMode,
+    );
     syncOptionsPerformanceMirror(settings.value.performanceMode);
 
     // 加载界面设置
-    themeColor.value = await storage.ext.local.get('themeColor', '#409EFF');
-    language.value = await storage.ext.local.get('language', 'zh_CN');
+    themeColor.value = await storage.ext.local.get("themeColor", "#409EFF");
+    language.value = await storage.ext.local.get("language", "zh_CN");
   } catch (error) {
-    maLogger.error('加载设置失败:', error);
-    ElMessage({ message: '加载设置失败', type: 'error' });
+    maLogger.error("加载设置失败:", error);
+    ElMessage({ message: "加载设置失败", type: "error" });
   }
 };
 
 // 保存基本设置
 const saveSettings = async () => {
   try {
-    settings.value.performanceMode = normalizeOptionsPerformanceLevel(settings.value.performanceMode);
+    settings.value.performanceMode = normalizeOptionsPerformanceLevel(
+      settings.value.performanceMode,
+    );
     syncOptionsPerformanceMirror(settings.value.performanceMode);
-    await storage.ext.local.set('extensionSettings', settings.value);
-    ElMessage({ message: '基本设置已保存', type: 'success' });
+    await storage.ext.local.set("extensionSettings", settings.value);
+    ElMessage({ message: "基本设置已保存", type: "success" });
   } catch (error) {
-    maLogger.error('保存设置失败:', error);
-    ElMessage({ message: '保存设置失败', type: 'error' });
+    maLogger.error("保存设置失败:", error);
+    ElMessage({ message: "保存设置失败", type: "error" });
   }
 };
 
 // 保存主题颜色
 const saveThemeColor = async () => {
   try {
-    await storage.ext.local.set('themeColor', themeColor.value);
-    ElMessage({ message: '主题颜色已保存', type: 'success' });
+    await storage.ext.local.set("themeColor", themeColor.value);
+    ElMessage({ message: "主题颜色已保存", type: "success" });
     // 这里可以添加更新主题颜色的逻辑
   } catch (error) {
-    maLogger.error('保存主题颜色失败:', error);
-    ElMessage({ message: '保存主题颜色失败', type: 'error' });
+    maLogger.error("保存主题颜色失败:", error);
+    ElMessage({ message: "保存主题颜色失败", type: "error" });
   }
 };
 
 // 保存语言设置
 const saveLanguage = async () => {
   try {
-    await storage.ext.local.set('language', language.value);
+    await storage.ext.local.set("language", language.value);
     ElMessage({
-      message: '语言设置已保存，需要刷新页面生效',
-      type: 'success',
-      duration: 3000
+      message: "语言设置已保存，需要刷新页面生效",
+      type: "success",
+      duration: 3000,
     });
   } catch (error) {
-    maLogger.error('保存语言设置失败:', error);
-    ElMessage({ message: '保存语言设置失败', type: 'error' });
+    maLogger.error("保存语言设置失败:", error);
+    ElMessage({ message: "保存语言设置失败", type: "error" });
   }
 };
 
 // 重置为默认设置
 const resetSettings = async () => {
   try {
-    await ElMessageBox.confirm('确定要重置所有设置为默认值吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+    await ElMessageBox.confirm("确定要重置所有设置为默认值吗？", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
     });
 
     // 重置设置
@@ -305,23 +375,23 @@ const resetSettings = async () => {
       performanceMode: DEFAULT_OPTIONS_PERFORMANCE_LEVEL,
     };
 
-    themeColor.value = '#409EFF';
-    language.value = 'zh_CN';
+    themeColor.value = "#409EFF";
+    language.value = "zh_CN";
     syncOptionsPerformanceMirror(settings.value.performanceMode);
 
     // 保存重置后的设置
     await Promise.all([
-      storage.ext.local.set('extensionSettings', settings.value),
-      storage.ext.local.set('themeColor', themeColor.value),
-      storage.ext.local.set('language', language.value)
+      storage.ext.local.set("extensionSettings", settings.value),
+      storage.ext.local.set("themeColor", themeColor.value),
+      storage.ext.local.set("language", language.value),
     ]);
 
-    ElMessage({ message: '设置已重置为默认值', type: 'success' });
+    ElMessage({ message: "设置已重置为默认值", type: "success" });
   } catch (error: any) {
     // 用户取消操作
-    if (error !== 'cancel') {
-      maLogger.error('重置设置失败:', error);
-      ElMessage({ message: '重置设置失败', type: 'error' });
+    if (error !== "cancel") {
+      maLogger.error("重置设置失败:", error);
+      ElMessage({ message: "重置设置失败", type: "error" });
     }
   }
 };
@@ -333,23 +403,23 @@ const exportSettings = async () => {
       extensionSettings: settings.value,
       themeColor: themeColor.value,
       language: language.value,
-      exportTime: new Date().toISOString()
+      exportTime: new Date().toISOString(),
     };
 
     const dataStr = JSON.stringify(allSettings, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `mria-extension-settings-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `mria-extension-settings-${new Date().toISOString().split("T")[0]}.json`;
     link.click();
 
     URL.revokeObjectURL(url);
-    ElMessage({ message: '设置导出成功', type: 'success' });
+    ElMessage({ message: "设置导出成功", type: "success" });
   } catch (error) {
-    maLogger.error('导出设置失败:', error);
-    ElMessage({ message: '导出设置失败', type: 'error' });
+    maLogger.error("导出设置失败:", error);
+    ElMessage({ message: "导出设置失败", type: "error" });
   }
 };
 
@@ -363,10 +433,12 @@ const importSettings = async (event: Event) => {
   try {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
-    if (!file.name.endsWith('.json')) {
-      ElMessage({ message: '请选择JSON格式的文件', type: 'error' });
+    if (!file.name.endsWith(".json")) {
+      ElMessage({ message: "请选择JSON格式的文件", type: "error" });
       return;
     }
 
@@ -376,50 +448,55 @@ const importSettings = async (event: Event) => {
         const settingsData = JSON.parse(e.target?.result as string);
 
         // 验证设置数据格式
-        if (!settingsData || typeof settingsData !== 'object') {
-          ElMessage({ message: '设置文件格式不正确', type: 'error' });
+        if (!settingsData || typeof settingsData !== "object") {
+          ElMessage({ message: "设置文件格式不正确", type: "error" });
           return;
         }
 
         // 更新设置
         if (settingsData.extensionSettings) {
-          settings.value = { ...settings.value, ...settingsData.extensionSettings };
-          settings.value.performanceMode = normalizeOptionsPerformanceLevel(settings.value.performanceMode);
+          settings.value = {
+            ...settings.value,
+            ...settingsData.extensionSettings,
+          };
+          settings.value.performanceMode = normalizeOptionsPerformanceLevel(
+            settings.value.performanceMode,
+          );
           syncOptionsPerformanceMirror(settings.value.performanceMode);
-          await storage.ext.local.set('extensionSettings', settings.value);
+          await storage.ext.local.set("extensionSettings", settings.value);
         }
 
         if (settingsData.themeColor) {
           themeColor.value = settingsData.themeColor;
-          await storage.ext.local.set('themeColor', themeColor.value);
+          await storage.ext.local.set("themeColor", themeColor.value);
         }
 
         if (settingsData.language) {
           language.value = settingsData.language;
-          await storage.ext.local.set('language', language.value);
+          await storage.ext.local.set("language", language.value);
         }
 
         showImportDialog.value = false;
         ElMessage({
-          message: '设置导入成功，部分设置需要刷新页面生效',
-          type: 'success',
-          duration: 3000
+          message: "设置导入成功，部分设置需要刷新页面生效",
+          type: "success",
+          duration: 3000,
         });
       } catch (error) {
-        maLogger.error('解析设置文件失败:', error);
-        ElMessage({ message: '解析设置文件失败', type: 'error' });
+        maLogger.error("解析设置文件失败:", error);
+        ElMessage({ message: "解析设置文件失败", type: "error" });
       }
     };
 
     reader.readAsText(file);
   } catch (error) {
-    maLogger.error('导入设置失败:', error);
-    ElMessage({ message: '导入设置失败', type: 'error' });
+    maLogger.error("导入设置失败:", error);
+    ElMessage({ message: "导入设置失败", type: "error" });
   }
 
   // 清空input值，以便可以重复选择同一个文件
   const target = event.target as HTMLInputElement;
-  target.value = '';
+  target.value = "";
 };
 
 // 组件挂载时加载设置
@@ -444,7 +521,11 @@ onMounted(() => {
   border: 1px solid rgba(86, 170, 235, 0.16);
   background:
     linear-gradient(180deg, rgba(7, 16, 29, 0.94), rgba(4, 10, 18, 0.9)),
-    radial-gradient(circle at top right, rgba(60, 146, 255, 0.08), transparent 42%);
+    radial-gradient(
+      circle at top right,
+      rgba(60, 146, 255, 0.08),
+      transparent 42%
+    );
   box-shadow:
     0 18px 60px rgba(0, 0, 0, 0.24),
     0 0 22px rgba(68, 165, 255, 0.05),
@@ -453,21 +534,31 @@ onMounted(() => {
 
 .settings-bridge,
 .settings-panel {
-  clip-path: polygon(0 18px, 18px 0, calc(100% - 28px) 0, 100% 18px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  clip-path: polygon(
+    0 18px,
+    18px 0,
+    calc(100% - 28px) 0,
+    100% 18px,
+    100% 100%,
+    20px 100%,
+    0 calc(100% - 20px)
+  );
 }
 
 .settings-bridge::before,
 .settings-panel::before,
 .status-card::before,
 .ops-link::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
     linear-gradient(transparent 96%, rgba(84, 154, 212, 0.05) 100%),
     linear-gradient(90deg, transparent 96%, rgba(84, 154, 212, 0.04) 100%);
-  background-size: 100% 18px, 18px 100%;
+  background-size:
+    100% 18px,
+    18px 100%;
   opacity: 0.16;
 }
 
@@ -485,7 +576,7 @@ onMounted(() => {
 .theme-signal__meta small,
 .ops-note span,
 .ops-link small {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -519,7 +610,14 @@ onMounted(() => {
 
 .status-card {
   padding: 16px 14px;
-  clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  clip-path: polygon(
+    0 12px,
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%
+  );
 }
 
 .status-card span {
@@ -542,11 +640,11 @@ onMounted(() => {
   line-height: 1.5;
 }
 
-.status-card[data-tone='green'] {
+.status-card[data-tone="green"] {
   border-color: rgba(122, 247, 208, 0.24);
 }
 
-.status-card[data-tone='amber'] {
+.status-card[data-tone="amber"] {
   border-color: rgba(255, 179, 71, 0.26);
 }
 
@@ -582,7 +680,7 @@ onMounted(() => {
 }
 
 .panel-heading strong {
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   font-size: 12px;
   color: rgba(147, 219, 241, 0.82);
 }
@@ -595,15 +693,25 @@ onMounted(() => {
   padding: 14px 16px;
   border: 1px solid rgba(96, 181, 239, 0.14);
   background: rgba(5, 14, 24, 0.68);
-  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  clip-path: polygon(
+    0 10px,
+    10px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%
+  );
 }
 
 .theme-signal__swatch {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--signal-color) 82%, #ffffff), var(--signal-color));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--signal-color) 82%, #ffffff),
+    var(--signal-color)
+  );
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 0 24px color-mix(in srgb, var(--signal-color) 26%, transparent);
@@ -670,7 +778,14 @@ onMounted(() => {
   padding: 16px;
   border: 1px solid rgba(96, 181, 239, 0.14);
   background: rgba(5, 14, 24, 0.68);
-  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  clip-path: polygon(
+    0 10px,
+    10px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%
+  );
 }
 
 .ops-note span {
@@ -690,8 +805,18 @@ onMounted(() => {
   display: block;
   padding: 16px;
   text-decoration: none;
-  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  clip-path: polygon(
+    0 10px,
+    10px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%
+  );
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .ops-link:hover {
@@ -741,7 +866,7 @@ onMounted(() => {
 
 :deep(.settings-form .el-form-item__label) {
   color: rgba(141, 204, 239, 0.76) !important;
-  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-family: "JetBrains Mono", "Consolas", monospace;
   letter-spacing: 0.08em;
 }
 
@@ -769,8 +894,7 @@ onMounted(() => {
 
 :deep(.el-input__wrapper.is-focus),
 :deep(.el-input-number .el-input__wrapper.is-focus) {
-  box-shadow:
-    inset 0 0 0 1px rgba(122, 247, 208, 0.26) !important;
+  box-shadow: inset 0 0 0 1px rgba(122, 247, 208, 0.26) !important;
 }
 
 :deep(.el-input-number__decrease),
@@ -788,7 +912,10 @@ onMounted(() => {
 
 :deep(.el-button) {
   border-radius: 12px;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 :deep(.action-matrix .el-button:hover),
@@ -798,8 +925,11 @@ onMounted(() => {
 
 :deep(.el-dialog) {
   border: 1px solid rgba(86, 170, 235, 0.16);
-  background:
-    linear-gradient(180deg, rgba(7, 16, 29, 0.98), rgba(4, 10, 18, 0.96)) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 16, 29, 0.98),
+    rgba(4, 10, 18, 0.96)
+  ) !important;
   box-shadow:
     0 18px 60px rgba(0, 0, 0, 0.32),
     0 0 22px rgba(68, 165, 255, 0.05) !important;
@@ -814,7 +944,6 @@ onMounted(() => {
 }
 
 @media (max-width: 1180px) {
-
   .settings-bridge,
   .settings-grid,
   .ops-layout {
@@ -828,7 +957,6 @@ onMounted(() => {
 }
 
 @media (max-width: 720px) {
-
   .settings-bridge,
   .settings-panel {
     padding: 16px;

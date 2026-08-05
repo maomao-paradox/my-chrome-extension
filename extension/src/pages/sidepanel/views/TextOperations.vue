@@ -3,11 +3,11 @@
     <div class="panel-title">文本操作</div>
     <div class="input-group">
       <label for="find-text">查找文本</label>
-      <input type="text" id="find-text" v-model="findText" placeholder="输入要查找的文本">
+      <input id="find-text" v-model="findText" type="text" placeholder="输入要查找的文本">
     </div>
     <div class="input-group">
       <label for="replace-text">替换为</label>
-      <input type="text" id="replace-text" v-model="replaceText" placeholder="输入替换的文本">
+      <input id="replace-text" v-model="replaceText" type="text" placeholder="输入替换的文本">
     </div>
     <div class="action-buttons">
       <button class="btn-primary" @click="replaceAllText">批量替换文本</button>

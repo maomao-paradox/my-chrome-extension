@@ -4,7 +4,7 @@ export async function startRecorder(tabId: number): Promise<void> {
   await chrome.scripting.executeScript({
     target: { tabId, allFrames: false },
     world: 'ISOLATED',
-    func: installRecorder,
+    func: installRecorder
   });
 }
 
@@ -12,7 +12,7 @@ export async function stopRecorder(tabId: number): Promise<void> {
   await chrome.scripting.executeScript({
     target: { tabId, allFrames: false },
     world: 'ISOLATED',
-    func: uninstallRecorder,
+    func: uninstallRecorder
   });
 }
 
@@ -36,7 +36,7 @@ function installRecorder(): void {
       element.getAttribute('title'),
       input.placeholder,
       input.value,
-      element.textContent,
+      element.textContent
     ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
   };
 
@@ -161,9 +161,9 @@ function installRecorder(): void {
         step,
         page: {
           title: document.title,
-          url: location.href,
-        },
-      },
+          url: location.href
+        }
+      }
     });
   };
 
@@ -182,7 +182,7 @@ function installRecorder(): void {
     }
     sendStep({
       type: 'click',
-      target: targetFor(element),
+      target: targetFor(element)
     });
   };
 
@@ -200,7 +200,7 @@ function installRecorder(): void {
       sendStep({
         type: 'fill',
         target: targetFor(element),
-        value: element.value,
+        value: element.value
       });
     }, 380);
   };
@@ -214,7 +214,7 @@ function installRecorder(): void {
       sendStep({
         type: 'fill',
         target: targetFor(element),
-        value: element.value,
+        value: element.value
       });
     }
   };
@@ -227,7 +227,7 @@ function installRecorder(): void {
     sendStep({
       type: 'press',
       target: element ? targetFor(element) : undefined,
-      key: 'Enter',
+      key: 'Enter'
     });
   };
 
@@ -243,7 +243,7 @@ function installRecorder(): void {
       document.removeEventListener('input', onInput, true);
       document.removeEventListener('change', onChange, true);
       document.removeEventListener('keydown', onKeydown, true);
-    },
+    }
   };
 }
 

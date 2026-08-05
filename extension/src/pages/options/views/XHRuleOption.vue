@@ -38,7 +38,7 @@
             placeholder="输入域名（例如：example.com 或 *.example.com）"
             class="domain-input"
           />
-          <button @click="addDomain" class="add-btn">添加</button>
+          <button class="add-btn" @click="addDomain">添加</button>
         </div>
         
         <div class="whitelist-list">
@@ -47,7 +47,7 @@
           </div>
           <div v-for="(domain, index) in whitelist" :key="index" class="whitelist-item">
             <code>{{ domain }}</code>
-            <button @click="removeDomain(index)" class="remove-btn">删除</button>
+            <button class="remove-btn" @click="removeDomain(index)">删除</button>
           </div>
         </div>
       </div>
@@ -63,35 +63,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { RuleForm, RuleList, TestTool } from '@components/index'
-import { Rule } from '@/types/components/index'
+import { ref, reactive, onMounted } from 'vue';
+import { RuleForm, RuleList, TestTool } from '@components/index';
+import { Rule } from '@/types/components/index';
 
-const activeTab = ref('rules')
-const rules = ref<Rule[]>([])
-const editId = ref<number | null>(null)
-const editableRule = reactive({})
+const activeTab = ref('rules');
+const rules = ref<Rule[]>([]);
+const editId = ref<number | null>(null);
+const editableRule = reactive({});
 
 // 域名白名单相关
-const whitelist = ref<string[]>([])
-const newDomain = ref('')
+const whitelist = ref<string[]>([]);
+const newDomain = ref('');
 
 // 存储键名
-const RULES_KEY = 'mria_xhr_rules'
-const WHITELIST_KEY = 'mria_xhr_whitelist'
+const RULES_KEY = 'mria_xhr_rules';
+const WHITELIST_KEY = 'mria_xhr_whitelist';
 
 // 组件挂载时加载数据
 onMounted(() => {
-  loadRules()
-  loadWhitelist()
-})
+  loadRules();
+  loadWhitelist();
+});
 
 // 从localStorage加载规则
 function loadRules() {
   try {
-    const storedRules = localStorage.getItem(RULES_KEY)
+    const storedRules = localStorage.getItem(RULES_KEY);
     if (storedRules) {
-      rules.value = JSON.parse(storedRules)
+      rules.value = JSON.parse(storedRules);
     } else {
       // 默认规则
       const defaultRule = {
@@ -100,44 +100,44 @@ function loadRules() {
         responseData: JSON.stringify({ id: 1, title: 'Modified by XHR Interceptor', completed: true, userId: 1 }, null, 2),
         responseType: 'json',
         enabled: true
-      }
-      rules.value = [defaultRule]
-      saveRules()
+      };
+      rules.value = [defaultRule];
+      saveRules();
     }
   } catch (error) {
-    maLogger.error('加载规则失败:', error)
+    maLogger.error('加载规则失败:', error);
   }
 }
 
 // 从localStorage加载白名单
 function loadWhitelist() {
   try {
-    const storedWhitelist = localStorage.getItem(WHITELIST_KEY)
+    const storedWhitelist = localStorage.getItem(WHITELIST_KEY);
     if (storedWhitelist) {
-      whitelist.value = JSON.parse(storedWhitelist)
+      whitelist.value = JSON.parse(storedWhitelist);
     }
   } catch (error) {
-    maLogger.error('加载白名单失败:', error)
+    maLogger.error('加载白名单失败:', error);
   }
 }
 
 // 保存规则到localStorage
 function saveRules() {
   try {
-    localStorage.setItem(RULES_KEY, JSON.stringify(rules.value))
-    notifyContentScript('MRIA_XHR_UPDATE_RULES', { rules: rules.value })
+    localStorage.setItem(RULES_KEY, JSON.stringify(rules.value));
+    notifyContentScript('MRIA_XHR_UPDATE_RULES', { rules: rules.value });
   } catch (error) {
-    maLogger.error('保存规则失败:', error)
+    maLogger.error('保存规则失败:', error);
   }
 }
 
 // 保存白名单到localStorage
 function saveWhitelist() {
   try {
-    localStorage.setItem(WHITELIST_KEY, JSON.stringify(whitelist.value))
-    notifyContentScript('MRIA_XHR_UPDATE_WHITELIST', { whitelist: whitelist.value })
+    localStorage.setItem(WHITELIST_KEY, JSON.stringify(whitelist.value));
+    notifyContentScript('MRIA_XHR_UPDATE_WHITELIST', { whitelist: whitelist.value });
   } catch (error) {
-    maLogger.error('保存白名单失败:', error)
+    maLogger.error('保存白名单失败:', error);
   }
 }
 
@@ -146,67 +146,67 @@ function notifyContentScript(type: string, data: { [key: string]: any | (string 
   if (chrome.tabs && chrome.tabs.query) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id as number, { type, ...data })
+        chrome.tabs.sendMessage(tabs[0].id as number, { type, ...data });
       }
-    })
+    });
   }
 }
 
 // 处理规则提交
 function handleSubmit(rule: Rule) {
-  const idx = rules.value.findIndex(r => r.id === rule.id)
+  const idx = rules.value.findIndex(r => r.id === rule.id);
   if (idx > -1) {
-    rules.value.splice(idx, 1, rule)
+    rules.value.splice(idx, 1, rule);
   } else {
-    rules.value.push({ ...rule, id: Date.now() })
+    rules.value.push({ ...rule, id: Date.now() });
   }
-  editId.value = null
-  resetEditableRule()
-  saveRules()
+  editId.value = null;
+  resetEditableRule();
+  saveRules();
 }
 
 // 切换规则启用状态
 function toggleRule(id: number) {
-  const rule = rules.value.find(r => r.id === id)
+  const rule = rules.value.find(r => r.id === id);
   if (rule) {
-    rule.enabled = !rule.enabled
+    rule.enabled = !rule.enabled;
   }
-  saveRules()
+  saveRules();
 }
 
 // 编辑规则
 function editRule(rule: Rule) {
-  editId.value = rule.id
-  Object.assign(editableRule, rule)
+  editId.value = rule.id;
+  Object.assign(editableRule, rule);
 }
 
 function resetEditableRule() {
-  editId.value = null
+  editId.value = null;
   Object.keys(editableRule).forEach((key) => {
-    delete editableRule[key as keyof typeof editableRule]
-  })
+    delete editableRule[key as keyof typeof editableRule];
+  });
 }
 
 // 删除规则
 function deleteRule(id: number) {
-  rules.value = rules.value.filter(r => r.id !== id)
-  saveRules()
+  rules.value = rules.value.filter(r => r.id !== id);
+  saveRules();
 }
 
 // 添加域名到白名单
 function addDomain() {
-  const domain = newDomain.value.trim()
+  const domain = newDomain.value.trim();
   if (domain && !whitelist.value.includes(domain as string)) {
-    whitelist.value.push(domain as string)
-    saveWhitelist()
-    newDomain.value = ''
+    whitelist.value.push(domain as string);
+    saveWhitelist();
+    newDomain.value = '';
   }
 }
 
 // 从白名单中删除域名
 function removeDomain(index: number) {
-  whitelist.value.splice(index, 1)
-  saveWhitelist()
+  whitelist.value.splice(index, 1);
+  saveWhitelist();
 }
 </script>
 

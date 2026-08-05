@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue';
+import { computed } from "vue";
 
 type Option = {
   label: string;
@@ -33,39 +33,39 @@ type Option = {
 const props = defineProps({
   modelValue: {
     type: [String, Number],
-    default: ''
+    default: "",
   },
   options: {
     type: Array as () => Option[],
-    required: true
+    required: true,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   label: {
     type: String,
-    default: ''
+    default: "",
   },
   id: {
     type: String,
-    default: ''
+    default: "",
   },
   error: {
     type: String,
-    default: ''
-  }
+    default: "",
+  },
 });
 
-const emit = defineEmits(['update:modelValue', 'change']);
+const emit = defineEmits(["update:modelValue", "change"]);
 
 const localValue = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  set: (value) => emit("update:modelValue", value),
 });
 
 const handleChange = (event: Event) => {
-  emit('change', event);
+  emit("change", event);
 };
 </script>
 
@@ -105,13 +105,13 @@ const handleChange = (event: Event) => {
 }
 
 .form-input.has-error {
-  border-color: #FF5252;
+  border-color: #ff5252;
 }
 
 .error-message {
   display: block;
   margin-top: 4px;
   font-size: 12px;
-  color: #FF5252;
+  color: #ff5252;
 }
 </style>

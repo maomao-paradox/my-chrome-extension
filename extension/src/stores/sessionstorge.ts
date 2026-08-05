@@ -38,5 +38,5 @@ export const session = {
   /** 判断 key 是否存在 */
   has(key: string): boolean {
     return sessionStorage.getItem(key) !== null;
-  },
+  }
 };

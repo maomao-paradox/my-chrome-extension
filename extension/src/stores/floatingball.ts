@@ -8,106 +8,110 @@
  */
 
 // stores/floatingball.ts
-import { defineStore } from 'pinia'
-import { ref, computed, Ref } from 'vue'
-import { Tool } from '@/types'
-import { storage } from '@/stores'
-import { appConfigKey } from '@/config'
+// 已从 Pinia 迁移为 Zustand（框架无关，Vue/React 均可使用）
+import { create } from "zustand";
+import type { Tool } from "@/types";
+import { storage } from "@/stores";
+import { appConfigKey } from "@/config";
 
-// 使用组合式 API 风格（推荐）
-export const useFloatingballStore = defineStore('floatingBall', () => {
-  // 新增侧边栏相关状态
-  let isEnabled = ref(true) // 悬浮球是否启用
-  let isSidePanelModeActive = ref(false) // 侧边栏模式是否激活
-  let openDialog = ref(false)
-  let openDrawer = ref(false)
-  let activeTool = ref<Tool | null>(null)
-  let clickBehavior = ref<'dialog' | 'sidepanel'>('dialog')
+/**
+ * Floatingball 状态管理接口
+ * 合并了原 Pinia 的 state + getters + actions
+ */
+interface FloatingballState {
+  // === State（原 ref + computed getter 合并）===
+  /** 悬浮球是否启用（原 isEnabled + enabledStat）*/
+  isEnabled: boolean;
+  /** 侧边栏模式是否激活（原 isSidePanelModeActive + sidePanelModeStat）*/
+  isSidePanelModeActive: boolean;
+  /** 控制面板是否打开（原 openDialog + dialogStat）*/
+  openDialog: boolean;
+  /** 工具抽屉是否打开（原 openDrawer + drawerStat）*/
+  openDrawer: boolean;
+  /** 当前激活的工具（原 activeTool + activeToolStat）*/
+  activeTool: Tool | null;
+  /** 点击行为：弹窗或侧边栏（原 clickBehavior + clickBehaviorStat）*/
+  clickBehavior: "dialog" | "sidepanel";
 
-  // getters (计算属性)
-  const dialogStat = computed(() => openDialog.value)
-  const drawerStat = computed(() => openDrawer.value)
-  const enabledStat = computed(() => isEnabled.value)
-  const sidePanelModeStat = computed(() => isSidePanelModeActive.value)
-  const clickBehaviorStat = computed(() => clickBehavior.value)
-  const activeToolStat = computed(() => activeTool.value)
+  // === Actions ===
+  /** 统一 toggle：切换 dialog/drawer 的开关状态 */
+  toggle: (key: "dialog" | "drawer", forced?: boolean) => void;
+  /** 切换当前激活的工具 */
+  changeTool: (tool: Tool | null) => void;
+  /** 切换侧边栏状态（通过 chrome.runtime 消息）*/
+  toggleSidepanel: (forced?: boolean) => void;
+  /** 从 storage 加载配置 */
+  loadConfig: () => Promise<void>;
+  /** 设置点击行为 */
+  setClickBehavior: (behavior: "dialog" | "sidepanel") => void;
+  /** 设置启用状态 */
+  setEnabled: (enabled: boolean) => void;
+}
 
-  // actions
-  type BoolKeys = 'dialog' | 'drawer'
-  const boolMap: Record<BoolKeys, Ref<boolean>> = {
-    dialog: openDialog,
-    drawer: openDrawer,
-  }
+/**
+ * Floatingball Zustand store
+ * 在 React 中：useFloatingballStore(s => s.openDialog)
+ * 在 Vue/非组件中：useFloatingballStore.getState().toggle(...)
+ */
+export const useFloatingballStore = create<FloatingballState>((set, get) => ({
+  // === 初始 State ===
+  isEnabled: true,
+  isSidePanelModeActive: false,
+  openDialog: false,
+  openDrawer: false,
+  activeTool: null,
+  clickBehavior: "dialog",
 
-  // 统一 toggle
-  function toggle<K extends BoolKeys>(key: K, forced?: boolean): void {
-    const target = boolMap[key]
-    // maLogger.info(target)
-    target.value = typeof forced === 'boolean' ? forced : !target.value
-  }
+  // === Actions ===
+  toggle: (key, forced) =>
+    set((state) => ({
+      ...(key === "dialog"
+        ? { openDialog: typeof forced === "boolean" ? forced : !state.openDialog }
+        : {}),
+      ...(key === "drawer"
+        ? { openDrawer: typeof forced === "boolean" ? forced : !state.openDrawer }
+        : {}),
+    })),
 
-  function changeTool(tool: Tool | null) {
-    activeTool.value = tool
-  }
+  changeTool: (tool) => set({ activeTool: tool }),
 
-  function toggleSidepanel(forced?: boolean) {
-    const active = typeof forced === 'boolean' ? forced : !isSidePanelModeActive.value
-    const type = active ? 'OPEN_SIDEPANEL' : 'CLOSE_SIDEPANEL'
-    // 开启侧边栏
-    chrome.runtime.sendMessage({ type, target: 'background' }, (response) => {
+  toggleSidepanel: (forced) => {
+    const active = typeof forced === "boolean" ? forced : !get().isSidePanelModeActive;
+    const type = active ? "OPEN_SIDEPANEL" : "CLOSE_SIDEPANEL";
+    // 开启/关闭侧边栏
+    chrome.runtime.sendMessage({ type, target: "background" }, () => {
       if (chrome.runtime.lastError) {
-        maLogger.log('侧边栏状态切换失败', chrome.runtime.lastError.message)
+        maLogger.log("侧边栏状态切换失败", chrome.runtime.lastError.message);
       } else {
-        maLogger.log('侧边栏状态切换成功')
-        isSidePanelModeActive.value = active
+        maLogger.log("侧边栏状态切换成功");
+        set({ isSidePanelModeActive: active });
       }
-    })
-  }
+    });
+  },
 
-  // 加载配置
-  function loadConfig() {
+  loadConfig: async () => {
     try {
-      storage.ext.local.get(appConfigKey)
-        .then((result) => {
-          if (result) {
-            // 查找悬浮球配置
-            const config = result['floatingball']
-            if (config) {
-              const behavior = config.type || 'dialog';
-              // 同时设置两个行为状态以确保一致性
-              setClickBehavior(behavior);
-              setEnabled(config.value !== false)
-            }
-          }
-        })
-      maLogger.log('悬浮球启用状态:', enabledStat.value, '悬浮球点击行为:', clickBehaviorStat.value)
+      const result = await storage.ext.local.get(appConfigKey);
+      if (result) {
+        // 查找悬浮球配置
+        const config = result["floatingball"];
+        if (config) {
+          const behavior = config.type || "dialog";
+          // 同时设置两个行为状态以确保一致性
+          set({
+            clickBehavior: behavior,
+            isEnabled: config.value !== false,
+          });
+        }
+      }
+      const state = get();
+      maLogger.log("悬浮球启用状态:", state.isEnabled, "悬浮球点击行为:", state.clickBehavior);
     } catch (error) {
-      maLogger.error('加载配置失败:', error)
+      maLogger.error("加载配置失败:", error);
     }
-  }
+  },
 
-  // 设置点击行为
-  function setClickBehavior(behavior: 'dialog' | 'sidepanel') {
-    clickBehavior.value = behavior
-  }
+  setClickBehavior: (behavior) => set({ clickBehavior: behavior }),
 
-  // 设置启用状态
-  function setEnabled(enabled: boolean) {
-    isEnabled.value = enabled
-  }
-
-  return {
-    dialogStat,
-    drawerStat,
-    enabledStat,
-    sidePanelModeStat,
-    clickBehaviorStat,
-    activeToolStat,
-    toggle,
-    changeTool,
-    toggleSidepanel,
-    loadConfig,
-    setClickBehavior,
-    setEnabled
-  }
-})
+  setEnabled: (enabled) => set({ isEnabled: enabled }),
+}));

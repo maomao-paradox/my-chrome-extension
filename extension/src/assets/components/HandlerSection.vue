@@ -2,7 +2,7 @@
   <div class="handler-section">
     <div class="handler-header">
       <h4>{{ title }}</h4>
-      <button class="btn btn-sm btn-secondary" @click="onAddSubRule" title="添加子规则">
+      <button class="btn btn-sm btn-secondary" title="添加子规则" @click="onAddSubRule">
         <span class="btn-icon">➕</span>
         添加子规则
       </button>

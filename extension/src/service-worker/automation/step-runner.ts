@@ -2,7 +2,7 @@ import type {
   AutomationRunStepsResult,
   AutomationStep,
   AutomationStepResult,
-  AutomationTarget,
+  AutomationTarget
 } from '@/types/automation';
 import { getAttachedWindowId, getPageSnapshot, waitForTabComplete } from './tab-runtime';
 import { isRiskyAutomationStep } from './safety';
@@ -21,7 +21,7 @@ export async function runSteps(tabId: number, steps: AutomationStep[], options: 
     }
     return {
       page: await getPageSnapshot(tabId),
-      results,
+      results
     };
   });
 }
@@ -53,7 +53,7 @@ async function runStepNow(tabId: number, step: AutomationStep, options: { allowR
       target: { tabId },
       world: 'ISOLATED',
       func: executeDOMStep,
-      args: [normalizedStep],
+      args: [normalizedStep]
     });
     result = execution?.result;
   }
@@ -63,7 +63,7 @@ async function runStepNow(tabId: number, step: AutomationStep, options: { allowR
     page: await getPageSnapshot(tabId),
     result,
     screenshot,
-    durationMs: Date.now() - startedAt,
+    durationMs: Date.now() - startedAt
   };
 }
 
@@ -72,7 +72,7 @@ function normalizeStep(step: AutomationStep): AutomationStep {
   return {
     ...step,
     type: rawType === 'verifytext' ? 'verifyText' : rawType as AutomationStep['type'],
-    timeoutMs: step.timeoutMs && step.timeoutMs > 0 ? step.timeoutMs : 10000,
+    timeoutMs: step.timeoutMs && step.timeoutMs > 0 ? step.timeoutMs : 10000
   };
 }
 
@@ -84,7 +84,7 @@ function assertStepAllowed(step: AutomationStep, options: { allowRisky?: boolean
     step.target?.name,
     step.target?.text,
     step.target?.selector,
-    step.value,
+    step.value
   ].filter(Boolean).join(' ');
 
   if (isRiskyAutomationStep(step.type, targetText)) {
@@ -94,7 +94,7 @@ function assertStepAllowed(step: AutomationStep, options: { allowRisky?: boolean
 
 async function captureVisibleTab(): Promise<string> {
   const dataURL = await chrome.tabs.captureVisibleTab(getAttachedWindowId(), {
-    format: 'png',
+    format: 'png'
   });
   return dataURL.replace(/^data:image\/png;base64,/, '');
 }
@@ -112,7 +112,7 @@ function executeDOMStep(step: AutomationStep): unknown {
       element.getAttribute('title'),
       input.placeholder,
       input.value,
-      element.textContent,
+      element.textContent
     ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
   };
 

@@ -1,0 +1,6 @@
+/* Menu 应用聚合样式
+ * 通过 ?inline 导入为字符串，注入到 shadow root
+ * 避免 Vite CSS 代码分割创建 <link> 标签导致相对路径请求失败
+ */
+@use "./app.scss";
+@use "../tools/styles/auto-click.scss";

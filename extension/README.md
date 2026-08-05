@@ -32,6 +32,43 @@ npm run build:enc
 
 扩展加载: 打开 `chrome://extensions` → 开启开发者模式 → 加载已解压的扩展程序 → 选择 `dist` 文件夹
 
+## 测试
+
+项目使用 [Vitest](https://vitest.dev/) + [happy-dom](https://github.com/capricorn86/happy-dom) + [Vue Test Utils](https://test-utils.vuejs.org/) 进行单元测试和组件测试。
+
+```bash
+# 运行全部测试（一次性）
+npm test -- run
+
+# 进入 watch 模式
+npm test
+
+# 指定测试文件
+npx vitest run test/element-control.spec.ts
+npx vitest run test/BookmarkPage.spec.ts
+```
+
+### 测试框架说明
+
+- **Vitest**：与 Vite 深度集成的下一代测试框架，速度极快，完全兼容 Jest API
+- **Vue Test Utils**：Vue 官方推荐的组件测试库，提供 `mount`/`shallowMount` 方法来渲染和交互组件
+- **happy-dom**：轻量级 DOM 模拟环境，替代 jsdom 以获得更好的性能
+
+### 测试基础设施
+
+- `vitest.config.ts` — 独立的 Vitest 配置，复用 `@` 路径别名、启用 Vue SFC 支持和 happy-dom 环境
+- `test/setup.ts` — 全局 setup，注入 `maLogger`、`chrome.*` API、`requestIdleCallback` 等 chrome 扩展运行时依赖
+- `test/**/*.spec.ts` — 测试用例目录
+
+### 已覆盖模块
+
+| 模块 | 测试文件 | 类型 | 用例数 |
+| --- | --- | --- | --- |
+| `src/utils/element-control.ts` | `test/element-control.spec.ts` | 单元测试 | 91 |
+| `src/pages/popup/composables/useDomainState.ts` | `test/useDomainState.spec.ts` | 单元测试 | 15 |
+| `src/pages/popup/views/BookmarkPage.vue` | `test/BookmarkPage.spec.ts` | 组件测试 | 36 |
+| `src/message/index.ts` | `test/message.spec.ts` | 单元测试 | 32 |
+
 ## 核心功能
 
 ### AI 智能助手
@@ -54,6 +91,13 @@ npm run build:enc
 - Popup 顶部导航改为紧凑分段样式，保留原有图标并增加文字标签、选中态和键盘焦点反馈，便于在小窗口内快速识别功能入口
 - 锚点页使用紧凑布局，搜索、导入、导出和列表操作都适配浏览器扩展的小窗口宽度
 - `src/pages/popup/views/TableContainer.vue` 支持 `density`、`sectionGap`、`contentGap`、`heroGap`、`rightMaxWidth` 等公共布局参数，页面可按需要复用同一头部/内容容器
+
+### Popup 动态令牌
+- Popup 新增“令牌”标签页，在扩展本地生成 TOTP 动态码，不依赖后端服务
+- 令牌数据保存到 `chrome.storage.local`；新增表单提交后会清空输入框
+- 支持粘贴 `otpauth://totp/...` 链接，也支持手动填写发行方、账户和 Base32 secret
+- 支持上传二维码图片，通过 `jsqr` 解析出 `otpauth://totp/...` 后填入表单
+- 倒计时每秒刷新，到达周期边界后自动生成新动态码
 
 ### 后台页签脚本执行
 - 后台脚本监听 `CREATE_TAB_WITH_SCRIPT` 消息，可新建页签并在目标页面开始加载后立即注入扩展内脚本

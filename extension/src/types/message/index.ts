@@ -13,8 +13,8 @@ export interface ExtMessage<T = any> {
     type?: string
     action?: string
     flag?: string
-    source?: 'sidepanel' | 'content' | 'background' | 'page' | "popup" | any
-    target?: 'sidepanel' | 'content' | 'background' | 'page' | "popup" | any
+    source?: 'sidepanel' | 'content' | 'background' | 'page' | 'popup' | any
+    target?: 'sidepanel' | 'content' | 'background' | 'page' | 'popup' | any
     payload?: T
     timestamp?: number
     id?: string
@@ -42,10 +42,10 @@ export interface BackgroundMessageHandler {
 
 // AI聊天相关消息类型
 export const AI_CHAT_MESSAGE_TYPES = {
-    REQUEST: 'AI_CHAT_REQUEST',
-    STREAM_DATA: 'AI_CHAT_STREAM_DATA',
-    COMPLETE: 'AI_CHAT_COMPLETE',
-    ERROR: 'AI_CHAT_ERROR'
+  REQUEST: 'AI_CHAT_REQUEST',
+  STREAM_DATA: 'AI_CHAT_STREAM_DATA',
+  COMPLETE: 'AI_CHAT_COMPLETE',
+  ERROR: 'AI_CHAT_ERROR'
 } as const;
 
 // AI聊天请求数据

@@ -6,7 +6,7 @@
     <div class="toggle-item">
       <label class="toggle-label">文字雨屏保</label>
       <label class="toggle-switch">
-        <input type="checkbox" v-model="textRainConfig.value" @change="onConfigChange" />
+        <input v-model="textRainConfig.value" type="checkbox" @change="onConfigChange" />
         <span class="toggle-slider"></span>
       </label>
     </div>
@@ -15,8 +15,8 @@
     <div class="slider-container">
       <label for="density-slider" class="slider-label">雨滴密度</label>
       <div class="slider-wrapper">
-        <input id="density-slider" type="range" :min="textRainConfig.min" :max="textRainConfig.max"
-          :step="textRainConfig.step" v-model.number="textRainConfig.density" class="slider" @change="onConfigChange" />
+        <input id="density-slider" v-model.number="textRainConfig.density" type="range" :min="textRainConfig.min"
+          :max="textRainConfig.max" :step="textRainConfig.step" class="slider" @change="onConfigChange" />
         <span class="slider-value">{{ textRainConfig.density }}</span>
       </div>
       <div class="slider-info">值越小，密度越大</div>
@@ -26,9 +26,9 @@
     <div class="bullet-input-section">
       <h4 class="section-subtitle">添加自定义弹幕</h4>
       <div class="input-group">
-        <input type="text" v-model="newBulletText" placeholder="请输入弹幕内容..." maxlength="20" class="text-input"
+        <input v-model="newBulletText" type="text" placeholder="请输入弹幕内容..." maxlength="20" class="text-input"
           @keyup.enter="addBullet" />
-        <button class="send-btn" @click="addBullet" :disabled="!newBulletText.trim()">
+        <button class="send-btn" :disabled="!newBulletText.trim()" @click="addBullet">
           发送
         </button>
       </div>
@@ -36,7 +36,7 @@
     </div>
 
     <!-- 已添加的弹幕列表 -->
-    <div class="bullet-list-section" v-if="customBullets.length > 0">
+    <div v-if="customBullets.length > 0" class="bullet-list-section">
       <h4 class="section-subtitle">已添加弹幕 ({{ customBullets.length }})</h4>
       <div class="bullet-tags">
         <span v-for="(bullet, index) in customBullets" :key="index" class="bullet-tag" @click="removeBullet(index)">
@@ -88,7 +88,7 @@ const onConfigChange = () => {
 // 添加自定义弹幕
 const addBullet = async (): Promise<void> => {
   const text = newBulletText.value.trim();
-  if (!text) return;
+  if (!text) {return;}
 
   try {
     // 保存到localStorage
@@ -109,7 +109,7 @@ const addBullet = async (): Promise<void> => {
     newBulletText.value = '';
 
   } catch (e) {
-    maLogger.error("添加弹幕失败:", e);
+    maLogger.error('添加弹幕失败:', e);
   }
 };
 
@@ -127,7 +127,7 @@ onMounted(() => {
       customBullets.value = JSON.parse(savedBullets);
     }
   } catch (e) {
-    maLogger.error("加载已保存弹幕失败:", e);
+    maLogger.error('加载已保存弹幕失败:', e);
   }
 });
 </script>

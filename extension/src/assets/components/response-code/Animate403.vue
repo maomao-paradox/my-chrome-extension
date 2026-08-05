@@ -26,43 +26,43 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
-const divRef = ref<HTMLDivElement | null>(null)
-let intervalId: number | null = null
+import { onMounted, onUnmounted, ref } from 'vue';
+const divRef = ref<HTMLDivElement | null>(null);
+let intervalId: number | null = null;
 
 onMounted(() => {
-    maLogger.log('403 mounted')
-    if (!divRef.value) {
-        return
-    }
+  maLogger.log('403 mounted');
+  if (!divRef.value) {
+    return;
+  }
 
-    const str = divRef.value.innerHTML.toString();
-    let i = 0;
-    divRef.value.innerHTML = "";
+  const str = divRef.value.innerHTML.toString();
+  let i = 0;
+  divRef.value.innerHTML = '';
 
-    const timer = setTimeout(() => {
-        intervalId = window.setInterval(() => {
-            i++;
-            if (divRef.value) {
-                divRef.value.innerHTML = str.slice(0, i) + "|";
-                if (i === str.length) {
-                    if (intervalId) {
-                        clearInterval(intervalId);
-                    }
-                    if (divRef.value) {
-                        divRef.value.innerHTML = str;
-                    }
-                }
-            }
-        }, 10);
-    }, 0);
-})
+  const timer = setTimeout(() => {
+    intervalId = window.setInterval(() => {
+      i++;
+      if (divRef.value) {
+        divRef.value.innerHTML = str.slice(0, i) + '|';
+        if (i === str.length) {
+          if (intervalId) {
+            clearInterval(intervalId);
+          }
+          if (divRef.value) {
+            divRef.value.innerHTML = str;
+          }
+        }
+      }
+    }, 10);
+  }, 0);
+});
 
 onUnmounted(() => {
-    if (intervalId) {
-        clearInterval(intervalId);
-    }
-})
+  if (intervalId) {
+    clearInterval(intervalId);
+  }
+});
 
 </script>
 

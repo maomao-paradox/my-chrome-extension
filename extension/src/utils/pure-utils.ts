@@ -25,7 +25,7 @@ export const pureUtils = {
   ...MessageExports,
   ...LoggerExports,
   ...ComponentManagerExports,
-  ...FileMapDecryptorExports,
+  ...FileMapDecryptorExports
 };
 
 export type PureUtils = typeof pureUtils;

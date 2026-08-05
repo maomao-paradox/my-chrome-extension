@@ -1,13 +1,13 @@
 <template>
   <!-- 服务区域 -->
-  <section class="services" id="services">
+  <section id="services" class="services">
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">我们的服务</h2>
         <p class="section-subtitle">为您提供全方位的浏览器增强服务，满足您的各种需求。</p>
       </div>
       <div class="services-grid">
-        <div class="service-card" v-for="(service, index) in services" :key="index">
+        <div v-for="(service, index) in services" :key="index" class="service-card">
           <div class="service-icon">{{ service.icon }}</div>
           <h3 class="service-title">{{ service.title }}</h3>
           <p class="service-description">{{ service.description }}</p>
@@ -27,7 +27,7 @@ interface Service {
 }
 
 // 接收props
-const props = defineProps<{
+defineProps<{
   services: Service[];
 }>();
 </script>

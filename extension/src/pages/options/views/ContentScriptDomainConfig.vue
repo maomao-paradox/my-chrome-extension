@@ -47,7 +47,7 @@ interface DomainConfigs {
 
 // 解析域名字符串为数组
 const parseDomains = (domainsString: string): string[] => {
-  if (!domainsString) return [];
+  if (!domainsString) {return [];}
   return domainsString.split(',').map(domain => domain.trim()).filter(domain => domain);
 };
 

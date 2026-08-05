@@ -11,29 +11,27 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
-
 const props = defineProps({
   icon: {
     type: String,
-    required: true
+    required: true,
   },
   tooltip: {
     type: String,
-    default: ''
+    default: "",
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   variant: {
     type: String,
-    default: 'default',
-    validator: (value: string) => ['default', 'delete'].includes(value)
-  }
+    default: "default",
+    validator: (value: string) => ["default", "delete"].includes(value),
+  },
 });
 
-const emit = defineEmits(['click']);
+const emit = defineEmits(["click"]);
 </script>
 
 <style scoped>
@@ -54,7 +52,7 @@ const emit = defineEmits(['click']);
 }
 
 .btn-icon-small.delete-action:hover:not(:disabled) {
-  color: #FF5252 !important;
+  color: #ff5252 !important;
   background: rgba(255, 82, 82, 0.1) !important;
 }
 

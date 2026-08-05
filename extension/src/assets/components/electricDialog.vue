@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
 // Props定义
 const props = withDefaults(defineProps<{
@@ -109,35 +109,35 @@ const props = withDefaults(defineProps<{
   borderColor: '#dd8448',
   showScrollbarGlass: true,
   scrollbarGlassText: 'Dramatic'
-})
+});
 
 // 计算样式
 const cardStyle = computed(() => ({
   '--electric-border-color': props.borderColor,
   '--electric-light-color': `oklch(from ${props.borderColor} l c h)`,
   '--gradient-color': `oklch(from ${props.borderColor} 0.3 calc(c / 2) h / 0.4)`
-}))
+}));
 
 const mainCardStyle = computed(() => ({
   width: typeof props.width === 'number' ? `${props.width}px` : props.width,
   height: typeof props.height === 'number' ? `${props.height}px` : props.height
-}))
+}));
 
 const borderStyle = computed(() => ({
   borderColor: `${props.borderColor}80` // 50% opacity
-}))
+}));
 
 const glowStyle1 = computed(() => ({
   borderColor: `${props.borderColor}99` // 60% opacity
-}))
+}));
 
 const glowStyle2 = computed(() => ({
   borderColor: props.borderColor
-}))
+}));
 
 const backgroundGlowStyle = computed(() => ({
   background: `linear-gradient(-30deg, oklch(from ${props.borderColor} l c h), transparent, ${props.borderColor})`
-}))
+}));
 </script>
 
 <style scoped>

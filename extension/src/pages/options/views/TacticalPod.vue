@@ -12,7 +12,7 @@
     </div>
     
     <div class="pod-content">
-      <div class="pod-data" v-for="(value, key) in pod.data" :key="key">
+      <div v-for="(value, key) in pod.data" :key="key" class="pod-data">
         <span class="data-label">{{ formatLabel(String(key)) }}</span>
         <span class="data-value">{{ value }}</span>
       </div>
@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 
 interface Pod {
   id: string;
@@ -39,7 +39,7 @@ interface Pod {
   data: { [key: string]: any };
 }
 
-const props = defineProps<{
+defineProps<{
   pod: Pod;
 }>();
 

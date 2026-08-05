@@ -1,56 +1,64 @@
 <template>
-  <el-drawer v-model="visible" :direction="direction" :resizable="resizable" :title="title" :modal="modal"
-    :close-on-click-modal="closeOnClickModal" :custom-class="customClass" :overlay-class="overlayClass"
-    @closed="handleClose">
+  <el-drawer
+    v-model="visible"
+    :direction="direction"
+    :resizable="resizable"
+    :title="title"
+    :modal="modal"
+    :close-on-click-modal="closeOnClickModal"
+    :custom-class="customClass"
+    :overlay-class="overlayClass"
+    @closed="handleClose"
+  >
     <slot />
   </el-drawer>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from "vue";
 
 interface DrawerProps {
-  visible?: boolean
-  title?: string
-  direction?: "rtl" | "ltr" | "ttb" | "btt"
-  resizable?: boolean
-  modal?: boolean
-  closeOnClickModal?: boolean
-  customClass?: string
-  overlayClass?: string
+  visible?: boolean;
+  title?: string;
+  direction?: "rtl" | "ltr" | "ttb" | "btt";
+  resizable?: boolean;
+  modal?: boolean;
+  closeOnClickModal?: boolean;
+  customClass?: string;
+  overlayClass?: string;
 }
 
 // Props定义
 const props = withDefaults(defineProps<DrawerProps>(), {
   visible: false,
-  title: '',
-  direction: 'rtl',
+  title: "",
+  direction: "rtl",
   resizable: false,
   modal: true,
   closeOnClickModal: true,
-  customClass: '',
-  overlayClass: ''
-})
+  customClass: "",
+  overlayClass: "",
+});
 
 // Emits定义
 const emit = defineEmits<{
-  'update:visible': [value: boolean]
-  'close': []
-  'closed': []
-}>()
+  "update:visible": [value: boolean];
+  close: [];
+  closed: [];
+}>();
 
 // 响应式数据
 const visible = computed({
   get: () => props.visible,
   set: (value: boolean) => {
-    emit('update:visible', value)
-  }
-})
+    emit("update:visible", value);
+  },
+});
 
 // 处理关闭事件
 const handleClose = () => {
-  emit('closed')
-}
+  emit("closed");
+};
 </script>
 
 <style scoped>
@@ -68,7 +76,8 @@ const handleClose = () => {
 :deep(.sci-fi-drawer) {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   border: 1px solid rgba(59, 130, 246, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
     -10px 0 20px rgba(59, 130, 246, 0.2);
   backdrop-filter: blur(10px);
   min-width: 400px;

@@ -134,7 +134,7 @@ class Static404 extends HTMLElement {
     template.innerHTML = html;
 
     if (!this.shadowRoot) {
-      console.warn("Shadow DOM未初始化")
+      console.warn('Shadow DOM未初始化');
       return;
     }
 
@@ -150,7 +150,7 @@ class Static404 extends HTMLElement {
   bindEvents() {
     // 绑定返回按钮事件
     if (!this.shadowRoot) {
-      console.warn("Shadow DOM未初始化")
+      console.warn('Shadow DOM未初始化');
       return;
     }
     const backButton = this.shadowRoot.querySelector('.back-button');

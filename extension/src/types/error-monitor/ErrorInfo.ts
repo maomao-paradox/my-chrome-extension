@@ -128,5 +128,5 @@ export const ErrorInfoUtils = {
       default:
         return ResourceType.OTHER;
     }
-  },
+  }
 };

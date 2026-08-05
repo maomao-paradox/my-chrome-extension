@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import GlassCursor from '@components/cursors/GlassCursor.vue';
-import Push from '@components/particles/push.vue'
+import Push from '@components/particles/push.vue';
 import { computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import Layout from '@components/layout/Layout.vue';

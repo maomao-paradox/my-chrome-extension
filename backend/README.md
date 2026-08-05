@@ -17,6 +17,10 @@ Go HTTP backend for the KIRA:NOVE Chrome extension. Its main job is to expose a 
   - create runs and receive execution events from the extension
   - archive screenshot base64 strings or file paths for each run
   - optionally ask AI to generate structured steps from natural language
+- Backend-generated TOTP tokens:
+  - store TOTP secrets in backend memory
+  - import `otpauth://totp/...` URLs or manual Base32 secrets
+  - return current codes without exposing the stored secret
 - Optional OpenAI-compatible AI proxy remains available for extension features that need it
 - Optional bearer/API-key protection with `API_TOKEN`
 - CORS support for `chrome-extension://*` and local Vite development origins
@@ -167,6 +171,36 @@ curl -s -X DELETE http://127.0.0.1:8787/api/automation/sessions/<session-id>
 ```
 
 The Playwright backend launches a separate browser instance. It does not control the user's currently open Chrome tab directly. Use the task APIs above for real-tab extension automation records and logs.
+
+## TOTP API
+
+Create a token account from an `otpauth://` URL:
+
+```bash
+curl -s http://127.0.0.1:8787/api/totp/accounts \
+  -H 'Content-Type: application/json' \
+  -d '{"otpauthUrl":"otpauth://totp/Example:alice@example.com?secret=JBSWY3DPEHPK3PXP&issuer=Example"}'
+```
+
+Or create one manually:
+
+```bash
+curl -s http://127.0.0.1:8787/api/totp/accounts \
+  -H 'Content-Type: application/json' \
+  -d '{"issuer":"Example","accountName":"alice@example.com","secret":"JBSWY3DPEHPK3PXP"}'
+```
+
+List accounts and request the current code:
+
+```bash
+curl -s http://127.0.0.1:8787/api/totp/accounts
+
+curl -s http://127.0.0.1:8787/api/totp/accounts/<account-id>/code \
+  -H 'Content-Type: application/json' \
+  -d '{}'
+```
+
+The API never returns the stored secret. Current storage is in-memory; restart clears token accounts.
 
 ## Other API Examples
 

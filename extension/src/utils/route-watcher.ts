@@ -34,7 +34,7 @@ export class RouteWatcher {
    */
   private setupListeners() {
     // 监听 History API 变化
-    this.historyStateListener = (event: PopStateEvent) => {
+    this.historyStateListener = () => {
       const newUrl = window.location.href;
       if (newUrl !== this.currentUrl) {
         const previousUrl = this.currentUrl;
@@ -52,8 +52,8 @@ export class RouteWatcher {
     };
 
     // 添加事件监听器
-    window.addEventListener('popstate', this.historyStateListener);
-    window.addEventListener('hashchange', this.hashChangeListener);
+    window.addEventListener("popstate", this.historyStateListener);
+    window.addEventListener("hashchange", this.hashChangeListener);
 
     // 重写 pushState 和 replaceState 方法，以便捕获这些变化
     this.overrideHistoryMethods();
@@ -97,11 +97,11 @@ export class RouteWatcher {
    * @param previousUrl 之前的 URL
    */
   private notifyCallbacks(url: string, previousUrl: string) {
-    this.callbacks.forEach(callback => {
+    this.callbacks.forEach((callback) => {
       try {
         callback(url, previousUrl);
       } catch (error) {
-        maLogger.error('Route change callback error:', error);
+        maLogger.error("Route change callback error:", error);
       }
     });
   }
@@ -131,10 +131,10 @@ export class RouteWatcher {
   destroy() {
     // 移除事件监听器
     if (this.historyStateListener) {
-      window.removeEventListener('popstate', this.historyStateListener);
+      window.removeEventListener("popstate", this.historyStateListener);
     }
     if (this.hashChangeListener) {
-      window.removeEventListener('hashchange', this.hashChangeListener);
+      window.removeEventListener("hashchange", this.hashChangeListener);
     }
 
     // 清除回调
@@ -171,8 +171,8 @@ export function useRouteWatcher(callback: RouteChangeCallback): () => void {
  */
 export function navigate(url: string, replace: boolean = false): void {
   if (replace) {
-    history.replaceState(null, '', url);
+    history.replaceState(null, "", url);
   } else {
-    history.pushState(null, '', url);
+    history.pushState(null, "", url);
   }
 }

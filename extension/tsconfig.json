@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2015",
+    "target": "es2020",
     "module": "esnext",
     "baseUrl": ".",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "isolatedModules": true,
     "strict": true,
     "paths": {
@@ -23,7 +24,7 @@
       ]
     },
     "lib": [
-      "esnext",
+      "es2020",
       "dom",
       "dom.iterable",
       "scripthost"
@@ -43,11 +44,10 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/types/*"
-  ],
+, "src/pages/study-table.tsx"  ],
   "exclude": [
     "node_modules",
     "dist",
-    "build",
-    "src/standalone"
+    "build"
   ]
 }

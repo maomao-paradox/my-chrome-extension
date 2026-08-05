@@ -1,0 +1,72 @@
+/**
+ * @author Zero
+ * @version v2.0.0
+ * @license MIT
+ * @file src/pages/popup/components/table-container.scss
+ * @description 表格容器样式
+ */
+ 
+
+@font-face {
+  font-family: "AaDracula";
+  src:
+    url("/static/fonts/AaDracula.woff2") format("woff2"),
+    url("/static/fonts/AaDracula.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.section-container,
+.section-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-container {
+  gap: var(--table-section-gap);
+}
+
+.section-content {
+  gap: var(--table-content-gap);
+}
+
+.section-container--compact {
+  .section-hero {
+    align-items: center;
+  }
+}
+
+.section-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--table-hero-gap);
+
+  &__left {
+    min-width: 0;
+
+    h1,
+    h3,
+    h2 {
+      font-family:
+        "AaDracula",
+        -apple-system,
+        BlinkMacSystemFont,
+        "PingFang SC",
+        "Microsoft YaHei",
+        sans-serif;
+      font-size: var(--table-title-font-size);
+      font-weight: var(--table-title-font-weight);
+    }
+
+    p {
+      font-size: var(--table-text-font-size);
+    }
+  }
+
+  &__right {
+    flex-shrink: 0;
+    max-width: var(--table-right-max-width);
+  }
+}

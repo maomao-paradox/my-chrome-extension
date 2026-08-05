@@ -12,13 +12,13 @@
     </header>
 
     <div class="toolbar">
-      <button class="primary" type="button" @click="attachCurrentTab" :disabled="busy">
+      <button class="primary" type="button" :disabled="busy" @click="attachCurrentTab">
         连接当前页
       </button>
-      <button type="button" @click="captureScreenshot" :disabled="!isConnected || busy">
+      <button type="button" :disabled="!isConnected || busy" @click="captureScreenshot">
         截图
       </button>
-      <button type="button" @click="toggleRecording" :disabled="!isConnected || busy">
+      <button type="button" :disabled="!isConnected || busy" @click="toggleRecording">
         {{ recording ? '停止录制' : '开始录制' }}
       </button>
     </div>
@@ -53,13 +53,13 @@
     </label>
 
     <div class="toolbar secondary">
-      <button type="button" @click="createOrSaveTask" :disabled="busy || steps.length === 0">
+      <button type="button" :disabled="busy || steps.length === 0" @click="createOrSaveTask">
         保存任务和步骤
       </button>
-      <button type="button" @click="loadTask" :disabled="busy || !taskId.trim()">
+      <button type="button" :disabled="busy || !taskId.trim()" @click="loadTask">
         加载任务
       </button>
-      <button type="button" @click="clearSteps" :disabled="busy || steps.length === 0">
+      <button type="button" :disabled="busy || steps.length === 0" @click="clearSteps">
         清空步骤
       </button>
     </div>
@@ -71,7 +71,7 @@
       </div>
       <textarea v-model="stepDraft" rows="5" spellcheck="false"></textarea>
       <div class="toolbar secondary">
-        <button type="button" @click="appendDraftStep" :disabled="busy">
+        <button type="button" :disabled="busy" @click="appendDraftStep">
           添加 JSON 步骤
         </button>
         <button type="button" @click="resetDraft">
@@ -87,7 +87,7 @@
       </div>
       <textarea v-model="intent" rows="3" placeholder="例如：登录系统并打开销售报表"></textarea>
       <textarea v-model="pageSnapshot" rows="3" placeholder="可粘贴页面摘要、可见控件、表单字段"></textarea>
-      <button type="button" @click="generateSteps" :disabled="busy || !intent.trim()">
+      <button type="button" :disabled="busy || !intent.trim()" @click="generateSteps">
         生成并追加步骤
       </button>
     </section>
@@ -100,7 +100,7 @@
             <option value="dry-run">dry-run</option>
             <option value="real-run">real-run</option>
           </select>
-          <button class="primary" type="button" @click="runCurrentSteps" :disabled="busy || !isConnected || steps.length === 0">
+          <button class="primary" type="button" :disabled="busy || !isConnected || steps.length === 0" @click="runCurrentSteps">
             执行并上报
           </button>
         </div>
@@ -153,7 +153,7 @@ import type {
   AutomationRunStepsResult,
   AutomationStep,
   AutomationStepResult,
-  AutomationTask,
+  AutomationTask
 } from '@/types/automation';
 import {
   createAutomationRun,
@@ -164,7 +164,7 @@ import {
   getAutomationBackendBaseURL,
   getAutomationTask,
   saveAutomationTaskSteps,
-  setAutomationBackendBaseURL,
+  setAutomationBackendBaseURL
 } from '@/services/api/automation-api';
 
 interface LogItem {
@@ -208,7 +208,7 @@ function addLog(message: string, level: LogItem['level'] = 'info'): void {
     id: `${Date.now()}_${Math.random()}`,
     time: new Date().toLocaleTimeString(),
     level,
-    message,
+    message
   });
   logs.value = logs.value.slice(0, 60);
 }
@@ -235,7 +235,7 @@ async function captureScreenshot(): Promise<void> {
   await runBusy(async () => {
     const result = await sendAutomationMessage<AutomationStepResult>('AUTOMATION_RUN_STEP', {
       step: { type: 'screenshot' },
-      allowRisky: true,
+      allowRisky: true
     });
     if (result.screenshot) {
       lastScreenshot.value = result.screenshot;
@@ -272,14 +272,14 @@ async function createOrSaveTask(): Promise<void> {
     if (!taskId.value.trim()) {
       task = await createAutomationTask({
         name: taskName.value.trim() || '真实标签页自动化任务',
-        description: taskDescription.value.trim(),
+        description: taskDescription.value.trim()
       });
       taskId.value = task.id;
     }
 
     task = await saveAutomationTaskSteps(taskId.value.trim(), {
       steps: steps.value,
-      replace: true,
+      replace: true
     });
     steps.value = task.steps;
     addLog(`任务已保存：${task.id}`, 'success');
@@ -319,7 +319,7 @@ async function generateSteps(): Promise<void> {
     const generated = await generateAutomationSteps({
       intent: intent.value,
       pageSnapshot: pageSnapshot.value,
-      availableActions: ['goto', 'click', 'fill', 'press', 'wait', 'extract', 'screenshot', 'verifyText'],
+      availableActions: ['goto', 'click', 'fill', 'press', 'wait', 'extract', 'screenshot', 'verifyText']
     });
     steps.value.push(...generated.map(ensureStepId));
     addLog(`AI 生成 ${generated.length} 个步骤`, 'success');
@@ -340,13 +340,13 @@ async function runCurrentSteps(): Promise<void> {
     const run = await createAutomationRun(task.id, {
       mode: runMode.value,
       status: 'running',
-      page: page.value,
+      page: page.value
     });
     activeRun.value = run;
 
     const result = await sendAutomationMessage<AutomationRunStepsResult>('AUTOMATION_RUN_STEPS', {
       steps: steps.value,
-      allowRisky: runMode.value === 'real-run',
+      allowRisky: runMode.value === 'real-run'
     });
     page.value = result.page;
 
@@ -356,7 +356,7 @@ async function runCurrentSteps(): Promise<void> {
     await createAutomationRunEvent(run.id, {
       status: 'completed',
       page: result.page,
-      message: `执行完成：${result.results.length} 步`,
+      message: `执行完成：${result.results.length} 步`
     });
     addLog(`执行完成并上报 run：${run.id}`, 'success');
   });
@@ -366,13 +366,13 @@ async function ensureSavedTask(): Promise<AutomationTask> {
   if (!taskId.value.trim()) {
     const task = await createAutomationTask({
       name: taskName.value.trim() || '真实标签页自动化任务',
-      description: taskDescription.value.trim(),
+      description: taskDescription.value.trim()
     });
     taskId.value = task.id;
   }
   return saveAutomationTaskSteps(taskId.value.trim(), {
     steps: steps.value,
-    replace: true,
+    replace: true
   });
 }
 
@@ -382,7 +382,7 @@ async function reportStepResult(runId: string, item: AutomationStepResult): Prom
     status: 'passed',
     durationMs: item.durationMs,
     page: item.page,
-    result: item.result,
+    result: item.result
   });
 
   if (item.screenshot) {
@@ -390,7 +390,7 @@ async function reportStepResult(runId: string, item: AutomationStepResult): Prom
       stepId: item.step.id,
       contentType: 'image/png',
       base64: item.screenshot,
-      page: item.page,
+      page: item.page
     });
     lastScreenshot.value = item.screenshot;
   }
@@ -422,7 +422,7 @@ function summarizeStep(step: AutomationStep): string {
 function ensureStepId(step: AutomationStep): AutomationStep {
   return {
     ...step,
-    id: step.id || `step_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    id: step.id || `step_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
   };
 }
 
@@ -449,7 +449,7 @@ function handleRuntimeMessage(message: any): void {
   if (message.payload?.page) {
     page.value = {
       title: message.payload.page.title || page.value.title,
-      url: message.payload.page.url || page.value.url,
+      url: message.payload.page.url || page.value.url
     };
   }
   addLog(`录制步骤：${step.type}`, 'success');

@@ -1,0 +1,267 @@
+/**
+ * GlassCardOverlay 样式
+ * 从 GlassCardOverlay.vue 的 <style scoped> 迁移而来
+ *
+ * 设计要点：
+ * - .glass-card 通过 inline style 注入 backdrop-filter/blur/saturate 等动态值
+ * - .glass-card-content 透明度过渡依赖 .glass-card--expanded 状态
+ * - .resize-handle 仅在展开时显示并可交互
+ */
+
+.glass-card {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-width: 260px;
+  min-height: 220px;
+  max-width: min(760px, calc(100vw - 32px));
+  max-height: min(600px, calc(100vh - 32px));
+  overflow: hidden;
+  border-radius: 8px;
+  color: #eff6ff;
+  cursor: default;
+  user-select: none;
+}
+
+.glass-card-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.22s ease;
+}
+
+.glass-card--expanded .glass-card-content {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      circle at top left,
+      rgba(255, 255, 255, 0.35),
+      transparent 42%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 28%);
+  pointer-events: none;
+}
+
+.glass-card-header,
+.glass-card-body,
+.glass-card-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  cursor: grab;
+}
+
+.glass-card-header:active {
+  cursor: grabbing;
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 16px;
+}
+
+.title-block strong {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.title-block span {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(239, 246, 255, 0.82);
+}
+
+.close-button,
+.ghost-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #eff6ff;
+  background: rgba(15, 23, 42, 0.28);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.close-button:hover,
+.ghost-button:hover {
+  background: rgba(15, 23, 42, 0.42);
+  transform: translateY(-1px);
+}
+
+.glass-card-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 18px;
+}
+
+.glass-card-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-height: 88px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.glass-card-preview p {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.glass-card-preview span {
+  font-size: 13px;
+  color: rgba(239, 246, 255, 0.88);
+}
+
+.glass-card-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.control-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.control-item span {
+  font-size: 12px;
+  color: rgba(239, 246, 255, 0.82);
+}
+
+.control-item strong {
+  font-size: 12px;
+  color: #f8fafc;
+}
+
+.control-item input[type="range"],
+.control-item select,
+.control-item input[type="color"] {
+  width: 100%;
+}
+
+.control-item select {
+  border: none;
+  border-radius: 12px;
+  padding: 8px 10px;
+  color: #eff6ff;
+  background: rgba(15, 23, 42, 0.3);
+  outline: none;
+}
+
+.control-item input[type="color"] {
+  height: 25px;
+  width: 25px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.control-item-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.glass-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 18px 18px;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  z-index: 2;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.72);
+  transition: opacity 0.18s ease, transform 0.22s ease;
+}
+
+.glass-card--expanded .resize-handle {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.resize-handle-nw {
+  top: 8px;
+  left: 8px;
+  cursor: nwse-resize;
+}
+
+.resize-handle-ne {
+  top: 8px;
+  right: 8px;
+  cursor: nesw-resize;
+}
+
+.resize-handle-sw {
+  bottom: 8px;
+  left: 8px;
+  cursor: nesw-resize;
+}
+
+.resize-handle-se {
+  right: 8px;
+  bottom: 8px;
+  cursor: nwse-resize;
+}
+
+@media (max-width: 640px) {
+  .glass-card {
+    max-width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+  }
+
+  .glass-card-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .close-button {
+    padding: 7px 10px;
+  }
+}

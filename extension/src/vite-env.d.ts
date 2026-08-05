@@ -32,55 +32,60 @@ declare module '*.scss?raw' {
 }
 
 // 图片资源类型声明
-// src/types/shims.d.ts
 declare module '*.vue' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
-  export default component
+  import type { DefineComponent } from 'vue';
+  // ✅ 修复：使用具体类型替代 {} 和 any
+  const component: DefineComponent<object, object, unknown>;
+  // 或者更精确：
+  // const component: DefineComponent<Record<string, never>, Record<string, never>, unknown>;
+  export default component;
 }
 
 // 处理所有带 ?component 的导入
 declare module '*?component' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
-  export default component
+  import type { DefineComponent } from 'vue';
+  // ✅ 修复
+  const component: DefineComponent<object, object, unknown>;
+  export default component;
 }
 
 // 特别处理 SVG
 declare module '*.svg' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
-  export default component
+  import type { DefineComponent } from 'vue';
+  // ✅ 修复
+  const component: DefineComponent<object, object, unknown>;
+  export default component;
 }
 
 declare module '*.svg?component' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
-  export default component
+  import type { DefineComponent } from 'vue';
+  // ✅ 修复
+  const component: DefineComponent<object, object, unknown>;
+  export default component;
 }
 
 // 处理图片资源
 declare module '*.png' {
-  const src: string
-  export default src
+  const src: string;
+  export default src;
 }
 
 declare module '*.jpg' {
-  const src: string
-  export default src
+  const src: string;
+  export default src;
 }
 
 declare module '*.jpeg' {
-  const src: string
-  export default src
+  const src: string;
+  export default src;
 }
 
 declare module '*.gif' {
-  const src: string
-  export default src
+  const src: string;
+  export default src;
 }
 
 declare module '*.webp' {
-  const src: string
-  export default src
+  const src: string;
+  export default src;
 }

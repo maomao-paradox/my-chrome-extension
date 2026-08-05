@@ -201,8 +201,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import $ from 'jquery'
+import { ref, onMounted } from 'vue';
+import $ from 'jquery';
 
 interface GenericLogoProps {
     logoName: string;
@@ -210,35 +210,35 @@ interface GenericLogoProps {
 }
 
 const props = withDefaults(defineProps<GenericLogoProps>(), {
-    logoName: 'LOGO',
-    startDelay: 2000
+  logoName: 'LOGO',
+  startDelay: 2000
 });
 
 onMounted(() => {
-    maLogger.log('GenericLogo mounted')
+  maLogger.log('GenericLogo mounted');
 
-    $("html, body, .container").on("click", function () {
-        if ($(".letter").hasClass("active")) {
-            $(".letter").removeClass("active");
-        } else {
-            $(".letter").addClass("active");
-        }
-    });
+  $('html, body, .container').on('click', function () {
+    if ($('.letter').hasClass('active')) {
+      $('.letter').removeClass('active');
+    } else {
+      $('.letter').addClass('active');
+    }
+  });
 
-    $(".letter").each(function (key, value) {
-        $(value).height(20);
-        $(".letters").hide().removeClass("hidden").fadeIn("slow");
-        setTimeout(function () {
-            $(value).height(200);
-        }, props.startDelay + 20 * $(value).index());
-        setTimeout(function () {
-            $(value).addClass("active");
-        }, props.startDelay + 500 + 200 * $(value).index());
-        setTimeout(function () {
-            $(value).removeClass("active");
-        }, props.startDelay + 2000 + 200 * $(value).index());
-    });
-})
+  $('.letter').each(function (key, value) {
+    $(value).height(20);
+    $('.letters').hide().removeClass('hidden').fadeIn('slow');
+    setTimeout(function () {
+      $(value).height(200);
+    }, props.startDelay + 20 * $(value).index());
+    setTimeout(function () {
+      $(value).addClass('active');
+    }, props.startDelay + 500 + 200 * $(value).index());
+    setTimeout(function () {
+      $(value).removeClass('active');
+    }, props.startDelay + 2000 + 200 * $(value).index());
+  });
+});
 </script>
 
 <!-- <style>

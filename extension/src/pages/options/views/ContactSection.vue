@@ -1,6 +1,6 @@
 <template>
   <!-- 联系我们区域 -->
-  <section class="contact" id="contact">
+  <section id="contact" class="contact">
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">联系星空探索中心</h2>

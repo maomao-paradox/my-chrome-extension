@@ -1,0 +1,175 @@
+/**
+ * SimpleCarousel 样式（从 MACarousel.vue <style scoped> 提取并适配 React）
+ * 替代 Element Plus el-carousel，使用原生 React 实现简化版轮播
+ */
+
+.ma-carousel-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ma-carousel-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  z-index: 1;
+  cursor: auto;
+}
+
+.ma-carousel-container {
+  position: relative;
+  width: 100%;
+  max-height: 60dvh;
+  max-width: 60dvw;
+  z-index: 2;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ma-carousel-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.ma-carousel-item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(30dvw, 360px);
+  height: min(40dvh, 320px);
+  opacity: 0.6;
+  transform: scale(0.95);
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  &.is-active {
+    opacity: 1;
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.ma-carousel-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+  font-size: 16px;
+  color: #f8fafc;
+  background: linear-gradient(90deg, #3b83f6af, #8a5cf6b0);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.ma-carousel-title {
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  margin: 0 0 15px 0;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.ma-carousel-details {
+  color: white;
+  font-size: 16px;
+  line-height: 1.6;
+  text-align: center;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+  margin: 0;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  max-width: 90%;
+  opacity: 0.95;
+  transition: all 0.3s ease;
+}
+
+.ma-carousel-hello {
+  padding: 20px;
+  text-align: center;
+  font-size: 16px;
+  color: #f8fafc;
+  background: linear-gradient(90deg, #3b83f6af, #8a5cf6b0);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* 轮播控制按钮 */
+.ma-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 11;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  &.prev {
+    left: 8px;
+  }
+
+  &.next {
+    right: 8px;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ma-carousel-item,
+  .ma-carousel-track {
+    transition-duration: 0.01ms;
+  }
+}

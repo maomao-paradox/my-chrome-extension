@@ -9,13 +9,13 @@ import type {
   CreateAutomationRunScreenshotRequest,
   CreateAutomationTaskRequest,
   GenerateAutomationStepsRequest,
-  SaveAutomationStepsRequest,
+  SaveAutomationStepsRequest
 } from '@/types/automation';
 
 const DEFAULT_BACKEND_BASE_URL = 'http://127.0.0.1:8787';
 const BACKEND_BASE_URL_STORAGE_KEY = 'automationBackendBaseUrl';
 
-interface ApiEnvelope<T> {
+interface ApiEnvelope {
   ok?: boolean;
   task?: AutomationTask;
   runs?: AutomationRun[];
@@ -59,8 +59,8 @@ async function requestJSON<T>(
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
+      ...(options.headers || {})
+    }
   });
 
   const text = await response.text();
@@ -83,7 +83,7 @@ export async function createAutomationTask(
 ): Promise<AutomationTask> {
   const response = await requestJSON<ApiEnvelope<AutomationTask>>('/api/automation/tasks', {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   if (!response.task) {
     throw new Error('后端未返回任务');
@@ -98,7 +98,7 @@ export async function getAutomationTask(id: string): Promise<{ task: AutomationT
   }
   return {
     task: response.task,
-    runs: response.runs || [],
+    runs: response.runs || []
   };
 }
 
@@ -108,7 +108,7 @@ export async function saveAutomationTaskSteps(
 ): Promise<AutomationTask> {
   const response = await requestJSON<ApiEnvelope<AutomationTask>>(`/api/automation/tasks/${encodeURIComponent(taskId)}/steps`, {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   if (!response.task) {
     throw new Error('后端未返回任务');
@@ -122,7 +122,7 @@ export async function createAutomationRun(
 ): Promise<AutomationRun> {
   const response = await requestJSON<ApiEnvelope<AutomationRun>>(`/api/automation/tasks/${encodeURIComponent(taskId)}/runs`, {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   if (!response.run) {
     throw new Error('后端未返回运行记录');
@@ -136,14 +136,14 @@ export async function createAutomationRunEvent(
 ): Promise<{ event: AutomationRunEvent; run: AutomationRun }> {
   const response = await requestJSON<ApiEnvelope<AutomationRunEvent>>(`/api/automation/runs/${encodeURIComponent(runId)}/events`, {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   if (!response.event || !response.run) {
     throw new Error('后端未返回执行事件');
   }
   return {
     event: response.event,
-    run: response.run,
+    run: response.run
   };
 }
 
@@ -153,14 +153,14 @@ export async function createAutomationRunScreenshot(
 ): Promise<{ screenshot: AutomationRunScreenshot; run: AutomationRun }> {
   const response = await requestJSON<ApiEnvelope<AutomationRunScreenshot>>(`/api/automation/runs/${encodeURIComponent(runId)}/screenshots`, {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   if (!response.screenshot || !response.run) {
     throw new Error('后端未返回截图记录');
   }
   return {
     screenshot: response.screenshot,
-    run: response.run,
+    run: response.run
   };
 }
 
@@ -169,7 +169,7 @@ export async function generateAutomationSteps(
 ): Promise<AutomationStep[]> {
   const response = await requestJSON<ApiEnvelope<AutomationStep[]>>('/api/automation/generate', {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   return response.steps || [];
 }

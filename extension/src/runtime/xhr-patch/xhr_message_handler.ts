@@ -7,12 +7,12 @@
  * @date 2026-02-05T02:38:01.696Z
  */
 
-import type { XhrRulesMap, ExtMessage } from "@/types";
-import { storage } from "@/stores";
-import  messenger  from "@/message";
-import { injectScriptToActivateTab } from "@/utils/element-control";
-import { sendMessageToPage, listenForPageMessages } from "@/message/content-page";
-import { getRuntimeScript } from "@/utils/common";
+import type { XhrRulesMap, ExtMessage } from '@/types';
+import { storage } from '@/stores';
+import  messenger  from '@/message';
+import { injectScriptToActivateTab } from '@/utils/element-control';
+import { sendMessageToPage, listenForPageMessages } from '@/message/content-page';
+import { getRuntimeScript } from '@/utils/common';
 
 /**
  * XHR 消息中转站 - 用于 处理 sidepanel和页面的通信
@@ -60,9 +60,9 @@ function sidepanelEventHandler() {
       const { type, payload: data, target } = event;
       // console.log(event)
       // 如果消息没有type字段，直接返回，视为其他消息类型
-      if (!type) return false;
+      if (!type) {return false;}
 
-      if (target && target.toLowerCase() !== 'content') return false;
+      if (target && target.toLowerCase() !== 'content') {return false;}
 
       switch (type) {
         case 'TOGGLE_XHR_PATCH':
@@ -149,7 +149,7 @@ function sidepanelEventHandler() {
     } catch (error) {
       console.error('MRIA: 处理sidepanel消息失败:', error);
     }
-  }
+  };
   messenger.ext.listen(handler);
 }
 

@@ -1,4 +1,11 @@
-import { computed, ref } from 'vue';
+/**
+ * @author Zero
+ * @version v2.0.0
+ * @license MIT
+ * @file src/pages/popup/composables/usePopupTheme.ts
+ * @description React 版主题管理 Hook
+ */
+import { useState, useCallback } from 'react';
 
 export const popupThemeStorageKey = 'popupTheme';
 
@@ -13,38 +20,60 @@ export const popupThemes = [
     label: '晨雾',
     description: '浅色柔和',
   },
+  {
+    key: 'jungle-knot',
+    label: '故障结',
+    description: '青紫故障色',
+  },
+  {
+    key: 'retro-terminal',
+    label: '黑白',
+    description: '极简强对比',
+  },
 ] as const;
 
 export type PopupThemeKey = (typeof popupThemes)[number]['key'];
 
 const defaultTheme: PopupThemeKey = 'midnight';
-const activeTheme = ref<PopupThemeKey>(defaultTheme);
-const isLoaded = ref(false);
 
+/**
+ * 判断值是否为有效主题键
+ */
 const isPopupThemeKey = (value: unknown): value is PopupThemeKey => {
   return popupThemes.some((theme) => theme.key === value);
 };
 
+/**
+ * 规范化主题键值
+ */
 const normalizeThemeKey = (value: unknown): PopupThemeKey => {
   return isPopupThemeKey(value) ? value : defaultTheme;
 };
 
+/**
+ * 应用主题到文档根元素
+ */
 const applyTheme = (themeKey: PopupThemeKey): void => {
   document.documentElement.dataset.popupTheme = themeKey;
   document.body?.setAttribute('data-popup-theme', themeKey);
 };
 
+/**
+ * 应用已存储的主题（用于入口初始化）
+ */
 export const applyStoredPopupThemeHint = (): void => {
   try {
     const storedTheme = localStorage.getItem(popupThemeStorageKey);
-    activeTheme.value = normalizeThemeKey(storedTheme);
+    const theme = normalizeThemeKey(storedTheme);
+    applyTheme(theme);
   } catch {
-    activeTheme.value = defaultTheme;
+    applyTheme(defaultTheme);
   }
-
-  applyTheme(activeTheme.value);
 };
 
+/**
+ * 从存储读取主题
+ */
 const readStoredTheme = async (): Promise<PopupThemeKey> => {
   try {
     if (typeof chrome !== 'undefined' && chrome.storage?.local) {
@@ -62,6 +91,9 @@ const readStoredTheme = async (): Promise<PopupThemeKey> => {
   }
 };
 
+/**
+ * 持久化主题到存储
+ */
 const persistTheme = async (themeKey: PopupThemeKey): Promise<void> => {
   try {
     localStorage.setItem(popupThemeStorageKey, themeKey);
@@ -78,23 +110,33 @@ const persistTheme = async (themeKey: PopupThemeKey): Promise<void> => {
   }
 };
 
+/**
+ * Popup 主题管理 Hook
+ */
 export const usePopupTheme = () => {
-  const activeThemeConfig = computed(() => {
-    return popupThemes.find((theme) => theme.key === activeTheme.value) ?? popupThemes[0];
-  });
+  const [activeTheme, setActiveTheme] = useState<PopupThemeKey>(defaultTheme);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const loadPopupTheme = async (): Promise<void> => {
-    activeTheme.value = await readStoredTheme();
-    applyTheme(activeTheme.value);
-    isLoaded.value = true;
-  };
+  const activeThemeConfig = popupThemes.find(
+    (theme) => theme.key === activeTheme,
+  ) ?? popupThemes[0];
 
-  const setPopupTheme = async (themeKey: PopupThemeKey): Promise<void> => {
-    const nextTheme = normalizeThemeKey(themeKey);
-    activeTheme.value = nextTheme;
-    applyTheme(nextTheme);
-    await persistTheme(nextTheme);
-  };
+  const loadPopupTheme = useCallback(async (): Promise<void> => {
+    const theme = await readStoredTheme();
+    setActiveTheme(theme);
+    applyTheme(theme);
+    setIsLoaded(true);
+  }, []);
+
+  const setPopupTheme = useCallback(
+    async (themeKey: PopupThemeKey): Promise<void> => {
+      const nextTheme = normalizeThemeKey(themeKey);
+      setActiveTheme(nextTheme);
+      applyTheme(nextTheme);
+      await persistTheme(nextTheme);
+    },
+    [],
+  );
 
   return {
     activeTheme,

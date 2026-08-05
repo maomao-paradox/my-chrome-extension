@@ -15,7 +15,7 @@
                             <div class="page-title home text-center">
                                 <slot name="header">
                                     <span class="heading-page">{{ title }}</span>
-                                    <p class="mt20" v-if="subtitle">{{ subtitle }}</p>
+                                    <p v-if="subtitle" class="mt20">{{ subtitle }}</p>
                                 </slot>
                             </div>
 
@@ -40,7 +40,7 @@
                                         <span class="hex-content-inner">
                                             <!-- 菜单项插槽 -->
                                             <slot name="menu-item" :item="item" :index="index">
-                                                <span class="icon" v-if="item.icon">
+                                                <span v-if="item.icon" class="icon">
                                                     <i :class="item.icon"></i>
                                                 </span>
                                                 <span class="title">{{ item.title }}</span>
@@ -79,54 +79,54 @@ interface MenuItem {
 
 // 定义组件属性
 const props = defineProps({
-    // 菜单数据
-    menuItems: {
-        type: Array as () => MenuItem[],
-        default: () => [
-            { title: 'Welcome', icon: 'fa fa-universal-access' },
-            { title: 'About', icon: 'fa fa-bullseye' },
-            { title: 'Services', icon: 'fa fa-braille' },
-            { title: 'Resume', icon: 'fa fa-id-badge' },
-            { title: 'Works', icon: 'fa fa-life-ring' },
-            { title: 'Testimonials', icon: 'fa fa-clipboard' },
-            { title: 'Contact', icon: 'fa fa-map-signs' }
-        ]
-    },
-    // 标题
-    title: {
-        type: String,
-        default: 'Welcome to My Page'
-    },
-    // 副标题
-    subtitle: {
-        type: String,
-        default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.'
-    },
-    // 背景图片
-    backgroundImage: {
-        type: String,
-        default: 'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1500&q=80'
-    },
-    // 覆盖层颜色
-    overlayColor: {
-        type: String,
-        default: 'rgba(14, 17, 24, 0.97)'
-    },
-    // 蜂窝背景颜色
-    bgColor: {
-        type: String,
-        default: '#1e2530'
-    },
-    // 悬停颜色
-    hoverColor: {
-        type: String,
-        default: '#ff0037'
-    },
-    // 边框颜色
-    borderColor: {
-        type: String,
-        default: '#ff0037'
-    }
+  // 菜单数据
+  menuItems: {
+    type: Array as () => MenuItem[],
+    default: () => [
+      { title: 'Welcome', icon: 'fa fa-universal-access' },
+      { title: 'About', icon: 'fa fa-bullseye' },
+      { title: 'Services', icon: 'fa fa-braille' },
+      { title: 'Resume', icon: 'fa fa-id-badge' },
+      { title: 'Works', icon: 'fa fa-life-ring' },
+      { title: 'Testimonials', icon: 'fa fa-clipboard' },
+      { title: 'Contact', icon: 'fa fa-map-signs' }
+    ]
+  },
+  // 标题
+  title: {
+    type: String,
+    default: 'Welcome to My Page'
+  },
+  // 副标题
+  subtitle: {
+    type: String,
+    default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.'
+  },
+  // 背景图片
+  backgroundImage: {
+    type: String,
+    default: 'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1500&q=80'
+  },
+  // 覆盖层颜色
+  overlayColor: {
+    type: String,
+    default: 'rgba(14, 17, 24, 0.97)'
+  },
+  // 蜂窝背景颜色
+  bgColor: {
+    type: String,
+    default: '#1e2530'
+  },
+  // 悬停颜色
+  hoverColor: {
+    type: String,
+    default: '#ff0037'
+  },
+  // 边框颜色
+  borderColor: {
+    type: String,
+    default: '#ff0037'
+  }
 });
 
 // 定义事件
@@ -139,12 +139,12 @@ const emit = defineEmits<{
 
 // 处理菜单点击
 const handleMenuClick = (item: MenuItem, index: number) => {
-    emit('menu-click', item, index);
+  emit('menu-click', item, index);
 };
 
 // 处理菜单悬停
 const handleMenuHover = (item: MenuItem, index: number, isHovering: boolean) => {
-    emit('menu-hover', item, index, isHovering);
+  emit('menu-hover', item, index, isHovering);
 };
 </script>
 

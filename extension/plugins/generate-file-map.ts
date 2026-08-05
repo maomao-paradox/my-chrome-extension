@@ -13,6 +13,27 @@ function generateFileMap() {
             for (const [originalPath, entry] of Object.entries(manifest)) {
                 const entryData = entry as any;
                 if (originalPath.includes("/manifest") || originalPath.startsWith("_")) {
+                    // 处理共享 chunk 的 CSS：如果该 chunk 只被单一 app 动态引用，
+                    // 则将其 CSS 记录为 css/{appName}，与其他 app 命名规则一致
+                    if (originalPath.startsWith("_") && entryData.css && Array.isArray(entryData.css)) {
+                        const dynImports = entryData.dynamicImports || [];
+                        if (dynImports.length > 0) {
+                            const appNames = new Set<string>();
+                            dynImports.forEach((imp: string) => {
+                                const match = imp.match(/^apps\/([^/]+)/);
+                                if (match) appNames.add(match[1]);
+                            });
+                            if (appNames.size === 1) {
+                                const appName = [...appNames][0];
+                                entryData.css.forEach((cssFile: string) => {
+                                    const cssKey = `css/${appName}`;
+                                    if (!fileMap[cssKey]) {
+                                        fileMap[cssKey] = cssFile;
+                                    }
+                                });
+                            }
+                        }
+                    }
                     continue;
                 }
 

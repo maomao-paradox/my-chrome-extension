@@ -1,10 +1,18 @@
 <template>
-  <TableContainer density="compact" section-gap="8px" content-gap="8px" hero-gap="8px" right-max-width="88px"
-    title-font-weight="500">
+  <TableContainer
+    density="compact"
+    section-gap="8px"
+    content-gap="8px"
+    hero-gap="8px"
+    right-max-width="88px"
+    title-font-weight="500"
+  >
     <template #head__left>
       <p class="section-kicker">Quick Access</p>
       <h2 class="section-title">锚点管理</h2>
-      <p class="section-subtitle">已保存的片段会按时间倒序排列，支持本地导入与导出。</p>
+      <p class="section-subtitle">
+        已保存的片段会按时间倒序排列，支持本地导入与导出。
+      </p>
     </template>
     <template #head__right>
       <div class="section-badge">{{ bookmarks.length }} 个</div>
@@ -13,10 +21,19 @@
       <section class="filter-panel">
         <label class="filter-panel-input-shell">
           <IconSearch class="filter-panel-icon" />
-          <input v-model.trim="filterKeyword" type="search" class="filter-panel-input"
-            placeholder="筛选锚点文本、页面标题、链接或域名" />
-          <button v-if="filterKeyword" type="button" class="filter-panel-clear" title="清空筛选"
-            @click="filterKeyword = ''">
+          <input
+            v-model.trim="filterKeyword"
+            type="search"
+            class="filter-panel-input"
+            placeholder="筛选锚点文本、页面标题、链接或域名"
+          />
+          <button
+            v-if="filterKeyword"
+            type="button"
+            class="filter-panel-clear"
+            title="清空筛选"
+            @click="filterKeyword = ''"
+          >
             <IconClose />
           </button>
         </label>
@@ -24,13 +41,29 @@
           {{ filterSummary }}
         </div>
         <div class="section-actions" aria-label="锚点数据操作">
-          <button class="toolbar-btn toolbar-btn--export" @click="exportBookmarks" title="导出锚点" aria-label="导出锚点">
+          <button
+            class="toolbar-btn toolbar-btn--export"
+            title="导出锚点"
+            aria-label="导出锚点"
+            @click="exportBookmarks"
+          >
             <IconDownload />
           </button>
-          <button class="toolbar-btn toolbar-btn--import" @click="triggerImport" title="导入锚点" aria-label="导入锚点">
+          <button
+            class="toolbar-btn toolbar-btn--import"
+            title="导入锚点"
+            aria-label="导入锚点"
+            @click="triggerImport"
+          >
             <IconUpload />
           </button>
-          <input type="file" ref="fileInput" class="visually-hidden" accept=".json" @change="importBookmarks" />
+          <input
+            ref="fileInput"
+            type="file"
+            class="visually-hidden"
+            accept=".json"
+            @change="importBookmarks"
+          />
         </div>
       </section>
 
@@ -40,10 +73,15 @@
             <IconBookmark />
           </div>
           <p class="empty-title">还没有保存锚点</p>
-          <p class="empty-hint">选中文本后点击页面工具栏中的锚点按钮，即可在这里回看。</p>
+          <p class="empty-hint">
+            选中文本后点击页面工具栏中的锚点按钮，即可在这里回看。
+          </p>
         </div>
 
-        <div v-else-if="filteredBookmarks.length === 0" class="empty-state empty-state--filtered">
+        <div
+          v-else-if="filteredBookmarks.length === 0"
+          class="empty-state empty-state--filtered"
+        >
           <div class="empty-icon">
             <IconSearch />
           </div>
@@ -51,30 +89,53 @@
           <p class="empty-hint">换个关键词试试，或清空筛选条件查看全部锚点。</p>
         </div>
 
-        <article v-for="bookmark in filteredBookmarks" :key="bookmark.id" class="bookmark-item">
-          <div class="bookmark-text" :title="bookmark.text">{{ bookmark.text }}</div>
+        <article
+          v-for="bookmark in filteredBookmarks"
+          :key="bookmark.id"
+          class="bookmark-item"
+        >
+          <div class="bookmark-text" :title="bookmark.text">
+            {{ bookmark.text }}
+          </div>
 
           <div class="bookmark-meta-row">
             <div class="bookmark-meta">
-              <div class="bookmark-title" :title="bookmark.title || '未命名页面'">
-                {{ bookmark.title || '未命名页面' }}
+              <div
+                class="bookmark-title"
+                :title="bookmark.title || '未命名页面'"
+              >
+                {{ bookmark.title || "未命名页面" }}
               </div>
-              <div class="bookmark-url" :title="bookmark.url">{{ truncateUrl(bookmark.url) }}</div>
+              <div class="bookmark-url" :title="bookmark.url">
+                {{ truncateUrl(bookmark.url) }}
+              </div>
             </div>
 
             <div class="bookmark-actions">
-              <button class="icon-btn icon-btn--open" @click="openBookmark(bookmark)" title="打开锚点">
+              <button
+                class="icon-btn icon-btn--open"
+                title="打开锚点"
+                @click="openBookmark(bookmark)"
+              >
                 <IconOpen />
               </button>
-              <button class="icon-btn icon-btn--delete" @click="confirmDelete(bookmark.id)" title="删除锚点">
+              <button
+                class="icon-btn icon-btn--delete"
+                title="删除锚点"
+                @click="confirmDelete(bookmark.id)"
+              >
                 <IconDelete />
               </button>
             </div>
           </div>
 
           <div class="bookmark-footer">
-            <span class="bookmark-domain">{{ getDomainLabel(bookmark.url) }}</span>
-            <span class="bookmark-date">{{ formatDate(bookmark.timestamp) }}</span>
+            <span class="bookmark-domain">{{
+              getDomainLabel(bookmark.url)
+            }}</span>
+            <span class="bookmark-date">{{
+              formatDate(bookmark.timestamp)
+            }}</span>
           </div>
         </article>
       </div>
@@ -85,8 +146,18 @@
           <h3>确认删除这个锚点？</h3>
           <p>删除后无法恢复，但不会影响原页面内容。</p>
           <div class="confirm-dialog-actions">
-            <button class="dialog-btn dialog-btn--ghost" @click="showDeleteConfirm = false">取消</button>
-            <button class="dialog-btn dialog-btn--danger" @click="deleteBookmark">删除</button>
+            <button
+              class="dialog-btn dialog-btn--ghost"
+              @click="showDeleteConfirm = false"
+            >
+              取消
+            </button>
+            <button
+              class="dialog-btn dialog-btn--danger"
+              @click="deleteBookmark"
+            >
+              删除
+            </button>
           </div>
         </div>
       </div>
@@ -95,19 +166,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { Bookmark } from '@/types/components/index.js';
-import { BookmarkStorage } from '@/services/bookmarkStorage';
-import { IconDelete, IconOpen, IconBookmark, IconUpload, IconDownload, IconSearch, IconClose } from '@icons/index';
-import TableContainer from './TableContainer.vue';
+import { ref, onMounted, computed } from "vue";
+import { Bookmark } from "@/types/components/index.js";
+import { BookmarkStorage } from "@/services/bookmarkStorage";
+import {
+  IconDelete,
+  IconOpen,
+  IconBookmark,
+  IconUpload,
+  IconDownload,
+  IconSearch,
+  IconClose,
+} from "@icons/index";
+import TableContainer from "../components/TableContainer.vue";
 
 const bookmarks = ref<Bookmark[]>([]);
 const showDeleteConfirm = ref(false);
-const bookmarkToDelete = ref<string>('');
+const bookmarkToDelete = ref<string>("");
 const fileInput = ref<HTMLInputElement | null>(null);
-const filterKeyword = ref('');
+const filterKeyword = ref("");
 
-const normalizedFilterKeyword = computed(() => filterKeyword.value.trim().toLowerCase());
+const normalizedFilterKeyword = computed(() =>
+  filterKeyword.value.trim().toLowerCase(),
+);
 const filteredBookmarks = computed(() => {
   const keyword = normalizedFilterKeyword.value;
 
@@ -117,12 +198,9 @@ const filteredBookmarks = computed(() => {
 
   return bookmarks.value.filter((bookmark) => {
     const domain = getDomainLabel(bookmark.url);
-    return [
-      bookmark.text,
-      bookmark.title || '',
-      bookmark.url,
-      domain,
-    ].some((value) => value.toLowerCase().includes(keyword));
+    return [bookmark.text, bookmark.title || "", bookmark.url, domain].some(
+      (value) => value.toLowerCase().includes(keyword),
+    );
   });
 });
 const filterSummary = computed(() => {
@@ -139,12 +217,25 @@ const loadBookmarks = async () => {
     loadedBookmarks.sort((a, b) => b.timestamp - a.timestamp);
     bookmarks.value = loadedBookmarks;
   } catch (error) {
-    maLogger.error('加载锚点失败:', error);
+    maLogger.error("加载锚点失败:", error);
   }
 };
 
 const openBookmark = (bookmark: Bookmark) => {
-  chrome.runtime.sendMessage({ type: 'OPEN_BOOKMARK', payload: bookmark, target: 'background' });
+  if (!chrome.runtime) {
+    console.warn("chrome.runtime is not available in this environment");
+    return;
+  }
+
+  if (!bookmark.url) {
+    console.warn("bookmark.url is not available");
+    return;
+  }
+  chrome.runtime.sendMessage({
+    type: "OPEN_BOOKMARK",
+    payload: bookmark,
+    target: "background",
+  });
 };
 
 const confirmDelete = (id: string) => {
@@ -153,14 +244,16 @@ const confirmDelete = (id: string) => {
 };
 
 const deleteBookmark = async () => {
-  if (!bookmarkToDelete.value) return;
+  if (!bookmarkToDelete.value) {
+    return;
+  }
 
   try {
     await BookmarkStorage.deleteBookmark(bookmarkToDelete.value);
     await loadBookmarks();
     showDeleteConfirm.value = false;
   } catch (error) {
-    maLogger.error('删除锚点失败:', error);
+    maLogger.error("删除锚点失败:", error);
   }
 };
 
@@ -168,15 +261,15 @@ const exportBookmarks = async () => {
   try {
     const bookmarksToExport = await BookmarkStorage.getBookmarks();
     const bookmarksData = JSON.stringify(bookmarksToExport, null, 2);
-    const blob = new Blob([bookmarksData], { type: 'application/json' });
+    const blob = new Blob([bookmarksData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `bookmarks-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   } catch (error) {
-    maLogger.error('导出锚点失败:', error);
+    maLogger.error("导出锚点失败:", error);
   }
 };
 
@@ -196,7 +289,7 @@ const readFileAsText = (file: File): Promise<string> => {
 const parseBookmarks = (content: string): Bookmark[] => {
   const data = JSON.parse(content);
   if (!Array.isArray(data)) {
-    throw new Error('无效的锚点数据格式');
+    throw new Error("无效的锚点数据格式");
   }
   return data as Bookmark[];
 };
@@ -205,7 +298,7 @@ const saveImportedBookmarks = async (bookmarks: Bookmark[]): Promise<void> => {
   for (const item of bookmarks) {
     if (item.text && item.url) {
       await BookmarkStorage.saveBookmark({
-        ...item
+        ...item,
       });
     }
   }
@@ -214,30 +307,34 @@ const saveImportedBookmarks = async (bookmarks: Bookmark[]): Promise<void> => {
 const importBookmarks = async (event: Event): Promise<void> => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
-  if (!file) return;
+  if (!file) {
+    return;
+  }
 
   try {
     const content = await readFileAsText(file);
     const importedBookmarks = parseBookmarks(content);
     await saveImportedBookmarks(importedBookmarks);
     await loadBookmarks();
-    target.value = '';
+    target.value = "";
   } catch (error) {
-    maLogger.error('导入锚点失败:', error);
+    maLogger.error("导入锚点失败:", error);
   }
 };
 
 const truncateUrl = (url: string, maxLength: number = 40) => {
-  if (url.length <= maxLength) return url;
+  if (url.length <= maxLength) {
+    return url;
+  }
   return `${url.substring(0, maxLength)}...`;
 };
 
 const getDomainLabel = (url: string) => {
   try {
     const { hostname } = new URL(url);
-    return hostname || '未知站点';
+    return hostname || "未知站点";
   } catch {
-    return '未知站点';
+    return "未知站点";
   }
 };
 
@@ -252,7 +349,10 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-$transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+$transition-base:
+  transform 0.2s ease,
+  border-color 0.2s ease,
+  background 0.2s ease;
 
 @mixin flex-center {
   display: inline-flex;
@@ -270,7 +370,9 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: $transition-base, color 0.2s ease;
+  transition:
+    $transition-base,
+    color 0.2s ease;
 }
 
 @mixin hover-lift {
@@ -351,7 +453,10 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
     border-radius: 11px;
     border: 1px solid var(--popup-border-muted);
     background: var(--popup-control-bg);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
 
     &:focus-within {
       border-color: var(--popup-border-strong);
@@ -394,7 +499,9 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
     background: transparent;
     color: var(--popup-text-subtle);
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
 
     &:hover {
       background: var(--popup-control-hover-bg);
@@ -427,7 +534,7 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   padding: 0;
   @include button-base(0, 11px);
 
-  >svg {
+  > svg {
     width: 15px;
     height: 15px;
   }
@@ -476,10 +583,12 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
     background: var(--popup-card-bg);
     border: 1px solid var(--popup-border);
     box-shadow: var(--popup-shadow-soft), var(--popup-inset-highlight);
-    transition: $transition-base, box-shadow 0.2s ease;
+    transition:
+      $transition-base,
+      box-shadow 0.2s ease;
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0 auto 0 0;
       width: 3px;
@@ -650,7 +759,9 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   color: var(--popup-text-subtle);
   cursor: pointer;
   opacity: 0.6;
-  transition: opacity 0.2s ease, color 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    color 0.2s ease;
 
   &:hover {
     opacity: 1;
@@ -688,7 +799,9 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   background: var(--popup-button-bg);
   color: var(--popup-text-on-accent);
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
@@ -762,9 +875,11 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   background: var(--popup-control-bg);
   color: var(--popup-text-secondary);
   cursor: pointer;
-  transition: $transition-base, color 0.2s ease;
+  transition:
+    $transition-base,
+    color 0.2s ease;
 
-  >svg {
+  > svg {
     width: 14px;
     height: 14px;
   }
@@ -843,7 +958,6 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   }
 }
 
-
 .dialog-btn {
   min-height: 36px;
   border-radius: 12px;
@@ -886,15 +1000,13 @@ $transition-base: transform 0.2s ease, border-color 0.2s ease, background 0.2s e
   box-shadow: 0 0 0 4px var(--popup-focus-ring);
 }
 
-@media (max-width: 360px) {
-  .filter-panel {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
+.filter-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
 
-  .filter-meta {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    max-width: none;
-  }
+.filter-meta {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  max-width: none;
 }
 </style>

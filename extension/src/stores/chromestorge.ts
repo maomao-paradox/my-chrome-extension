@@ -3,7 +3,7 @@
  * 1. Chrome 插件 → chrome.storage
  * 2. 普通浏览器 → localStorage
  */
-const isExtension = typeof chrome !== 'undefined' && chrome.storage;
+const isExtension = typeof chrome !== "undefined" && chrome.storage;
 
 export declare interface PageStorage {
   /* 有 */
@@ -40,13 +40,17 @@ export declare interface ExtStorage {
 const extLocal: ExtStorage = {
   /* 有 */
   async has(key: string) {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     const result = await chrome.storage.local.get(key);
-    return result.hasOwnProperty(key);
+    return Object.prototype.hasOwnProperty.call(result, key);
   },
   /* 读取 */
   async get(key: string, defaultValue?: any) {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     defaultValue = defaultValue === undefined ? {} : defaultValue;
     const result = await chrome.storage.local.get(key);
     return result[key] ?? defaultValue;
@@ -54,19 +58,25 @@ const extLocal: ExtStorage = {
 
   /* 写入 */
   async set(key, value) {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     return chrome.storage.local.set({ [key]: value });
   },
 
   /* 删除 */
   async remove(key: string) {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     return chrome.storage.local.remove(key);
   },
 
   /* 清空（慎用） */
   async clear() {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     return chrome.storage.local.clear();
   },
 };
@@ -74,12 +84,14 @@ const extLocal: ExtStorage = {
 const pageLocal: PageStorage = {
   /* 有 */
   has(key: string) {
-    return localStorage.hasOwnProperty(key);
+    return Object.prototype.hasOwnProperty.call(localStorage, key);
   },
   /* 读取 */
   get(key: string, defaultValue?: any) {
     try {
-      return JSON.parse(localStorage.getItem(key) as string) ?? defaultValue ?? null;
+      return (
+        JSON.parse(localStorage.getItem(key) as string) ?? defaultValue ?? null
+      );
     } catch {
       return localStorage.getItem(key) ?? null;
     }
@@ -87,7 +99,9 @@ const pageLocal: PageStorage = {
 
   /* 写入 */
   set(key, value) {
-    if (typeof value === 'object') value = JSON.stringify(value)
+    if (typeof value === "object") {
+      value = JSON.stringify(value);
+    }
     localStorage.setItem(key, value);
   },
 
@@ -105,7 +119,7 @@ const pageLocal: PageStorage = {
 const pageSession: PageStorage = {
   /* 有 */
   has(key: string) {
-    return sessionStorage.hasOwnProperty(key);
+    return Object.prototype.hasOwnProperty.call(sessionStorage, key);
   },
   /* 读取 */
   get(key: string, defaultValue?: any) {
@@ -119,7 +133,9 @@ const pageSession: PageStorage = {
 
   /* 写入 */
   set(key: string, value: string) {
-    if (typeof value === 'object') value = JSON.stringify(value)
+    if (typeof value === "object") {
+      value = JSON.stringify(value);
+    }
     sessionStorage.setItem(key, value);
   },
 
@@ -132,58 +148,68 @@ const pageSession: PageStorage = {
   clear() {
     sessionStorage.clear();
   },
-}
+};
 
 const extSession: ExtStorage = {
   /* 有 */
   async has(key: string) {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     const result = await chrome.storage.session.get(key);
-    return result.hasOwnProperty(key);
+    return Object.prototype.hasOwnProperty.call(result, key);
   },
   /* 读取 */
   async get(key: string, defaultValue?: any) {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     defaultValue = defaultValue === undefined ? {} : defaultValue;
     const result = await chrome.storage.session.get(key);
     return result[key] ?? defaultValue;
   },
   /* 写入 */
   async set(key: string, value: string) {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     return chrome.storage.session.set({ [key]: value });
   },
   /* 删除 */
   async remove(key: string) {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     return chrome.storage.session.remove(key);
   },
   /* 清空（慎用） */
   async clear() {
-    if (!isExtension) throw new Error('Not in extension environment');
+    if (!isExtension) {
+      throw new Error("Not in extension environment");
+    }
     return chrome.storage.session.clear();
   },
-}
+};
 
 export declare type Page = {
   local: PageStorage;
   session: PageStorage;
-}
+};
 
 export declare type Ext = {
   local: ExtStorage;
   session: ExtStorage;
-}
+};
 
 const page: Page = {
   local: pageLocal,
   session: pageSession,
-}
+};
 
 const ext: Ext = {
   local: extLocal,
   session: extSession,
-}
+};
 
 export default {
   ext,

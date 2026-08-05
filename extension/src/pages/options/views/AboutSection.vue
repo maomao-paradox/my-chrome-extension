@@ -1,6 +1,6 @@
 <template>
   <!-- 关于我们区域 -->
-  <section class="about" id="about">
+  <section id="about" class="about">
     <div class="container">
       <div class="about-content">
         <div class="about-text">

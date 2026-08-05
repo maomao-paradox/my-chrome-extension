@@ -1,0 +1,19 @@
+/**
+ * Floatingball 应用聚合样式入口
+ *
+ * 用途：通过 `import floatingballStyles from "./styles/index.scss?inline"`
+ * 将所有组件样式打包为字符串，在 shadow root 中一次性注入。
+ * 这样避免 Vite 的 CSS 代码分割创建 <link> 标签导致相对路径请求失败。
+ *
+ * 顺序：基础样式 → 子组件样式（后导入的可覆盖前者）
+ */
+
+// 子组件样式
+@use "./floating-ball.scss";
+@use "./glass-card-overlay.scss";
+@use "./control-panel.scss";
+@use "./tool-drawer.scss";
+
+// views 子组件样式（位于 views/styles/ 目录下）
+@use "../views/styles/image-download.scss";
+@use "../views/styles/script-runner.scss";

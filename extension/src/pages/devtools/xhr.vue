@@ -18,19 +18,19 @@
 
       <!-- 右侧：操作按钮组 -->
       <div class="action-buttons">
-        <button class="btn btn-primary" @click="refreshRules" :disabled="isLoading">
+        <button class="btn btn-primary" :disabled="isLoading" @click="refreshRules">
           <span class="btn-icon">🔄</span>
           刷新规则
         </button>
-        <button class="btn btn-secondary" @click="addNewRule" :disabled="isLoading">
+        <button class="btn btn-secondary" :disabled="isLoading" @click="addNewRule">
           <span class="btn-icon">➕</span>
           添加规则
         </button>
-        <button class="btn btn-danger" @click="clearAllRules" :disabled="isLoading || rules.length === 0">
+        <button class="btn btn-danger" :disabled="isLoading || rules.length === 0" @click="clearAllRules">
           <span class="btn-icon">🗑️</span>
           清空规则
         </button>
-        <button class="btn btn-outline" @click="toggleXhrPatch" :disabled="isLoading">
+        <button class="btn btn-outline" :disabled="isLoading" @click="toggleXhrPatch">
           <span class="btn-icon">{{ isXhrEnabled ? '🚫' : '✅' }}</span>
           {{ isXhrEnabled ? '禁用补丁' : '启用补丁' }}
         </button>
@@ -42,7 +42,7 @@
       <div class="section-header">
         <h2>当前规则 ({{ rules.length }})</h2>
         <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="搜索规则路径..." class="search-input" />
+          <input v-model="searchQuery" type="text" placeholder="搜索规则路径..." class="search-input" />
           <span class="search-icon">🔍</span>
         </div>
       </div>
@@ -70,10 +70,10 @@
               <span class="path-text">{{ rule.api }}</span>
             </div>
             <div class="rule-actions">
-              <button class="btn-icon-small" @click="editRule(rule, index)" title="编辑规则">
+              <button class="btn-icon-small" title="编辑规则" @click="editRule(rule, index)">
                 ✏️
               </button>
-              <button class="btn-icon-small" @click="deleteRule(rule.api!)" title="删除规则">
+              <button class="btn-icon-small" title="删除规则" @click="deleteRule(rule.api!)">
                 ❌
               </button>
             </div>
@@ -109,7 +109,7 @@
         <div class="dialog-content">
           <div class="form-group">
             <label for="rulePath">API路径:</label>
-            <input id="rulePath" type="text" v-model="currentRule.api" placeholder="例如: /api/get_hospital_list"
+            <input id="rulePath" v-model="currentRule.api" type="text" placeholder="例如: /api/get_hospital_list"
               class="form-input" required />
           </div>
 
@@ -128,7 +128,7 @@
 
         <div class="dialog-footer">
           <button class="btn btn-outline" @click="closeRuleDialog">取消</button>
-          <button class="btn btn-primary" @click="saveRule" :disabled="!currentRule.api">保存规则</button>
+          <button class="btn btn-primary" :disabled="!currentRule.api" @click="saveRule">保存规则</button>
         </div>
       </div>
     </div>
@@ -173,20 +173,20 @@ const currentRule = ref<XhrRule>({
 const filteredRules = computed((): XhrRulesArray => {
   // 添加详细日志，检查过滤前后规则对象的完整结构
   if (!searchQuery.value.trim()) {
-    maLogger.log("搜索框为空，返回原始规则列表");
+    maLogger.log('搜索框为空，返回原始规则列表');
     return rules.value;
   }
 
   const query = searchQuery.value.toLowerCase();
 
   // 在过滤前打印规则对象的完整结构
-  maLogger.log("过滤前的原始规则:", JSON.stringify(rules.value, null, 2));
+  maLogger.log('过滤前的原始规则:', JSON.stringify(rules.value, null, 2));
 
   // 过滤规则，并使用深拷贝确保保留所有属性
   const result = rules.value.filter((rule: XhrRule) => rule.api?.toLowerCase().includes(query));
 
   // 打印过滤后的规则结构
-  maLogger.log("过滤后的规则:", JSON.stringify(result, null, 2));
+  maLogger.log('过滤后的规则:', JSON.stringify(result, null, 2));
   return result;
 });
 
@@ -197,17 +197,17 @@ import { sendMessageToContentScript } from '@/message/back-content';
 async function refreshRules() {
   try {
     isLoading.value = true;
-    chrome.devtools.inspectedWindow.eval(`window.XHR_PATCH_MANAGER.getStatus();`,
+    chrome.devtools.inspectedWindow.eval('window.XHR_PATCH_MANAGER.getStatus();',
       function (result: any, isException) {
         if (!isException) {
-          maLogger.log("页面 XHR补丁 状态:", result);
+          maLogger.log('页面 XHR补丁 状态:', result);
           // 更新完整的状态信息
           isXhrEnabled.value = result.isEnabled !== undefined ? result.isEnabled : false;
           isXhrPatched.value = result.isPatched !== undefined ? result.isPatched : false;
         }
       }
     );
-    chrome.devtools.inspectedWindow.eval(`window.XHR_PATCH_MANAGER.getCurrentRules();`,
+    chrome.devtools.inspectedWindow.eval('window.XHR_PATCH_MANAGER.getCurrentRules();',
       function (result: any, isException) {
         if (!isException) {
           // 转换规则格式
@@ -224,7 +224,7 @@ async function refreshRules() {
           };
 
           rules.value = newRules;
-          maLogger.log("刷新后的规则列表:", rules.value);
+          maLogger.log('刷新后的规则列表:', rules.value);
         }
       }
     );
@@ -252,7 +252,7 @@ function addNewRule() {
 
 // 编辑规则
 function editRule(rule: XhrRule, index: number) {
-  maLogger.log("正在编辑规则", rule);
+  maLogger.log('正在编辑规则', rule);
   isEditing.value = true;
   currentRuleIndex.value = index;
   currentRule.value = {
@@ -321,7 +321,7 @@ function removeSubRule(handlerType: 'open' | 'send' | 'response', index: number)
 
 // 保存单条规则
 async function saveRule() {
-  if (!currentRule.value.api) return;
+  if (!currentRule.value.api) {return;}
 
   try {
     isLoading.value = true;
@@ -427,7 +427,7 @@ function clearAllRules() {
 
       // 调用 XHR_PATCH_MANAGER.clearRules 清空规则
       chrome.devtools.inspectedWindow.eval(
-        `window.XHR_PATCH_MANAGER.clearRules();`,
+        'window.XHR_PATCH_MANAGER.clearRules();',
         function (result: any, isException) {
           if (isException) {
             maLogger.error('清空规则失败:', result);

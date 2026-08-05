@@ -5,7 +5,10 @@ export interface LoggerOptions {
 }
 
 export type LoggerMethod = (...args: any[]) => Logger;
-export type LoggerAssertMethod = (condition?: boolean, ...args: any[]) => Logger;
+export type LoggerAssertMethod = (
+  condition?: boolean,
+  ...args: any[]
+) => Logger;
 
 export interface Logger {
   title: string;
@@ -27,8 +30,8 @@ export interface Logger {
   assert: LoggerAssertMethod;
 }
 
-const DEFAULT_LOGGER_TITLE = 'MRIA';
-const LOGGER_STORAGE_KEY = 'extensionSettings';
+const DEFAULT_LOGGER_TITLE = "MRIA";
+const LOGGER_STORAGE_KEY = "extensionSettings";
 let isStorageListenerInstalled = false;
 
 const prefixArgs = (title: string, args: any[]): any[] => {
@@ -37,7 +40,7 @@ const prefixArgs = (title: string, args: any[]): any[] => {
   }
 
   const [firstArg, ...restArgs] = args;
-  if (typeof firstArg === 'string') {
+  if (typeof firstArg === "string") {
     return [`[${title}] ${firstArg}`, ...restArgs];
   }
 
@@ -57,27 +60,39 @@ const createMethod = (
       return getLogger();
     }
 
-    const consoleMethod = baseConsole[methodName] as ((...args: any[]) => void) | undefined;
-    if (typeof consoleMethod !== 'function') {
+    const consoleMethod = baseConsole[methodName] as
+      | ((...args: any[]) => void)
+      | undefined;
+    if (typeof consoleMethod !== "function") {
       return getLogger();
     }
 
-    Reflect.apply(consoleMethod, baseConsole, options.prefixed === false ? args : prefixArgs(getTitle(), args));
+    Reflect.apply(
+      consoleMethod,
+      baseConsole,
+      options.prefixed === false ? args : prefixArgs(getTitle(), args),
+    );
     return getLogger();
   };
 };
 
 const readDebugMode = async (): Promise<boolean> => {
   try {
-    if (typeof chrome === 'undefined' || !chrome.storage?.local) {
+    if (typeof chrome === "undefined" || !chrome.storage?.local) {
       return false;
     }
 
-    const snapshot = await chrome.storage.local.get([LOGGER_STORAGE_KEY, 'debugMode']) as Record<string, any>;
-    const extensionSettings = (snapshot[LOGGER_STORAGE_KEY] || {}) as Record<string, any>;
+    const snapshot = (await chrome.storage.local.get([
+      LOGGER_STORAGE_KEY,
+      "debugMode",
+    ])) as Record<string, any>;
+    const extensionSettings = (snapshot[LOGGER_STORAGE_KEY] || {}) as Record<
+      string,
+      any
+    >;
     return extensionSettings.debugMode === true || snapshot.debugMode === true;
   } catch (error) {
-    globalThis.console?.warn?.('[Zero] 读取日志配置失败:', error);
+    globalThis.console?.warn?.("[Zero] 读取日志配置失败:", error);
     return false;
   }
 };
@@ -86,9 +101,8 @@ export const createLogger = (options: LoggerOptions = {}): Logger => {
   const baseConsole = options.console || globalThis.console;
   let title = options.title || DEFAULT_LOGGER_TITLE;
   let enabled = options.enabled === true;
-  let logger: Logger;
 
-  logger = {
+  const logger: Logger = {
     get title() {
       return title;
     },
@@ -103,30 +117,99 @@ export const createLogger = (options: LoggerOptions = {}): Logger => {
       enabled = nextEnabled;
       return logger;
     },
-    debug: createMethod(baseConsole, 'debug', () => title, () => enabled, () => logger),
-    error: createMethod(baseConsole, 'error', () => title, () => enabled, () => logger),
-    info: createMethod(baseConsole, 'info', () => title, () => enabled, () => logger),
-    log: createMethod(baseConsole, 'log', () => title, () => enabled, () => logger),
-    trace: createMethod(baseConsole, 'trace', () => title, () => enabled, () => logger),
-    warn: createMethod(baseConsole, 'warn', () => title, () => enabled, () => logger),
-    table: createMethod(baseConsole, 'table', () => title, () => enabled, () => logger, { prefixed: false }),
-    group: createMethod(baseConsole, 'group', () => title, () => enabled, () => logger),
-    groupCollapsed: createMethod(baseConsole, 'groupCollapsed', () => title, () => enabled, () => logger),
+    debug: createMethod(
+      baseConsole,
+      "debug",
+      () => title,
+      () => enabled,
+      () => logger,
+    ),
+    error: createMethod(
+      baseConsole,
+      "error",
+      () => title,
+      () => enabled,
+      () => logger,
+    ),
+    info: createMethod(
+      baseConsole,
+      "info",
+      () => title,
+      () => enabled,
+      () => logger,
+    ),
+    log: createMethod(
+      baseConsole,
+      "log",
+      () => title,
+      () => enabled,
+      () => logger,
+    ),
+    trace: createMethod(
+      baseConsole,
+      "trace",
+      () => title,
+      () => enabled,
+      () => logger,
+    ),
+    warn: createMethod(
+      baseConsole,
+      "warn",
+      () => title,
+      () => enabled,
+      () => logger,
+    ),
+    table: createMethod(
+      baseConsole,
+      "table",
+      () => title,
+      () => enabled,
+      () => logger,
+      { prefixed: false },
+    ),
+    group: createMethod(
+      baseConsole,
+      "group",
+      () => title,
+      () => enabled,
+      () => logger,
+    ),
+    groupCollapsed: createMethod(
+      baseConsole,
+      "groupCollapsed",
+      () => title,
+      () => enabled,
+      () => logger,
+    ),
     groupEnd: (...args: any[]): Logger => {
-      if (!enabled || typeof baseConsole.groupEnd !== 'function') {
+      if (!enabled || typeof baseConsole.groupEnd !== "function") {
         return logger;
       }
       Reflect.apply(baseConsole.groupEnd, baseConsole, args);
       return logger;
     },
-    time: createMethod(baseConsole, 'time', () => title, () => enabled, () => logger, { prefixed: false }),
-    timeEnd: createMethod(baseConsole, 'timeEnd', () => title, () => enabled, () => logger, { prefixed: false }),
+    time: createMethod(
+      baseConsole,
+      "time",
+      () => title,
+      () => enabled,
+      () => logger,
+      { prefixed: false },
+    ),
+    timeEnd: createMethod(
+      baseConsole,
+      "timeEnd",
+      () => title,
+      () => enabled,
+      () => logger,
+      { prefixed: false },
+    ),
     assert: (condition?: boolean, ...args: any[]): Logger => {
       if (!enabled || condition) {
         return logger;
       }
 
-      if (typeof baseConsole.assert === 'function') {
+      if (typeof baseConsole.assert === "function") {
         baseConsole.assert(condition, ...prefixArgs(title, args));
       }
       return logger;
@@ -141,12 +224,12 @@ const installStorageListener = (): void => {
     return;
   }
 
-  if (typeof chrome === 'undefined' || !chrome.storage?.onChanged) {
+  if (typeof chrome === "undefined" || !chrome.storage?.onChanged) {
     return;
   }
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== 'local') {
+    if (areaName !== "local") {
       return;
     }
 
@@ -154,8 +237,12 @@ const installStorageListener = (): void => {
       return;
     }
 
-    const extensionSettings = (changes[LOGGER_STORAGE_KEY]?.newValue || {}) as Record<string, any>;
-    const hasExtensionDebugMode = Object.prototype.hasOwnProperty.call(extensionSettings, 'debugMode');
+    const extensionSettings = (changes[LOGGER_STORAGE_KEY]?.newValue ||
+      {}) as Record<string, any>;
+    const hasExtensionDebugMode = Object.prototype.hasOwnProperty.call(
+      extensionSettings,
+      "debugMode",
+    );
     if (!hasExtensionDebugMode && !changes.debugMode) {
       return;
     }
@@ -174,7 +261,7 @@ export const installGlobalLogger = (options: LoggerOptions = {}): Logger => {
     if (options.title) {
       existingLogger.setTitle(options.title);
     }
-    if (typeof options.enabled === 'boolean') {
+    if (typeof options.enabled === "boolean") {
       existingLogger.setEnabled(options.enabled);
     }
     installStorageListener();
@@ -182,7 +269,7 @@ export const installGlobalLogger = (options: LoggerOptions = {}): Logger => {
   }
 
   const logger = createLogger(options);
-  Object.defineProperty(globalThis, 'maLogger', {
+  Object.defineProperty(globalThis, "maLogger", {
     value: logger,
     writable: true,
     enumerable: false,

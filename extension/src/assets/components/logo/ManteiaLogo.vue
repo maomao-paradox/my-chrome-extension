@@ -42,44 +42,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import $ from 'jquery'
-var startDelay = 2000;
+import { ref, onMounted } from 'vue';
+import $ from 'jquery';
+const startDelay = 2000;
 
 onMounted(() => {
-    maLogger.log('ManteiaLogo mounted')
+  maLogger.log('ManteiaLogo mounted');
 
-    $("html, body, .container").click(function () {
-        if ($(".letter").hasClass("active")) {
-            $(".letter").removeClass("active");
-        } else {
-            $(".letter").addClass("active");
-        }
-    });
+  $('html, body, .container').click(function () {
+    if ($('.letter').hasClass('active')) {
+      $('.letter').removeClass('active');
+    } else {
+      $('.letter').addClass('active');
+    }
+  });
 
-    $(".letter").each(function (key, value) {
-        $(value).height(20);
-        $(".letters").hide().removeClass("hidden").fadeIn("slow");
-        setTimeout(function () {
-            $(value).height(200);
-        }, startDelay + 20 * $(value).index());
-        setTimeout(function () {
-            $(value).addClass("active");
-        }, startDelay + 3000 + 200 * $(value).index());
-    });
-
+  $('.letter').each(function (key, value) {
+    $(value).height(20);
+    $('.letters').hide().removeClass('hidden').fadeIn('slow');
     setTimeout(function () {
-        $(".letter").removeClass("active");
-    }, startDelay + 2500);
-
+      $(value).height(200);
+    }, startDelay + 20 * $(value).index());
     setTimeout(function () {
-        $(".letter").addClass("active");
-    }, startDelay + 500);
+      $(value).addClass('active');
+    }, startDelay + 3000 + 200 * $(value).index());
+  });
 
-    setTimeout(function () {
-        $(".letter").removeClass("active");
-    }, 10000);
-})
+  setTimeout(function () {
+    $('.letter').removeClass('active');
+  }, startDelay + 2500);
+
+  setTimeout(function () {
+    $('.letter').addClass('active');
+  }, startDelay + 500);
+
+  setTimeout(function () {
+    $('.letter').removeClass('active');
+  }, 10000);
+});
 </script>
 
 <style>

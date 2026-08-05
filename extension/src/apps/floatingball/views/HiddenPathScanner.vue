@@ -14,10 +14,10 @@
             <el-icon v-else class="el-icon-loading"></el-icon>
             {{ running ? '扫描中...' : '开始扫描' }}
           </el-button>
-          <el-button @click="clearResults" :disabled="running">
+          <el-button :disabled="running" @click="clearResults">
             <el-icon class="el-icon-delete"></el-icon> 清空结果
           </el-button>
-          <el-button @click="resetScanner" :disabled="running">
+          <el-button :disabled="running" @click="resetScanner">
             <el-icon class="el-icon-refresh"></el-icon> 重置
           </el-button>
         </div>
@@ -29,7 +29,7 @@
               <el-icon class="el-icon-link"></el-icon>
             </template>
           </el-input>
-          <el-button type="success" size="small" @click="useCurrentPage" :disabled="running" style="margin-left: 10px;">
+          <el-button type="success" size="small" :disabled="running" style="margin-left: 10px;" @click="useCurrentPage">
             使用当前页面
           </el-button>
         </div>
@@ -96,15 +96,15 @@
               <el-icon class="result-icon" :class="getStatusIcon(result.status)"></el-icon>
               <span class="result-path">{{ result.path }}</span>
               <span class="result-status">{{ getStatusText(result.status) }}</span>
-              <span class="result-code" v-if="result.statusCode">{{ result.statusCode }}</span>
+              <span v-if="result.statusCode" class="result-code">{{ result.statusCode }}</span>
               <span class="result-time">{{ result.time }}ms</span>
             </div>
             <div v-if="result.responseSize" class="result-details">
               <span>响应大小: {{ formatFileSize(result.responseSize) }}</span>
               <span v-if="result.redirectUrl">重定向到: {{ result.redirectUrl }}</span>
             </div>
-            <el-button type="text" size="small" @click="openPath(result.fullUrl)" class="open-btn"
-              v-if="result.status === 'success' || result.status === 'redirect'">
+            <el-button v-if="result.status === 'success' || result.status === 'redirect'" type="text" size="small" class="open-btn"
+              @click="openPath(result.fullUrl)">
               打开
             </el-button>
           </div>
@@ -131,24 +131,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue';
 
 // 响应式数据
-const targetUrl = ref('')
-const selectedDictionaries = ref(['common', 'files'])
-const customPaths = ref('')
-const concurrency = ref(5)
-const timeout = ref(3000)
-const running = ref(false)
-const progress = ref(0)
-const scannedCount = ref(0)
-const totalCount = ref(0)
-const foundCount = ref(0)
-const scanStatus = ref<any>('')
-const scanResults = ref<any>([])
-const filterStatus = ref('all')
+const targetUrl = ref('');
+const selectedDictionaries = ref(['common', 'files']);
+const customPaths = ref('');
+const concurrency = ref(5);
+const timeout = ref(3000);
+const running = ref(false);
+const progress = ref(0);
+const scannedCount = ref(0);
+const totalCount = ref(0);
+const foundCount = ref(0);
+const scanStatus = ref<any>('');
+const scanResults = ref<any>([]);
+const filterStatus = ref('all');
 
-const emit = defineEmits(['add-message'])
+const emit = defineEmits(['add-message']);
 
 // 常见路径字典
 const pathDictionaries = {
@@ -172,94 +172,94 @@ const pathDictionaries = {
     'web.config', 'nginx.conf', '.htaccess', 'backup', 'backups',
     '.DS_Store', 'backup.zip', 'www.zip'
   ]
-}
+};
 
 // 格式化文件大小
 function formatFileSize(bytes: number) {
-  if (bytes < 1024) return bytes + ' B'
-  else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB'
-  else return (bytes / 1048576).toFixed(2) + ' MB'
+  if (bytes < 1024) {return bytes + ' B';}
+  else if (bytes < 1048576) {return (bytes / 1024).toFixed(2) + ' KB';}
+  else {return (bytes / 1048576).toFixed(2) + ' MB';}
 }
 
 // 获取状态图标
 function getStatusIcon(status: string) {
   switch (status) {
-    case 'success': return 'el-icon-circle-check'
-    case 'redirect': return 'el-icon-outer-link'
-    case 'error': return 'el-icon-circle-close'
-    default: return 'el-icon-help'
+    case 'success': return 'el-icon-circle-check';
+    case 'redirect': return 'el-icon-outer-link';
+    case 'error': return 'el-icon-circle-close';
+    default: return 'el-icon-help';
   }
 }
 
 // 获取状态文本
 function getStatusText(status: string) {
   switch (status) {
-    case 'success': return '存在'
-    case 'redirect': return '重定向'
-    case 'error': return '不存在'
-    default: return '未知'
+    case 'success': return '存在';
+    case 'redirect': return '重定向';
+    case 'error': return '不存在';
+    default: return '未知';
   }
 }
 
 // 过滤结果
 const filteredResults = computed(() => {
-  if (filterStatus.value === 'all') return scanResults.value
-  return scanResults.value.filter((result: any) => result.status === filterStatus.value)
-})
+  if (filterStatus.value === 'all') {return scanResults.value;}
+  return scanResults.value.filter((result: any) => result.status === filterStatus.value);
+});
 
 // 使用当前页面URL
 function useCurrentPage() {
   try {
     // 在Chrome扩展环境中获取当前页面URL
-    const currentUrl = window.location.origin + '/'
-    targetUrl.value = currentUrl
+    const currentUrl = window.location.origin + '/';
+    targetUrl.value = currentUrl;
     emit('add-message', {
       message: '已设置为当前页面URL',
       type: 'success'
-    })
+    });
   } catch (error) {
     emit('add-message', {
       message: '获取当前页面URL失败',
       type: 'error'
-    })
+    });
   }
 }
 
 // 构建要扫描的路径列表
 function buildPathList() {
-  const paths = new Set()
+  const paths = new Set();
 
   // 添加字典路径
   selectedDictionaries.value.forEach(dict => {
     if (pathDictionaries[dict as keyof typeof pathDictionaries]) {
-      pathDictionaries[dict as keyof typeof pathDictionaries].forEach(path => paths.add(path))
+      pathDictionaries[dict as keyof typeof pathDictionaries].forEach(path => paths.add(path));
     }
-  })
+  });
 
   // 添加自定义路径
   if (customPaths.value.trim()) {
     customPaths.value.trim().split('\n').forEach(path => {
-      if (path.trim()) paths.add(path.trim())
-    })
+      if (path.trim()) {paths.add(path.trim());}
+    });
   }
 
-  return Array.from(paths)
+  return Array.from(paths);
 }
 
 // 格式化URL
 function formatUrl(baseUrl: string, path: string) {
   // 确保baseUrl以/结尾
-  const base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/'
+  const base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
   // 移除path开头的/（如果有）
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path
-  return base + cleanPath
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  return base + cleanPath;
 }
 
 // 扫描单个路径
 async function scanPath(url: string) {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout.value)
-  const startTime = Date.now()
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout.value);
+  const startTime = Date.now();
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -270,11 +270,11 @@ async function scanPath(url: string) {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'
       },
       signal: controller.signal
-    })
-    const endTime = Date.now()
-    const responseTime = endTime - startTime
+    });
+    const endTime = Date.now();
+    const responseTime = endTime - startTime;
 
-    clearTimeout(timeoutId)
+    clearTimeout(timeoutId);
 
     const result = {
       path: url.replace(targetUrl.value, ''),
@@ -284,25 +284,25 @@ async function scanPath(url: string) {
       time: responseTime,
       responseSize: 0,
       redirectUrl: ''
-    }
+    };
 
     // 检查是否是重定向
     if (response.redirected) {
-      result.status = 'redirect'
-      result.redirectUrl = response.url
+      result.status = 'redirect';
+      result.redirectUrl = response.url;
     } else if (response.status >= 400) {
-      result.status = 'error'
+      result.status = 'error';
     }
 
     // 获取响应大小
-    const blob = await response.blob()
-    result.responseSize = blob.size
+    const blob = await response.blob();
+    result.responseSize = blob.size;
 
-    return result
+    return result;
   } catch (error: any) {
-    clearTimeout(timeoutId)
-    const endTime = Date.now()
-    const responseTime = endTime - startTime
+    clearTimeout(timeoutId);
+    const endTime = Date.now();
+    const responseTime = endTime - startTime;
 
     return {
       path: url.replace(targetUrl.value, ''),
@@ -311,73 +311,73 @@ async function scanPath(url: string) {
       statusCode: 0,
       time: responseTime,
       error: error.message
-    }
+    };
   }
 }
 
 // 并发扫描路径
 async function concurrentScan(paths: string[]) {
-  const results: any[] = []
-  const queue = [...paths]
-  const activeWorkers = new Set()
+  const results: any[] = [];
+  const queue = [...paths];
+  const activeWorkers = new Set();
 
-  totalCount.value = paths.length
-  scannedCount.value = 0
-  foundCount.value = 0
-  progress.value = 0
-  scanStatus.value = 'progress'
+  totalCount.value = paths.length;
+  scannedCount.value = 0;
+  foundCount.value = 0;
+  progress.value = 0;
+  scanStatus.value = 'progress';
 
   const processQueue = async () => {
     while (queue.length > 0 && activeWorkers.size < concurrency.value && running.value) {
-      const path = queue.shift()
-      const url = formatUrl(targetUrl.value, path as string)
+      const path = queue.shift();
+      const url = formatUrl(targetUrl.value, path as string);
 
       const worker = scanPath(url).then(result => {
-        activeWorkers.delete(worker)
-        results.push(result)
-        scanResults.value.push(result)
+        activeWorkers.delete(worker);
+        results.push(result);
+        scanResults.value.push(result);
 
-        scannedCount.value++
+        scannedCount.value++;
         if (result.status === 'success' || result.status === 'redirect') {
-          foundCount.value++
+          foundCount.value++;
         }
 
-        progress.value = Math.floor((scannedCount.value / totalCount.value) * 100)
+        progress.value = Math.floor((scannedCount.value / totalCount.value) * 100);
 
         // 继续处理队列
-        processQueue()
+        processQueue();
       }).catch(error => {
-        activeWorkers.delete(worker)
-        scannedCount.value++
-        progress.value = Math.floor((scannedCount.value / totalCount.value) * 100)
-        maLogger.error('扫描路径失败:', error)
-        processQueue()
-      })
+        activeWorkers.delete(worker);
+        scannedCount.value++;
+        progress.value = Math.floor((scannedCount.value / totalCount.value) * 100);
+        maLogger.error('扫描路径失败:', error);
+        processQueue();
+      });
 
-      activeWorkers.add(worker)
+      activeWorkers.add(worker);
     }
 
     // 检查是否所有扫描都已完成
     if (activeWorkers.size === 0 && running.value) {
-      running.value = false
-      scanStatus.value = foundCount.value > 0 ? 'success' : 'warning'
+      running.value = false;
+      scanStatus.value = foundCount.value > 0 ? 'success' : 'warning';
 
       emit('add-message', {
         message: `扫描完成！共发现 ${foundCount.value} 个可能存在的路径`,
         type: foundCount.value > 0 ? 'success' : 'warning'
-      })
+      });
     }
-  }
+  };
 
   // 开始处理队列
-  processQueue()
+  processQueue();
 
   // 等待所有扫描完成
   while (activeWorkers.size > 0 && running.value) {
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 
-  return results
+  return results;
 }
 
 // 开始扫描
@@ -386,84 +386,84 @@ async function startScan() {
     emit('add-message', {
       message: '请输入目标URL',
       type: 'warning'
-    })
-    return
+    });
+    return;
   }
 
-  const paths = buildPathList()
+  const paths = buildPathList();
   if (paths.length === 0) {
     emit('add-message', {
       message: '请选择路径字典或输入自定义路径',
       type: 'warning'
-    })
-    return
+    });
+    return;
   }
 
   // 清空之前的结果
-  scanResults.value = []
-  running.value = true
+  scanResults.value = [];
+  running.value = true;
 
   try {
-    await concurrentScan(paths as string[])
+    await concurrentScan(paths as string[]);
   } catch (error: any) {
-    running.value = false
+    running.value = false;
     emit('add-message', {
       message: '扫描过程中发生错误: ' + error.message,
       type: 'error'
-    })
-    maLogger.error('扫描错误:', error)
+    });
+    maLogger.error('扫描错误:', error);
   }
 }
 
 // 清空结果
 function clearResults() {
-  scanResults.value = []
-  scannedCount.value = 0
-  totalCount.value = 0
-  foundCount.value = 0
-  progress.value = 0
+  scanResults.value = [];
+  scannedCount.value = 0;
+  totalCount.value = 0;
+  foundCount.value = 0;
+  progress.value = 0;
   emit('add-message', {
     message: '已清空扫描结果',
     type: 'info'
-  })
+  });
 }
 
 // 重置扫描器
 function resetScanner() {
-  clearResults()
-  targetUrl.value = ''
-  selectedDictionaries.value = ['common', 'files']
-  customPaths.value = ''
-  concurrency.value = 5
-  timeout.value = 3000
-  filterStatus.value = 'all'
+  clearResults();
+  targetUrl.value = '';
+  selectedDictionaries.value = ['common', 'files'];
+  customPaths.value = '';
+  concurrency.value = 5;
+  timeout.value = 3000;
+  filterStatus.value = 'all';
   emit('add-message', {
     message: '扫描器已重置',
     type: 'info'
-  })
+  });
 }
 
 // 打开路径
 function openPath(url: string) {
   try {
-    window.open(url, '_blank')
+    window.open(url, '_blank');
   } catch (error) {
     emit('add-message', {
       message: '打开路径失败',
       type: 'error'
-    })
+    });
   }
 }
 
 // 组件挂载时尝试设置当前页面URL
 onMounted(() => {
   try {
-    const currentUrl = window.location.origin + '/'
-    targetUrl.value = currentUrl
+    const currentUrl = window.location.origin + '/';
+    targetUrl.value = currentUrl;
   } catch (error) {
-    maLogger.log('无法自动设置当前页面URL:', error)
+    maLogger.log('无法自动设置当前页面URL:', error);
   }
-})
+});
 </script>
 
 <style scoped>

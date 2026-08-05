@@ -4,7 +4,7 @@ import {
   normalizeMouseTrailPreference,
   readStoredMouseTrailPreference,
   type MouseTrailPreference,
-  type MouseTrailPreset,
+  type MouseTrailPreset
 } from '@/assets/composables/mouse/mouseTrailPreference';
 
 let trailControls: ReturnType<typeof useMusicNoteTrails> | null = null;

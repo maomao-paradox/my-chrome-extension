@@ -14,6 +14,7 @@ import (
 	"backend/internal/automation"
 	"backend/internal/config"
 	"backend/internal/httpx"
+	"backend/internal/totp"
 )
 
 type Handler struct {
@@ -23,6 +24,7 @@ type Handler struct {
 	sessions *SessionStore
 	auto     *automation.Service
 	tasks    *automation.TaskStore
+	totp     *totp.Store
 }
 
 type SessionStore struct {
@@ -42,6 +44,7 @@ func New(cfg config.Config, logger *slog.Logger) *Handler {
 		},
 		auto:  automation.NewService(),
 		tasks: automation.NewTaskStore(),
+		totp:  totp.NewStore(),
 	}
 }
 

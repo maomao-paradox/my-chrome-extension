@@ -1,8 +1,10 @@
+/**
+ * @description AI 助手 DevTools 面板入口（React 版本）
+ */
 import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/logger';
-import { createApp } from 'vue';
-import PanelApp from './panel.vue';
 
 installGlobalLogger({ title: 'MRIA DEVTOOLS PANEL', enabled: false });
 void syncGlobalLoggerFromStorage();
 
-createApp(PanelApp).mount('#app');
+// 动态导入 React 版本
+void import('./panel/index');

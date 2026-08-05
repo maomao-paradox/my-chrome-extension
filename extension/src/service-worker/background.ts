@@ -23,8 +23,8 @@ const streamManager = new StreamManager();
 const devToolsPortManager = new DevToolsPortManager();
 
 initRuntimeConnectionListener({
-	streamManager,
-	devToolsPortManager
+  streamManager,
+  devToolsPortManager
 });
 initClearAiSessionListener();
 initMenuListener();

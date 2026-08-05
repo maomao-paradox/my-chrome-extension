@@ -18,24 +18,17 @@ export const domainConfigsKey = 'domainConfigs';
 const getContentScriptUrl = async (domain: string) => await getAssetsAbstractPath(`js/content/content-${domain}`);
 const getAppEntryUrl = async (appName: string) => await getAssetsAbstractPath(`js/apps/${appName}`);
 
-const contentDomains = ['Radius', 'Zentao', 'Mria', 'Qapro', 'Teach', 'Lanhuapp', 'Portainer'];
+export const contentDomains = ['Radius', 'Zentao', 'Mria', 'Qapro', 'Teach', 'Lanhuapp', 'Portainer'];
 
 export const contentModules = contentDomains.reduce((acc, domain) => acc.set(domain, {
-    domainKey: `content${domain}Domains`,
-    flag: `__CONTENT_SCRIPT_${domain.toUpperCase()}`,
-    path: getContentScriptUrl(domain.toLowerCase())
+  domainKey: `content${domain}Domains`,
+  flag: `__CONTENT_SCRIPT_${domain.toUpperCase()}`,
+  path: getContentScriptUrl(domain.toLowerCase())
 }), new Map<string, ModuleOption>());
-
-contentModules.set('TextareaAi', {
-    domainKey: 'contentTextareaAiDomains',
-    flag: '__CONTENT_SCRIPT_TEXTAREA_AI',
-    path: getContentScriptUrl('textarea-ai')
-});
-
 
 const appDomains = ['sidebar', 'floatingball', 'pianoEffect', 'textSelectionToolbar', 'componentCapture', 'errorMonitor', 'menu'];
 
 export const appModules = appDomains.reduce((acc, domain) => acc.set(domain, {
-    flag: `__APP_${domain.toUpperCase()}`,
-    path: getAppEntryUrl(domain)
+  flag: `__APP_${domain.toUpperCase()}`,
+  path: getAppEntryUrl(domain)
 }), new Map<string, ModuleOption>());

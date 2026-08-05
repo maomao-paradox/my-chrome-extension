@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.695Z
  */
 
-import type { ExtMessage, ResponseMessage } from "@/types"
+import type { ExtMessage, ResponseMessage } from '@/types';
 
 /**
  * 极简跨端通信封装
@@ -16,7 +16,7 @@ import type { ExtMessage, ResponseMessage } from "@/types"
  */
 const isExtension = typeof chrome !== 'undefined' && chrome.runtime;
 
-export *  from './back-content'
+export *  from './back-content';
 
 /* 1. Chrome 扩展内部通信 */
 const ext = {
@@ -47,7 +47,7 @@ const ext = {
         return true; // 异步
       });
     }
-  },
+  }
 };
 
 /* 2. 与页面通信 */
@@ -105,11 +105,11 @@ const page = {
         }
       });
     }
-  },
+  }
 };
 
 /* 3. 统一对外 API */
 export default {
   ext,
-  page,
+  page
 };

@@ -1,7 +1,13 @@
-import { ref } from 'vue';
+/**
+ * @author Zero
+ * @version v2.0.0
+ * @license MIT
+ * @file src/pages/popup/composables/usePopupMouseTrail.ts
+ * @description React 版鼠标拖尾管理 Hook
+ */
+import { useState, useCallback } from 'react';
 import {
   defaultMouseTrailPreset,
-  mouseTrailStorageKey,
   normalizeMouseTrailPreset,
   persistMouseTrail,
   readStoredMouseTrailPreference,
@@ -9,13 +15,11 @@ import {
   type MouseTrailPreset,
 } from '@/assets/composables/mouse/mouseTrailPreference';
 
-export const popupMouseTrailStorageKey = mouseTrailStorageKey;
+export const popupMouseTrailStorageKey = 'mouseTrail';
 
-const defaultMouseTrailEnabled = false;
-const isMouseTrailEnabled = ref(defaultMouseTrailEnabled);
-const mouseTrailPreset = ref<MouseTrailPreset>(defaultMouseTrailPreset);
-const isMouseTrailLoaded = ref(false);
-
+/**
+ * 判断是否为可用的页面标签
+ */
 const isUsablePageTab = (tab: chrome.tabs.Tab | undefined): tab is chrome.tabs.Tab & { id: number } => {
   if (!tab?.id) {
     return false;
@@ -29,69 +33,92 @@ const isUsablePageTab = (tab: chrome.tabs.Tab | undefined): tab is chrome.tabs.T
     && !url.startsWith('about:');
 };
 
-const getCurrentPreference = (): MouseTrailPreference => ({
-  enabled: isMouseTrailEnabled.value,
-  preset: mouseTrailPreset.value,
-});
-
-const notifyCurrentPageMouseTrail = async (preference: MouseTrailPreference): Promise<void> => {
-  try {
-    if (typeof chrome === 'undefined' || !chrome.tabs) {
-      return;
-    }
-
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    const activeTab = tabs[0];
-
-    if (!isUsablePageTab(activeTab)) {
-      return;
-    }
-
-    await new Promise<void>((resolve) => {
-      chrome.tabs.sendMessage(activeTab.id, {
-        type: 'TOGGLE_MOUSE_TRAIL',
-        source: 'popup',
-        target: 'content',
-        payload: preference,
-      }, () => {
-        if (chrome.runtime.lastError) {
-          maLogger.warn('当前页面暂未接收鼠标拖尾消息:', chrome.runtime.lastError.message);
-        }
-        resolve();
-      });
-    });
-  } catch (error) {
-    maLogger.warn('通知当前页面更新鼠标拖尾失败:', error);
-  }
-};
-
+/**
+ * Popup 鼠标拖尾管理 Hook
+ */
 export const usePopupMouseTrail = () => {
-  const loadPopupMouseTrail = async (): Promise<void> => {
-    if (isMouseTrailLoaded.value) {
+  const [isMouseTrailEnabled, setIsMouseTrailEnabled] = useState(false);
+  const [mouseTrailPreset, setMouseTrailPreset] = useState<MouseTrailPreset>(defaultMouseTrailPreset);
+  const [isMouseTrailLoaded, setIsMouseTrailLoaded] = useState(false);
+
+  /**
+   * 获取当前偏好设置
+   */
+  const getCurrentPreference = (): MouseTrailPreference => ({
+    enabled: isMouseTrailEnabled,
+    preset: mouseTrailPreset,
+  });
+
+  /**
+   * 通知当前页面更新鼠标拖尾
+   */
+  const notifyCurrentPageMouseTrail = async (preference: MouseTrailPreference): Promise<void> => {
+    try {
+      if (typeof chrome === 'undefined' || !chrome.tabs) {
+        return;
+      }
+
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const activeTab = tabs[0];
+
+      if (!isUsablePageTab(activeTab)) {
+        return;
+      }
+
+      await new Promise<void>((resolve) => {
+        chrome.tabs.sendMessage(activeTab.id, {
+          type: 'TOGGLE_MOUSE_TRAIL',
+          source: 'popup',
+          target: 'content',
+          payload: preference,
+        }, () => {
+          if (chrome.runtime.lastError) {
+            maLogger.warn('当前页面暂未接收鼠标拖尾消息:', chrome.runtime.lastError.message);
+          }
+          resolve();
+        });
+      });
+    } catch (error) {
+      maLogger.warn('通知当前页面更新鼠标拖尾失败:', error);
+    }
+  };
+
+  /**
+   * 加载鼠标拖尾设置
+   */
+  const loadPopupMouseTrail = useCallback(async (): Promise<void> => {
+    if (isMouseTrailLoaded) {
       await notifyCurrentPageMouseTrail(getCurrentPreference());
       return;
     }
 
     const preference = await readStoredMouseTrailPreference();
-    isMouseTrailEnabled.value = preference.enabled;
-    mouseTrailPreset.value = preference.preset;
-    isMouseTrailLoaded.value = true;
+    setIsMouseTrailEnabled(preference.enabled);
+    setMouseTrailPreset(preference.preset);
+    setIsMouseTrailLoaded(true);
     await notifyCurrentPageMouseTrail(preference);
-  };
+  }, [isMouseTrailLoaded, isMouseTrailEnabled, mouseTrailPreset]);
 
-  const setPopupMouseTrail = async (enabled: boolean): Promise<void> => {
-    isMouseTrailEnabled.value = enabled;
-    const preference = getCurrentPreference();
+  /**
+   * 设置鼠标拖尾启用状态
+   */
+  const setPopupMouseTrail = useCallback(async (enabled: boolean): Promise<void> => {
+    setIsMouseTrailEnabled(enabled);
+    const preference: MouseTrailPreference = { enabled, preset: mouseTrailPreset };
     await persistMouseTrail(preference);
     await notifyCurrentPageMouseTrail(preference);
-  };
+  }, [mouseTrailPreset]);
 
-  const setPopupMouseTrailPreset = async (preset: MouseTrailPreset): Promise<void> => {
-    mouseTrailPreset.value = normalizeMouseTrailPreset(preset);
-    const preference = getCurrentPreference();
+  /**
+   * 设置鼠标拖尾预设
+   */
+  const setPopupMouseTrailPreset = useCallback(async (preset: MouseTrailPreset): Promise<void> => {
+    const normalized = normalizeMouseTrailPreset(preset);
+    setMouseTrailPreset(normalized);
+    const preference: MouseTrailPreference = { enabled: isMouseTrailEnabled, preset: normalized };
     await persistMouseTrail(preference);
     await notifyCurrentPageMouseTrail(preference);
-  };
+  }, [isMouseTrailEnabled]);
 
   return {
     isMouseTrailEnabled,

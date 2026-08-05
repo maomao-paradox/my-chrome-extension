@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed } from 'vue';
 
 // Props定义
 const props = withDefaults(defineProps<{
@@ -41,27 +41,27 @@ const props = withDefaults(defineProps<{
   lockScroll: true,
   draggable: false,
   customClass: ''
-})
+});
 
 // Emits定义
 const emit = defineEmits<{
   'update:visible': [value: boolean]
   'close': []
   'closed': []
-}>()
+}>();
 
 // 响应式数据
 const visible = computed({
   get: () => props.visible,
   set: (value: boolean) => {
-    emit('update:visible', value)
+    emit('update:visible', value);
   }
-})
+});
 
 // 处理关闭事件
 const handleClose = () => {
-  emit('closed')
-}
+  emit('closed');
+};
 </script>
 
 <style scoped>

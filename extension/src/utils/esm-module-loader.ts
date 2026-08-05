@@ -45,7 +45,10 @@ export class ESMModuleLoader<T extends Record<string, any> = any> {
       moduleOption.path = await moduleOption.path;
     }
     // 类型安全的加载实现...
-    const module = (await import(String(moduleOption.path))) as ModuleFactory;
+    const module = (await import(
+      /* @vite-ignore */
+      String(moduleOption.path)
+    )) as ModuleFactory;
     const instance = await Promise.resolve(
       module.default(this._context, initOptions),
     );

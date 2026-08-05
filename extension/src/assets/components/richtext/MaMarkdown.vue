@@ -12,7 +12,7 @@
 
     <!-- 仅预览模式 -->
     <div v-else-if="mode === 'preview'" class="preview-only">
-      <div v-html="previewHtml"></div>
+      <div class="preview-content" v-html="previewHtml"></div>
     </div>
 
     <!-- 仅编辑模式 -->
@@ -71,7 +71,7 @@ const initRenderer = () => {
 
 // 计算属性：渲染后的HTML
 const previewHtml = computed(() => {
-  if (!markdownText.value || !mdRenderer.value) return '';
+  if (!markdownText.value || !mdRenderer.value) {return '';}
   const html = mdRenderer.value.render(markdownText.value);
   return DOMPurify.sanitize(html);
 });

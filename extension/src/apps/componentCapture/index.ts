@@ -3,35 +3,47 @@
  * @version v1.0.0
  * @license MIT
  * @file src/apps/componentCapture/index.ts
+ *
+ * ComponentCapture 应用入口（React 版）
+ * 从 Vue 版 index.ts 迁移而来
+ *
+ * 关键变更：
+ * - createApp → createRoot（react-dom/client）
+ * - Vue 应用实例 → React Root
+ * - 移除 pinia 依赖（App 组件不使用 store）
+ * - CSS 通过 chrome-extension:// 加载 → 通过 ?inline SCSS 注入 shadow root
+ *   （避免 Vite CSS 代码分割创建 <link> 标签导致相对路径请求失败）
+ * - 保留 triggerComponentCapture / captureComponent API（message-handlers.ts 依赖）
  */
 
+import React from "react";
+import { createRoot, type Root } from "react-dom/client";
+import ComponentCaptureApp from "./App";
+import { AppModule } from "@/types/index";
+import { shadowHostId } from "@/config";
+import { createShadowHost, injectStyles } from "@/utils/shadow-dom";
+import { $id, addElementToDom } from "@/utils/element-control";
+import { bus } from "@/event/bus";
 
+// 通过 ?inline 导入聚合 SCSS 为字符串
+// 这样 Vite 会把所有样式打包到当前 chunk，避免创建 <link> 标签
+import componentCaptureStyles from "./styles/app.scss?inline";
 
-import { AppModule } from '@/types/index.js'
-import { shadowHostId } from '@/config'
-import ComponentCaptureApp from './App.vue'
-import { createShadowHost, injectCssDom } from '@/utils/shadow-dom'
-import { createApp } from 'vue'
-import { pinia } from '@/stores'
-import { getAssetsAbstractPath, getAssetsAbstractPathSync } from '@/utils/common'
-import { addElementToDom } from '@/utils/element-control'
-import { bus } from '@/event'
-
-
-const pluginName = 'componentCapture'
+const pluginName = "componentCapture";
 
 class ComponentCaptureModule implements AppModule {
-  _context: any = null
-  shadowHostId: string = shadowHostId
-  isInjected: boolean = false
-  vueContainer: HTMLElement | null = null
-  shadowRoot: ShadowRoot | null = null
-  appInstance: ReturnType<typeof createApp> | null = null
-  isCapturing: boolean = false
-  isEnabled: boolean = false
+  _ctx: any = null;
+  shadowHostId: string = shadowHostId;
+  isInjected: boolean = false;
+  reactContainer: HTMLElement | null = null;
+  shadowRoot: ShadowRoot | null = null;
+  appRoot: Root | null = null;
+  isCapturing: boolean = false;
+  isEnabled: boolean = false;
+  stylesInjected: boolean = false;
 
   constructor() {
-    maLogger.log('ComponentCaptureModule initialized')
+    maLogger.log("ComponentCaptureModule initialized");
   }
 
   /**
@@ -40,58 +52,71 @@ class ComponentCaptureModule implements AppModule {
   async inject(): Promise<void> {
     try {
       if (window.self !== window.top) {
-        maLogger.log('不是主页面，不注入组件捕获模块')
-        return
+        maLogger.log("不是主页面，不注入组件捕获模块");
+        return;
       }
 
       if (!document.body) {
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           const checkBody = () => {
             if (document.body) {
-              resolve(null)
+              resolve(null);
             } else {
-              requestAnimationFrame(checkBody)
+              requestAnimationFrame(checkBody);
             }
-          }
-          checkBody()
-        })
+          };
+          checkBody();
+        });
       }
 
-      if (this.isInjected && this.appInstance && this.vueContainer && this.shadowRoot) {
-        return
+      // 已注入则跳过
+      if (
+        this.isInjected &&
+        this.appRoot &&
+        this.reactContainer &&
+        this.shadowRoot &&
+        $id(this.shadowHostId)
+      ) {
+        return;
       }
 
+      // 创建 shadow root
       if (!this.shadowRoot) {
-        const { shadowRoot } = createShadowHost(this.shadowHostId, 'open')
-        this.shadowRoot = shadowRoot
+        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
+        this.shadowRoot = shadowRoot;
       }
 
-      if (!this.isInjected) {
-        injectCssDom(this.shadowRoot as ShadowRoot, getAssetsAbstractPathSync(`css/${pluginName}`))
-        this.isInjected = true
+      // 注入聚合 SCSS（?inline 导入的字符串）
+      if (!this.stylesInjected && this.shadowRoot) {
+        injectStyles(this.shadowRoot, componentCaptureStyles);
+        this.stylesInjected = true;
       }
 
-      if (!this.vueContainer && !this.shadowRoot?.getElementById(`shadow-app-${pluginName}`)) {
-        this.vueContainer = addElementToDom({
-          tag: 'div',
+      // 创建 React 容器
+      if (
+        !this.reactContainer &&
+        !this.shadowRoot?.getElementById(`shadow-app-${pluginName}`)
+      ) {
+        this.reactContainer = addElementToDom({
+          tag: "div",
           attrs: {
-            id: `shadow-app-${pluginName}`
+            id: `shadow-app-${pluginName}`,
           },
-          style: 'position: fixed; z-index: var(--z-index);'
-        })(this.shadowRoot as ShadowRoot)
+          style: "position: fixed; z-index: var(--z-index);",
+        })(this.shadowRoot as ShadowRoot);
       }
 
-      if (this.appInstance) {
-        this.appInstance.unmount()
-        this.appInstance = null
+      // 卸载旧的 React root
+      if (this.appRoot) {
+        this.appRoot.unmount();
+        this.appRoot = null;
       }
 
-      this.appInstance = createApp(ComponentCaptureApp)
-      this.appInstance.use(pinia)
-      this.appInstance.mount(this.vueContainer!)
-
+      // 创建 React root 并渲染组件
+      this.appRoot = createRoot(this.reactContainer!);
+      this.appRoot.render(React.createElement(ComponentCaptureApp));
     } catch (error) {
-      maLogger.error('注入组件捕获模块失败:', error)
+      maLogger.error("注入组件捕获模块失败:", error);
     }
   }
 
@@ -99,36 +124,37 @@ class ComponentCaptureModule implements AppModule {
    * 启用模块
    */
   enable(): void {
-    this.inject().catch(error => {
-      maLogger.error('启用组件捕获模块失败:', error)
-    })
+    this.inject().catch((error) => {
+      maLogger.error("启用组件捕获模块失败:", error);
+    });
   }
 
   /**
    * 禁用模块
    */
   disable(): void {
-    this.hide()
-    this.cleanup()
+    this.hide();
+    this.cleanup();
   }
 
   /**
    * 触发组件捕获
+   * 通过事件总线通知 React 组件启动捕获模式
    */
   async triggerComponentCapture(): Promise<void> {
     try {
-      maLogger.log('开始组件捕获...')
-      await this.inject()
+      maLogger.log("开始组件捕获...");
+      await this.inject();
 
-      // 显示Vue容器
-      if (this.vueContainer) {
-        this.vueContainer.style.display = 'block'
+      // 显示 React 容器
+      if (this.reactContainer) {
+        this.reactContainer.style.display = "block";
       }
 
-      // 通过事件总线启动捕获
-      bus.emit('start-component-capture')
+      // 通过事件总线启动捕获（React 组件监听此事件）
+      bus.emit("start-component-capture");
     } catch (error) {
-      maLogger.error('触发组件捕获失败:', error)
+      maLogger.error("触发组件捕获失败:", error);
     }
   }
 
@@ -136,17 +162,17 @@ class ComponentCaptureModule implements AppModule {
    * 触发组件捕获（别名，保持向后兼容）
    */
   async captureComponent(): Promise<void> {
-    return this.triggerComponentCapture()
+    return this.triggerComponentCapture();
   }
 
   /**
    * 隐藏捕获界面
    */
   private hide(): void {
-    if (this.vueContainer) {
-      this.vueContainer.style.display = 'none'
-      this.isCapturing = false
-      maLogger.log('组件捕获界面已隐藏')
+    if (this.reactContainer) {
+      this.reactContainer.style.display = "none";
+      this.isCapturing = false;
+      maLogger.log("组件捕获界面已隐藏");
     }
   }
 
@@ -154,47 +180,47 @@ class ComponentCaptureModule implements AppModule {
    * 清理资源
    */
   private cleanup(): void {
-    if (this.appInstance) {
-      this.appInstance.unmount()
-      this.appInstance = null
+    if (this.appRoot) {
+      this.appRoot.unmount();
+      this.appRoot = null;
     }
 
-    if (this.vueContainer) {
+    if (this.reactContainer) {
       try {
-        this.vueContainer.remove()
+        this.reactContainer.remove();
       } catch (error) {
         // 元素可能已经被移除
       }
-      this.vueContainer = null
+      this.reactContainer = null;
     }
 
-    this.isCapturing = false
+    this.isCapturing = false;
   }
 
   /**
    * 初始化
    */
   async init(context?: any): Promise<void> {
-    this._context = context
-    maLogger.log('ComponentCaptureModule initialized with context')
+    this._ctx = context;
+    maLogger.log("ComponentCaptureModule initialized with context");
   }
 }
 
-let moduleInstance: ComponentCaptureModule | null = null
+let moduleInstance: ComponentCaptureModule | null = null;
 
 export default (context: AppContext): AppModule => {
   if (!moduleInstance) {
-    moduleInstance = new ComponentCaptureModule()
-    moduleInstance.init(context)
+    moduleInstance = new ComponentCaptureModule();
+    moduleInstance.init(context);
   }
-  return moduleInstance
-}
+  return moduleInstance;
+};
 
 /**
  * 触发组件捕获的快捷函数
  */
 export function triggerComponentCapture(): void {
   if (moduleInstance) {
-    moduleInstance.captureComponent()
+    moduleInstance.captureComponent();
   }
 }

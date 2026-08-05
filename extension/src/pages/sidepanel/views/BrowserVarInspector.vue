@@ -10,7 +10,7 @@
       <div class="input-group">
         <input id="variablePath" v-model="variablePath" type="text"
           placeholder="例如: window.document.title 或 appState.user" class="variable-input" @keydown.enter="getVariable" />
-        <button @click="getVariable" class="get-btn">获取变量</button>
+        <button class="get-btn" @click="getVariable">获取变量</button>
       </div>
     </div>
 
@@ -22,27 +22,27 @@
     <div v-else-if="error" class="error">
       <span class="error-icon">⚠️</span>
       <span>{{ error }}</span>
-      <button @click="getVariable" class="retry-btn">重试</button>
+      <button class="retry-btn" @click="getVariable">重试</button>
     </div>
 
     <div v-else-if="variableData !== null" class="result-section">
       <div class="result-header">
         <span class="variable-type">{{ variableType }}</span>
-        <button @click="refreshVariable" class="refresh-btn">刷新</button>
+        <button class="refresh-btn" @click="refreshVariable">刷新</button>
       </div>
 
       <!-- 可编辑文本区域 -->
       <div class="edit-section">
         <textarea v-model="variableString" class="variable-textarea" placeholder="在这里编辑变量值..."
           @blur="updateVariableFromText"></textarea>
-        <button @click="updateVariableFromText" class="update-btn">更新变量</button>
+        <button class="update-btn" @click="updateVariableFromText">更新变量</button>
       </div>
 
       <!-- 格式化的变量展示 -->
-      <div class="formatted-result" v-if="isJson">
+      <div v-if="isJson" class="formatted-result">
         <div class="json-tree" v-html="formattedJson"></div>
       </div>
-      <div class="formatted-result" v-else>
+      <div v-else class="formatted-result">
         <pre>{{ variableString }}</pre>
       </div>
     </div>
@@ -79,10 +79,10 @@ const error = ref('');
 
 // 变量类型
 const variableType = computed(() => {
-  if (variableData.value === null) return '';
+  if (variableData.value === null) {return '';}
   if (typeof variableData.value === 'object') {
-    if (Array.isArray(variableData.value)) return 'Array';
-    if (variableData.value === null) return 'null';
+    if (Array.isArray(variableData.value)) {return 'Array';}
+    if (variableData.value === null) {return 'null';}
     return 'Object';
   }
   return typeof variableData.value;
@@ -90,7 +90,7 @@ const variableType = computed(() => {
 
 // 格式化的JSON
 const formattedJson = computed(() => {
-  if (!isJson.value || variableData.value === null) return '';
+  if (!isJson.value || variableData.value === null) {return '';}
   return formatJsonForDisplay(variableData.value);
 });
 
@@ -166,7 +166,7 @@ function evaluateVariablePath(path: string): Promise<any> {
           } else {
             reject(new Error(response?.msg || '获取变量失败'));
           }
-        })
+        });
       });
     } catch (error: any) {
       maLogger.error('评估变量路径时出错:', error.message);

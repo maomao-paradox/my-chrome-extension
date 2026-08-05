@@ -1,15 +1,21 @@
 <template>
   <div class="user-config-container">
     <h2>用户配置</h2>
-    <div class="item-group" ref="itemGroup">
-      <UserCard v-for="(item, user) in configs" :key="user" :username="user" :user-info="item" @delete="handleDelete"
-        @save="handleSave" />
+    <div ref="itemGroup" class="item-group">
+      <UserCard
+        v-for="(item, user) in configs"
+        :key="user"
+        :username="user"
+        :user-info="item"
+        @delete="handleDelete"
+        @save="handleSave"
+      />
     </div>
     <div class="action-buttons">
       <button class="el-button" @click="addUser">添加用户</button>
       <button class="el-button" @click="saveConfig">保存配置</button>
     </div>
-  <!-- <div>
+    <!-- <div>
       <h4>当前配置：</h4>
       <pre>{{ configs }}</pre>
     </div> -->
@@ -17,8 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import { UserCard } from '@components/index';
+import { ref, reactive, onMounted } from "vue";
+import { UserCard } from "@components/index";
 
 interface UserInfo {
   realname: string;
@@ -27,7 +33,7 @@ interface UserInfo {
   enabled: boolean;
 }
 
-const g = 'userInfo';
+const g = "userInfo";
 
 // 组件引用
 const itemGroup = ref<HTMLElement | null>(null);
@@ -45,21 +51,25 @@ const addUser = () => {
     realname: "测试用户",
     password: "123456",
     role: "",
-    enabled: true
+    enabled: true,
   };
   configs["temporary"] = newUser;
 };
 
 // 删除用户
 const handleDelete = (user: string) => {
-  if (configs && configs.hasOwnProperty(user)) {
+  if (configs && Object.prototype.hasOwnProperty.call(configs, user)) {
     delete configs[user];
     maLogger.log("删除配置项：", user);
   }
 };
 
 // 保存用户信息
-const handleSave = (oldUsername: string, newUsername: string, newConfig: UserInfo) => {
+const handleSave = (
+  oldUsername: string,
+  newUsername: string,
+  newConfig: UserInfo,
+) => {
   configs[newUsername] = newConfig;
   if (oldUsername !== newUsername) {
     handleDelete(oldUsername);
@@ -167,7 +177,7 @@ h2 {
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .el-button {
     width: 100%;
   }

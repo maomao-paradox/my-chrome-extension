@@ -27,14 +27,14 @@ export async function attachToTab(tabId?: number): Promise<AutomationAttachResul
 
   currentTab = {
     tabId: tab.id,
-    windowId: tab.windowId,
+    windowId: tab.windowId
   };
 
   const page = await getPageSnapshot(tab.id);
   return {
     tabId: tab.id,
     windowId: tab.windowId,
-    page,
+    page
   };
 }
 
@@ -70,14 +70,14 @@ export async function getPageSnapshot(tabId = getAttachedTabId()): Promise<Requi
     world: 'ISOLATED',
     func: () => ({
       title: document.title,
-      url: location.href,
-    }),
+      url: location.href
+    })
   });
 
   const page = result?.result as Required<AutomationPageSnapshot> | undefined;
   return {
     title: page?.title || '',
-    url: page?.url || '',
+    url: page?.url || ''
   };
 }
 

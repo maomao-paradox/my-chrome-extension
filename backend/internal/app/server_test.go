@@ -166,6 +166,41 @@ func TestAutomationGenerateRequiresAIConfig(t *testing.T) {
 	}
 }
 
+func TestTOTPLifecycle(t *testing.T) {
+	server := NewServer(config.Load(), slog.Default())
+
+	create := postJSON(t, server, "/api/totp/accounts", `{
+		"issuer":"Example",
+		"accountName":"alice@example.com",
+		"secret":"JBSWY3DPEHPK3PXP"
+	}`)
+	if create.Code != http.StatusCreated {
+		t.Fatalf("expected create status 201, got %d: %s", create.Code, create.Body.String())
+	}
+	accountID := jsonPathString(t, create.Body.Bytes(), "account", "id")
+	if accountID == "" {
+		t.Fatalf("expected account id, got %s", create.Body.String())
+	}
+	if bytes.Contains(create.Body.Bytes(), []byte(`"secret"`)) {
+		t.Fatalf("secret must not be returned: %s", create.Body.String())
+	}
+
+	code := postJSON(t, server, "/api/totp/accounts/"+accountID+"/code", `{}`)
+	if code.Code != http.StatusOK {
+		t.Fatalf("expected code status 200, got %d: %s", code.Code, code.Body.String())
+	}
+	if jsonPathString(t, code.Body.Bytes(), "code", "code") == "" {
+		t.Fatalf("expected generated code, got %s", code.Body.String())
+	}
+
+	deleteReq := httptest.NewRequest(http.MethodDelete, "/api/totp/accounts/"+accountID, nil)
+	deleteRec := httptest.NewRecorder()
+	server.ServeHTTP(deleteRec, deleteReq)
+	if deleteRec.Code != http.StatusOK {
+		t.Fatalf("expected delete status 200, got %d: %s", deleteRec.Code, deleteRec.Body.String())
+	}
+}
+
 func postJSON(t *testing.T, server http.Handler, path string, body string) *httptest.ResponseRecorder {
 	t.Helper()
 	req := httptest.NewRequest(http.MethodPost, path, bytes.NewBufferString(body))

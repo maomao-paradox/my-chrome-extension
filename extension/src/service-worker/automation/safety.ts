@@ -4,12 +4,12 @@ const BLOCKED_URL_PREFIXES = [
   'edge://',
   'brave://',
   'about:',
-  'devtools://',
+  'devtools://'
 ];
 
 const BLOCKED_HOSTS = new Set([
   'chrome.google.com',
-  'chromewebstore.google.com',
+  'chromewebstore.google.com'
 ]);
 
 export function assertAttachableURL(rawURL: string | undefined): void {

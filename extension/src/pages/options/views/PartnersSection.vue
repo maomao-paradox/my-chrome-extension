@@ -4,7 +4,7 @@
     <div class="container">
       <h3 class="partners-title">我们的合作伙伴</h3>
       <div class="partners-grid">
-        <div class="partner-item" v-for="(partner, index) in partners" :key="index">
+        <div v-for="(partner, index) in partners" :key="index" class="partner-item">
           {{ partner.name }}
         </div>
       </div>
@@ -19,7 +19,7 @@ interface Partner {
 }
 
 // 接收props
-const props = defineProps<{
+defineProps<{
   partners: Partner[];
 }>();
 </script>

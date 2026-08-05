@@ -36,13 +36,13 @@
         placeholder="输入您的问题..." 
         @keyup.enter="sendMessage"
       >
-      <button @click="sendMessage" class="send-btn">发送</button>
+      <button class="send-btn" @click="sendMessage">发送</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 
 // 组件props
 const props = defineProps<{
@@ -50,7 +50,7 @@ const props = defineProps<{
   isVisible: boolean;
   // 初始文本（选中文本）
   initialText?: string;
-}>()
+}>();
 
 // 组件事件
 const emit = defineEmits<{
@@ -58,20 +58,20 @@ const emit = defineEmits<{
   (e: 'close'): void;
   // 发送消息事件
   (e: 'sendMessage', message: string): void;
-}>()
+}>();
 
 // 聊天窗口引用
-const chatWindowRef = ref<HTMLElement | null>(null)
+const chatWindowRef = ref<HTMLElement | null>(null);
 // 输入框引用
-const inputRef = ref<HTMLInputElement | null>(null)
+const inputRef = ref<HTMLInputElement | null>(null);
 // 消息列表
 const messages = ref<Array<{ 
   content: string;
   isUser: boolean;
   isLoading?: boolean;
-}>>([])
+}>>([]);
 // 输入消息
-const inputMessage = ref('')
+const inputMessage = ref('');
 
 // 监听可见性变化，自动聚焦输入框
 watch(() => props.isVisible, (newValue) => {
@@ -80,12 +80,12 @@ watch(() => props.isVisible, (newValue) => {
       inputRef.value?.focus();
     });
   }
-})
+});
 
 // 发送消息
 const sendMessage = () => {
   const message = inputMessage.value.trim();
-  if (!message) return;
+  if (!message) {return;}
   
   // 添加用户消息到列表
   messages.value.push({
@@ -105,7 +105,7 @@ const sendMessage = () => {
   
   // 触发发送消息事件
   emit('sendMessage', message);
-}
+};
 
 // 接收AI回复
 const receiveAIResponse = (response: string) => {
@@ -123,12 +123,12 @@ const receiveAIResponse = (response: string) => {
       });
     }
   }
-}
+};
 
 // 关闭聊天窗口
 const closeChatWindow = () => {
   emit('close');
-}
+};
 
 // 暴露方法给父组件
 defineExpose({

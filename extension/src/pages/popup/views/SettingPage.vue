@@ -170,10 +170,10 @@
               <MASwitch v-model="app.enabled" :label="app.name">
                 <div v-if="app.type === 'toolbar'" class="color-picker-wrapper">
                   <input
+                    v-model="app.options.brandColor"
                     type="color"
                     class="color-picker"
                     aria-label="选择品牌颜色"
-                    v-model="app.options.brandColor"
                   />
                   <span>{{ app.options.brandColor }}</span>
                 </div>
@@ -214,7 +214,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
 import { MASwitch } from "@components/index";
-import TableContainer from "./TableContainer.vue";
+import TableContainer from "../components/TableContainer.vue";
 import { appConfigKey, domainConfigsKey } from "@/config";
 import {
   IconConfirm,
@@ -235,7 +235,7 @@ import {
   useDomainManager,
   type DomainConfigItem,
 } from "@/assets/composables/useDomainManager";
-import { usePluginManager } from "@/assets/composables/usePluginManager";
+import { usePluginManager } from "@/pages/popup/composables/usePluginManager.js";
 
 const { extractDomain } = useDomainState();
 const { activeTheme, setPopupTheme } = usePopupTheme();

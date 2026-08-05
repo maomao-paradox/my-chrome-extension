@@ -15,7 +15,7 @@
         placeholder="输入域名，多个域名用逗号分隔（例如：https://example.com,https://test.com）" 
         class="domain-input"
         :disabled="!props.enabled">
-      <button class="el-button" @click="saveDomains" :disabled="!props.enabled">保存配置</button>
+      <button class="el-button" :disabled="!props.enabled" @click="saveDomains">保存配置</button>
     </div>
     <div class="domain-hint">
       <p>当前配置的域名：</p>

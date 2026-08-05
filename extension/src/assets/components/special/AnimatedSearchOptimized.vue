@@ -10,8 +10,8 @@
                 </svg>
             </div>
             <textarea id="search" ref="searchInput" v-model="inputModel" class="animated-search"
-                @click="toggleSearch($event)" autocomplete="off" @keyup.ctrl.enter="submitQuestion" wrap="soft"
-                maxlength="500" />
+                autocomplete="off" wrap="soft" maxlength="500" @click="toggleSearch($event)"
+                @keyup.ctrl.enter="submitQuestion" />
             <div class="close-icon icon" @click="clearField($event)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FBEFF9" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -25,143 +25,143 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue';
 
 interface AnimatedSearchProps {
 }
 
 const [inputModel, modifiers] = defineModel<string>('input-value', {
-    set(value) {
-        if (modifiers['?']) {
-            return value.replace(/[\?, ？]/g, '')
-        }
-        // 拦截所有问号，无论是否使用修饰符
-        return value
+  set(value) {
+    if (modifiers['?']) {
+      return value.replace(/[\?, ？]/g, '');
     }
-})
-const props = defineProps<AnimatedSearchProps>()
-const searchInput = ref<HTMLTextAreaElement>()
-const inputWidth = 500
+    // 拦截所有问号，无论是否使用修饰符
+    return value;
+  }
+});
+const props = defineProps<AnimatedSearchProps>();
+const searchInput = ref<HTMLTextAreaElement>();
+const inputWidth = 500;
 
-const emit = defineEmits(['submitQuestion'])
+const emit = defineEmits(['submitQuestion']);
 
-const isActive = ref(false)
+const isActive = ref(false);
 
 function submitQuestion() {
-    if (!inputModel.value) {
-        searchInput.value?.focus()
-        return
-    }
-    maLogger.log("提交问题", inputModel.value)
-    emit('submitQuestion', inputModel.value)
+  if (!inputModel.value) {
+    searchInput.value?.focus();
+    return;
+  }
+  maLogger.log('提交问题', inputModel.value);
+  emit('submitQuestion', inputModel.value);
 }
 
 watch(() => inputModel.value, (newValue) => {
-    if (!isActive.value) return;
+  if (!isActive.value) {return;}
 
-    const textarea = searchInput.value;
-    if (!textarea) return;
+  const textarea = searchInput.value;
+  if (!textarea) {return;}
 
-    // 创建隐藏元素来测量文本宽度
-    const tempSpan = document.createElement('span');
-    // 确保隐藏元素的样式与输入框完全一致
-    const computedStyle = getComputedStyle(textarea);
-    tempSpan.style.fontSize = computedStyle.fontSize;
-    tempSpan.style.fontFamily = computedStyle.fontFamily;
-    tempSpan.style.fontWeight = computedStyle.fontWeight;
-    tempSpan.style.visibility = 'hidden';
-    tempSpan.style.position = 'absolute';
-    tempSpan.style.whiteSpace = 'nowrap';
-    tempSpan.style.padding = '0';
-    tempSpan.style.margin = '0';
-    tempSpan.textContent = newValue || '';
-    document.body.appendChild(tempSpan);
+  // 创建隐藏元素来测量文本宽度
+  const tempSpan = document.createElement('span');
+  // 确保隐藏元素的样式与输入框完全一致
+  const computedStyle = getComputedStyle(textarea);
+  tempSpan.style.fontSize = computedStyle.fontSize;
+  tempSpan.style.fontFamily = computedStyle.fontFamily;
+  tempSpan.style.fontWeight = computedStyle.fontWeight;
+  tempSpan.style.visibility = 'hidden';
+  tempSpan.style.position = 'absolute';
+  tempSpan.style.whiteSpace = 'nowrap';
+  tempSpan.style.padding = '0';
+  tempSpan.style.margin = '0';
+  tempSpan.textContent = newValue || '';
+  document.body.appendChild(tempSpan);
 
-    // 测量文本宽度
-    const textWidth = tempSpan.offsetWidth;
-    document.body.removeChild(tempSpan);
+  // 测量文本宽度
+  const textWidth = tempSpan.offsetWidth;
+  document.body.removeChild(tempSpan);
 
-    // 计算最终宽度，确保至少为inputWidth
-    const finalWidth = Math.max(inputWidth, textWidth + 100); // 100px 为左右内边距和按钮的空间
-    textarea.style.width = finalWidth + 'px';
+  // 计算最终宽度，确保至少为inputWidth
+  const finalWidth = Math.max(inputWidth, textWidth + 100); // 100px 为左右内边距和按钮的空间
+  textarea.style.width = finalWidth + 'px';
 
-    // 如果达到最大宽度800px，则需要换行显示了
-    if (finalWidth >= 800) {
-        textarea.style.height = 'auto'
-    }
-})
+  // 如果达到最大宽度800px，则需要换行显示了
+  if (finalWidth >= 800) {
+    textarea.style.height = 'auto';
+  }
+});
 
 function toggleSearch(event: Event) {
-    // 防止点击输入框内部时重复触发
-    if (isActive.value) {
-        event.stopPropagation()
-        return;
-    }
+  // 防止点击输入框内部时重复触发
+  if (isActive.value) {
+    event.stopPropagation();
+    return;
+  }
 
-    // 聚焦输入框
-    setTimeout(() => {
-        isActive.value = true
-        searchInput.value?.focus()
-        updateTextareaShape()
-    }, 100)
+  // 聚焦输入框
+  setTimeout(() => {
+    isActive.value = true;
+    searchInput.value?.focus();
+    updateTextareaShape();
+  }, 100);
 }
 
 function clearField(event: Event) {
-    // 防止事件冒泡，避免触发 textarea 的点击事件
-    event.stopPropagation()
+  // 防止事件冒泡，避免触发 textarea 的点击事件
+  event.stopPropagation();
 
-    maLogger.log("点击清除图标", inputModel.value?.length)
+  maLogger.log('点击清除图标', inputModel.value?.length);
 
-    if (inputModel.value?.length === 0) {
-        isActive.value = false
-    } else {
-        // 同时清空 inputModel.value 和 textarea.value
-        inputModel.value = ''
-        searchInput.value!.value = ''
-    }
-    maLogger.log("清空输入框", inputModel.value)
-    maLogger.log(searchInput.value?.value)
+  if (inputModel.value?.length === 0) {
+    isActive.value = false;
+  } else {
+    // 同时清空 inputModel.value 和 textarea.value
+    inputModel.value = '';
+        searchInput.value!.value = '';
+  }
+  maLogger.log('清空输入框', inputModel.value);
+  maLogger.log(searchInput.value?.value);
 
-    updateTextareaShape()
+  updateTextareaShape();
 }
 
 function updateTextareaShape() {
-    if (!searchInput.value) return
+  if (!searchInput.value) {return;}
 
-    const textarea = searchInput.value
-    const lines = textarea.value.split(/\r\n|\r|\n/).length
-    const style = getComputedStyle(textarea)
-    const lineHeight = parseFloat(style.lineHeight)
-    const paddingTop = parseFloat(style.paddingTop)
-    const paddingBottom = parseFloat(style.paddingBottom)
-    const isExpanded = isActive.value
+  const textarea = searchInput.value;
+  const lines = textarea.value.split(/\r\n|\r|\n/).length;
+  const style = getComputedStyle(textarea);
+  const lineHeight = parseFloat(style.lineHeight);
+  const paddingTop = parseFloat(style.paddingTop);
+  const paddingBottom = parseFloat(style.paddingBottom);
+  const isExpanded = isActive.value;
 
-    if (!textarea.value) {
-        textarea.style.height = '45px'
-        textarea.style.borderRadius = '22.5px'
-        maLogger.log("重置为初始的圆形状态")
-        if (isExpanded) {
-            // 没有内容但处于激活状态，保持展开的宽度
-            textarea.style.width = inputWidth + 'px'
-        } else {
-            // 没有内容且不处于激活状态，重置为初始的圆形状态
-            textarea.style.width = '45px'
-        }
+  if (!textarea.value) {
+    textarea.style.height = '45px';
+    textarea.style.borderRadius = '22.5px';
+    maLogger.log('重置为初始的圆形状态');
+    if (isExpanded) {
+      // 没有内容但处于激活状态，保持展开的宽度
+      textarea.style.width = inputWidth + 'px';
     } else {
-        const contentHeight = lines * lineHeight
-        const containerHeight = contentHeight + paddingTop + paddingBottom
-        let width = isExpanded ? inputWidth : 45
-        textarea.style.width = width + 'px'
-        textarea.style.height = containerHeight + 'px'
-
-        setTimeout(() => {
-            textarea.style.borderRadius = Math.round(containerHeight / 2) + 'px'
-        }, 16)
+      // 没有内容且不处于激活状态，重置为初始的圆形状态
+      textarea.style.width = '45px';
     }
+  } else {
+    const contentHeight = lines * lineHeight;
+    const containerHeight = contentHeight + paddingTop + paddingBottom;
+    const width = isExpanded ? inputWidth : 45;
+    textarea.style.width = width + 'px';
+    textarea.style.height = containerHeight + 'px';
+
+    setTimeout(() => {
+      textarea.style.borderRadius = Math.round(containerHeight / 2) + 'px';
+    }, 16);
+  }
 }
 
 onMounted(() => {
-})
+});
 </script>
 
 <!-- <style>

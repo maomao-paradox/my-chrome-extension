@@ -16,7 +16,7 @@ export const createDefaultAIConfig = (): AIModelConfig => ({
   modelId: DEFAULT_AI_MODEL_ID,
   apiBaseUrl: '',
   apiKey: '',
-  systemPrompt: '',
+  systemPrompt: ''
 });
 
 const canUseChromeStorage = (): boolean => {
@@ -61,7 +61,7 @@ export const normalizeAIConfig = (input: unknown): AIModelConfig => {
       : defaults.modelId,
     apiBaseUrl: typeof record.apiBaseUrl === 'string' ? record.apiBaseUrl.trim() : defaults.apiBaseUrl,
     apiKey: typeof record.apiKey === 'string' ? record.apiKey.trim() : defaults.apiKey,
-    systemPrompt: typeof record.systemPrompt === 'string' ? record.systemPrompt : defaults.systemPrompt,
+    systemPrompt: typeof record.systemPrompt === 'string' ? record.systemPrompt : defaults.systemPrompt
   };
 };
 

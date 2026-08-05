@@ -23,7 +23,7 @@
         <button class="scifi-dialog__btn scifi-dialog__btn--cancel" @click="handleCancel">
           {{ cancelText }}
         </button>
-        <button class="scifi-dialog__btn scifi-dialog__btn--confirm" @click="handleConfirm" :disabled="loading">
+        <button class="scifi-dialog__btn scifi-dialog__btn--confirm" :disabled="loading" @click="handleConfirm">
           <span v-if="loading" class="scifi-dialog__btn--loading">
             <IconLoading />
           </span>
@@ -39,9 +39,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { eventManager } from "@/event"
-import { IconClose, IconLoading } from '@/assets/icons'
+import { ref, onMounted, onUnmounted } from 'vue';
+import { eventManager } from '@/event';
+import { IconClose, IconLoading } from '@/assets/icons';
 
 interface SciFiConfirmDialogProps {
   title: string
@@ -56,51 +56,51 @@ const props = withDefaults(defineProps<SciFiConfirmDialogProps>(), {
   confirmText: 'Confirm',
   cancelText: 'Cancel',
   loadingText: 'Loading...'
-})
+});
 
 const visible = defineModel('visible', {
   type: Boolean,
   default: false
-})
+});
 
 // Emits
 const emit = defineEmits<{
   confirm: []
   cancel: []
   close: []
-}>()
+}>();
 
 // State
-const loading = ref(false)
+const loading = ref(false);
 
 // Methods
 const handleConfirm = async () => {
-  loading.value = true
+  loading.value = true;
 
   // 模拟异步操作，与之前的行为保持一致
   setTimeout(() => {
-    loading.value = false
-    emit('confirm')
-    emit('close')
-  }, 500)
-}
+    loading.value = false;
+    emit('confirm');
+    emit('close');
+  }, 500);
+};
 
 const handleCancel = () => {
-  loading.value = false
-  emit('cancel')
-  emit('close')
-}
+  loading.value = false;
+  emit('cancel');
+  emit('close');
+};
 
 // Keyboard events
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
-    handleCancel()
+    handleCancel();
   } else if (event.key === 'Enter' && !loading.value) {
-    handleConfirm()
+    handleConfirm();
   }
-}
+};
 
-eventManager.useListener(window, 'keydown', handleKeydown)
+eventManager.useListener(window, 'keydown', handleKeydown);
 
 </script>
 

@@ -2,11 +2,19 @@
   <div class="app-container">
     <!-- 顶部导航栏 -->
     <nav class="navigation">
-      <div class="nav-tabs-scroll" ref="navTabsScroll">
+      <div ref="navTabsScroll" class="nav-tabs-scroll">
         <div class="nav-tabs">
-          <button v-for="tab in tabs" :key="tab.id" :class="['nav-tab', { active: currentTab === tab.id }]"
-            @click="handleTabClick(tab.id)">
-            <span v-if="tab.id === 'automation'" class="tab-icon automation-tab-icon" aria-hidden="true"></span>
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            :class="['nav-tab', { active: currentTab === tab.id }]"
+            @click="handleTabClick(tab.id)"
+          >
+            <span
+              v-if="tab.id === 'automation'"
+              class="tab-icon automation-tab-icon"
+              aria-hidden="true"
+            ></span>
             <span v-else class="tab-icon">{{ getTabIcon(tab.id) }}</span>
             <span class="tab-label">{{ tab.name }}</span>
           </button>
@@ -17,15 +25,18 @@
     <!-- 主内容区域 -->
     <main class="main-content">
       <!-- AI对话面板 -->
-      <AIChat v-if="currentTab === 'ai-chat'" />
+      <div
+        v-if="currentTab === 'automation'"
+        class="automation-container fade-in"
+      >
+        <AutomationPanel />
+      </div>
 
       <!-- 其他功能面板 -->
-      <div v-else-if="currentTab === 'other-features'" class="features-container fade-in">
-        <header>
-          <h1>MRIA扩展功能</h1>
-          <p class="subtitle">增强您的浏览体验</p>
-        </header>
-
+      <div
+        v-else-if="currentTab === 'other-features'"
+        class="features-container fade-in"
+      >
         <!-- 功能卡片 -->
         <div class="feature-cards">
           <div class="feature-card">
@@ -46,29 +57,17 @@
         </div>
       </div>
 
-      <!-- 浏览器变量查看器 -->
-      <div v-else-if="currentTab === 'browser-var'" class="var-inspector-container fade-in">
-        <BrowserVarInspector />
-      </div>
-
       <!-- 路径扫描工具 -->
-      <div v-else-if="currentTab === 'path-scanner'" class="path-scanner-container fade-in">
+      <div
+        v-else-if="currentTab === 'path-scanner'"
+        class="path-scanner-container fade-in"
+      >
         <HiddenPathScanner />
-      </div>
-
-      <!-- 音乐 -->
-      <div v-else-if="currentTab === 'music'" class="music-container fade-in">
-        <Music />
-      </div>
-
-      <!-- 真实标签页自动化 -->
-      <div v-else-if="currentTab === 'automation'" class="automation-container fade-in">
-        <AutomationPanel />
       </div>
     </main>
 
     <!-- 状态栏 -->
-    <div class="status-bar" ref="statusBar">
+    <div ref="statusBar" class="status-bar">
       <div class="status-left">
         <span>MRIA Extension v1.0.0</span>
       </div>
@@ -80,12 +79,6 @@
         <span>{{ formattedTime }}</span>
       </div>
     </div>
-
-    <!-- 提示框 -->
-    <!-- <div id="toast" class="toast" ref="toast">
-      <span class="toast-icon">{{ toastIcon }}</span>
-      <span class="toast-message"></span>
-    </div> -->
   </div>
 </template>
 
@@ -96,11 +89,7 @@ import CoreFeatures from './views/CoreFeatures.vue';
 import TextOperations from './views/TextOperations.vue';
 import DeveloperTools from './views/DeveloperTools.vue';
 import About from './views/About.vue';
-import BrowserVarInspector from './views/BrowserVarInspector.vue';
 import HiddenPathScanner from './views/HiddenPathScanner.vue';
-import XhrPatchManager from './views/XhrPatchManager.vue';
-import AIChat from './views/FuturisticAIChat.vue';
-import Music from './views/Music.vue';
 import AutomationPanel from './views/AutomationPanel.vue';
 
 // 导航选项卡定义
@@ -111,12 +100,12 @@ interface Tab {
 
 // 导航选项卡列表
 const tabs: Tab[] = [
-  { id: 'ai-chat', name: '网页分析' },
-  { id: 'automation', name: '自动化' },
+  // { id: 'ai-chat', name: '网页分析' },
+  { id: 'automation', name: '网页自动化' },
   { id: 'other-features', name: '功能面板' },
-  { id: 'browser-var', name: '调试面板' },
-  { id: 'path-scanner', name: '路径扫描' },
-  { id: 'music', name: '音乐' }
+  // { id: 'browser-var', name: '调试面板' },
+  { id: 'path-scanner', name: '路径扫描' }
+  // { id: 'music', name: '音乐' }
 ];
 
 // 当前选中的选项卡
@@ -152,24 +141,27 @@ const getTabIcon = (tabId: string) => {
 // 获取提示框图标
 const getToastIcon = (type: ToastType) => {
   const icons: Record<ToastType, string> = {
-    'success': '✅',
-    'error': '❌',
-    'info': 'ℹ️'
+    success: '✅',
+    error: '❌',
+    info: 'ℹ️'
   };
   return icons[type];
 };
 
 // 提示框图标
-const toastIcon = computed(() => {
-  return getToastIcon(currentToastType);
-});
+// const toastIcon = computed(() => {
+//   return getToastIcon(currentToastType);
+// });
 
 /**
  * 处理选项卡点击
  */
 function handleTabClick(tabId: string) {
   currentTab.value = tabId;
-  showToast(`已切换到 ${tabs.find(tab => tab.id === tabId)?.name}`, 'success');
+  showToast(
+    `已切换到 ${tabs.find((tab) => tab.id === tabId)?.name}`,
+    'success'
+  );
 }
 
 /**
@@ -178,11 +170,17 @@ function handleTabClick(tabId: string) {
  * @param type 提示类型
  * @param duration 持续时间(毫秒)
  */
-function showToast(message: string, type: ToastType = 'info', duration: number = 3000): void {
-  if (!toast.value) return;
+function showToast(
+  message: string,
+  type: ToastType = 'info',
+  duration: number = 3000
+): void {
+  if (!toast.value) {return;}
 
   const toastElement = toast.value;
-  const messageElement = toastElement.querySelector('.toast-message') as HTMLElement;
+  const messageElement = toastElement.querySelector(
+    '.toast-message'
+  ) as HTMLElement;
 
   if (messageElement) {
     messageElement.textContent = message;
@@ -206,19 +204,27 @@ function showToast(message: string, type: ToastType = 'info', duration: number =
  */
 onMounted(() => {
   // 监听消息
-  chrome.runtime.onMessage.addListener((message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void): boolean => {
-    if (message.action === 'UPDATE_STATUS' && statusBar.value) {
-      const statusCenter = statusBar.value.querySelector('.status-center span');
-      if (statusCenter) {
-        statusCenter.textContent = message.text;
+  chrome.runtime.onMessage.addListener(
+    (
+      message: any,
+      sender: chrome.runtime.MessageSender,
+      sendResponse: (response?: any) => void
+    ): boolean => {
+      if (message.action === 'UPDATE_STATUS' && statusBar.value) {
+        const statusCenter = statusBar.value.querySelector(
+          '.status-center span'
+        );
+        if (statusCenter) {
+          statusCenter.textContent = message.text;
+        }
+        sendResponse({ success: true });
+      } else if (message.action === 'SHOW_TOAST') {
+        showToast(message.text, (message.type as ToastType) || 'info');
+        sendResponse({ success: true });
       }
-      sendResponse({ success: true });
-    } else if (message.action === 'SHOW_TOAST') {
-      showToast(message.text, message.type as ToastType || 'info');
-      sendResponse({ success: true });
+      return true; // 保持消息通道开放以便异步响应
     }
-    return true; // 保持消息通道开放以便异步响应
-  });
+  );
 
   // 显示初始化成功消息
   showToast('侧边栏初始化成功', 'success');
@@ -233,13 +239,13 @@ onMounted(() => {
   if (navTabsScroll.value) {
     // 平滑滚动变量
     let scrollAnimationId: number | null = null;
-    let currentScrollPos = 0;
+    // const currentScrollPos = 0;
     let targetScrollPos = 0;
-    let easeFactor = 0.3; // 缓动因子，值越大滚动越快
+    const easeFactor = 0.3; // 缓动因子，值越大滚动越快
 
     // 平滑滚动动画函数
     const smoothScroll = () => {
-      if (!navTabsScroll.value) return;
+      if (!navTabsScroll.value) {return;}
 
       // 计算当前位置和目标位置的差值
       const diff = targetScrollPos - navTabsScroll.value.scrollLeft;
@@ -263,7 +269,11 @@ onMounted(() => {
 
     const handleWheel = (event: WheelEvent) => {
       // 只有当按下Shift键或者没有垂直滚动条时才进行横向滚动
-      if (event.shiftKey || (navTabsScroll.value && navTabsScroll.value.scrollHeight <= navTabsScroll.value.clientHeight)) {
+      if (
+        event.shiftKey ||
+        (navTabsScroll.value &&
+          navTabsScroll.value.scrollHeight <= navTabsScroll.value.clientHeight)
+      ) {
         event.preventDefault();
 
         if (navTabsScroll.value) {
@@ -271,7 +281,13 @@ onMounted(() => {
           targetScrollPos = navTabsScroll.value.scrollLeft + event.deltaY * 0.4; // 更大的缩放因子以加快滚动速度
 
           // 确保目标位置在有效范围内
-          targetScrollPos = Math.max(0, Math.min(targetScrollPos, navTabsScroll.value.scrollWidth - navTabsScroll.value.clientWidth));
+          targetScrollPos = Math.max(
+            0,
+            Math.min(
+              targetScrollPos,
+              navTabsScroll.value.scrollWidth - navTabsScroll.value.clientWidth
+            )
+          );
 
           // 如果没有正在运行的动画，启动一个
           if (!scrollAnimationId) {
@@ -281,7 +297,9 @@ onMounted(() => {
       }
     };
 
-    navTabsScroll.value.addEventListener('wheel', handleWheel, { passive: false });
+    navTabsScroll.value.addEventListener('wheel', handleWheel, {
+      passive: false
+    });
 
     // 在组件卸载时清理
     onBeforeUnmount(() => {
@@ -308,28 +326,32 @@ onBeforeUnmount(() => {
 /* CSS变量定义 - 科技感主题 */
 :root {
   /* 主色调 - 科技蓝 */
-  --primary-color: #165DFF;
-  --primary-light: #4080FF;
-  --primary-dark: #0E42D2;
+  --primary-color: #165dff;
+  --primary-light: #4080ff;
+  --primary-dark: #0e42d2;
 
   /* 渐变色 */
-  --gradient-primary: linear-gradient(135deg, #165DFF 0%, #4080FF 100%);
-  --gradient-secondary: linear-gradient(135deg, #0D1117 0%, #161B22 100%);
-  --gradient-card: linear-gradient(135deg, rgba(22, 93, 255, 0.05) 0%, rgba(64, 128, 255, 0.1) 100%);
+  --gradient-primary: linear-gradient(135deg, #165dff 0%, #4080ff 100%);
+  --gradient-secondary: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  --gradient-card: linear-gradient(
+    135deg,
+    rgba(22, 93, 255, 0.05) 0%,
+    rgba(64, 128, 255, 0.1) 100%
+  );
 
   /* 背景色 */
-  --bg-primary: #0D1117;
-  --bg-secondary: #161B22;
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
   --bg-card: rgba(22, 27, 34, 0.8);
   --bg-hover: rgba(22, 93, 255, 0.1);
 
   /* 文本色 */
-  --text-primary: #E6EDF3;
-  --text-secondary: #8B949E;
-  --text-tertiary: #484F58;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-tertiary: #484f58;
 
   /* 边框和分隔线 */
-  --border-color: #30363D;
+  --border-color: #30363d;
   --border-light: rgba(48, 54, 61, 0.5);
 
   /* 阴影 */
@@ -354,7 +376,9 @@ onBeforeUnmount(() => {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   color: var(--text-primary);
   background: var(--gradient-secondary);
   line-height: 1.6;
@@ -445,7 +469,7 @@ body {
 }
 
 .nav-tab.active {
-  background: linear-gradient(135deg, #165DFF 0%, #4080FF 100%);
+  background: linear-gradient(135deg, #165dff 0%, #4080ff 100%);
   color: white;
   border-color: transparent;
   box-shadow: 0 2px 10px rgba(22, 93, 255, 0.3);
@@ -465,7 +489,7 @@ body {
 }
 
 .automation-tab-icon::after {
-  content: '';
+  content: "";
   position: absolute;
   right: -5px;
   bottom: -5px;
@@ -572,7 +596,7 @@ h1 {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #00C853 0%, #007E33 100%);
+  background: linear-gradient(135deg, #00c853 0%, #007e33 100%);
   box-shadow: 0 0 8px rgba(0, 200, 83, 0.6);
   animation: pulse 2s infinite;
 }
@@ -621,15 +645,27 @@ h1 {
 }
 
 .toast.success {
-  background: linear-gradient(135deg, rgba(0, 200, 83, 0.9) 0%, rgba(0, 126, 51, 0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 200, 83, 0.9) 0%,
+    rgba(0, 126, 51, 0.9) 100%
+  );
 }
 
 .toast.error {
-  background: linear-gradient(135deg, rgba(244, 67, 54, 0.9) 0%, rgba(198, 40, 40, 0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(244, 67, 54, 0.9) 0%,
+    rgba(198, 40, 40, 0.9) 100%
+  );
 }
 
 .toast.info {
-  background: linear-gradient(135deg, rgba(22, 93, 255, 0.9) 0%, rgba(64, 128, 255, 0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(22, 93, 255, 0.9) 0%,
+    rgba(64, 128, 255, 0.9) 100%
+  );
 }
 
 .toast-icon {

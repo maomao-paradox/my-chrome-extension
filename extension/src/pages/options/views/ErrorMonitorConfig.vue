@@ -1,100 +1,100 @@
 <template>
   <div class="error-monitor-config-container">
     <div class="config-grid">
-      <el-card class="config-card config-card--base">
+      <ElCard class="config-card config-card--base">
         <template #header>
           <div class="card-header">
             <span>基础配置</span>
-            <el-tag v-if="store.isEnabled" type="success">已启用</el-tag>
-            <el-tag v-else type="info">已禁用</el-tag>
+            <ElTag v-if="store.isEnabled" type="success">已启用</ElTag>
+            <ElTag v-else type="info">已禁用</ElTag>
           </div>
         </template>
 
-        <el-form :model="store.config" label-width="150px" :rules="formRules" ref="formRef" class="monitor-config-form">
+        <ElForm ref="formRef" :model="store.config" label-width="150px" :rules="formRules" class="monitor-config-form">
           <!-- 监控开关 -->
-          <el-form-item label="启用异常监控">
-            <el-switch v-model="store.config.enabled" @change="handleEnabledChange" />
+          <ElFormItem label="启用异常监控">
+            <ElSwitch v-model="store.config.enabled" @change="handleEnabledChange" />
             <div class="form-item-hint">开启后将自动捕获页面异常</div>
-          </el-form-item>
+          </ElFormItem>
 
           <!-- Webhook 地址 -->
-          <el-form-item label="Webhook 地址" prop="webhookUrl">
-            <el-input v-model="store.config.webhookUrl"
+          <ElFormItem label="Webhook 地址" prop="webhookUrl">
+            <ElInput v-model="store.config.webhookUrl"
               placeholder="https://oapi.dingtalk.com/robot/send?access_token=..." :disabled="!store.config.enabled"
               @change="validateAndSave" />
             <div class="form-item-hint">填写钉钉机器人的 Webhook 地址</div>
-          </el-form-item>
+          </ElFormItem>
 
-          <el-form-item label="机器人关键词">
-            <el-input v-model="store.config.dingTalkKeyword" placeholder="可选，例如：监控告警" :disabled="!store.config.enabled"
+          <ElFormItem label="机器人关键词">
+            <ElInput v-model="store.config.dingTalkKeyword" placeholder="可选，例如：监控告警" :disabled="!store.config.enabled"
               @change="validateAndSave" />
             <div class="form-item-hint">如果钉钉机器人开启了关键词安全校验，这里填写对应关键词</div>
-          </el-form-item>
+          </ElFormItem>
 
           <!-- 钉钉 Token -->
-          <el-form-item label="额外 Token">
-            <el-input v-model="store.config.dingTalkToken" placeholder="仅在你的转发服务需要额外鉴权时填写"
+          <ElFormItem label="额外 Token">
+            <ElInput v-model="store.config.dingTalkToken" placeholder="仅在你的转发服务需要额外鉴权时填写"
               :disabled="!store.config.enabled" show-password @change="validateAndSave" />
             <div class="form-item-hint">直接使用钉钉机器人 Webhook 时通常不需要填写</div>
-          </el-form-item>
+          </ElFormItem>
 
           <!-- 截图开关 -->
-          <el-form-item label="启用截图">
-            <el-switch v-model="store.config.screenshotEnabled" :disabled="!store.config.enabled"
+          <ElFormItem label="启用截图">
+            <ElSwitch v-model="store.config.screenshotEnabled" :disabled="!store.config.enabled"
               @change="validateAndSave" />
             <div class="form-item-hint">异常发生时自动截取页面屏幕</div>
-          </el-form-item>
+          </ElFormItem>
 
           <!-- 最大截图大小 -->
-          <el-form-item label="最大截图大小 (MB)">
-            <el-slider v-model="store.config.maxScreenshotSize" :min="0.1" :max="5" :step="0.1"
+          <ElFormItem label="最大截图大小 (MB)">
+            <ElSlider v-model="store.config.maxScreenshotSize" :min="0.1" :max="5" :step="0.1"
               :disabled="!store.config.enabled || !store.config.screenshotEnabled" show-input
               @change="validateAndSave" />
             <div class="form-item-hint">超过此大小的截图将不会被发送</div>
-          </el-form-item>
+          </ElFormItem>
 
           <!-- 节流间隔 -->
-          <el-form-item label="节流间隔 (秒)">
-            <el-slider v-model="store.config.throttleInterval" :min="5" :max="300" :step="5"
+          <ElFormItem label="节流间隔 (秒)">
+            <ElSlider v-model="store.config.throttleInterval" :min="5" :max="300" :step="5"
               :disabled="!store.config.enabled" show-input @change="validateAndSave" />
             <div class="form-item-hint">同一页面在间隔时间内产生的多个异常将被合并</div>
-          </el-form-item>
+          </ElFormItem>
 
           <!-- Console.error 捕获 -->
-          <el-form-item label="捕获error日志">
-            <el-switch v-model="store.config.captureConsoleError" :disabled="!store.config.enabled"
+          <ElFormItem label="捕获error日志">
+            <ElSwitch v-model="store.config.captureConsoleError" :disabled="!store.config.enabled"
               @change="validateAndSave" />
             <div class="form-item-hint">是否捕获 maLogger.error 调用</div>
-          </el-form-item>
-        </el-form>
+          </ElFormItem>
+        </ElForm>
         <div class="action-buttons">
-          <el-button @click="resetConfig">
-            <el-icon>
+          <ElButton @click="resetConfig">
+            <ElIcon>
               <RefreshLeft />
-            </el-icon>
+            </ElIcon>
             重置为默认
-          </el-button>
-          <el-button type="info" @click="testConnection">
-            <el-icon>
+          </ElButton>
+          <ElButton type="info" @click="testConnection">
+            <ElIcon>
               <Connection />
-            </el-icon>
+            </ElIcon>
             发送测试消息
-          </el-button>
+          </ElButton>
         </div>
-      </el-card>
+      </ElCard>
 
       <div class="config-stack">
         <!-- 域名白名单 -->
-        <el-card class="config-card domain-card" :class="{ 'is-collapsed': activeDomainPanel !== 'whitelist' }"
+        <ElCard class="config-card domain-card" :class="{ 'is-collapsed': activeDomainPanel !== 'whitelist' }"
           @click="openDomainPanel('whitelist')">
           <template #header>
             <div class="card-header card-header--interactive" :aria-expanded="activeDomainPanel === 'whitelist'">
               <span>域名白名单</span>
               <span class="domain-card__meta">
-                <el-tag type="info">{{ store.config.domainWhitelist.length }} 个</el-tag>
-                <el-icon class="domain-card__arrow" :class="{ 'is-open': activeDomainPanel === 'whitelist' }">
+                <ElTag type="info">{{ store.config.domainWhitelist.length }} 个</ElTag>
+                <ElIcon class="domain-card__arrow" :class="{ 'is-open': activeDomainPanel === 'whitelist' }">
                   <ArrowDown />
-                </el-icon>
+                </ElIcon>
               </span>
             </div>
           </template>
@@ -103,37 +103,37 @@
             :inert="activeDomainPanel !== 'whitelist'" :aria-hidden="activeDomainPanel !== 'whitelist'">
             <div class="domain-card__content">
               <div class="domain-input-row">
-                <el-input v-model="newWhitelistDomain" placeholder="输入域名，如：example.com 或 *.example.com"
+                <ElInput v-model="newWhitelistDomain" placeholder="输入域名，如：example.com 或 *.example.com"
                   :disabled="!store.config.enabled" @keyup.enter="addWhitelistDomain" />
-                <el-button type="primary" :disabled="!store.config.enabled || !newWhitelistDomain"
+                <ElButton type="primary" :disabled="!store.config.enabled || !newWhitelistDomain"
                   @click="addWhitelistDomain">
                   添加
-                </el-button>
+                </ElButton>
               </div>
 
-              <div class="domain-list" v-if="store.config.domainWhitelist.length > 0">
-                <el-tag v-for="domain in store.config.domainWhitelist" :key="domain" closable
-                  @close="store.removeFromWhitelist(domain)" class="domain-tag">
+              <div v-if="store.config.domainWhitelist.length > 0" class="domain-list">
+                <ElTag v-for="domain in store.config.domainWhitelist" :key="domain" closable
+                  class="domain-tag" @close="store.removeFromWhitelist(domain)">
                   {{ domain }}
-                </el-tag>
+                </ElTag>
               </div>
 
-              <el-empty v-else description="暂无白名单域名，空列表表示允许所有域名，添加域名后将只允许监控列表中的域名" />
+              <ElEmpty v-else description="暂无白名单域名，空列表表示允许所有域名，添加域名后将只允许监控列表中的域名" />
             </div>
           </div>
-        </el-card>
+        </ElCard>
 
         <!-- 域名黑名单 -->
-        <el-card class="config-card domain-card" :class="{ 'is-collapsed': activeDomainPanel !== 'blacklist' }"
+        <ElCard class="config-card domain-card" :class="{ 'is-collapsed': activeDomainPanel !== 'blacklist' }"
           @click="openDomainPanel('blacklist')">
           <template #header>
             <div class="card-header card-header--interactive" :aria-expanded="activeDomainPanel === 'blacklist'">
               <span>域名黑名单</span>
               <span class="domain-card__meta">
-                <el-tag type="danger">{{ store.config.domainBlacklist.length }} 个</el-tag>
-                <el-icon class="domain-card__arrow" :class="{ 'is-open': activeDomainPanel === 'blacklist' }">
+                <ElTag type="danger">{{ store.config.domainBlacklist.length }} 个</ElTag>
+                <ElIcon class="domain-card__arrow" :class="{ 'is-open': activeDomainPanel === 'blacklist' }">
                   <ArrowDown />
-                </el-icon>
+                </ElIcon>
               </span>
             </div>
           </template>
@@ -143,25 +143,25 @@
             <div class="domain-card__content">
 
               <div class="domain-input-row">
-                <el-input v-model="newBlacklistDomain" placeholder="输入域名，如：example.com 或 *.example.com"
+                <ElInput v-model="newBlacklistDomain" placeholder="输入域名，如：example.com 或 *.example.com"
                   :disabled="!store.config.enabled" @keyup.enter="addBlacklistDomain" />
-                <el-button type="primary" :disabled="!store.config.enabled || !newBlacklistDomain"
+                <ElButton type="primary" :disabled="!store.config.enabled || !newBlacklistDomain"
                   @click="addBlacklistDomain">
                   添加
-                </el-button>
+                </ElButton>
               </div>
 
-              <div class="domain-list" v-if="store.config.domainBlacklist.length > 0">
-                <el-tag v-for="domain in store.config.domainBlacklist" :key="domain" closable type="danger"
-                  @close="store.removeFromBlacklist(domain)" class="domain-tag">
+              <div v-if="store.config.domainBlacklist.length > 0" class="domain-list">
+                <ElTag v-for="domain in store.config.domainBlacklist" :key="domain" closable type="danger"
+                  class="domain-tag" @close="store.removeFromBlacklist(domain)">
                   {{ domain }}
-                </el-tag>
+                </ElTag>
               </div>
 
-              <el-empty v-else description="暂无黑名单域名，黑名单中的域名将不会被监控" />
+              <ElEmpty v-else description="暂无黑名单域名，黑名单中的域名将不会被监控" />
             </div>
           </div>
-        </el-card>
+        </ElCard>
       </div>
     </div>
   </div>
@@ -268,7 +268,7 @@ async function resetConfig() {
 // 添加白名单域名
 function addWhitelistDomain() {
   const domain = newWhitelistDomain.value.trim();
-  if (!domain) return;
+  if (!domain) {return;}
 
   store.addToWhitelist(domain);
   newWhitelistDomain.value = '';
@@ -278,7 +278,7 @@ function addWhitelistDomain() {
 // 添加黑名单域名
 function addBlacklistDomain() {
   const domain = newBlacklistDomain.value.trim();
-  if (!domain) return;
+  if (!domain) {return;}
 
   store.addToBlacklist(domain);
   newBlacklistDomain.value = '';

@@ -1,10 +1,10 @@
 <template>
   <div class="browser-var-view">
-    <el-card>
+    <ElCard>
       <template #header>
         <div class="card-header">
           <span>浏览器变量查看器</span>
-          <el-button size="small" type="primary" @click="saveConfig">保存配置</el-button>
+          <ElButton size="small" type="primary" @click="saveConfig">保存配置</ElButton>
         </div>
       </template>
       
@@ -18,9 +18,9 @@
       <BrowserVarInspector />
       
       <div v-if="lastUpdate" class="update-info">
-        <el-alert :message="lastUpdate" type="success" show-icon :closable="false" />
+        <ElAlert :message="lastUpdate" type="success" show-icon :closable="false" />
       </div>
-    </el-card>
+    </ElCard>
   </div>
 </template>
 

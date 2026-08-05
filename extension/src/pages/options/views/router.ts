@@ -28,12 +28,12 @@ const routes: RouteRecordRaw[] = [
   
   // 重定向规则
   { path: '/', redirect: '/home' },
-  { path: '/:pathMatch(.*)*', redirect: '/home' },
+  { path: '/:pathMatch(.*)*', redirect: '/home' }
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 });
 
 // 路由守卫

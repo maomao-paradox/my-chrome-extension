@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, useTemplateRef } from 'vue';
-import { useMouseTracker } from '@/assets/composables/mouse/mouseTracker'
+import { useMouseTracker } from '@/assets/composables/mouse/mouseTracker';
 
 export interface PointerProps {
     color?: string
@@ -22,54 +22,54 @@ export interface PointerProps {
 }
 
 const props = withDefaults(defineProps<PointerProps>(), {
-    color: '#1ff700',
-    size: '4rem'
-})
+  color: '#1ff700',
+  size: '4rem'
+});
 
-const { x, y } = useMouseTracker()
-const currentElement = ref<HTMLElement | null>(null)
-const pointerRef = useTemplateRef<HTMLElement>('pointer')
+const { x, y } = useMouseTracker();
+const currentElement = ref<HTMLElement | null>(null);
+const pointerRef = useTemplateRef<HTMLElement>('pointer');
 
 const mouseStyle = computed(() => {
-    let newX = x.value
-    let newY = y.value
-    if (currentElement.value) {
-        const rect = currentElement.value.getBoundingClientRect()
-        const centerX = rect.left + rect.width / 2
-        const centerY = rect.top + rect.height / 2
-        newX = centerX + (x.value - centerX) * 0.1
-        newY = centerY + (y.value - centerY) * 0.1
-    }
-    return {
-        '--x': `${newX}px`,
-        '--y': `${newY}px`,
-    }
-})
+  let newX = x.value;
+  let newY = y.value;
+  if (currentElement.value) {
+    const rect = currentElement.value.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    newX = centerX + (x.value - centerX) * 0.1;
+    newY = centerY + (y.value - centerY) * 0.1;
+  }
+  return {
+    '--x': `${newX}px`,
+    '--y': `${newY}px`
+  };
+});
 
 onMounted(() => {
-    const targetElements = [...document.querySelectorAll<HTMLElement>(props.cssSelector?.join(',') || '._target')]
-    console.log(targetElements)
-    if (props.color) {
-        pointerRef.value!.style.setProperty('--color', props.color)
-    }
-    if (props.size) {
-        pointerRef.value!.style.setProperty('--width', props.size)
-        pointerRef.value!.style.setProperty('--height', props.size)
-    }
-    targetElements.forEach(item => {
-        item.addEventListener('mouseenter', () => {
-            const rect = item.getBoundingClientRect()
-            currentElement.value = item
-            pointerRef.value!.style.setProperty('--width', rect.width + innerWidth * 0.02 + "px")
-            pointerRef.value!.style.setProperty('--height', rect.height + innerHeight * 0.02 + "px")
-        })
-        item.addEventListener('mouseleave', () => {
-            currentElement.value = null
-            pointerRef.value!.style.setProperty('--width', "4rem")
-            pointerRef.value!.style.setProperty('--height', "4rem")
-        })
-    })
-})
+  const targetElements = [...document.querySelectorAll<HTMLElement>(props.cssSelector?.join(',') || '._target')];
+  console.log(targetElements);
+  if (props.color) {
+        pointerRef.value!.style.setProperty('--color', props.color);
+  }
+  if (props.size) {
+        pointerRef.value!.style.setProperty('--width', props.size);
+        pointerRef.value!.style.setProperty('--height', props.size);
+  }
+  targetElements.forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      const rect = item.getBoundingClientRect();
+      currentElement.value = item;
+            pointerRef.value!.style.setProperty('--width', rect.width + innerWidth * 0.02 + 'px');
+            pointerRef.value!.style.setProperty('--height', rect.height + innerHeight * 0.02 + 'px');
+    });
+    item.addEventListener('mouseleave', () => {
+      currentElement.value = null;
+            pointerRef.value!.style.setProperty('--width', '4rem');
+            pointerRef.value!.style.setProperty('--height', '4rem');
+    });
+  });
+});
 </script>
 
 <style scoped lang="less">
