@@ -32,7 +32,7 @@ export default defineConfig({
   plugins: [
     vue(),
     react({
-      fastRefresh: true,
+      jsxRuntime: "automatic",
     }),
     svgLoader({
       defaultImport: "url", // 默认作为 URL

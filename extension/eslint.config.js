@@ -1,9 +1,10 @@
 import js from "@eslint/js";
 import globals from "globals";
 import vue from "eslint-plugin-vue";
-import ts from "@typescript-eslint/eslint-plugin";
-import tsParser from "@typescript-eslint/parser";
+import tseslint from "typescript-eslint"; // 改这里
 import vueParser from "vue-eslint-parser";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
   {
@@ -23,13 +24,13 @@ export default [
 
   js.configs.recommended,
 
-  // Vue 配置（使用 vue-eslint-parser）
+  // Vue 配置
   {
     files: ["**/*.vue"],
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        parser: tsParser,
+        parser: tseslint.parser, // 改这里，使用 tseslint 的 parser
         ecmaVersion: "latest",
         sourceType: "module",
       },
@@ -62,11 +63,42 @@ export default [
     },
   },
 
-  // TypeScript 文件配置
+  // React 配置
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    // 排除 .vue 文件
+    ignores: ["**/*.vue"],
+    plugins: {
+      react,
+      "react-hooks": reactHooks,
+    },
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    rules: {
+      ...react.configs.recommended.rules,
+      ...react.configs["jsx-runtime"].rules,
+      ...reactHooks.configs.recommended.rules,
+      "react/prop-types": "off",
+      "react/react-in-jsx-scope": "off",
+    },
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
+  },
+
+  // TypeScript 配置（应用到所有 .ts/.tsx 文件，但 .vue 文件已经由 vue 配置处理）
   {
     files: ["**/*.ts", "**/*.tsx"],
+    ignores: ["**/*.vue"], // 排除 .vue 文件
     languageOptions: {
-      parser: tsParser,
+      parser: tseslint.parser, // 改这里
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
@@ -74,10 +106,10 @@ export default [
       },
     },
     plugins: {
-      "@typescript-eslint": ts,
+      "@typescript-eslint": tseslint.plugin, // 改这里
     },
     rules: {
-      ...ts.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules, // 改这里
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
@@ -91,11 +123,11 @@ export default [
     },
   },
 
-  // 针对 eval 警告的特殊规则（允许某些场景）
+  // 针对 eval 警告的特殊规则
   {
     files: ["**/mcp-executor.ts", "**/getPageVariable.js"],
     rules: {
-      "no-eval": "off", // 或 'warn' 如果你想保持警告
+      "no-eval": "off",
       "no-new-func": "off",
     },
   },
@@ -127,7 +159,7 @@ export default [
     rules: {
       "no-console": process.env.NODE_ENV === "production" ? "error" : "warn",
       "no-debugger": process.env.NODE_ENV === "production" ? "error" : "warn",
-      "no-eval": "error", // 默认禁止 eval
+      "no-eval": "error",
       "prefer-const": "error",
       "no-var": "error",
       eqeqeq: ["error", "always"],
