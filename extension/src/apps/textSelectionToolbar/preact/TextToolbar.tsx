@@ -2,8 +2,7 @@
  * TextToolbar 组件 - Preact 版本
  * 提供文本选择工具栏的UI，支持多种工具操作
  */
-import { h, type ComponentChild } from "preact";
-import { useState, useEffect, useRef, useCallback } from "preact/hooks";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { TextTool } from "@/types";
 import "./styles/text-toolbar.scss";
 
@@ -55,14 +54,14 @@ const DEFAULT_ICON =
  * TextToolbar 组件
  * 提供文本选择工具栏的UI，显示可用的工具按钮
  */
-const TextToolbar = ({
+const TextToolbar: React.FC<TextToolbarProps> = ({
   initialText = "",
   selectedText = "",
   customTools = [],
   showCloseBtn = false,
   onClose,
   onToolClick,
-}: TextToolbarProps): ComponentChild => {
+}) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [currentInitialText, setCurrentInitialText] =
     useState<string>(initialText);
@@ -112,7 +111,7 @@ const TextToolbar = ({
   /**
    * 渲染关闭按钮
    */
-  const renderCloseButton = (): ComponentChild => (
+  const renderCloseButton = (): React.ReactNode => (
     <button
       className="close-btn"
       type="button"
@@ -134,7 +133,7 @@ const TextToolbar = ({
   /**
    * 渲染工具按钮列表
    */
-  const renderTools = (): ComponentChild =>
+  const renderTools = (): React.ReactNode =>
     customTools.map((tool, index) => (
       <button
         key={`${tool.id}-${index}`}

@@ -2,9 +2,10 @@
  * App 组件 - Preact 版本
  * 文本选择工具栏主容器，管理所有子组件和状态
  */
-import { h, type ComponentChild } from "preact";
-import { Suspense, lazy } from "preact/compat";
-import { useState, useEffect, useCallback, useRef } from "preact/hooks";
+import React, { Suspense, lazy } from "react";
+// 如果需要类型，React 18+ 使用 ReactNode
+import type { ReactNode } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { TextTool } from "@/types";
 import { componentManager } from "@/utils/componentManager";
 import { eventManager } from "@/event";
@@ -94,11 +95,11 @@ const STORAGE_KEY = "textSelectionToolbarState";
  * App 组件
  * 文本选择工具栏主容器
  */
-const App = ({
+const App: React.FC<AppProps> = ({
   initialText,
   customTools = [],
   showCloseBtn = true,
-}: AppProps): ComponentChild => {
+}) => {
   // 工具栏可见性状态
   const [isVisible, setIsVisible] = useState(false);
   const [showToolbar, setShowToolbar] = useState(true);

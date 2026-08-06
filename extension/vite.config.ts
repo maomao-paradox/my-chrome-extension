@@ -126,7 +126,6 @@ export default defineConfig({
         manualChunks: isProduction
           ? {
               vue: ["vue", "vue-router", "pinia"],
-              preact: ["preact", "preact/hooks"],
               react: ["react", "react-dom/client"],
               antd: ["antd", "@ant-design/icons"],
               "element-plus": ["element-plus", "@element-plus/icons-vue"],
@@ -193,9 +192,8 @@ export default defineConfig({
       "pinia",
       "vue-router",
       "element-plus",
-      "preact",
-      "preact/compat",
-      "preact/hooks",
+      "react",
+      "react-dom/client",
     ],
     esbuildOptions: {
       target: "es2022",

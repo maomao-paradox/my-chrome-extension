@@ -2,9 +2,8 @@
  * CommentModal 组件 - Preact 版本
  * 留言编辑/添加模态框，支持创建和编辑留言
  */
-import { h, type ComponentChild } from 'preact';
-import { useState, useEffect, useCallback } from 'preact/hooks';
-import './styles/comment-modal.scss';
+import { useState, useEffect, useCallback } from "react";
+import "./styles/comment-modal.scss";
 
 /**
  * CommentModal 组件属性接口
@@ -21,7 +20,11 @@ interface CommentModalProps {
   /** 关闭事件 */
   onClose?: () => void;
   /** 保存事件 */
-  onSave?: (data: { text: string; comment: string; commentId?: string }) => void;
+  onSave?: (data: {
+    text: string;
+    comment: string;
+    commentId?: string;
+  }) => void;
   /** 删除事件 */
   onDelete?: (commentId: string) => void;
 }
@@ -30,16 +33,16 @@ interface CommentModalProps {
  * CommentModal 组件
  * 提供添加/编辑留言的模态框UI
  */
-const CommentModal = ({
+const CommentModal: React.FC<CommentModalProps> = ({
   visible,
   selectedText,
-  commentId = '',
-  existingComment = '',
+  commentId = "",
+  existingComment = "",
   onClose,
   onSave,
-  onDelete
-}: CommentModalProps): ComponentChild => {
-  const [commentContent, setCommentContent] = useState<string>('');
+  onDelete,
+}: CommentModalProps) => {
+  const [commentContent, setCommentContent] = useState<string>("");
   const [isEdit, setIsEdit] = useState<boolean>(false);
 
   /**
@@ -51,7 +54,7 @@ const CommentModal = ({
         setCommentContent(existingComment);
         setIsEdit(true);
       } else {
-        setCommentContent('');
+        setCommentContent("");
         setIsEdit(false);
       }
     }
@@ -73,7 +76,7 @@ const CommentModal = ({
     onSave?.({
       text: selectedText,
       comment: commentContent.trim(),
-      commentId: commentId || undefined
+      commentId: commentId || undefined,
     });
   }, [commentContent, selectedText, commentId, onSave]);
 
@@ -95,18 +98,21 @@ const CommentModal = ({
   }, []);
 
   // 计算标题
-  const title = isEdit ? '编辑留言' : '添加留言';
+  const title = isEdit ? "编辑留言" : "添加留言";
 
   // 计算保存按钮文本
-  const saveText = isEdit ? '保存修改' : '添加留言';
+  const saveText = isEdit ? "保存修改" : "添加留言";
 
   // 如果不可见则返回 null
   if (!visible) return null;
 
   return (
-    <div className="comment-modal-overlay" onClick={(e: Event) => {
-      if (e.target === e.currentTarget) handleClose();
-    }}>
+    <div
+      className="comment-modal-overlay"
+      onClick={(e: Event) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+    >
       <div className="comment-modal">
         <div className="comment-modal-header">
           <h3 className="comment-modal-title">{title}</h3>
@@ -139,7 +145,9 @@ const CommentModal = ({
           </div>
 
           <div className="comment-input-group">
-            <label className="label" htmlFor="comment-modal-textarea">留言内容</label>
+            <label className="label" htmlFor="comment-modal-textarea">
+              留言内容
+            </label>
             <textarea
               id="comment-modal-textarea"
               className="comment-textarea"

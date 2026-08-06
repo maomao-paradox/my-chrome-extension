@@ -8,7 +8,7 @@
 
 import { AppModule } from "@/types/index.js";
 import { shadowHostId } from "@/config";
-import { h, render } from "preact";
+import { createRoot, type Root } from "react-dom/client";
 import App from "./preact/App";
 import { createShadowHost, injectCssDom } from "@/utils/shadow-dom";
 import { storage } from "@/stores";
@@ -26,6 +26,7 @@ import { generateId } from "@/utils/base";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
 import { loadAIConfig } from "@/utils/ai-config";
 import { fillTextareaElementByAI } from "./textarea-ai";
+import React from "react";
 
 const appName = "textSelectionToolbar";
 
@@ -1052,13 +1053,13 @@ class TextSelectionToolbarModule implements AppModule {
 
       // 渲染Preact应用
       if (this.preactContainer) {
-        render(
-          h(App, {
+        const root = createRoot(this.preactContainer);
+        root.render(
+          React.createElement(App, {
             initialText: "",
             customTools: this.customTools,
             showCloseBtn: this.showCloseBtn,
           }),
-          this.preactContainer,
         );
       }
     } catch (error) {

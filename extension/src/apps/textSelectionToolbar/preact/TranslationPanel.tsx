@@ -2,8 +2,7 @@
  * TranslationPanel 组件 - Preact 版本
  * 可拖拽的翻译/AI 解释面板，支持流式更新和震动反馈
  */
-import { h, type ComponentChild } from "preact";
-import { useState, useEffect, useRef, useCallback } from "preact/hooks";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./styles/translation-panel.scss";
 
 /**
@@ -43,7 +42,7 @@ interface TranslationPanelProps {
  * TranslationPanel 组件
  * 提供可拖拽的翻译面板UI
  */
-const TranslationPanel = ({
+const TranslationPanel: React.FC<TranslationPanelProps> = ({
   visible,
   title = "AI解释",
   content,
@@ -51,7 +50,7 @@ const TranslationPanel = ({
   position = { left: 100, top: 100 },
   shakeKey = 0,
   onClose,
-}: TranslationPanelProps): ComponentChild => {
+}: TranslationPanelProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isShaking, setIsShaking] = useState(false);

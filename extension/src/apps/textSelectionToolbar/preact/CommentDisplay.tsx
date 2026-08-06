@@ -2,10 +2,9 @@
  * CommentDisplay 组件 - Preact 版本
  * 留言内容展示面板，显示原文、留言内容和时间戳
  */
-import { h, type ComponentChild } from 'preact';
-import { useCallback } from 'preact/hooks';
-import type { Comment } from '@/services/commentStorage';
-import './styles/comment-display.scss';
+import { useState, useCallback } from "react";
+import type { Comment } from "@/services/commentStorage";
+import "./styles/comment-display.scss";
 
 /**
  * CommentDisplay 组件属性接口
@@ -34,17 +33,17 @@ const formatTime = (timestamp: number): string => {
   const diff = now.getTime() - date.getTime();
 
   if (diff < 60000) {
-    return '刚刚';
+    return "刚刚";
   } else if (diff < 3600000) {
     return `${Math.floor(diff / 60000)}分钟前`;
   } else if (diff < 86400000) {
     return `${Math.floor(diff / 3600000)}小时前`;
   } else {
-    return date.toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("zh-CN", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 };
@@ -53,13 +52,13 @@ const formatTime = (timestamp: number): string => {
  * CommentDisplay 组件
  * 提供留言内容展示的UI
  */
-const CommentDisplay = ({
+const CommentDisplay: React.FC<CommentDisplayProps> = ({
   visible,
   comment,
   position,
   onClose,
-  onEdit
-}: CommentDisplayProps): ComponentChild => {
+  onEdit,
+}: CommentDisplayProps) => {
   /**
    * 处理关闭
    */
@@ -80,13 +79,16 @@ const CommentDisplay = ({
   // 计算样式
   const style = {
     left: `${position.x}px`,
-    top: `${position.y}px`
+    top: `${position.y}px`,
   };
 
   return (
-    <div className="comment-display-overlay" onClick={(e: Event) => {
-      if (e.target === e.currentTarget) handleClose();
-    }}>
+    <div
+      className="comment-display-overlay"
+      onClick={(e: Event) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+    >
       <div className="comment-display" style={style}>
         <div className="comment-display-header">
           <h4 className="comment-display-title">留言内容</h4>
@@ -129,18 +131,10 @@ const CommentDisplay = ({
         </div>
 
         <div className="comment-display-footer">
-          <button
-            className="btn btn-edit"
-            type="button"
-            onClick={handleEdit}
-          >
+          <button className="btn btn-edit" type="button" onClick={handleEdit}>
             编辑
           </button>
-          <button
-            className="btn btn-close"
-            type="button"
-            onClick={handleClose}
-          >
+          <button className="btn btn-close" type="button" onClick={handleClose}>
             关闭
           </button>
         </div>

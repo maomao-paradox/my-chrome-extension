@@ -2,9 +2,8 @@
  * ReplaceModal 组件 - Preact 版本
  * 文本替换模态框，支持查找和替换功能
  */
-import { h, type ComponentChild } from 'preact';
-import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
-import './styles/replace-modal.scss';
+import { useState, useEffect, useRef, useCallback } from "react";
+import "./styles/replace-modal.scss";
 
 /**
  * 替换选项接口
@@ -36,15 +35,15 @@ interface ReplaceModalProps {
  * ReplaceModal 组件
  * 提供文本替换的模态框UI
  */
-const ReplaceModal = ({
+const ReplaceModal: React.FC<ReplaceModalProps> = ({
   visible,
-  title = '替换文本',
+  title = "替换文本",
   searchText,
   onClose,
-  onReplace
-}: ReplaceModalProps): ComponentChild => {
+  onReplace,
+}: ReplaceModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [replaceText, setReplaceText] = useState<string>('');
+  const [replaceText, setReplaceText] = useState<string>("");
   const [caseSensitive, setCaseSensitive] = useState<boolean>(false);
   const [wholeWord, setWholeWord] = useState<boolean>(false);
   const [isShaking, setIsShaking] = useState<boolean>(false);
@@ -58,7 +57,7 @@ const ReplaceModal = ({
       setTimeout(() => {
         inputRef.current?.focus();
       }, 0);
-      setReplaceText('');
+      setReplaceText("");
     }
   }, [visible]);
 
@@ -92,7 +91,7 @@ const ReplaceModal = ({
     }
     onReplace?.(replaceText, {
       caseSensitive,
-      wholeWord
+      wholeWord,
     });
   }, [replaceText, caseSensitive, wholeWord, triggerShake, onReplace]);
 
@@ -107,32 +106,38 @@ const ReplaceModal = ({
   /**
    * 处理回车键
    */
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleReplace();
-    }
-  }, [handleReplace]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleReplace();
+      }
+    },
+    [handleReplace],
+  );
 
   /**
    * 处理复选框变化
    */
   const handleCaseSensitiveChange = useCallback(() => {
-    setCaseSensitive(prev => !prev);
+    setCaseSensitive((prev) => !prev);
   }, []);
 
   const handleWholeWordChange = useCallback(() => {
-    setWholeWord(prev => !prev);
+    setWholeWord((prev) => !prev);
   }, []);
 
   // 如果不可见则返回 null
   if (!visible) return null;
 
   return (
-    <div className="replace-modal-overlay" onClick={(e: Event) => {
-      if (e.target === e.currentTarget) handleClose();
-    }}>
-      <div className={`replace-modal${isShaking ? ' is-shaking' : ''}`}>
+    <div
+      className="replace-modal-overlay"
+      onClick={(e: Event) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+    >
+      <div className={`replace-modal${isShaking ? " is-shaking" : ""}`}>
         <div className="replace-modal__header">
           <div className="replace-modal__title-group">
             <h2 className="replace-modal__title">{title}</h2>
@@ -155,7 +160,12 @@ const ReplaceModal = ({
           </div>
 
           <div className="replace-modal__input-group">
-            <label className="replace-modal__label" htmlFor="replace-modal-input">替换为</label>
+            <label
+              className="replace-modal__label"
+              htmlFor="replace-modal-input"
+            >
+              替换为
+            </label>
             <input
               id="replace-modal-input"
               ref={inputRef}
