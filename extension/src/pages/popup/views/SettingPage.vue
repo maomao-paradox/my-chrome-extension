@@ -986,10 +986,7 @@ onBeforeUnmount(() => {
   :deep() {
     // 容器
     .sci-fi-switch-container {
-      align-items: center;
-      gap: 8px;
       min-height: 44px;
-      padding: 8px 9px;
     }
 
     // 标签
@@ -1017,8 +1014,6 @@ onBeforeUnmount(() => {
 
     // 开关
     .sci-fi-switch {
-      flex-shrink: 0;
-
       &:hover,
       &:active {
         transform: none;
@@ -1061,13 +1056,10 @@ onBeforeUnmount(() => {
     }
 
     .switch-thumb {
-      top: 3px;
-      left: 3px;
       width: 20px;
       height: 20px;
       background: var(--popup-switch-thumb-bg);
       box-shadow: none;
-      transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .switch-glow {

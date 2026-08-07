@@ -5,11 +5,17 @@
  * @file src/pages/popup/views/TOTPTokenPage.tsx
  * @description React 版动态令牌页面 - 查看后端生成的动态验证码
  */
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Button, Input, message } from 'antd';
-import { ClockCircleOutlined } from '@ant-design/icons';
-import jsQR from 'jsqr';
-import TableContainer from '../components/TableContainer';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
+import { Button, Input, message } from "antd";
+import { ClockCircleOutlined } from "@ant-design/icons";
+import jsQR from "jsqr";
+import TableContainer from "../components/TableContainer";
 import {
   createTOTPAccount,
   deleteTOTPAccount,
@@ -17,8 +23,8 @@ import {
   listTOTPAccounts,
   type TOTPAccount,
   type TOTPCode,
-} from '@/services/api/totp-api';
-import './totp-token-page.scss';
+} from "@/services/api/totp-api";
+import "./totp-token-page.scss";
 
 /**
  * 表单数据类型
@@ -45,65 +51,60 @@ interface TokenCardProps {
 /**
  * Token 卡片组件（使用 React.memo 优化）
  */
-const TokenCard: React.FC<TokenCardProps> = React.memo(({
-  account,
-  code,
-  remaining,
-  progressPercent,
-  onCopy,
-  onDelete,
-}) => {
-  const displayIssuer = account.issuer || '未命名';
-  const remainingText = remaining > 0 ? `${remaining}s` : '刷新中';
+const TokenCard: React.FC<TokenCardProps> = React.memo(
+  ({ account, code, remaining, progressPercent, onCopy, onDelete }) => {
+    const displayIssuer = account.issuer || "未命名";
+    const remainingText = remaining > 0 ? `${remaining}s` : "刷新中";
 
-  return (
-    <article className="token-card">
-      <div className="token-card__main">
-        <div className="token-meta">
-          <strong>{displayIssuer}</strong>
-          <span>{account.accountName}</span>
-        </div>
-        <div
-          className={`token-code ${!code?.code ? 'token-code--empty' : ''}`}
-        >
-          {code?.code || '------'}
-        </div>
-      </div>
-
-      <div className="token-card__bottom">
-        <div className="timer">
-          <span className="timer-track">
-            <span
-              className="timer-fill"
-              style={{ width: `${progressPercent}%` }}
-            ></span>
-          </span>
-          <span>{remainingText}</span>
-        </div>
-        <div className="token-actions">
-          <Button
-            className="text-btn"
-            htmlType="button"
-            disabled={!code?.code}
-            onClick={onCopy}
+    return (
+      <article className="token-card">
+        <div className="token-card__main">
+          <div className="token-meta">
+            <strong>{displayIssuer}</strong>
+            <span>{account.accountName}</span>
+          </div>
+          <div
+            className={`token-code ${!code?.code ? "token-code--empty" : ""}`}
           >
-            复制
-          </Button>
-          <Button
-            className="text-btn text-btn--danger"
-            htmlType="button"
-            danger
-            onClick={onDelete}
-          >
-            删除
-          </Button>
+            {code?.code || "------"}
+          </div>
         </div>
-      </div>
-    </article>
-  );
-});
 
-TokenCard.displayName = 'TokenCard';
+        <div className="token-card__bottom">
+          <div className="timer">
+            <span className="timer-track">
+              <span
+                className="timer-fill"
+                style={{ width: `${progressPercent}%` }}
+              ></span>
+            </span>
+            <span>{remainingText}</span>
+          </div>
+          <div className="token-actions">
+            <Button
+              className="text-btn"
+              htmlType="button"
+              disabled={!code?.code}
+              onClick={onCopy}
+            >
+              复制
+            </Button>
+            <Button
+              className="text-btn text-btn--danger"
+              htmlType="button"
+              danger
+              onClick={onDelete}
+            >
+              删除
+            </Button>
+          </div>
+        </div>
+      </article>
+    );
+  },
+);
+
+TokenCard.displayName = "TokenCard";
 
 /**
  * TOTP 动态令牌页面组件
@@ -114,39 +115,41 @@ export const TOTPTokenPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isScanningQR, setIsScanningQR] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [nowMs, setNowMs] = useState(Date.now());
   const qrInputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<number | undefined>(undefined);
 
   const [form, setForm] = useState<TOTPForm>({
-    issuer: '',
-    accountName: '',
-    secret: '',
-    otpauthUrl: '',
+    issuer: "",
+    accountName: "",
+    secret: "",
+    otpauthUrl: "",
   });
 
   const [messageApi, messageContextHolder] = message.useMessage();
 
   /** 提交按钮是否禁用 */
   const isSubmitDisabled = useMemo(() => {
-    return isSubmitting || (!form.otpauthUrl && (!form.accountName || !form.secret));
+    return (
+      isSubmitting || (!form.otpauthUrl && (!form.accountName || !form.secret))
+    );
   }, [isSubmitting, form]);
 
   /** 清空状态消息 */
   const clearStatus = useCallback(() => {
-    setErrorMessage('');
-    setSuccessMessage('');
+    setErrorMessage("");
+    setSuccessMessage("");
   }, []);
 
   /** 重置表单 */
   const resetForm = useCallback(() => {
     setForm({
-      issuer: '',
-      accountName: '',
-      secret: '',
-      otpauthUrl: '',
+      issuer: "",
+      accountName: "",
+      secret: "",
+      otpauthUrl: "",
     });
   }, []);
 
@@ -156,50 +159,63 @@ export const TOTPTokenPage: React.FC = () => {
   }, []);
 
   /** 从图片解码二维码 */
-  const decodeQRCodeFromImage = useCallback(async (file: File): Promise<string> => {
-    const bitmap = await createImageBitmap(file);
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
-      const context = canvas.getContext('2d', { willReadFrequently: true });
-      if (!context) {
-        throw new Error('无法读取二维码图片');
-      }
+  const decodeQRCodeFromImage = useCallback(
+    async (file: File): Promise<string> => {
+      const bitmap = await createImageBitmap(file);
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) {
+          throw new Error("无法读取二维码图片");
+        }
 
-      context.drawImage(bitmap, 0, 0);
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-      const result = jsQR(imageData.data, imageData.width, imageData.height);
-      const content = result?.data?.trim();
-      if (!content) {
-        throw new Error('未识别到二维码内容');
+        context.drawImage(bitmap, 0, 0);
+        const imageData = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
+        const result = jsQR(imageData.data, imageData.width, imageData.height);
+        const content = result?.data?.trim();
+        if (!content) {
+          throw new Error("未识别到二维码内容");
+        }
+        return content;
+      } finally {
+        bitmap.close();
       }
-      return content;
-    } finally {
-      bitmap.close();
-    }
-  }, []);
+    },
+    [],
+  );
 
   /** 处理二维码上传 */
-  const handleQRUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleQRUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    clearStatus();
-    setIsScanningQR(true);
-    try {
-      const content = await decodeQRCodeFromImage(file);
-      if (!content.startsWith('otpauth://totp/')) {
-        throw new Error('二维码不是 TOTP 令牌链接');
+      clearStatus();
+      setIsScanningQR(true);
+      try {
+        const content = await decodeQRCodeFromImage(file);
+        if (!content.startsWith("otpauth://totp/")) {
+          throw new Error("二维码不是 TOTP 令牌链接");
+        }
+        setForm((prev) => ({ ...prev, otpauthUrl: content }));
+        setSuccessMessage("二维码已解析");
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error ? error.message : "二维码解析失败",
+        );
+      } finally {
+        setIsScanningQR(false);
       }
-      setForm((prev) => ({ ...prev, otpauthUrl: content }));
-      setSuccessMessage('二维码已解析');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '二维码解析失败');
-    } finally {
-      setIsScanningQR(false);
-    }
-  }, [decodeQRCodeFromImage, clearStatus]);
+    },
+    [decodeQRCodeFromImage, clearStatus],
+  );
 
   /** 刷新单个账户的验证码 */
   const refreshCode = useCallback(async (accountId: string): Promise<void> => {
@@ -207,14 +223,17 @@ export const TOTPTokenPage: React.FC = () => {
       const code = await getTOTPCode(accountId);
       setCodes((prev) => ({ ...prev, [accountId]: code }));
     } catch (error) {
-      maLogger.warn('刷新验证码失败:', accountId, error);
+      maLogger.warn("刷新验证码失败:", accountId, error);
     }
   }, []);
 
   /** 批量刷新验证码 */
-  const refreshCodesForAccounts = useCallback(async (accountsList: TOTPAccount[]): Promise<void> => {
-    await Promise.all(accountsList.map((account) => refreshCode(account.id)));
-  }, [refreshCode]);
+  const refreshCodesForAccounts = useCallback(
+    async (accountsList: TOTPAccount[]): Promise<void> => {
+      await Promise.all(accountsList.map((account) => refreshCode(account.id)));
+    },
+    [refreshCode],
+  );
 
   /** 加载账户列表 */
   const loadAccounts = useCallback(async (): Promise<void> => {
@@ -225,7 +244,7 @@ export const TOTPTokenPage: React.FC = () => {
       setAccounts(loadedAccounts);
       await refreshCodesForAccounts(loadedAccounts);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '加载令牌失败');
+      setErrorMessage(error instanceof Error ? error.message : "加载令牌失败");
     } finally {
       setIsLoading(false);
     }
@@ -237,7 +256,9 @@ export const TOTPTokenPage: React.FC = () => {
     try {
       await refreshCodesForAccounts(accounts);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '刷新动态码失败');
+      setErrorMessage(
+        error instanceof Error ? error.message : "刷新动态码失败",
+      );
     }
   }, [accounts, refreshCodesForAccounts, clearStatus]);
 
@@ -255,55 +276,72 @@ export const TOTPTokenPage: React.FC = () => {
         otpauthUrl: form.otpauthUrl,
       });
       resetForm();
-      setSuccessMessage('令牌已保存');
+      setSuccessMessage("令牌已保存");
       await loadAccounts();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '保存令牌失败');
+      setErrorMessage(error instanceof Error ? error.message : "保存令牌失败");
     } finally {
       setIsSubmitting(false);
     }
   }, [form, isSubmitting, clearStatus, resetForm, loadAccounts]);
 
   /** 删除账户 */
-  const removeAccount = useCallback(async (accountId: string): Promise<void> => {
-    if (!window.confirm('确认删除这个令牌？')) return;
+  const removeAccount = useCallback(
+    async (accountId: string): Promise<void> => {
+      if (!window.confirm("确认删除这个令牌？")) return;
 
-    clearStatus();
-    try {
-      await deleteTOTPAccount(accountId);
-      setCodes((prev) => {
-        const next = { ...prev };
-        delete next[accountId];
-        return next;
-      });
-      setAccounts((prev) => prev.filter((account) => account.id !== accountId));
-      setSuccessMessage('令牌已删除');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '删除令牌失败');
-    }
-  }, [clearStatus]);
+      clearStatus();
+      try {
+        await deleteTOTPAccount(accountId);
+        setCodes((prev) => {
+          const next = { ...prev };
+          delete next[accountId];
+          return next;
+        });
+        setAccounts((prev) =>
+          prev.filter((account) => account.id !== accountId),
+        );
+        setSuccessMessage("令牌已删除");
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error ? error.message : "删除令牌失败",
+        );
+      }
+    },
+    [clearStatus],
+  );
 
   /** 复制验证码 */
-  const copyCode = useCallback(async (accountId: string): Promise<void> => {
-    const code = codes[accountId]?.code;
-    if (!code) return;
+  const copyCode = useCallback(
+    async (accountId: string): Promise<void> => {
+      const code = codes[accountId]?.code;
+      if (!code) return;
 
-    clearStatus();
-    try {
-      await navigator.clipboard.writeText(code);
-      messageApi.success('动态码已复制');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '复制失败');
-    }
-  }, [codes, clearStatus, messageApi]);
+      clearStatus();
+      try {
+        await navigator.clipboard.writeText(code);
+        messageApi.success("动态码已复制");
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "复制失败");
+      }
+    },
+    [codes, clearStatus, messageApi],
+  );
 
   /** 计算账户剩余秒数 */
-  const getRemainingSeconds = useCallback((account: TOTPAccount, codes: Record<string, TOTPCode>, nowMs: number): number => {
-    const code = codes[account.id];
-    if (!code) return account.period;
-    const expiresAt = new Date(code.expiresAt).getTime();
-    return Math.max(0, Math.ceil((expiresAt - nowMs) / 1000));
-  }, []);
+  const getRemainingSeconds = useCallback(
+    (
+      account: TOTPAccount,
+      codes: Record<string, TOTPCode>,
+      nowMs: number,
+    ): number => {
+      const code = codes[account.id];
+      if (!code) return account.period;
+      const expiresAt = new Date(code.expiresAt).getTime();
+      return Math.max(0, Math.ceil((expiresAt - nowMs) / 1000));
+    },
+    [],
+  );
 
   /** 定时器回调 - 使用 ref 存储避免依赖重建 */
   const tickRef = useRef<() => Promise<void>>(async () => {});
@@ -317,9 +355,11 @@ export const TOTPTokenPage: React.FC = () => {
     if (expiredAccounts.length === 0) return;
 
     try {
-      await Promise.all(expiredAccounts.map((account) => refreshCode(account.id)));
+      await Promise.all(
+        expiredAccounts.map((account) => refreshCode(account.id)),
+      );
     } catch (error) {
-      maLogger.warn('刷新 TOTP 动态码失败:', error);
+      maLogger.warn("刷新 TOTP 动态码失败:", error);
     }
   };
 
@@ -343,7 +383,10 @@ export const TOTPTokenPage: React.FC = () => {
     return accounts.map((account) => {
       const code = codes[account.id];
       const remaining = getRemainingSeconds(account, codes, nowMs);
-      const progress = Math.max(0, Math.min(100, (remaining / account.period) * 100));
+      const progress = Math.max(
+        0,
+        Math.min(100, (remaining / account.period) * 100),
+      );
       return { account, code, remaining, progress };
     });
   }, [accounts, codes, nowMs, getRemainingSeconds]);
@@ -361,14 +404,15 @@ export const TOTPTokenPage: React.FC = () => {
         </>
       }
       headRight={
-        <Button
+        <button
           className="icon-btn"
-          htmlType="button"
+          type="button"
           title="刷新"
           disabled={isLoading}
           onClick={refreshAll}
-          icon={<ClockCircleOutlined />}
-        />
+        >
+          <ClockCircleOutlined />
+        </button>
       }
     >
       {messageContextHolder}
@@ -384,7 +428,12 @@ export const TOTPTokenPage: React.FC = () => {
           <span>otpauth 链接</span>
           <Input.TextArea
             value={form.otpauthUrl}
-            onChange={(e) => setForm((prev) => ({ ...prev, otpauthUrl: e.target.value.trim() }))}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                otpauthUrl: e.target.value.trim(),
+              }))
+            }
             rows={2}
             placeholder="otpauth://totp/..."
           />
@@ -402,7 +451,12 @@ export const TOTPTokenPage: React.FC = () => {
             <span>账户</span>
             <Input
               value={form.accountName}
-              onChange={(e) => setForm((prev) => ({ ...prev, accountName: e.target.value.trim() }))}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  accountName: e.target.value.trim(),
+                }))
+              }
               type="text"
               autoComplete="off"
               placeholder="name@example.com"
@@ -412,7 +466,9 @@ export const TOTPTokenPage: React.FC = () => {
             <span>发行方</span>
             <Input
               value={form.issuer}
-              onChange={(e) => setForm((prev) => ({ ...prev, issuer: e.target.value.trim() }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, issuer: e.target.value.trim() }))
+              }
               type="text"
               autoComplete="off"
               placeholder="GitHub"
@@ -424,7 +480,9 @@ export const TOTPTokenPage: React.FC = () => {
           <span>Secret</span>
           <Input
             value={form.secret}
-            onChange={(e) => setForm((prev) => ({ ...prev, secret: e.target.value.trim() }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, secret: e.target.value.trim() }))
+            }
             type="password"
             autoComplete="off"
             placeholder="Base32 secret"
@@ -432,37 +490,39 @@ export const TOTPTokenPage: React.FC = () => {
         </label>
 
         <div className="form-actions">
-          <Button
+          <button
             className="secondary-btn"
-            htmlType="button"
+            type="button"
             disabled={isScanningQR}
             onClick={openQRPicker}
           >
-            {isScanningQR ? '解析中' : '上传二维码'}
-          </Button>
+            {isScanningQR ? "解析中" : "上传二维码"}
+          </button>
           <span className="form-spacer"></span>
-          <Button
+          <button
             className="secondary-btn"
-            htmlType="button"
+            type="button"
             disabled={isLoading}
             onClick={resetForm}
           >
             清空
-          </Button>
-          <Button
+          </button>
+          <button
             className="primary-btn"
-            type="primary"
-            htmlType="submit"
+            type="button"
             disabled={isSubmitDisabled}
-            loading={isSubmitting}
           >
-            {isSubmitting ? '保存中' : '保存令牌'}
-          </Button>
+            {isSubmitting ? "保存中" : "保存令牌"}
+          </button>
         </div>
       </form>
 
-      {errorMessage && <div className="notice notice--error">{errorMessage}</div>}
-      {successMessage && <div className="notice notice--success">{successMessage}</div>}
+      {errorMessage && (
+        <div className="notice notice--error">{errorMessage}</div>
+      )}
+      {successMessage && (
+        <div className="notice notice--success">{successMessage}</div>
+      )}
 
       {isLoading && accounts.length === 0 && (
         <div className="empty-state">加载中</div>

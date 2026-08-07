@@ -5,46 +5,51 @@
  * @file src/pages/popup/views/SettingPage.tsx
  * @description React 版设置页面 - 主题、站点脚本与功能入口集中配置
  */
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Switch as AntSwitch } from 'antd';
-import MaSwitch from '@/assets/components/MaSwitch';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
+import MaSwitch from "@/assets/components/MaSwitch";
 import {
   SettingOutlined,
   FileTextOutlined,
   ToolOutlined,
   CheckCircleOutlined,
-} from '@ant-design/icons';
-import TableContainer from '../components/TableContainer';
-import { storage } from '@/stores';
-import { sendMessageToContentScript } from '@/message/back-content';
-import { appConfigKey, domainConfigsKey } from '@/config';
-import { useDomainState, extractDomain } from '../composables/useDomainState';
+} from "@ant-design/icons";
+import TableContainer from "../components/TableContainer";
+import { storage } from "@/stores";
+import { sendMessageToContentScript } from "@/message/back-content";
+import { appConfigKey, domainConfigsKey } from "@/config";
+import { useDomainState, extractDomain } from "../composables/useDomainState";
 import {
   popupThemes,
   usePopupTheme,
   type PopupThemeKey,
-} from '../composables/usePopupTheme';
-import { usePopupMouseTrail } from '../composables/usePopupMouseTrail';
-import { mouseTrailPresetOptions } from '@/assets/composables/mouse/mouseTrailPreference';
+} from "../composables/usePopupTheme";
+import { usePopupMouseTrail } from "../composables/usePopupMouseTrail";
+import { mouseTrailPresetOptions } from "@/assets/composables/mouse/mouseTrailPreference";
 import {
   useDomainManager,
   type DomainConfigItem,
-} from '../composables/useDomainManager';
-import { usePluginManager } from '../composables/usePluginManager';
-import './setting-page.scss';
+} from "../composables/useDomainManager";
+import { usePluginManager } from "../composables/usePluginManager";
+import "./setting-page.scss";
 
 /**
  * 保存状态类型
  */
-type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+type SaveState = "idle" | "saving" | "saved" | "error";
 
 /**
  * 消息类型映射
  */
 const MESSAGE_TYPE = {
-  '0': 'CONFIG_INIT',
-  '1': 'CONFIG_UPDATE',
-  '2': 'CONFIG_DELETE',
+  "0": "CONFIG_INIT",
+  "1": "CONFIG_UPDATE",
+  "2": "CONFIG_DELETE",
 } as const;
 
 /**
@@ -60,15 +65,18 @@ export const SettingPage: React.FC = () => {
     setPopupMouseTrailPreset,
   } = usePopupMouseTrail();
   const { domainConfigs, loadDomainConfigs } = useDomainManager();
-  const { pluginConfigs, setPluginConfigs, loadPluginConfigs, isLoaded } = usePluginManager();
+  const { pluginConfigs, setPluginConfigs, loadPluginConfigs, isLoaded } =
+    usePluginManager();
 
-  const [selectedContentScript, setSelectedContentScript] = useState<string>('');
-  const [currentActivedTabDomain, setCurrentActivedTabDomain] = useState<string>('');
-  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [selectedContentScript, setSelectedContentScript] =
+    useState<string>("");
+  const [currentActivedTabDomain, setCurrentActivedTabDomain] =
+    useState<string>("");
+  const [saveState, setSaveState] = useState<SaveState>("idle");
 
   // 深拷贝 pluginConfigs 以便修改
-  const [localPluginConfigs, setLocalPluginConfigs] = useState(() => 
-    JSON.parse(JSON.stringify(pluginConfigs))
+  const [localPluginConfigs, setLocalPluginConfigs] = useState(() =>
+    JSON.parse(JSON.stringify(pluginConfigs)),
   );
 
   // 首次加载存储配置后，将真实状态同步到本地副本（仅执行一次）
@@ -81,14 +89,16 @@ export const SettingPage: React.FC = () => {
   }, [isLoaded, pluginConfigs]);
 
   // 保存状态重置定时器
-  const saveResetTimerRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const saveResetTimerRef = React.useRef<
+    ReturnType<typeof setTimeout> | undefined
+  >(undefined);
 
   /** 可用的内容脚本列表 */
   const availableContentScripts = useMemo<string[]>(() => {
     return Object.entries(domainConfigs)
       .filter(([key, config]) => {
-        if (key === 'Eve') return false;
-        if (typeof config === 'object' && config !== null) {
+        if (key === "Eve") return false;
+        if (typeof config === "object" && config !== null) {
           return (config as DomainConfigItem).enabled;
         }
         return true;
@@ -108,9 +118,8 @@ export const SettingPage: React.FC = () => {
 
   /** 已配置路由的插件数量 */
   const routedPluginCount = useMemo(() => {
-    return pluginConfigEntries.filter(
-      ([, value]) => value.type !== undefined,
-    ).length;
+    return pluginConfigEntries.filter(([, value]) => value.type !== undefined)
+      .length;
   }, [pluginConfigEntries]);
 
   /** 当前主题标签 */
@@ -123,30 +132,38 @@ export const SettingPage: React.FC = () => {
 
   /** 选中脚本标签 */
   const selectedScriptLabel = useMemo(() => {
-    if (!currentActivedTabDomain) return '当前站点未识别';
-    return selectedContentScript || '当前站点未绑定脚本';
+    if (!currentActivedTabDomain) return "当前站点未识别";
+    return selectedContentScript || "当前站点未绑定脚本";
   }, [currentActivedTabDomain, selectedContentScript]);
 
   /** 是否正在保存 */
-  const isSaving = saveState === 'saving';
+  const isSaving = saveState === "saving";
 
   /** 保存按钮标题 */
   const saveButtonTitle = useMemo(() => {
     switch (saveState) {
-      case 'saving': return '保存中';
-      case 'saved': return '已保存';
-      case 'error': return '保存失败';
-      default: return '保存配置';
+      case "saving":
+        return "保存中";
+      case "saved":
+        return "已保存";
+      case "error":
+        return "保存失败";
+      default:
+        return "保存配置";
     }
   }, [saveState]);
 
   /** 保存按钮提示 */
   const saveButtonHint = useMemo(() => {
     switch (saveState) {
-      case 'saving': return '正在写入本地并同步页面';
-      case 'saved': return '配置已同步到当前页面';
-      case 'error': return '请稍后重试或检查当前页面状态';
-      default: return '写入本地并同步到当前页面';
+      case "saving":
+        return "正在写入本地并同步页面";
+      case "saved":
+        return "配置已同步到当前页面";
+      case "error":
+        return "请稍后重试或检查当前页面状态";
+      default:
+        return "写入本地并同步到当前页面";
     }
   }, [saveState]);
 
@@ -156,7 +173,7 @@ export const SettingPage: React.FC = () => {
     return Array.from(
       new Set(
         domainsString
-          .split(',')
+          .split(",")
           .map((item) => item.trim())
           .filter(Boolean),
       ),
@@ -164,56 +181,70 @@ export const SettingPage: React.FC = () => {
   }, []);
 
   /** 获取域名配置字符串 */
-  const getDomainsString = useCallback((scriptKey: string): string => {
-    const config = domainConfigs[scriptKey];
-    if (typeof config === 'object' && config !== null) {
-      return (config as DomainConfigItem).domains || '';
-    }
-    return typeof config === 'string' ? config : '';
-  }, [domainConfigs]);
+  const getDomainsString = useCallback(
+    (scriptKey: string): string => {
+      const config = domainConfigs[scriptKey];
+      if (typeof config === "object" && config !== null) {
+        return (config as DomainConfigItem).domains || "";
+      }
+      return typeof config === "string" ? config : "";
+    },
+    [domainConfigs],
+  );
 
   /** 确保域名配置为对象格式 */
-  const ensureDomainConfigObject = useCallback((scriptKey: string): DomainConfigItem => {
-    const currentConfig = domainConfigs[scriptKey];
-    if (typeof currentConfig === 'object' && currentConfig !== null) {
-      return currentConfig as DomainConfigItem;
-    }
-
-    const normalizedConfig: DomainConfigItem = {
-      enabled: true,
-      domains: typeof currentConfig === 'string' ? currentConfig : '',
-    };
-    // 注意：此处不应直接修改 domainConfigs，需要通过 setter
-    return normalizedConfig;
-  }, [domainConfigs]);
-
-  /** 同步当前域名选择 */
-  const syncCurrentDomainSelection = useCallback((scriptKey: string): void => {
-    if (!currentActivedTabDomain) return;
-
-    const newDomainConfigs = { ...domainConfigs };
-    for (const [key] of Object.entries(domainConfigs)) {
-      if (key === 'Eve') continue;
-
-      const config = ensureDomainConfigObject(key);
-      const filteredDomains = parseDomains(config.domains).filter(
-        (item) => item !== currentActivedTabDomain,
-      );
-
-      if (scriptKey && key === scriptKey) {
-        filteredDomains.push(currentActivedTabDomain);
+  const ensureDomainConfigObject = useCallback(
+    (scriptKey: string): DomainConfigItem => {
+      const currentConfig = domainConfigs[scriptKey];
+      if (typeof currentConfig === "object" && currentConfig !== null) {
+        return currentConfig as DomainConfigItem;
       }
 
-      config.domains = Array.from(new Set(filteredDomains)).join(',');
-      newDomainConfigs[key] = config;
-    }
-    // 这里需要调用 setDomainConfigs，但目前没有这个 setter
-    // 实际使用时需要根据项目结构调整
-  }, [currentActivedTabDomain, domainConfigs, parseDomains, ensureDomainConfigObject]);
+      const normalizedConfig: DomainConfigItem = {
+        enabled: true,
+        domains: typeof currentConfig === "string" ? currentConfig : "",
+      };
+      // 注意：此处不应直接修改 domainConfigs，需要通过 setter
+      return normalizedConfig;
+    },
+    [domainConfigs],
+  );
+
+  /** 同步当前域名选择 */
+  const syncCurrentDomainSelection = useCallback(
+    (scriptKey: string): void => {
+      if (!currentActivedTabDomain) return;
+
+      const newDomainConfigs = { ...domainConfigs };
+      for (const [key] of Object.entries(domainConfigs)) {
+        if (key === "Eve") continue;
+
+        const config = ensureDomainConfigObject(key);
+        const filteredDomains = parseDomains(config.domains).filter(
+          (item) => item !== currentActivedTabDomain,
+        );
+
+        if (scriptKey && key === scriptKey) {
+          filteredDomains.push(currentActivedTabDomain);
+        }
+
+        config.domains = Array.from(new Set(filteredDomains)).join(",");
+        newDomainConfigs[key] = config;
+      }
+      // 这里需要调用 setDomainConfigs，但目前没有这个 setter
+      // 实际使用时需要根据项目结构调整
+    },
+    [
+      currentActivedTabDomain,
+      domainConfigs,
+      parseDomains,
+      ensureDomainConfigObject,
+    ],
+  );
 
   /** 解析选中脚本 */
   const resolveSelectedScript = useCallback((): string => {
-    if (!currentActivedTabDomain) return '';
+    if (!currentActivedTabDomain) return "";
 
     for (const scriptKey of availableContentScripts) {
       if (
@@ -224,8 +255,13 @@ export const SettingPage: React.FC = () => {
         return scriptKey;
       }
     }
-    return '';
-  }, [currentActivedTabDomain, availableContentScripts, parseDomains, getDomainsString]);
+    return "";
+  }, [
+    currentActivedTabDomain,
+    availableContentScripts,
+    parseDomains,
+    getDomainsString,
+  ]);
 
   /** 处理脚本变更 */
   const handleScriptChange = useCallback(() => {
@@ -233,20 +269,29 @@ export const SettingPage: React.FC = () => {
   }, [selectedContentScript, syncCurrentDomainSelection]);
 
   /** 选择主题 */
-  const selectTheme = useCallback(async (themeKey: PopupThemeKey): Promise<void> => {
-    if (themeKey === activeTheme) return;
-    await setPopupTheme(themeKey);
-  }, [activeTheme, setPopupTheme]);
+  const selectTheme = useCallback(
+    async (themeKey: PopupThemeKey): Promise<void> => {
+      if (themeKey === activeTheme) return;
+      await setPopupTheme(themeKey);
+    },
+    [activeTheme, setPopupTheme],
+  );
 
   /** 处理鼠标拖尾变更 */
-  const handleMouseTrailChange = useCallback(async (enabled: boolean): Promise<void> => {
-    await setPopupMouseTrail(enabled);
-  }, [setPopupMouseTrail]);
+  const handleMouseTrailChange = useCallback(
+    async (enabled: boolean): Promise<void> => {
+      await setPopupMouseTrail(enabled);
+    },
+    [setPopupMouseTrail],
+  );
 
   /** 处理鼠标拖尾预设变更 */
-  const handleMouseTrailPresetChange = useCallback(async (preset: any): Promise<void> => {
-    await setPopupMouseTrailPreset(preset);
-  }, [setPopupMouseTrailPreset]);
+  const handleMouseTrailPresetChange = useCallback(
+    async (preset: any): Promise<void> => {
+      await setPopupMouseTrailPreset(preset);
+    },
+    [setPopupMouseTrailPreset],
+  );
 
   /** 加载配置 */
   const loadConfig = useCallback(async (): Promise<void> => {
@@ -254,20 +299,25 @@ export const SettingPage: React.FC = () => {
       await loadPluginConfigs();
       await loadDomainConfigs();
     } catch (error) {
-      maLogger.error('加载配置失败:', error);
+      maLogger.error("加载配置失败:", error);
     }
   }, [loadPluginConfigs, loadDomainConfigs]);
 
   /** 获取当前活动标签页 */
-  const getActivedTab = useCallback(async (): Promise<chrome.tabs.Tab | undefined> => {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    return tabs[0];
-  }, []);
+  const getActivedTab =
+    useCallback(async (): Promise<chrome.tabs.Tab | null> => {
+      if (!chrome.tabs) return null;
+      const tabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      return tabs[0];
+    }, []);
 
   /** 获取当前活动标签页域名 */
   const getActivedTabDomain = useCallback(async (): Promise<string> => {
     const tab = await getActivedTab();
-    return extractDomain(tab?.url || '');
+    return extractDomain(tab?.url || "");
   }, [getActivedTab]);
 
   /** 安排保存状态重置 */
@@ -277,7 +327,7 @@ export const SettingPage: React.FC = () => {
     }
 
     saveResetTimerRef.current = setTimeout(() => {
-      setSaveState('idle');
+      setSaveState("idle");
       saveResetTimerRef.current = undefined;
     }, 1800);
   }, []);
@@ -286,7 +336,7 @@ export const SettingPage: React.FC = () => {
   const saveConfig = useCallback(async (): Promise<void> => {
     if (isSaving) return;
 
-    setSaveState('saving');
+    setSaveState("saving");
 
     try {
       if (chrome.storage?.local) {
@@ -295,14 +345,14 @@ export const SettingPage: React.FC = () => {
       }
 
       const res = await sendMessageToContentScript({
-        type: MESSAGE_TYPE['1'],
+        type: MESSAGE_TYPE["1"],
         payload: localPluginConfigs,
       });
       maLogger.log(res);
-      setSaveState('saved');
+      setSaveState("saved");
     } catch (error) {
-      maLogger.error('保存配置失败:', error);
-      setSaveState('error');
+      maLogger.error("保存配置失败:", error);
+      setSaveState("error");
     } finally {
       scheduleSaveStateReset();
     }
@@ -323,7 +373,7 @@ export const SettingPage: React.FC = () => {
       setCurrentActivedTabDomain(domain);
       setSelectedContentScript(resolveSelectedScript());
     });
-  }, [loadConfig, getActivedTabDomain, resolveSelectedScript]);
+  }, []);
 
   /** 加载主题和鼠标拖尾 */
   useEffect(() => {
@@ -382,7 +432,7 @@ export const SettingPage: React.FC = () => {
                 key={theme.key}
                 type="button"
                 className={`theme-option theme-option--${theme.key} ${
-                  activeTheme === theme.key ? 'theme-option--active' : ''
+                  activeTheme === theme.key ? "theme-option--active" : ""
                 }`}
                 aria-pressed={activeTheme === theme.key}
                 onClick={() => selectTheme(theme.key)}
@@ -400,28 +450,26 @@ export const SettingPage: React.FC = () => {
           </div>
 
           <div className="switch-row switch-row--appearance">
-            <div className="sci-fi-switch-container">
-              <div className="sci-fi-switch-label">鼠标拖尾</div>
-              <div className="switch-controls">
-                <select
-                  value={mouseTrailPreset}
-                  className="dropdown-select mouse-trail-preset-select"
-                  disabled={!isMouseTrailEnabled}
-                  aria-label="鼠标拖尾样式"
-                  onChange={(e) => handleMouseTrailPresetChange(e.target.value)}
-                >
-                  {mouseTrailPresetOptions.map((option: any) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <MaSwitch
-                  checked={isMouseTrailEnabled}
-                  onChange={(checked) => handleMouseTrailChange(checked)}
-                />
-              </div>
-            </div>
+            <MaSwitch
+              label="鼠标拖尾"
+              checked={isMouseTrailEnabled}
+              onChange={(checked) => handleMouseTrailChange(checked)}
+            >
+              <select
+                id="mouse-trail-preset-select"
+                value={mouseTrailPreset}
+                className="dropdown-select mouse-trail-preset-select"
+                disabled={!isMouseTrailEnabled}
+                aria-label="鼠标拖尾样式"
+                onChange={(e) => handleMouseTrailPresetChange(e.target.value)}
+              >
+                {mouseTrailPresetOptions.map((option: any) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </MaSwitch>
           </div>
         </section>
 
@@ -444,7 +492,7 @@ export const SettingPage: React.FC = () => {
             <div className="domain-row">
               <span className="field-label">当前域名</span>
               <strong className="domain-value">
-                {currentActivedTabDomain || '未识别'}
+                {currentActivedTabDomain || "未识别"}
               </strong>
             </div>
 
@@ -475,7 +523,7 @@ export const SettingPage: React.FC = () => {
 
             <div
               className={`selection-summary ${
-                !selectedContentScript ? 'selection-summary--empty' : ''
+                !selectedContentScript ? "selection-summary--empty" : ""
               }`}
             >
               <span className="selection-dot"></span>
@@ -504,39 +552,37 @@ export const SettingPage: React.FC = () => {
           {pluginConfigEntries.length > 0 ? (
             <div className="switch-list">
               {pluginConfigEntries.map(([key, app]) => (
-                <div
-                  key={key}
-                  className={`switch-row ${
-                    (app as any).type !== undefined ? 'switch-row--routed' : ''
-                  }`}
-                >
-                  <div className="sci-fi-switch-container">
-                    <div className="sci-fi-switch-label">{(app as any).name}</div>
-                    {(app as any).type === 'toolbar' && (app as any).options && (
-                      <div className="color-picker-wrapper">
-                        <input
-                          type="color"
-                          className="color-picker"
-                          value={(app as any).options.brandColor}
-                          aria-label="选择品牌颜色"
-                          onChange={(e) => {
-                            setLocalPluginConfigs((prev: any) => ({
-                              ...prev,
-                              [key]: {
-                                ...prev[key],
-                                options: { ...prev[key].options, brandColor: e.target.value },
-                              },
-                            }));
-                          }}
-                        />
-                        <span>{(app as any).options.brandColor}</span>
-                      </div>
-                    )}
-                    <MaSwitch
-                      checked={Boolean((app as any).enabled)}
-                      onChange={(checked) => handlePluginToggle(key, checked)}
-                    />
-                  </div>
+                <div key={key} className="switch-row">
+                  <MaSwitch
+                    label={(app as any).name}
+                    checked={Boolean((app as any).enabled)}
+                    onChange={(checked) => handlePluginToggle(key, checked)}
+                  >
+                    {(app as any).type === "toolbar" &&
+                      (app as any).options && (
+                        <div className="color-picker-wrapper">
+                          <input
+                            type="color"
+                            className="color-picker"
+                            value={(app as any).options.brandColor}
+                            aria-label="选择品牌颜色"
+                            onChange={(e) => {
+                              setLocalPluginConfigs((prev: any) => ({
+                                ...prev,
+                                [key]: {
+                                  ...prev[key],
+                                  options: {
+                                    ...prev[key].options,
+                                    brandColor: e.target.value,
+                                  },
+                                },
+                              }));
+                            }}
+                          />
+                          <span>{(app as any).options.brandColor}</span>
+                        </div>
+                      )}
+                  </MaSwitch>
                 </div>
               ))}
             </div>

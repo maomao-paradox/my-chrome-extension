@@ -4,7 +4,8 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 8px 0;
+  gap: 8px;
+  padding: 8px 9px;
 }
 
 .sci-fi-switch-label {
@@ -17,9 +18,35 @@
 }
 
 .sci-fi-switch {
+  flex-shrink: 0;
   position: relative;
   cursor: pointer;
   transition: all 0.3s ease;
+
+  &:hover,
+  &:active {
+    transform: none;
+  }
+
+  &.active {
+    .switch-track {
+      animation: none;
+      border-color: var(--popup-switch-active-border);
+      background: var(--popup-switch-active-bg);
+      box-shadow: var(--popup-inset-highlight);
+    }
+
+    .switch-thumb {
+      left: calc(100% - 23px);
+      background: var(--popup-switch-active-thumb-bg);
+    }
+
+    .switch-indicator {
+      right: 29px;
+      color: var(--popup-text-on-accent);
+      text-shadow: none;
+    }
+  }
 }
 
 /* 禁用状态 */
@@ -27,6 +54,13 @@
   cursor: not-allowed;
   opacity: 0.5;
   pointer-events: none;
+}
+
+/* 开关部件（统一过渡） */
+.switch-track,
+.switch-thumb,
+.switch-indicator {
+  transition: all 0.24s ease;
 }
 
 .switch-track {
@@ -56,6 +90,7 @@
     0 0 5px rgba(0, 153, 204, 0.5) inset;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 2;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .switch-glow {
@@ -64,11 +99,9 @@
   left: 50%;
   width: 0;
   height: 0;
-  background: radial-gradient(
-    circle,
-    rgba(0, 240, 255, 0.3) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(0, 240, 255, 0.3) 0%,
+      transparent 70%);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: all 0.5s ease;
@@ -110,11 +143,9 @@
 .sci-fi-switch.active .switch-glow {
   width: 150px;
   height: 150px;
-  background: radial-gradient(
-    circle,
-    rgba(0, 240, 255, 0.4) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(0, 240, 255, 0.4) 0%,
+      transparent 70%);
 }
 
 .sci-fi-switch.active .switch-indicator {
@@ -151,9 +182,11 @@
   0% {
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
   }
+
   50% {
     box-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
   }
+
   100% {
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
   }
@@ -185,6 +218,6 @@
   }
 
   .sci-fi-switch.active .switch-indicator {
-    right: 45px;
+    right: 35px;
   }
 }

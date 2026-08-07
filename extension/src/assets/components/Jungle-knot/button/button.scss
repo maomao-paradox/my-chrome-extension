@@ -81,5 +81,6 @@
     letter-spacing: 2px;
     color: #ffffff; /* 主体文字用深色，因为在白底上 */
     text-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
+    user-select: none; // 阻止选中文本
   }
 }

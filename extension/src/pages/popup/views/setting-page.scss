@@ -279,13 +279,7 @@
 }
 
 .sci-fi-switch-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
   min-height: 44px;
-  padding: 8px 9px;
 }
 
 .sci-fi-switch-label {
@@ -359,9 +353,9 @@
 
 .content-script-select,
 .dropdown-select {
-  width: 100%;
+  flex: 0;
   min-height: 32px;
-  padding: 0 30px 0 10px;
+  padding: 0 10px;
   border-radius: 10px;
   border: 1px solid var(--popup-border);
   background: var(--popup-control-bg-strong);
@@ -601,7 +595,8 @@
 }
 
 @keyframes savePulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {

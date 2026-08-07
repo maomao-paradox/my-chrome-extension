@@ -3,8 +3,6 @@
  * 从 Vue 版本迁移的 SCSS 样式
  * 合并 textarea-ai 样式以便统一作为 css/textSelectionToolbar 注入 Shadow DOM
  */
-@import "./textarea-ai.scss";
-
 .toolbar-root {
   position: relative;
 }

@@ -75,7 +75,7 @@ export function injectStyles(
  */
 export async function injectCssDom(shadowRoot: ShadowRoot, cssUrl: string) {
   try {
-    maLogger.log("Injecting CSS from:", cssUrl);
+    // maLogger.log("Injecting CSS from:", cssUrl);
     const cssContent = await fetch(cssUrl).then((res) => res.text());
     injectStyles(shadowRoot, cssContent);
     return cssContent;
