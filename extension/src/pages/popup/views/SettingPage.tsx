@@ -350,7 +350,11 @@ export const SettingPage: React.FC = () => {
         payload: localPluginConfigs,
       });
       maLogger.log(res);
-      setSaveState("saved");
+      if (res?.success) {
+        setSaveState("saved");
+      } else {
+        setSaveState("error");
+      }
     } catch (error) {
       maLogger.error("保存配置失败:", error);
       setSaveState("error");
