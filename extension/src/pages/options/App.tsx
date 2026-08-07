@@ -12,6 +12,7 @@ import React, {
   ComponentType,
   lazy,
   Suspense,
+  LazyExoticComponent,
 } from "react";
 import GlassCursor from "@components/cursors/GlassCursor";
 import PanelNav, {
@@ -24,7 +25,7 @@ import { STARSHIP_MODULES, StarshipPanelId } from "./views/starshipModules";
 import Static404 from "@/assets/components/Static404";
 
 // 懒加载组件
-// const HeroSection = lazy(() => import('@/pages/options/views/HeroSection'));
+const HeroSection = lazy(() => import("./views/HeroSection"));
 // const ContentScriptDomainConfig = lazy(() => import('@/pages/options/views/ContentScriptDomainConfig'));
 // const UserOption = lazy(() => import('@/pages/options/views/UserOption'));
 // const ExtensionSettings = lazy(() => import('@/pages/options/views/ExtensionSettings'));
@@ -43,8 +44,11 @@ const PERFORMANCE_BODY_CLASSES = [
   "options-performance-high",
 ] as const;
 
-const componentMap: Record<StarshipPanelId, ComponentType | React.ReactNode> = {
-  main: Static404,
+const componentMap: Record<
+  StarshipPanelId,
+  ComponentType | LazyExoticComponent<React.FC<any>>
+> = {
+  main: HeroSection,
   top: Static404,
   "top-left": Static404,
   "top-right": Static404,

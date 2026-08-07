@@ -43,7 +43,7 @@ export interface PanelNavs {
 export interface PanelBase {
   xPos: number;
   yPos: number;
-  page: React.ReactNode;
+  page: ComponentType<any> | React.ReactNode;
   title: string;
   meta: StarshipModuleMeta;
 }
@@ -950,13 +950,12 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
                 >
                   {key === "main" && shouldRenderPanel(key) && (
                     <Suspense fallback={null}>
-                      <Static404 />
-                      {/* <HeroSection
+                      <panel.page
                         modules={moduleStates}
                         activePanelKey={activePanelKey}
                         onOpenOverview={openTacticalOverview}
                         onNavigatePanel={focusPanel}
-                      /> */}
+                      />
                     </Suspense>
                   )}
 
