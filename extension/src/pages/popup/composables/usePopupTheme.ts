@@ -5,36 +5,44 @@
  * @file src/pages/popup/composables/usePopupTheme.ts
  * @description React 版主题管理 Hook
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
-export const popupThemeStorageKey = 'popupTheme';
+export const popupThemeStorageKey = "popupTheme";
 
 export const popupThemes = [
   {
-    key: 'midnight',
-    label: '深海',
-    description: '深色高对比',
+    key: "midnight",
+    label: "深海",
+    description: "深色对比系",
+    primaryColor: "#2dd4bf",
+    secondaryColor: "#0f172a",
   },
   {
-    key: 'daylight',
-    label: '晨雾',
-    description: '浅色柔和',
+    key: "daylight",
+    label: "晨雾",
+    description: "柔和暖色系",
+    primaryColor: "#f59e0b",
+    secondaryColor: "#ffffff",
   },
   {
-    key: 'jungle-knot',
-    label: '故障结',
-    description: '青紫故障色',
+    key: "jungle-knot",
+    label: "故障结",
+    description: "酸绿故障系",
+    primaryColor: "#73f51cff",
+    secondaryColor: "#330505ff",
   },
   {
-    key: 'retro-terminal',
-    label: '黑白',
-    description: '极简强对比',
+    key: "retro-terminal",
+    label: "黑白",
+    description: "黑白复古系",
+    primaryColor: "#d8d8d8ff",
+    secondaryColor: "#140303ff",
   },
 ] as const;
 
-export type PopupThemeKey = (typeof popupThemes)[number]['key'];
+export type PopupThemeKey = (typeof popupThemes)[number]["key"];
 
-const defaultTheme: PopupThemeKey = 'midnight';
+const defaultTheme: PopupThemeKey = "midnight";
 
 /**
  * 判断值是否为有效主题键
@@ -55,7 +63,7 @@ const normalizeThemeKey = (value: unknown): PopupThemeKey => {
  */
 const applyTheme = (themeKey: PopupThemeKey): void => {
   document.documentElement.dataset.popupTheme = themeKey;
-  document.body?.setAttribute('data-popup-theme', themeKey);
+  document.body?.setAttribute("data-popup-theme", themeKey);
 };
 
 /**
@@ -76,12 +84,12 @@ export const applyStoredPopupThemeHint = (): void => {
  */
 const readStoredTheme = async (): Promise<PopupThemeKey> => {
   try {
-    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+    if (typeof chrome !== "undefined" && chrome.storage?.local) {
       const snapshot = await chrome.storage.local.get(popupThemeStorageKey);
       return normalizeThemeKey(snapshot[popupThemeStorageKey]);
     }
   } catch (error) {
-    maLogger.warn('读取 popup 主题失败，使用本地缓存:', error);
+    maLogger.warn("读取 popup 主题失败，使用本地缓存:", error);
   }
 
   try {
@@ -98,15 +106,15 @@ const persistTheme = async (themeKey: PopupThemeKey): Promise<void> => {
   try {
     localStorage.setItem(popupThemeStorageKey, themeKey);
   } catch (error) {
-    maLogger.warn('写入 popup 主题缓存失败:', error);
+    maLogger.warn("写入 popup 主题缓存失败:", error);
   }
 
   try {
-    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+    if (typeof chrome !== "undefined" && chrome.storage?.local) {
       await chrome.storage.local.set({ [popupThemeStorageKey]: themeKey });
     }
   } catch (error) {
-    maLogger.warn('保存 popup 主题失败:', error);
+    maLogger.warn("保存 popup 主题失败:", error);
   }
 };
 
@@ -117,9 +125,8 @@ export const usePopupTheme = () => {
   const [activeTheme, setActiveTheme] = useState<PopupThemeKey>(defaultTheme);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const activeThemeConfig = popupThemes.find(
-    (theme) => theme.key === activeTheme,
-  ) ?? popupThemes[0];
+  const activeThemeConfig =
+    popupThemes.find((theme) => theme.key === activeTheme) ?? popupThemes[0];
 
   const loadPopupTheme = useCallback(async (): Promise<void> => {
     const theme = await readStoredTheme();

@@ -2,7 +2,7 @@
  * @file src/assets/components/layout/PanelNav.tsx
  * @description React 版 Options 星舰面板导航。
  */
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState, type ComponentType, type CSSProperties } from 'react';
 import TacticalOverview from '@/pages/options/views/TacticalOverview';
 import {
   STARSHIP_MODULES,
@@ -11,6 +11,7 @@ import {
   type StarshipPanelId,
 } from '@/pages/options/views/starshipModules';
 import { useStarshipTelemetry } from './useStarshipTelemetry';
+import BrowserVarView from '@/pages/options/views/BrowserVarView';
 
 type Direction = 'top' | 'right' | 'bottom' | 'left';
 
@@ -21,6 +22,23 @@ const DIRECTION_OFFSETS: Record<Direction, { x: number; y: number }> = {
   left: { x: -1, y: 0 },
 };
 
+const reactPanelMap: Partial<Record<StarshipPanelId, ComponentType>> = {
+  'top-right': BrowserVarView,
+};
+
+const ReactModulePlaceholder = ({ panelKey }: { panelKey: StarshipPanelId }) => {
+  const module = STARSHIP_MODULES.find((item) => item.id === panelKey) ?? STARSHIP_MODULES[0];
+
+  return (
+    <section className="react-module-placeholder">
+      <span>{module.glyph}</span>
+      <h2>{module.title}</h2>
+      <p>{module.description}</p>
+      <small>该舱段的 Vue 业务面板待迁移为 React 组件。</small>
+    </section>
+  );
+};
+
 const PanelNav = () => {
   const [activePanelKey, setActivePanelKey] = useState<StarshipPanelId>('main');
   const [showOverview, setShowOverview] = useState(false);
@@ -29,6 +47,7 @@ const PanelNav = () => {
   const activeModule = modules.find((module) => module.id === activePanelKey) ?? modules[0];
   const peripheralModules = modules.filter((module) => module.id !== 'main');
   const gridModules = [...peripheralModules].sort((a, b) => b.position.y - a.position.y || a.position.x - b.position.x);
+  const ActivePanelComponent = reactPanelMap[activePanelKey];
 
   const focusPanel = (panelKey: StarshipPanelId) => {
     setActivePanelKey(panelKey);
@@ -183,6 +202,21 @@ const PanelNav = () => {
             </button>
           ))}
         </section>
+
+        {activePanelKey !== 'main' ? (
+          <section className="react-module-shell" data-status={activeModule.telemetry.status}>
+            <header className="react-module-shell__header">
+              <div>
+                <span>{activeModule.glyph} / {activeModule.section}</span>
+                <h2>{activeModule.title}</h2>
+              </div>
+              <button type="button" onClick={() => focusPanel('main')}>返回指挥中心</button>
+            </header>
+            <div className="react-module-shell__body">
+              {ActivePanelComponent ? <ActivePanelComponent /> : <ReactModulePlaceholder panelKey={activePanelKey} />}
+            </div>
+          </section>
+        ) : null}
 
         <footer className="bridge-footer">
           <span>EDGE NAV ACTIVE</span>

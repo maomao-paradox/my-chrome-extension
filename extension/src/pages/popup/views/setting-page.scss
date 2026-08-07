@@ -245,15 +245,16 @@
     font-size: 12px;
     font-weight: 700;
     line-height: 1.15;
-    color: var(--popup-text-primary);
+    // color: var(--popup-text-primary);
   }
 
-  small {
+  span {
     display: -webkit-box;
     overflow: hidden;
     font-size: 10px;
+    font-weight: 600;
     line-height: 1.25;
-    color: var(--popup-text-subtle);
+    // color: var(--popup-text-subtle);
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;

@@ -319,13 +319,13 @@
 }
 
 /* 主题特定样式 */
-:root[data-popup-theme="retro-terminal"] {
-  .tab-btn.active {
-    color: var(--popup-text-on-accent);
+// :root[data-popup-theme="retro-terminal"] {
+//   .tab-btn.active {
+//     color: var(--popup-text-on-accent);
 
-    .tab-icon,
-    .tab-label {
-      color: var(--popup-text-on-accent);
-    }
-  }
-}
+//     .tab-icon,
+//     .tab-label {
+//       color: var(--popup-text-on-accent);
+//     }
+//   }
+// }

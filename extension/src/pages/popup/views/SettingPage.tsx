@@ -36,6 +36,7 @@ import {
   type DomainConfigItem,
 } from "../composables/useDomainManager";
 import { usePluginManager } from "../composables/usePluginManager";
+import JungleKnotButton from "@/assets/components/Jungle-knot/Button";
 import "./setting-page.scss";
 
 /**
@@ -428,24 +429,25 @@ export const SettingPage: React.FC = () => {
 
           <div className="theme-grid">
             {popupThemes.map((theme) => (
-              <button
+              <li
                 key={theme.key}
-                type="button"
                 className={`theme-option theme-option--${theme.key} ${
                   activeTheme === theme.key ? "theme-option--active" : ""
                 }`}
                 aria-pressed={activeTheme === theme.key}
-                onClick={() => selectTheme(theme.key)}
               >
-                <span className="theme-preview">
-                  <span className="theme-preview__panel"></span>
-                  <span className="theme-preview__accent"></span>
-                </span>
-                <span className="theme-copy">
-                  <strong>{theme.label}</strong>
-                  <small>{theme.description}</small>
-                </span>
-              </button>
+                <JungleKnotButton
+                  label="THEME"
+                  onClick={() => selectTheme(theme.key)}
+                  primaryColor={theme.primaryColor}
+                  secondaryColor={theme.secondaryColor}
+                >
+                  <span className="theme-copy">
+                    <strong>{theme.label}</strong>
+                    <span>{theme.description}</span>
+                  </span>
+                </JungleKnotButton>
+              </li>
             ))}
           </div>
 

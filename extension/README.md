@@ -146,7 +146,7 @@ await chrome.runtime.sendMessage({
 ### 个人主页
 - 提供独立创意个人主页，包含动漫赛博主视觉、幻想展柜、技法展示、丰富动画交互与静态模式切换
 - 开发模式可访问 `http://127.0.0.1:5173/pages/profile.html`
-- 浏览器插件环境下访问插件的 options 页面；当前已将 `PanelNav`、星舰总览弹层 `TacticalOverview` 与玻璃星轨光标 `GlassCursor` 迁移为 React 组件
+- 浏览器插件环境下访问插件的 options 页面；当前已将 `PanelNav`、星舰总览弹层 `TacticalOverview`、玻璃星轨光标 `GlassCursor`、浏览器变量查看器迁移为 React 组件
 
 ### 3D 旋转展示页
 - `src/pages/index.html` 已封装为 Vue 3 入口，页面逻辑集中在 `src/pages/index/App.vue`
