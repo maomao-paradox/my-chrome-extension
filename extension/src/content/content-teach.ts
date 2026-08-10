@@ -11,7 +11,7 @@ import { waitForSelector, getElementAbsolutePosition, createEl, PositionStrategy
 import { createApp } from 'vue';
 import { Requester, get_token } from '@/services/api/mria-api';
 import type { Response, ExtMessage, MessageHandler, Tool } from '@/types';
-import { QuickLogin } from '@components/index';
+// import { QuickLogin } from '@components/index';
 import { storage } from '@/stores';
 import { whenDomReady } from '@/utils/element-control';
 import messenger from '@/message';
@@ -81,16 +81,16 @@ export default (ctx: AppContext, config = {}) => {
         // 将容器添加到Shadow DOM
         shadowRoot.appendChild(loginContainer);
 
-        const app = createApp(QuickLogin, {
-          userList: {
-            ['mp' + _ADMIN]: { realname: '超级管理员', password: _ADMIN + '123', enabled: !0, role: '管理员' },
-            //@ts-ignore
-            'PinDuoDuo': { realname: '拼多多', password: '123456', enabled: !0, role: '学生' },
-            'app': { realname: '逃课的学生', password: '123456', enabled: !0, role: '学生' }
-          }
-        });
+        // const app = createApp(QuickLogin, {
+        //   userList: {
+        //     ['mp' + _ADMIN]: { realname: '超级管理员', password: _ADMIN + '123', enabled: !0, role: '管理员' },
+        //     //@ts-ignore
+        //     'PinDuoDuo': { realname: '拼多多', password: '123456', enabled: !0, role: '学生' },
+        //     'app': { realname: '逃课的学生', password: '123456', enabled: !0, role: '学生' }
+        //   }
+        // });
 
-        app.mount(loginContainer);
+        // app.mount(loginContainer);
 
         // 使用新的定位方法定位登录组件
         positionInfo.positionElement({

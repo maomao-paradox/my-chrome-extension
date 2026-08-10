@@ -57,7 +57,7 @@ import type {
   MessageHandler,
   Tool,
 } from "@/types";
-import { QuickLogin, ElInputSearch } from "@components/index";
+// import { QuickLogin, ElInputSearch } from "@components/index";
 import { storage } from "@/stores";
 import { getRuntimeScript } from "@/utils";
 import { whenDomReady } from "@/utils/element-control";
@@ -491,20 +491,20 @@ export default (ctx: AppContext, config = {}) => {
 
     shadowRoot.appendChild(loginContainer);
 
-    const app = createApp(QuickLogin, {
-      userList: {
-        ["mp" + _ADMIN]: {
-          realname: "超级管理员",
-          password: _ADMIN + "123",
-          enabled: true,
-          role: "管理员",
-        },
-        //@ts-ignore
-        ...ctx["userInfo"],
-      },
-    });
+    // const app = createApp(QuickLogin, {
+    //   userList: {
+    //     ["mp" + _ADMIN]: {
+    //       realname: "超级管理员",
+    //       password: _ADMIN + "123",
+    //       enabled: true,
+    //       role: "管理员",
+    //     },
+    //     //@ts-ignore
+    //     ...ctx["userInfo"],
+    //   },
+    // });
 
-    app.mount(loginContainer);
+    // app.mount(loginContainer);
 
     positionInfo.positionElement({
       targetElement: loginContainer,
@@ -596,7 +596,8 @@ export default (ctx: AppContext, config = {}) => {
     waitForSelector({
       selector: "div#pane-linkLibryay",
       callback: injectVueComponent(
-        ElInputSearch,
+        // ElInputSearch,
+        {},
         getFormSearchComponentConfig(),
       ),
       callbackArgs: ["afterbegin"],
@@ -869,7 +870,7 @@ export default (ctx: AppContext, config = {}) => {
 
   whenDomReady(() => {
     // 注入XHR补丁
-    injectXhrPatch(xhrRules['mria']);
+    injectXhrPatch(xhrRules["mria"]);
     // 初始化寄生式注入
     parasitism();
     // 初始化侧边栏

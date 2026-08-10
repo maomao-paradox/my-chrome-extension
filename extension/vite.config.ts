@@ -1,9 +1,6 @@
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
 import react from "@vitejs/plugin-react";
 import AutoImport from "unplugin-auto-import/vite";
-import Components from "unplugin-vue-components/vite";
-import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { crx } from "@crxjs/vite-plugin";
 import manifest from "./src/manifest.config";
 import path from "path";
@@ -11,7 +8,6 @@ import encryptFileMapPlugin from "./plugins/encrypt-file-map";
 import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
-import svgLoader from "vite-svg-loader";
 
 const isProduction = process.env.NODE_ENV === "production";
 const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
@@ -22,7 +18,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       "@components": path.resolve(__dirname, "./src/assets/components"),
       "@icons": path.resolve(__dirname, "./src/assets/icons"),
-      "@types": path.resolve(__dirname, "./src/assets/types"),
+      "@types": path.resolve(__dirname, "./src/types"),
     },
   },
   root: "src/",
@@ -30,22 +26,7 @@ export default defineConfig({
   envDir: "../",
   cacheDir: "../node_modules/.vite",
   plugins: [
-    vue(),
-    react({
-      jsxRuntime: "automatic",
-    }),
-    svgLoader({
-      defaultImport: "url", // 默认作为 URL
-      // 这样你可以通过 ?url 来获取 URL，通过 ?component 来获取组件
-    }),
-    AutoImport({
-      resolvers: [ElementPlusResolver()],
-      dts: true,
-    }),
-    Components({
-      resolvers: [ElementPlusResolver()],
-      dts: true,
-    }),
+    react(),
     crx({
       manifest,
       contentScripts: {
@@ -125,10 +106,8 @@ export default defineConfig({
       output: {
         manualChunks: isProduction
           ? {
-              vue: ["vue", "vue-router", "pinia"],
               react: ["react", "react-dom/client"],
               antd: ["antd", "@ant-design/icons"],
-              "element-plus": ["element-plus", "@element-plus/icons-vue"],
               // 基础设施 - 纯函数工具，可在 Service Worker 中使用
               "infrastructure-pure": ["@/utils/pure-utils"],
               // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
@@ -187,14 +166,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: [
-      "vue",
-      "pinia",
-      "vue-router",
-      "element-plus",
-      "react",
-      "react-dom/client",
-    ],
+    include: ["react", "react-dom/client"],
     esbuildOptions: {
       target: "es2022",
     },

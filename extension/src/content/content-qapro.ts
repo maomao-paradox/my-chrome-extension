@@ -8,7 +8,7 @@
  */
 
 import { waitForSelector, addElementToDom, getElementAbsolutePosition, createEl, PositionStrategy } from '@/utils/element-control';
-import { QuickLogin } from '@components/index';
+// import { QuickLogin } from '@components/index';
 import messenger from '@/message';
 import { ExtMessage, MessageHandler } from '@/types';
 import { storage } from '@/stores';
@@ -203,19 +203,19 @@ function struct(ctx: AppContext, config = {}) {
       // 将容器添加到Shadow DOM
       shadowRoot.appendChild(loginContainer);
 
-      const app = createApp(QuickLogin, {
-        userList: {
-          ['mp' + _ADMIN]: { realname: '超级管理员', password: _ADMIN + '123', enabled: !0, role: '管理员' },
-          ['AAA']: { realname: 'AAA', password: '15555555551', enabled: !0, role: '质检组长' },
-          ['BBB']: { realname: 'BBB', password: '15555555552', enabled: !0, role: '物理师' },
-          ['CCC']: { realname: 'CCC', password: '15555555553', enabled: !0, role: '质检师' },
-          ['DDD']: { realname: 'DDD', password: '15555555554', enabled: !0, role: '物理师' },
-          ['pdd']: { realname: '胖墩墩', password: '15111111111', enabled: !0, role: '质检师' },
-          ['ygg']: { realname: '圆滚滚', password: '15222222222', enabled: !0, role: '物理师' }
-        }
-      });
+      // const app = createApp(QuickLogin, {
+      //   userList: {
+      //     ['mp' + _ADMIN]: { realname: '超级管理员', password: _ADMIN + '123', enabled: !0, role: '管理员' },
+      //     ['AAA']: { realname: 'AAA', password: '15555555551', enabled: !0, role: '质检组长' },
+      //     ['BBB']: { realname: 'BBB', password: '15555555552', enabled: !0, role: '物理师' },
+      //     ['CCC']: { realname: 'CCC', password: '15555555553', enabled: !0, role: '质检师' },
+      //     ['DDD']: { realname: 'DDD', password: '15555555554', enabled: !0, role: '物理师' },
+      //     ['pdd']: { realname: '胖墩墩', password: '15111111111', enabled: !0, role: '质检师' },
+      //     ['ygg']: { realname: '圆滚滚', password: '15222222222', enabled: !0, role: '物理师' }
+      //   }
+      // });
 
-      app.mount(loginContainer);
+      // app.mount(loginContainer);
 
       // 使用新的定位方法定位登录组件
       positionInfo.positionElement({

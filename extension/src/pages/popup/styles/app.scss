@@ -260,6 +260,7 @@
 }
 
 .tab-content-enter {
+  margin-bottom: 10px;
   animation: tabFadeIn 0.2s ease-out;
 }
 
@@ -278,7 +279,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 42px;
+  min-height: 32px;
   padding: 0 20px;
   font-size: 12px;
   color: var(--popup-text-subtle);
@@ -296,7 +297,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

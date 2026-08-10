@@ -83,8 +83,8 @@
     font-weight: 700;
   }
 
-  .ant-input,
-  .ant-input-affix-wrapper {
+  &--input,
+  &--textarea {
     width: 100%;
     min-width: 0;
     border: 1px solid var(--popup-border-muted);
@@ -97,8 +97,7 @@
     outline: none;
     box-sizing: border-box;
 
-    &:focus,
-    &.ant-input-affix-wrapper-focused {
+    &:focus {
       border-color: var(--popup-border-strong);
       box-shadow: 0 0 0 4px var(--popup-focus-ring);
     }
@@ -108,7 +107,7 @@
     }
   }
 
-  .ant-input-affix-wrapper textarea {
+  &--textarea {
     resize: vertical;
     min-height: 54px;
   }

@@ -38,6 +38,7 @@ import {
 import { usePluginManager } from "../composables/usePluginManager";
 import JungleKnotButton from "@/assets/components/Jungle-knot/Button";
 import "./setting-page.scss";
+import { ConfigItem } from "@/types";
 
 /**
  * 保存状态类型
@@ -76,9 +77,9 @@ export const SettingPage: React.FC = () => {
   const [saveState, setSaveState] = useState<SaveState>("idle");
 
   // 深拷贝 pluginConfigs 以便修改
-  const [localPluginConfigs, setLocalPluginConfigs] = useState(() =>
-    JSON.parse(JSON.stringify(pluginConfigs)),
-  );
+  const [localPluginConfigs, setLocalPluginConfigs] = useState<
+    Record<string, ConfigItem>
+  >(() => JSON.parse(JSON.stringify(pluginConfigs)));
 
   // 首次加载存储配置后，将真实状态同步到本地副本（仅执行一次）
   const hasSyncedRef = useRef(false);

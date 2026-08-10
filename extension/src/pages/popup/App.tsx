@@ -5,21 +5,21 @@
  * @file src/pages/popup/App.tsx
  * @description React 版 Popup 主组件 - 包含 tab 导航和页面切换
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   SettingOutlined,
   CameraOutlined,
   PushpinOutlined,
   ClockCircleOutlined,
-} from '@ant-design/icons';
-import BookmarkPage from './views/BookmarkPage';
-import SettingPage from './views/SettingPage';
-import CapturePage from './views/CapturePage';
-import TOTPTokenPage from './views/TOTPTokenPage';
-import { useDomainState } from './composables/useDomainState';
-import { usePopupTheme } from './composables/usePopupTheme';
-import { usePopupMouseTrail } from './composables/usePopupMouseTrail';
-import './styles/app.scss';
+} from "@ant-design/icons";
+import BookmarkPage from "./views/BookmarkPage";
+import SettingPage from "./views/SettingPage";
+import CapturePage from "./views/CapturePage";
+import TOTPTokenPage from "./views/TOTPTokenPage";
+import { useDomainState } from "./composables/useDomainState";
+import { usePopupTheme } from "./composables/usePopupTheme";
+import { usePopupMouseTrail } from "./composables/usePopupMouseTrail";
+import "./styles/app.scss";
 
 /**
  * Tab 配置项类型
@@ -37,30 +37,30 @@ interface TabConfig {
  */
 const TABS: TabConfig[] = [
   {
-    key: 'bookmarks',
-    label: '笔记',
-    hint: '管理片段笔记，快速回溯对应页面。',
+    key: "bookmarks",
+    label: "笔记",
+    hint: "管理片段笔记，快速回溯对应页面。",
     icon: <PushpinOutlined />,
     component: BookmarkPage,
   },
   {
-    key: 'capture',
-    label: '捕获',
-    hint: '从当前页面拾取组件，结果同步到开发者工具。',
+    key: "capture",
+    label: "捕获",
+    hint: "从当前页面拾取组件，结果同步到开发者工具。",
     icon: <CameraOutlined />,
     component: CapturePage,
   },
   {
-    key: 'tokens',
-    label: '令牌',
-    hint: '查看后端生成的动态验证码。',
+    key: "tokens",
+    label: "令牌",
+    hint: "查看后端生成的动态验证码。",
     icon: <ClockCircleOutlined />,
     component: TOTPTokenPage,
   },
   {
-    key: 'settings',
-    label: '设置',
-    hint: '管理内容脚本与插件默认打开方式。',
+    key: "settings",
+    label: "设置",
+    hint: "管理内容脚本与插件默认打开方式。",
     icon: <SettingOutlined />,
     component: SettingPage,
   },
@@ -81,7 +81,7 @@ const App: React.FC = () => {
   const CurrentComponent = currentTab.component;
 
   /** 页面标题 */
-  const popupTitle = chrome.i18n?.getMessage('popupTitle') ?? 'POPUP测试页';
+  const popupTitle = chrome.i18n?.getMessage("popupTitle") ?? "POPUP测试页";
 
   /** 初始化加载 */
   useEffect(() => {
@@ -109,11 +109,11 @@ const App: React.FC = () => {
             <div className="header-meta">
               <div
                 className={`status-chip ${
-                  isDomainDisabled ? 'status-chip--off' : 'status-chip--on'
+                  isDomainDisabled ? "status-chip--off" : "status-chip--on"
                 }`}
               >
                 <span className="status-dot"></span>
-                <span>{isDomainDisabled ? '停用' : '可用'}</span>
+                <span>{isDomainDisabled ? "停用" : "可用"}</span>
               </div>
               <span className="header-version">v1.0.0</span>
             </div>
@@ -121,11 +121,15 @@ const App: React.FC = () => {
         </header>
 
         {/* Tab 导航 */}
-        <nav className="tab-navigation" aria-label="Popup navigation" role="tablist">
+        <nav
+          className="tab-navigation"
+          aria-label="Popup navigation"
+          role="tablist"
+        >
           {TABS.map((tab) => (
             <button
               key={tab.key}
-              className={`tab-btn ${activeTab === tab.key ? 'active' : ''}`}
+              className={`tab-btn ${activeTab === tab.key ? "active" : ""}`}
               role="tab"
               type="button"
               aria-selected={activeTab === tab.key}

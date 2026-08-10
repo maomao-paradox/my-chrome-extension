@@ -7,39 +7,34 @@
  * @date 2026-02-05T02:38:01.693Z
  */
 
-import { Component } from 'vue';
-
 // 简洁的导入导出方式
-export { default as IconDownload } from './download.svg?component';
-export { default as IconSearch } from './search.svg?component';
-export { default as IconDelete } from './delete.svg?component';
-export { default as IconInfo } from './info.svg?component';
-export { default as IconEarth } from './earth.svg?component';
-export { default as IconSetting } from './setting.svg?component';
-export { default as IconDocument } from './document.svg?component';
-export { default as IconLoading } from './loading.svg?component';
-export { default as IconCommunity } from './community.svg?component';
-export { default as IconSupport } from './support.svg?component';
-export { default as IconTooling } from './tool.svg?component';
-export { default as IconEcosystem } from './ecosystem.svg?component';
-export { default as IconUpload } from './upload.svg?component';
-export { default as IconOpen } from './open.svg?component';
-export { default as IconBookmark } from './bookmark.svg?component';
-export { default as IconFullScreen } from './full-screen.svg?component';
-export { default as IconOffScreen } from './off-screen.svg?component';
-export { default as IconClose } from './close.svg?component';
-export { default as IconTime } from './time.svg?component';
-export { default as IconCapture } from './capture.svg?component';
-export { default as IconPreviousMusic } from './previous-music.svg?component';
-export { default as IconPlay } from './play.svg?component';
-export { default as IconPause } from './pause.svg?component';
-export { default as IconNextMusic } from './next-music.svg?component';
-export { default as GlowingArrow } from './GlowingArrow.vue';
-export { default as IconConfirm } from './confirm.svg?component';
-export { default as IconAIChat } from './ai-chat.svg?component';
+export { default as IconDownload } from "./download.svg";
+export { default as IconSearch } from "./search.svg";
+export { default as IconDelete } from "./delete.svg";
+export { default as IconInfo } from "./info.svg";
+export { default as IconEarth } from "./earth.svg";
+export { default as IconSetting } from "./setting.svg";
+export { default as IconDocument } from "./document.svg";
+export { default as IconLoading } from "./loading.svg";
+export { default as IconCommunity } from "./community.svg";
+export { default as IconSupport } from "./support.svg";
+export { default as IconTooling } from "./tool.svg";
+export { default as IconEcosystem } from "./ecosystem.svg";
+export { default as IconUpload } from "./upload.svg";
+export { default as IconOpen } from "./open.svg";
+export { default as IconBookmark } from "./bookmark.svg";
+export { default as IconFullScreen } from "./full-screen.svg";
+export { default as IconOffScreen } from "./off-screen.svg";
+export { default as IconClose } from "./close.svg";
+export { default as IconClock } from "./clock.svg";
+export { default as IconCapture } from "./capture.svg";
+export { default as IconPreviousMusic } from "./previous-music.svg";
+export { default as IconPlay } from "./play.svg";
+export { default as IconPause } from "./pause.svg";
+export { default as IconNextMusic } from "./next-music.svg";
+export { default as IconConfirm } from "./confirm.svg";
+export { default as IconAIChat } from "./ai-chat.svg";
 
-import IconAIChat from './ai-chat.svg?component';
+import IconAIChat from "./ai-chat.svg";
 
-export const toolIcon: Map<string, Component> = new Map([
-  ['ai-chat', IconAIChat as Component]
-]);
+export const toolIcon: Map<string, any> = new Map([["ai-chat", IconAIChat]]);

@@ -32,6 +32,7 @@ export interface TextTool extends Tool {
 
 export interface ConfigItem {
   id?: string;
+  enabled: boolean;
   value: boolean;
   desc: string;
   type?: 'dialog' | 'sidepanel';

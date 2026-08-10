@@ -12,8 +12,6 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { Button, Input, message } from "antd";
-import { ClockCircleOutlined } from "@ant-design/icons";
 import jsQR from "jsqr";
 import TableContainer from "../components/TableContainer";
 import {
@@ -25,6 +23,7 @@ import {
   type TOTPCode,
 } from "@/services/api/totp-api";
 import "./totp-token-page.scss";
+import ClockSvg from "@/assets/icons/clock.svg?url";
 
 /**
  * 表单数据类型
@@ -81,22 +80,21 @@ const TokenCard: React.FC<TokenCardProps> = React.memo(
             <span>{remainingText}</span>
           </div>
           <div className="token-actions">
-            <Button
+            <button
               className="text-btn"
-              htmlType="button"
+              type="button"
               disabled={!code?.code}
               onClick={onCopy}
             >
               复制
-            </Button>
-            <Button
+            </button>
+            <button
               className="text-btn text-btn--danger"
-              htmlType="button"
-              danger
+              type="button"
               onClick={onDelete}
             >
               删除
-            </Button>
+            </button>
           </div>
         </div>
       </article>
@@ -128,7 +126,7 @@ export const TOTPTokenPage: React.FC = () => {
     otpauthUrl: "",
   });
 
-  const [messageApi, messageContextHolder] = message.useMessage();
+  // const [messageApi, messageContextHolder] = message.useMessage();
 
   /** 提交按钮是否禁用 */
   const isSubmitDisabled = useMemo(() => {
@@ -320,12 +318,12 @@ export const TOTPTokenPage: React.FC = () => {
       clearStatus();
       try {
         await navigator.clipboard.writeText(code);
-        messageApi.success("动态码已复制");
+        // messageApi.success("动态码已复制");
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : "复制失败");
       }
     },
-    [codes, clearStatus, messageApi],
+    [codes, clearStatus],
   );
 
   /** 计算账户剩余秒数 */
@@ -411,12 +409,10 @@ export const TOTPTokenPage: React.FC = () => {
           disabled={isLoading}
           onClick={refreshAll}
         >
-          <ClockCircleOutlined />
+          <img src={ClockSvg} alt="刷新" style={{ color: "#ffffff" }} />
         </button>
       }
     >
-      {messageContextHolder}
-
       <form
         className="token-form"
         onSubmit={(e) => {
@@ -426,7 +422,8 @@ export const TOTPTokenPage: React.FC = () => {
       >
         <label className="field field--wide">
           <span>otpauth 链接</span>
-          <Input.TextArea
+          <textarea
+            className="field--textarea"
             value={form.otpauthUrl}
             onChange={(e) =>
               setForm((prev) => ({
@@ -449,7 +446,8 @@ export const TOTPTokenPage: React.FC = () => {
         <div className="form-grid">
           <label className="field">
             <span>账户</span>
-            <Input
+            <input
+              className="field--input"
               value={form.accountName}
               onChange={(e) =>
                 setForm((prev) => ({
@@ -464,7 +462,8 @@ export const TOTPTokenPage: React.FC = () => {
           </label>
           <label className="field">
             <span>发行方</span>
-            <Input
+            <input
+              className="field--input"
               value={form.issuer}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, issuer: e.target.value.trim() }))
@@ -478,7 +477,8 @@ export const TOTPTokenPage: React.FC = () => {
 
         <label className="field">
           <span>Secret</span>
-          <Input
+          <input
+            className="field--input"
             value={form.secret}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, secret: e.target.value.trim() }))

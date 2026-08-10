@@ -41,7 +41,7 @@ export class BookmarkStorage {
         console.warn("local storage not available, use test data");
         return [
           {
-            id: "testBookmark",
+            id: "testBookmark1",
             text: "这是一段测试文本",
             url: "https://www.example.com",
             scrollPosition: {
@@ -52,7 +52,7 @@ export class BookmarkStorage {
             title: "测试书签",
           },
           {
-            id: "testBookmark",
+            id: "testBookmark2",
             text: "This is a test bookmark",
             url: "https://www.example.com",
             scrollPosition: {
