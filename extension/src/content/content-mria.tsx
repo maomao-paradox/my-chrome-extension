@@ -29,7 +29,6 @@ import {
   createEl,
   PositionStrategy,
 } from "@/utils/element-control";
-import { createApp } from "vue";
 import {
   Requester,
   getFormCodeByName,
@@ -57,13 +56,14 @@ import type {
   MessageHandler,
   Tool,
 } from "@/types";
-// import { QuickLogin, ElInputSearch } from "@components/index";
+import { QuickLogin } from "@components/index";
 import { storage } from "@/stores";
 import { getRuntimeScript } from "@/utils";
 import { whenDomReady } from "@/utils/element-control";
 import messenger from "@/message";
 import xhrRules from "@/runtime/xhr-patch/rules";
 import { injectXhrPatch } from "@/runtime/xhr-patch/xhr_message_handler";
+import { createRoot } from "react-dom/client";
 
 export const tools: Tool[] = [
   {
@@ -184,7 +184,7 @@ const ROLES = [
   "物理主任",
   "护士",
 ];
-const _ADMIN = "admin";
+const ADMIN = "admin";
 
 const checkVaild = (value: { string: any }): boolean =>
   value && typeof value === "object" && Object.keys(value).length > 0;
@@ -491,20 +491,21 @@ export default (ctx: AppContext, config = {}) => {
 
     shadowRoot.appendChild(loginContainer);
 
-    // const app = createApp(QuickLogin, {
-    //   userList: {
-    //     ["mp" + _ADMIN]: {
-    //       realname: "超级管理员",
-    //       password: _ADMIN + "123",
-    //       enabled: true,
-    //       role: "管理员",
-    //     },
-    //     //@ts-ignore
-    //     ...ctx["userInfo"],
-    //   },
-    // });
-
-    // app.mount(loginContainer);
+    const root = createRoot(loginContainer);
+    root.render(
+      <QuickLogin
+        userList={{
+          ["mp" + ADMIN]: {
+            realname: "超级管理员",
+            password: ADMIN + "123",
+            enabled: true,
+            role: "管理员",
+          },
+          //@ts-ignore
+          ...ctx["userInfo"],
+        }}
+      />,
+    );
 
     positionInfo.positionElement({
       targetElement: loginContainer,

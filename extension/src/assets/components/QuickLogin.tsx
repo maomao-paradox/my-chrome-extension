@@ -1,6 +1,6 @@
 // QuickLogin.tsx
 import React, { useState, useEffect } from "react";
-import "./QuickLogin.css";
+import { quickLogin } from "./styles";
 
 // 类型定义
 interface UserInfo {
@@ -13,7 +13,7 @@ interface UserInfo {
 interface QuickLoginProps {
   userList?: Record<string, UserInfo>;
   onLogin?: (username: string, password: string) => void;
-  className?: string;
+  customClass?: string;
 }
 
 // 默认用户列表
@@ -29,7 +29,7 @@ const defaultUserList: Record<string, UserInfo> = {
 const QuickLogin: React.FC<QuickLoginProps> = ({
   userList = defaultUserList,
   onLogin,
-  className = "",
+  customClass = "",
 }) => {
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +42,7 @@ const QuickLogin: React.FC<QuickLoginProps> = ({
     const user = userList[username];
     if (user) {
       // 调用传入的回调
-      if (onLogin) {
+      if (onLogin && typeof onLogin === "function") {
         onLogin(username, user.password);
       } else {
         // 默认使用 chrome.runtime.sendMessage
@@ -71,7 +71,7 @@ const QuickLogin: React.FC<QuickLoginProps> = ({
   const usernames = Object.keys(userList);
 
   return (
-    <div className={`quick-login-wrapper ${className}`}>
+    <div className={`quick-login-wrapper ${customClass}`}>
       <div className="custom-select" role="combobox" aria-expanded={isOpen}>
         {/* 选择框触发器 */}
         <div className="select-trigger" onClick={() => setIsOpen(!isOpen)}>

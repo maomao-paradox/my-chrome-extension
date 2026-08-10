@@ -5,13 +5,7 @@
  * @file src/pages/popup/views/SettingPage.tsx
  * @description React 版设置页面 - 主题、站点脚本与功能入口集中配置
  */
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import MaSwitch from "@/assets/components/MaSwitch";
 import {
   SettingOutlined,
@@ -23,7 +17,7 @@ import TableContainer from "../components/TableContainer";
 import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
 import { appConfigKey, domainConfigsKey } from "@/config";
-import { useDomainState, extractDomain } from "../composables/useDomainState";
+import { extractDomain } from "../composables/useDomainState";
 import {
   popupThemes,
   usePopupTheme,
@@ -66,7 +60,8 @@ export const SettingPage: React.FC = () => {
     setPopupMouseTrail,
     setPopupMouseTrailPreset,
   } = usePopupMouseTrail();
-  const { domainConfigs, loadDomainConfigs } = useDomainManager();
+  const { domainConfigs, loadDomainConfigs, saveDomainConfigs } =
+    useDomainManager();
   const { pluginConfigs, setPluginConfigs, loadPluginConfigs, isLoaded } =
     usePluginManager();
 
@@ -91,13 +86,14 @@ export const SettingPage: React.FC = () => {
   }, [isLoaded, pluginConfigs]);
 
   // 保存状态重置定时器
-  const saveResetTimerRef = React.useRef<
-    ReturnType<typeof setTimeout> | undefined
-  >(undefined);
+  const saveResetTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
   /** 可用的内容脚本列表 */
-  const availableContentScripts = useMemo<string[]>(() => {
-    return Object.entries(domainConfigs)
+  const availableContentScripts = () => {
+    debugger;
+    return Object.entries(domainConfigs.current)
       .filter(([key, config]) => {
         if (key === "Eve") return false;
         if (typeof config === "object" && config !== null) {
@@ -106,43 +102,45 @@ export const SettingPage: React.FC = () => {
         return true;
       })
       .map(([key]) => key);
-  }, [domainConfigs]);
+  };
 
   /** 插件配置条目列表 */
-  const pluginConfigEntries = useMemo(() => {
+  const pluginConfigEntries = (): [string, ConfigItem][] => {
     return Object.entries(localPluginConfigs);
-  }, [localPluginConfigs]);
+  };
 
   /** 已启用的插件数量 */
-  const enabledPluginCount = useMemo(() => {
-    return pluginConfigEntries.filter(([, app]) => Boolean(app.enabled)).length;
-  }, [pluginConfigEntries]);
+  const enabledPluginCount = () => {
+    return pluginConfigEntries().filter(([, app]) => Boolean(app.enabled))
+      .length;
+  };
 
   /** 已配置路由的插件数量 */
-  const routedPluginCount = useMemo(() => {
-    return pluginConfigEntries.filter(([, value]) => value.type !== undefined)
+  const routedPluginCount = () => {
+    return pluginConfigEntries().filter(([, value]) => value.type !== undefined)
       .length;
-  }, [pluginConfigEntries]);
+  };
 
   /** 当前主题标签 */
-  const currentThemeLabel = useMemo(() => {
+  const currentThemeLabel = () => {
     return (
       popupThemes.find((theme) => theme.key === activeTheme)?.label ??
       popupThemes[0].label
     );
-  }, [activeTheme]);
+  };
 
   /** 选中脚本标签 */
-  const selectedScriptLabel = useMemo(() => {
+  const selectedScriptLabel = () => {
+    debugger;
     if (!currentActivedTabDomain) return "当前站点未识别";
     return selectedContentScript || "当前站点未绑定脚本";
-  }, [currentActivedTabDomain, selectedContentScript]);
+  };
 
   /** 是否正在保存 */
   const isSaving = saveState === "saving";
 
   /** 保存按钮标题 */
-  const saveButtonTitle = useMemo(() => {
+  const saveButtonTitle = () => {
     switch (saveState) {
       case "saving":
         return "保存中";
@@ -153,10 +151,10 @@ export const SettingPage: React.FC = () => {
       default:
         return "保存配置";
     }
-  }, [saveState]);
+  };
 
   /** 保存按钮提示 */
-  const saveButtonHint = useMemo(() => {
+  const saveButtonHint = () => {
     switch (saveState) {
       case "saving":
         return "正在写入本地并同步页面";
@@ -167,7 +165,7 @@ export const SettingPage: React.FC = () => {
       default:
         return "写入本地并同步到当前页面";
     }
-  }, [saveState]);
+  };
 
   /** 解析域名列表字符串 */
   const parseDomains = useCallback((domainsString: string): string[] => {
@@ -185,19 +183,19 @@ export const SettingPage: React.FC = () => {
   /** 获取域名配置字符串 */
   const getDomainsString = useCallback(
     (scriptKey: string): string => {
-      const config = domainConfigs[scriptKey];
+      const config = domainConfigs.current[scriptKey];
       if (typeof config === "object" && config !== null) {
         return (config as DomainConfigItem).domains || "";
       }
       return typeof config === "string" ? config : "";
     },
-    [domainConfigs],
+    [domainConfigs.current],
   );
 
   /** 确保域名配置为对象格式 */
   const ensureDomainConfigObject = useCallback(
     (scriptKey: string): DomainConfigItem => {
-      const currentConfig = domainConfigs[scriptKey];
+      const currentConfig = domainConfigs.current[scriptKey];
       if (typeof currentConfig === "object" && currentConfig !== null) {
         return currentConfig as DomainConfigItem;
       }
@@ -206,19 +204,19 @@ export const SettingPage: React.FC = () => {
         enabled: true,
         domains: typeof currentConfig === "string" ? currentConfig : "",
       };
-      // 注意：此处不应直接修改 domainConfigs，需要通过 setter
+      // 注意：此处不应直接修改 domainConfigs.current，需要通过 setter
       return normalizedConfig;
     },
-    [domainConfigs],
+    [domainConfigs.current],
   );
 
   /** 同步当前域名选择 */
   const syncCurrentDomainSelection = useCallback(
-    (scriptKey: string): void => {
+    async (scriptKey: string): Promise<void> => {
       if (!currentActivedTabDomain) return;
 
-      const newDomainConfigs = { ...domainConfigs };
-      for (const [key] of Object.entries(domainConfigs)) {
+      const newDomainConfigs = { ...domainConfigs.current };
+      for (const [key] of Object.entries(domainConfigs.current)) {
         if (key === "Eve") continue;
 
         const config = ensureDomainConfigObject(key);
@@ -233,42 +231,34 @@ export const SettingPage: React.FC = () => {
         config.domains = Array.from(new Set(filteredDomains)).join(",");
         newDomainConfigs[key] = config;
       }
-      // 这里需要调用 setDomainConfigs，但目前没有这个 setter
+      // 这里需要调用 setdomainConfigs.current，但目前没有这个 setter
       // 实际使用时需要根据项目结构调整
+      await saveDomainConfigs(newDomainConfigs);
     },
-    [
-      currentActivedTabDomain,
-      domainConfigs,
-      parseDomains,
-      ensureDomainConfigObject,
-    ],
+    [selectedContentScript, domainConfigs.current, currentActivedTabDomain],
   );
 
   /** 解析选中脚本 */
-  const resolveSelectedScript = useCallback((): string => {
-    if (!currentActivedTabDomain) return "";
+  const resolveSelectedScript = useCallback(
+    (currentDomain: string): string => {
+      console.error("当前活动标签页域名:", currentDomain);
+      console.error("当前可用脚本:", availableContentScripts);
 
-    for (const scriptKey of availableContentScripts) {
-      if (
-        parseDomains(getDomainsString(scriptKey)).includes(
-          currentActivedTabDomain,
-        )
-      ) {
-        return scriptKey;
+      if (!currentDomain) return "";
+      debugger;
+      for (const scriptKey of availableContentScripts()) {
+        console.error(
+          "当前脚本域名:",
+          parseDomains(getDomainsString(scriptKey)),
+        );
+        if (parseDomains(getDomainsString(scriptKey)).includes(currentDomain)) {
+          return scriptKey;
+        }
       }
-    }
-    return "";
-  }, [
-    currentActivedTabDomain,
-    availableContentScripts,
-    parseDomains,
-    getDomainsString,
-  ]);
-
-  /** 处理脚本变更 */
-  const handleScriptChange = useCallback(() => {
-    syncCurrentDomainSelection(selectedContentScript);
-  }, [selectedContentScript, syncCurrentDomainSelection]);
+      return "";
+    },
+    [parseDomains, getDomainsString],
+  );
 
   /** 选择主题 */
   const selectTheme = useCallback(
@@ -335,7 +325,7 @@ export const SettingPage: React.FC = () => {
   }, []);
 
   /** 保存配置 */
-  const saveConfig = useCallback(async (): Promise<void> => {
+  const saveAllConfigs = useCallback(async (): Promise<void> => {
     if (isSaving) return;
 
     setSaveState("saving");
@@ -343,8 +333,12 @@ export const SettingPage: React.FC = () => {
     try {
       if (chrome.storage?.local) {
         await storage.ext.local.set(appConfigKey, localPluginConfigs);
-        await storage.ext.local.set(domainConfigsKey, domainConfigs);
+        await storage.ext.local.set(domainConfigsKey, domainConfigs.current);
       }
+
+      console.error("同步当前域名选择", selectedContentScript);
+      debugger;
+      await syncCurrentDomainSelection(selectedContentScript);
 
       const res = await sendMessageToContentScript({
         type: MESSAGE_TYPE["1"],
@@ -362,7 +356,13 @@ export const SettingPage: React.FC = () => {
     } finally {
       scheduleSaveStateReset();
     }
-  }, [isSaving, localPluginConfigs, domainConfigs, scheduleSaveStateReset]);
+  }, [
+    isSaving,
+    localPluginConfigs,
+    domainConfigs.current,
+    selectedContentScript,
+    scheduleSaveStateReset,
+  ]);
 
   /** 更新插件启用状态 */
   const handlePluginToggle = useCallback((key: string, enabled: boolean) => {
@@ -374,11 +374,23 @@ export const SettingPage: React.FC = () => {
 
   /** 初始化加载 */
   useEffect(() => {
-    loadConfig();
-    getActivedTabDomain().then((domain) => {
-      setCurrentActivedTabDomain(domain);
-      setSelectedContentScript(resolveSelectedScript());
-    });
+    async function init() {
+      debugger;
+      await loadConfig();
+      getActivedTabDomain().then((domain) => {
+        maLogger.log("当前活动标签页域名:", domain);
+        setCurrentActivedTabDomain(domain);
+        const selectedScript = resolveSelectedScript(domain);
+        console.error("当前选中脚本:", selectedScript);
+        setSelectedContentScript(selectedScript);
+
+        if (!chrome.storage?.local && !chrome.tabs) {
+          setSelectedContentScript(availableContentScripts()[0]);
+        }
+      });
+    }
+
+    void init();
   }, []);
 
   /** 加载主题和鼠标拖尾 */
@@ -409,11 +421,11 @@ export const SettingPage: React.FC = () => {
         <div className="settings-summary">
           <div className="summary-chip">
             <span>配置项</span>
-            <strong>{pluginConfigEntries.length}</strong>
+            <strong>{pluginConfigEntries().length}</strong>
           </div>
           <div className="summary-chip summary-chip--accent">
             <span>已启用</span>
-            <strong>{enabledPluginCount}</strong>
+            <strong>{enabledPluginCount()}</strong>
           </div>
         </div>
       }
@@ -429,7 +441,7 @@ export const SettingPage: React.FC = () => {
               <p className="card-kicker">Appearance</p>
               <h3 className="card-title">主题设置</h3>
             </div>
-            <span className="panel-status">{currentThemeLabel}</span>
+            <span className="panel-status">{currentThemeLabel()}</span>
           </div>
 
           <div className="theme-grid">
@@ -510,16 +522,16 @@ export const SettingPage: React.FC = () => {
                   value={selectedContentScript}
                   className="content-script-select"
                   disabled={
-                    availableContentScripts.length === 0 ||
+                    availableContentScripts().length === 0 ||
                     !currentActivedTabDomain
                   }
                   onChange={(e) => {
+                    console.error("选择脚本", e.target.value);
                     setSelectedContentScript(e.target.value);
-                    handleScriptChange();
                   }}
                 >
                   <option value="">不启用内容脚本</option>
-                  {availableContentScripts.map((script) => (
+                  {availableContentScripts().map((script) => (
                     <option key={script} value={script}>
                       {script}
                     </option>
@@ -534,10 +546,10 @@ export const SettingPage: React.FC = () => {
               }`}
             >
               <span className="selection-dot"></span>
-              <span>{selectedScriptLabel}</span>
+              <span>{selectedScriptLabel()}</span>
             </div>
 
-            {availableContentScripts.length === 0 && (
+            {availableContentScripts().length === 0 && (
               <p className="selector-hint">暂无可用内容脚本</p>
             )}
           </div>
@@ -553,12 +565,12 @@ export const SettingPage: React.FC = () => {
               <p className="card-kicker">Feature Routing</p>
               <h3 className="card-title">功能设置</h3>
             </div>
-            <span className="panel-status">{routedPluginCount} 个入口</span>
+            <span className="panel-status">{routedPluginCount()} 个入口</span>
           </div>
 
-          {pluginConfigEntries.length > 0 ? (
+          {pluginConfigEntries().length > 0 ? (
             <div className="switch-list">
-              {pluginConfigEntries.map(([key, app]) => (
+              {pluginConfigEntries().map(([key, app]) => (
                 <div key={key} className="switch-row">
                   <MaSwitch
                     label={(app as any).name}
@@ -609,14 +621,14 @@ export const SettingPage: React.FC = () => {
         <button
           className="primary-btn"
           disabled={isSaving}
-          onClick={saveConfig}
+          onClick={saveAllConfigs}
         >
           <span className="primary-btn__icon">
             <CheckCircleOutlined />
           </span>
           <span className="primary-btn__copy">
-            <strong>{saveButtonTitle}</strong>
-            <small>{saveButtonHint}</small>
+            <strong>{saveButtonTitle()}</strong>
+            <small>{saveButtonHint()}</small>
           </span>
         </button>
       </div>

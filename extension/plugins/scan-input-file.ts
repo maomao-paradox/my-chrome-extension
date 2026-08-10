@@ -1,70 +1,72 @@
-import path from 'path'
-import fs from 'fs'
+import path from "path";
+import fs from "fs";
 
 interface ScanFilesOptions {
-    dirPath: string
-    prefix: string
-    extFilter?: string | string[]
-    exclude?: string[]
-    useIndexFile?: boolean
-    recursive?: boolean
+  dirPath: string;
+  prefix: string;
+  extFilter?: string | string[];
+  exclude?: string[];
+  useIndexFile?: boolean;
+  recursive?: boolean;
 }
 
 function scanFiles(options: ScanFilesOptions): Record<string, string> {
-  const { 
-    dirPath, 
-    prefix, 
-    extFilter = ['.js', '.ts'], 
+  const {
+    dirPath,
+    prefix,
+    extFilter = [".js", ".ts", ".jsx", ".tsx"],
     exclude = [],
     useIndexFile = false,
-    recursive = false 
-  } = options
+    recursive = false,
+  } = options;
 
-  const resolvedPath = path.resolve(__dirname, '..', dirPath)
-  const inputConfig: Record<string, string> = {}
+  const resolvedPath = path.resolve(__dirname, "..", dirPath);
+  const inputConfig: Record<string, string> = {};
 
   try {
-    const items = fs.readdirSync(resolvedPath, { withFileTypes: true })
+    const items = fs.readdirSync(resolvedPath, { withFileTypes: true });
 
-    items.forEach(item => {
-      const fullPath = path.resolve(resolvedPath, item.name)
+    items.forEach((item) => {
+      const fullPath = path.resolve(resolvedPath, item.name);
 
       if (item.isFile()) {
-        const ext = path.extname(item.name)
-        const isValidExt = Array.isArray(extFilter) 
-          ? extFilter.includes(ext) 
-          : ext === extFilter
-        
+        const ext = path.extname(item.name);
+        const isValidExt = Array.isArray(extFilter)
+          ? extFilter.includes(ext)
+          : ext === extFilter;
+
         if (isValidExt && !exclude.includes(item.name)) {
-          const fileName = item.name.replace(new RegExp(`${ext}$`), '')
-          inputConfig[`${prefix}/${fileName}`] = fullPath
+          const fileName = item.name.replace(new RegExp(`${ext}$`), "");
+          inputConfig[`${prefix}/${fileName}`] = fullPath;
         }
       } else if (item.isDirectory() && (useIndexFile || recursive)) {
-        const indexFilePath = path.resolve(fullPath, 'index.ts')
+        const indexFilePath = path.resolve(fullPath, "index.ts");
         if (useIndexFile && fs.existsSync(indexFilePath)) {
-          inputConfig[`${prefix}/${item.name}`] = indexFilePath
+          inputConfig[`${prefix}/${item.name}`] = indexFilePath;
         } else if (recursive) {
-          const nestedItems = fs.readdirSync(fullPath)
-          nestedItems.forEach(nestedItem => {
-            const ext = path.extname(nestedItem)
-            const isValidExt = Array.isArray(extFilter) 
-              ? extFilter.includes(ext) 
-              : ext === extFilter
-            
+          const nestedItems = fs.readdirSync(fullPath);
+          nestedItems.forEach((nestedItem) => {
+            const ext = path.extname(nestedItem);
+            const isValidExt = Array.isArray(extFilter)
+              ? extFilter.includes(ext)
+              : ext === extFilter;
+
             if (isValidExt && !exclude.includes(nestedItem)) {
-              const fileName = nestedItem.replace(new RegExp(`${ext}$`), '')
-              inputConfig[`${prefix}/${fileName}`] = path.resolve(fullPath, nestedItem)
+              const fileName = nestedItem.replace(new RegExp(`${ext}$`), "");
+              inputConfig[`${prefix}/${fileName}`] = path.resolve(
+                fullPath,
+                nestedItem,
+              );
             }
-          })
+          });
         }
       }
-    })
+    });
   } catch (error) {
-    console.error(`扫描${dirPath}目录文件失败:`, error)
+    console.error(`扫描${dirPath}目录文件失败:`, error);
   }
 
-  return inputConfig
+  return inputConfig;
 }
 
-
-export default scanFiles
+export default scanFiles;
