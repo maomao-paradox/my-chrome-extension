@@ -9,6 +9,7 @@
  */
 
 // 子组件样式
+@use "../../../assets/components/Draggable.scss";
 @use "./floating-ball.scss";
 @use "./glass-card-overlay.scss";
 @use "./control-panel.scss";
@@ -17,3 +18,4 @@
 // views 子组件样式（位于 views/styles/ 目录下）
 @use "../views/styles/image-download.scss";
 @use "../views/styles/script-runner.scss";
+@use "../views/styles/spectrum-effects.scss";

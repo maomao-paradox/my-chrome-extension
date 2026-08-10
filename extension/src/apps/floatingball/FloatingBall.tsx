@@ -15,7 +15,6 @@ import React, { useCallback, useRef } from "react";
 import { Draggable } from "@/assets/components/react-index";
 import type { DraggableHandle } from "@/assets/components/react-index";
 import { getStaticAbstractPath } from "@/utils/common";
-import { shadowHostId } from "@/config";
 import "./styles/floating-ball.scss";
 
 interface FloatingBallProps {
@@ -68,15 +67,17 @@ const FloatingBall: React.FC<FloatingBallProps> = ({
    * 仅当点击目标在 Shadow DOM 内时触发回调
    */
   const handleIconClick = useCallback(
-    (event: MouseEvent | TouchEvent) => {
-      const target = event.target as HTMLElement | null;
+    (e: MouseEvent | TouchEvent) => {
+      e.stopPropagation();
+      const target = e.target as HTMLElement | null;
       if (!target) return;
-      // 检查点击是否在 Shadow DOM 内
-      if (target.closest(`#${shadowHostId}`)) {
-        onClick?.(event);
+      const rootNode = target.getRootNode();
+      maLogger.info("点击目标", target, rootNode);
+      if (rootNode instanceof ShadowRoot) {
+        onClick?.(e);
       }
     },
-    [onClick]
+    [onClick],
   );
 
   /**
@@ -92,7 +93,7 @@ const FloatingBall: React.FC<FloatingBallProps> = ({
         y: y + ICON_CENTER_OFFSET,
       };
     },
-    []
+    [],
   );
 
   /**
@@ -114,13 +115,14 @@ const FloatingBall: React.FC<FloatingBallProps> = ({
         {...DRAGGABLE_PROPS}
         width={45}
         height={45}
-        onClick={handleIconClick}
         onDragging={handleDragging}
         onMove={handleMove}
       >
         {/* 悬浮球图标 */}
         <div className="icon" draggable={false}>
-          {iconSlot ?? <img src={iconSrc} alt="floating ball" />}
+          {iconSlot ?? (
+            <img src={iconSrc} alt="floating ball" onClick={handleIconClick} />
+          )}
         </div>
         {contentSlot ?? children}
       </Draggable>

@@ -42,8 +42,6 @@ interface FloatingballState {
   toggleSidepanel: (forced?: boolean) => void;
   /** 从 storage 加载配置 */
   loadConfig: () => Promise<void>;
-  /** 设置点击行为 */
-  setClickBehavior: (behavior: "dialog" | "sidepanel") => void;
   /** 设置启用状态 */
   setEnabled: (enabled: boolean) => void;
 }
@@ -110,8 +108,6 @@ export const useFloatingballStore = create<FloatingballState>((set, get) => ({
       maLogger.error("加载配置失败:", error);
     }
   },
-
-  setClickBehavior: (behavior) => set({ clickBehavior: behavior }),
 
   setEnabled: (enabled) => set({ isEnabled: enabled }),
 }));

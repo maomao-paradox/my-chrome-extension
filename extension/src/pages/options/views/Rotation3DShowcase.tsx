@@ -13,6 +13,7 @@ import "./rotation-3D-showcase.scss";
 type RotationItemType = "blue" | "green" | "yellow";
 
 interface RotationItem {
+  id?: string;
   name: string;
   type: RotationItemType;
   icon: string;
@@ -20,6 +21,7 @@ interface RotationItem {
 }
 
 export interface RotationItemInput {
+  id?: string;
   name: string;
   type: RotationItemType;
   icon?: string;
@@ -80,9 +82,12 @@ const defaultItemList: RotationItem[] = [
 
 // Props 接口
 interface Rotation3DPageProps {
+  className?: string;
   embedded?: boolean;
   projection?: boolean;
   items?: RotationItemInput[];
+  activeItemId?: string;
+  onItemClick?: (item: RotationItemInput) => void;
 }
 
 // 工具函数：加载脚本
@@ -106,9 +111,12 @@ function loadScriptOnce(src: string, id: string): Promise<void> {
 }
 
 const Rotation3DPage: React.FC<Rotation3DPageProps> = ({
+  className,
   embedded = false,
   projection = false,
   items,
+  activeItemId,
+  onItemClick,
 }) => {
   const rotationRootRef = useRef<HTMLDivElement>(null);
   const rotation3DInstanceRef = useRef<Rotation3DInstance | null>(null);
@@ -123,6 +131,7 @@ const Rotation3DPage: React.FC<Rotation3DPageProps> = ({
     }
 
     return items.map((item) => ({
+      id: item.id,
       name: item.name,
       type: item.type,
       icon: item.icon ?? "",
@@ -186,6 +195,7 @@ const Rotation3DPage: React.FC<Rotation3DPageProps> = ({
     "rotation3d-page",
     embedded && "rotation3d-page--embedded",
     projection && "rotation3d-page--projection",
+    className,
   ]
     .filter(Boolean)
     .join(" ");
@@ -205,9 +215,12 @@ const Rotation3DPage: React.FC<Rotation3DPageProps> = ({
           <div className="itemList">
             {itemList.map((item) => (
               <button
-                key={item.name}
-                className={`rotation3D__item ${item.type}`}
+                key={item.id ?? item.name}
+                className={`rotation3D__item ${item.type} ${
+                  item.id === activeItemId ? "rotation3D__item--active" : ""
+                }`}
                 type="button"
+                onClick={() => onItemClick?.(item)}
               >
                 <span className="scale">
                   <span className="cont">
@@ -225,7 +238,7 @@ const Rotation3DPage: React.FC<Rotation3DPageProps> = ({
           <div className="lineList" aria-hidden="true">
             {itemList.map((item) => (
               <div
-                key={`${item.name}-line`}
+                key={`${item.id ?? item.name}-line`}
                 className={`rotation3D__line ${item.type}`}
               >
                 {item.type === "blue" && (

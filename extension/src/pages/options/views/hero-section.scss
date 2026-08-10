@@ -1,16 +1,117 @@
 .bridge-console {
+  --hero-motion-micro: 0.22s;
+  --hero-motion-pulse: 2.8s;
+  --hero-motion-instrument: 5.2s;
+  --hero-motion-slow: 8.8s;
+  --hero-glow-blue: rgba(105, 183, 255, 0.18);
+  --hero-glow-green: rgba(122, 247, 208, 0.18);
+  position: relative;
   min-height: calc(100vh - 134px);
+  padding: 18px 22px 24px;
   color: #eaf9ff;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  isolation: isolate;
+}
+
+.bridge-console::before,
+.bridge-console::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.bridge-console::before {
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(118deg, rgba(122, 247, 208, 0.1) 0 1px, transparent 1px 13%),
+    linear-gradient(242deg, rgba(105, 183, 255, 0.1) 0 1px, transparent 1px 13%),
+    linear-gradient(90deg, rgba(8, 20, 36, 0.82), transparent 18% 82%, rgba(8, 20, 36, 0.82)),
+    radial-gradient(ellipse at 50% 18%, rgba(105, 183, 255, 0.11), transparent 58%);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    calc(100% - 36px) 100%,
+    calc(100% - 92px) calc(100% - 32px),
+    92px calc(100% - 32px),
+    36px 100%,
+    0 100%
+  );
+}
+
+.bridge-console::after {
+  z-index: 0;
+  left: 5%;
+  right: 5%;
+  bottom: 10px;
+  height: 34px;
+  background:
+    linear-gradient(90deg, transparent, rgba(122, 247, 208, 0.16), transparent),
+    linear-gradient(180deg, rgba(7, 18, 31, 0), rgba(4, 12, 22, 0.74));
+  clip-path: polygon(0 100%, 7% 0, 93% 0, 100% 100%);
+  box-shadow: 0 -16px 42px rgba(0, 0, 0, 0.18);
 }
 
 .bridge-header {
+  position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
+  padding: 14px 16px;
+  clip-path: polygon(
+    0 16px,
+    16px 0,
+    calc(100% - 22px) 0,
+    100% 18px,
+    100% 100%,
+    18px 100%,
+    0 calc(100% - 18px)
+  );
+  border: 1px solid rgba(92, 174, 232, 0.18);
+  background:
+    linear-gradient(180deg, rgba(4, 13, 25, 0.74), rgba(2, 8, 16, 0.44)),
+    radial-gradient(circle at 50% 0, rgba(105, 183, 255, 0.1), transparent 58%);
+  box-shadow:
+    inset 0 1px 0 rgba(183, 231, 255, 0.05),
+    0 14px 42px rgba(0, 0, 0, 0.16);
+}
+
+.bridge-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 18px auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(122, 247, 208, 0.44),
+    rgba(105, 183, 255, 0.48),
+    transparent
+  );
+  opacity: 0.74;
+}
+
+.bridge-header::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -10px;
+  height: 10px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(7, 18, 32, 0.9) 12% 88%,
+    transparent
+  );
+  clip-path: polygon(0 0, 100% 0, 94% 100%, 6% 100%);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
 }
 
 .bridge-header__title {
@@ -23,6 +124,110 @@
 
 .bridge-header__copy {
   text-align: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.bridge-signal-stack {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  min-width: min(470px, 46vw);
+  padding: 8px 16px 9px;
+  overflow: hidden;
+  color: rgba(167, 222, 242, 0.72);
+  font-family: "JetBrains Mono", "Consolas", monospace;
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  text-align: left;
+  text-transform: uppercase;
+  background:
+    linear-gradient(90deg, rgba(105, 183, 255, 0.07), transparent 24% 76%, rgba(122, 247, 208, 0.07)),
+    repeating-linear-gradient(180deg, transparent 0 7px, rgba(114, 202, 248, 0.04) 8px);
+  border-top: 1px solid rgba(105, 183, 255, 0.18);
+  border-bottom: 1px solid rgba(122, 247, 208, 0.18);
+  clip-path: polygon(0 7px, 7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px));
+}
+
+.bridge-signal-stack::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0 42%,
+    rgba(122, 247, 208, 0.12) 50%,
+    transparent 58% 100%
+  );
+  transform: translateY(-100%);
+  animation: bridgeSignalScan var(--hero-motion-instrument) ease-in-out infinite;
+}
+
+.bridge-signal-line {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr auto;
+  gap: 14px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.bridge-signal-line span:last-child,
+.bridge-signal-line strong {
+  color: rgba(223, 248, 255, 0.82);
+  font-weight: 500;
+  text-align: right;
+}
+
+.bridge-signal-line--primary {
+  color: rgba(122, 247, 208, 0.86);
+}
+
+.bridge-signal-line--secondary {
+  color: rgba(105, 183, 255, 0.7);
+  opacity: 0.82;
+}
+
+.bridge-signal-line--noise {
+  grid-template-columns: 1fr auto;
+  color: rgba(155, 198, 220, 0.44);
+  font-size: 8px;
+  opacity: 0.76;
+}
+
+.bridge-signal-meter {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: end;
+  gap: 3px;
+  height: 8px;
+  margin-top: 2px;
+  opacity: 0.72;
+}
+
+.bridge-signal-meter i {
+  display: block;
+  flex: 1;
+  min-width: 2px;
+  height: var(--signal-height);
+  background: linear-gradient(180deg, #dffcff, #69b7ff 55%, #7af7d0);
+  box-shadow: 0 0 6px rgba(122, 247, 208, 0.42);
+  transform-origin: bottom;
+  animation: bridgeSignalMeter 1.7s ease-in-out infinite alternate;
+  animation-delay: var(--signal-delay);
 }
 
 .bridge-header__eyebrow,
@@ -43,23 +248,23 @@
 }
 
 .bridge-header__eyebrow {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   color: rgba(137, 203, 239, 0.78);
   font-size: 11px;
 }
 
 .bridge-header h1 {
   margin: 0;
-  font-size: clamp(34px, 4.2vw, 46px);
+  font-size: clamp(32px, 3.7vw, 42px);
   line-height: 1;
-  text-shadow: 0 0 22px rgba(107, 189, 255, 0.22);
+  text-shadow: 0 0 14px rgba(107, 189, 255, 0.16);
 }
 
 .bridge-header__subtitle {
   max-width: 720px;
-  margin: 12px auto 0;
+  margin: 10px auto 0;
   color: rgba(197, 225, 241, 0.78);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .hud-rail {
@@ -89,7 +294,9 @@
 
 .bridge-header__meta {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  align-self: stretch;
+  align-items: stretch;
 }
 
 .meta-chip,
@@ -108,8 +315,8 @@
 }
 
 .meta-chip {
-  min-width: 158px;
-  padding: 14px 16px;
+  min-width: 138px;
+  padding: 10px 12px;
   clip-path: polygon(
     0 12px,
     12px 0,
@@ -122,15 +329,15 @@
 
 .meta-chip__label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 10px;
+  margin-bottom: 4px;
+  font-size: 9px;
   color: rgba(127, 186, 220, 0.72);
 }
 
 .meta-chip strong {
   color: #f3fbff;
-  font-size: 15px;
-  text-shadow: 0 0 16px rgba(105, 183, 255, 0.18);
+  font-size: 13px;
+  text-shadow: 0 0 12px rgba(105, 183, 255, 0.16);
 }
 
 .meta-chip--status[data-status="online"] {
@@ -151,6 +358,47 @@
   grid-template-columns: 280px minmax(0, 1fr) 320px;
   gap: 18px;
   align-items: stretch;
+  padding: 8px 10px 14px;
+}
+
+.bridge-layout::before,
+.bridge-layout::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.bridge-layout::before {
+  z-index: 0;
+  inset: 0;
+  border: 1px solid rgba(105, 183, 255, 0.1);
+  background:
+    linear-gradient(112deg, transparent 0 16%, rgba(122, 247, 208, 0.12) 16.2%, transparent 16.6%),
+    linear-gradient(248deg, transparent 0 16%, rgba(105, 183, 255, 0.12) 16.2%, transparent 16.6%),
+    linear-gradient(180deg, rgba(7, 18, 32, 0.2), rgba(2, 8, 16, 0.3));
+  clip-path: polygon(
+    0 24px,
+    24px 0,
+    calc(100% - 24px) 0,
+    100% 24px,
+    100% calc(100% - 28px),
+    calc(100% - 44px) 100%,
+    44px 100%,
+    0 calc(100% - 28px)
+  );
+}
+
+.bridge-layout::after {
+  z-index: 0;
+  top: 16px;
+  bottom: 18px;
+  left: calc(280px + 18px);
+  right: calc(320px + 18px);
+  border-left: 1px solid rgba(122, 247, 208, 0.14);
+  border-right: 1px solid rgba(105, 183, 255, 0.14);
+  box-shadow:
+    -22px 0 34px rgba(0, 0, 0, 0.12),
+    22px 0 34px rgba(0, 0, 0, 0.12);
 }
 
 .bridge-layout__overlay {
@@ -177,7 +425,7 @@
   stroke-linejoin: round;
   stroke-linecap: round;
   opacity: 0.88;
-  animation: bridgeGuideShift 3.2s linear infinite;
+  animation: bridgeGuideShift var(--hero-motion-instrument) linear infinite;
 }
 
 .bridge-guide--glow {
@@ -199,7 +447,7 @@
 }
 
 .bridge-guide__pulse {
-  animation: bridgeGuidePulse 1.2s ease-out infinite;
+  animation: bridgeGuidePulse var(--hero-motion-pulse) ease-out infinite;
 }
 
 .bridge-sidebar,
@@ -361,6 +609,144 @@
   color: rgba(127, 191, 221, 0.7);
 }
 
+.starship-ai-card {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(122, 247, 208, 0.12), transparent 40%),
+    linear-gradient(180deg, rgba(6, 15, 29, 0.94), rgba(3, 8, 16, 0.78));
+}
+
+.starship-ai-emblem {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: 1;
+  min-height: 150px;
+  place-items: center;
+  overflow: hidden;
+}
+
+.starship-ai-emblem__halo {
+  position: absolute;
+  width: 150px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(122, 247, 208, 0.24);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(122, 247, 208, 0.12), transparent 58%),
+    conic-gradient(from 90deg, transparent 0 18%, rgba(122, 247, 208, 0.28), transparent 38% 100%);
+  box-shadow:
+    inset 0 0 24px rgba(105, 183, 255, 0.08),
+    0 0 32px rgba(122, 247, 208, 0.1);
+  animation: starshipAiHaloPulse var(--hero-motion-pulse) ease-in-out infinite;
+}
+
+.starship-ai-emblem__svg {
+  position: relative;
+  width: min(176px, 88%);
+  aspect-ratio: 1;
+  overflow: visible;
+  filter:
+    drop-shadow(0 0 14px rgba(105, 183, 255, 0.18))
+    drop-shadow(0 0 26px rgba(122, 247, 208, 0.1));
+}
+
+.starship-ai-emblem__orbit {
+  fill: none;
+  stroke: rgba(122, 247, 208, 0.32);
+  stroke-width: 1.2;
+  stroke-dasharray: 7 10;
+}
+
+.starship-ai-emblem__orbit ellipse:last-child {
+  stroke: rgba(105, 183, 255, 0.26);
+}
+
+.starship-ai-emblem__particles {
+  fill: #7af7d0;
+  filter:
+    drop-shadow(0 0 8px rgba(122, 247, 208, 0.78))
+    drop-shadow(0 0 16px rgba(105, 183, 255, 0.32));
+}
+
+.starship-ai-emblem__particles circle:nth-child(2),
+.starship-ai-emblem__particles circle:nth-child(4) {
+  fill: #69b7ff;
+  opacity: 0.82;
+}
+
+.starship-ai-emblem__ship {
+  transform-origin: 110px 116px;
+  animation: starshipAiFloat var(--hero-motion-pulse) ease-in-out infinite;
+}
+
+.starship-ai-emblem__hull {
+  fill: rgba(105, 183, 255, 0.08);
+  stroke: url("#aiShipHull");
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.starship-ai-emblem__wing,
+.starship-ai-emblem__keel,
+.starship-ai-emblem__thruster {
+  fill: none;
+  stroke: rgba(122, 247, 208, 0.74);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.starship-ai-emblem__keel {
+  stroke: rgba(233, 251, 255, 0.8);
+}
+
+.starship-ai-emblem__core {
+  fill: url("#aiCoreGlow");
+  filter: drop-shadow(0 0 16px rgba(122, 247, 208, 0.55));
+  animation: starshipAiCore var(--hero-motion-pulse) ease-in-out infinite;
+}
+
+.starship-ai-emblem__thruster {
+  stroke-dasharray: 4 8;
+  animation: starshipAiThrust 1.4s ease-in-out infinite;
+}
+
+.starship-ai-emblem__nodes {
+  fill: #7af7d0;
+  filter: drop-shadow(0 0 10px rgba(122, 247, 208, 0.64));
+}
+
+.starship-ai-emblem__nodes circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: starshipAiNode var(--hero-motion-pulse) ease-in-out infinite;
+}
+
+.starship-ai-emblem__nodes circle:nth-child(2) {
+  animation-delay: 0.28s;
+}
+
+.starship-ai-emblem__nodes circle:nth-child(3) {
+  animation-delay: 0.56s;
+}
+
+.starship-ai-card__status {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 12px;
+  font-family: "JetBrains Mono", "Consolas", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(158, 222, 238, 0.76);
+  text-transform: uppercase;
+}
+
 .radar-shell {
   position: relative;
   z-index: 1;
@@ -487,6 +873,7 @@
     18px 18px,
     100% 100%;
   opacity: 0.28;
+  animation: radarBackdropPulse var(--hero-motion-instrument) ease-in-out infinite;
 }
 
 .radar-wrap::after {
@@ -502,16 +889,65 @@
   aspect-ratio: 1;
 }
 
+.radar-plate {
+  fill: url("#radarPlateGlow");
+  stroke: rgba(122, 247, 208, 0.18);
+  stroke-width: 1;
+  filter:
+    drop-shadow(0 0 18px rgba(105, 183, 255, 0.08))
+    drop-shadow(0 0 26px rgba(122, 247, 208, 0.08));
+}
+
 .radar-grid circle,
 .radar-grid line {
   fill: none;
-  stroke: rgba(121, 207, 255, 0.18);
+  stroke: rgba(121, 207, 255, 0.2);
   stroke-width: 1;
+  animation: radarGridBreath var(--hero-motion-instrument) ease-in-out infinite;
+}
+
+.radar-grid--rings circle {
+  stroke-dasharray: 1 5;
+}
+
+.radar-grid--bearings line:not(.radar-grid__tick) {
+  stroke: rgba(122, 247, 208, 0.14);
+  stroke-dasharray: 4 8;
+}
+
+.radar-range-band {
+  stroke: rgba(122, 247, 208, 0.34);
+  stroke-width: 1.35;
+  stroke-dasharray: 18 260;
+  stroke-linecap: round;
+  transform-origin: 110px 110px;
+  animation: radarRangeOrbit var(--hero-motion-slow) linear infinite;
 }
 
 .radar-grid__tick {
-  stroke: rgba(132, 214, 252, 0.26);
+  stroke: rgba(132, 214, 252, 0.34);
   stroke-width: 0.92;
+}
+
+.radar-pulse-ring {
+  fill: none;
+  stroke: rgba(122, 247, 208, 0.42);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 8;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 8px rgba(122, 247, 208, 0.24));
+  animation: radarPulseRing var(--hero-motion-pulse) ease-out infinite;
+}
+
+.radar-target-vector {
+  stroke: var(--target-color);
+  stroke-width: 0.72;
+  stroke-dasharray: 3 7;
+  opacity: 0.28;
+  filter: drop-shadow(
+    0 0 6px color-mix(in srgb, var(--target-color) 28%, transparent)
+  );
 }
 
 .radar-labels text {
@@ -523,16 +959,12 @@
 
 .radar-sweep {
   transform-origin: 110px 110px;
-  animation: radarSpinContinuous 5.8s linear infinite;
+  animation: radarSpinContinuous var(--hero-motion-instrument) linear infinite;
   will-change: transform;
 }
 
 .radar-sweep__trail {
-  opacity: 0.76;
-}
-
-.radar-sweep__mid {
-  opacity: 0.82;
+  opacity: 0.86;
 }
 
 .radar-sweep__lead {
@@ -544,13 +976,21 @@
   stroke: rgba(122, 247, 208, 0.72);
   stroke-width: 1.7;
   filter: drop-shadow(0 0 10px rgba(122, 247, 208, 0.52));
-  animation: radarLinePulse 1.8s ease-in-out infinite;
+  animation: radarLinePulse var(--hero-motion-pulse) ease-in-out infinite;
 }
 
 .radar-core-halo {
   fill: rgba(122, 247, 208, 0.22);
   stroke: none;
   filter: blur(2px);
+}
+
+.radar-core-halo--outer {
+  fill: none;
+  stroke: rgba(122, 247, 208, 0.28);
+  stroke-width: 1;
+  filter: drop-shadow(0 0 14px rgba(122, 247, 208, 0.28));
+  animation: radarCorePulse var(--hero-motion-pulse) ease-in-out infinite;
 }
 
 .radar-core {
@@ -560,7 +1000,7 @@
 }
 
 .radar-target-unit {
-  cursor: pointer;
+  cursor: default;
 }
 
 .radar-target-hit {
@@ -571,11 +1011,12 @@
 .radar-target-echo {
   fill: color-mix(in srgb, var(--target-color) 14%, transparent);
   stroke: color-mix(in srgb, var(--target-color) 48%, rgba(255, 255, 255, 0));
-  stroke-width: 1;
+  stroke-width: 1.2;
   filter: drop-shadow(
     0 0 10px color-mix(in srgb, var(--target-color) 28%, transparent)
   );
-  animation: radarEchoPulse 1.8s ease-in-out infinite;
+  animation: radarEchoPulse var(--hero-motion-pulse) ease-in-out infinite;
+  animation-delay: var(--target-delay);
   transform-box: fill-box;
   transform-origin: center;
 }
@@ -594,13 +1035,15 @@
 .radar-target-dot {
   fill: var(--target-color);
   stroke: none;
-  filter: drop-shadow(0 0 12px var(--target-color));
+  filter: drop-shadow(0 0 10px var(--target-color));
+  animation: radarTargetPing var(--hero-motion-pulse) ease-in-out infinite;
+  animation-delay: var(--target-delay);
 }
 
 .radar-target-unit--hovered .radar-target-echo,
 .radar-target-unit--active .radar-target-echo {
   opacity: 1;
-  animation-duration: 1.05s;
+  animation-duration: calc(var(--hero-motion-pulse) * 0.45);
 }
 
 .radar-target-unit--hovered .radar-target-lock,
@@ -642,9 +1085,9 @@
     0 100%
   );
   transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+    transform var(--hero-motion-micro) ease,
+    border-color var(--hero-motion-micro) ease,
+    box-shadow var(--hero-motion-micro) ease;
   cursor: pointer;
 }
 
@@ -663,29 +1106,114 @@
 }
 
 .ship-card {
-  min-height: 580px;
+  min-height: 620px;
+  padding: 20px;
+  border-color: rgba(122, 247, 208, 0.22);
+  background:
+    linear-gradient(180deg, rgba(7, 18, 32, 0.94), rgba(2, 8, 15, 0.84)),
+    radial-gradient(ellipse at 50% 18%, rgba(105, 183, 255, 0.14), transparent 50%);
+  box-shadow:
+    inset 0 0 0 1px rgba(183, 231, 255, 0.06),
+    inset 0 -34px 62px rgba(0, 0, 0, 0.26),
+    0 22px 58px rgba(0, 0, 0, 0.34),
+    0 0 34px rgba(122, 247, 208, 0.06);
+}
+
+.ship-card::before {
+  inset: 8px 10px auto;
+  height: 18px;
+  background:
+    linear-gradient(90deg, rgba(122, 247, 208, 0), rgba(122, 247, 208, 0.26), rgba(105, 183, 255, 0.2), rgba(122, 247, 208, 0)),
+    repeating-linear-gradient(90deg, transparent 0 24px, rgba(183, 231, 255, 0.14) 24px 25px);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 20px) 100%, 20px 100%);
+  opacity: 0.8;
+}
+
+.ship-card::after {
+  left: 34px;
+  right: 34px;
+  top: auto;
+  bottom: 9px;
+  width: auto;
+  height: 16px;
+  background:
+    linear-gradient(90deg, transparent, rgba(105, 183, 255, 0.18), rgba(122, 247, 208, 0.2), transparent),
+    linear-gradient(180deg, rgba(7, 18, 32, 0.12), rgba(7, 18, 32, 0.72));
+  clip-path: polygon(0 100%, 4% 0, 96% 0, 100% 100%);
+  opacity: 0.9;
 }
 
 .ship-stage {
   position: relative;
   z-index: 1;
-  min-height: 490px;
+  min-height: 530px;
   overflow: hidden;
+  border: 1px solid rgba(122, 247, 208, 0.16);
   clip-path: polygon(
-    0 18px,
-    18px 0,
-    100% 0,
-    100% calc(100% - 24px),
-    calc(100% - 24px) 100%,
-    0 100%
+    0 30px,
+    30px 0,
+    calc(100% - 30px) 0,
+    100% 30px,
+    100% calc(100% - 36px),
+    calc(100% - 44px) 100%,
+    44px 100%,
+    0 calc(100% - 36px)
   );
   background:
     radial-gradient(
       circle at center,
+      rgba(122, 247, 208, 0.1),
+      transparent 24%
+    ),
+    radial-gradient(
+      ellipse at 50% 56%,
       rgba(25, 112, 255, 0.18),
-      transparent 36%
+      transparent 42%
     ),
     linear-gradient(180deg, rgba(3, 11, 22, 0.84), rgba(2, 7, 13, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(183, 231, 255, 0.04),
+    inset 0 28px 44px rgba(105, 183, 255, 0.05),
+    inset 0 -34px 58px rgba(0, 0, 0, 0.28);
+}
+
+.ship-stage::before,
+.ship-stage::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  pointer-events: none;
+}
+
+.ship-stage::before {
+  z-index: 2;
+  top: 50%;
+  width: min(74%, 680px);
+  aspect-ratio: 1.9;
+  border: 1px solid rgba(122, 247, 208, 0.2);
+  border-radius: 50%;
+  box-shadow:
+    0 0 26px rgba(122, 247, 208, 0.08),
+    inset 0 0 28px rgba(105, 183, 255, 0.08);
+  transform: translate(-50%, -42%) perspective(900px) rotateX(62deg);
+}
+
+.ship-stage::after {
+  z-index: 2;
+  bottom: 12%;
+  width: min(66%, 610px);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(105, 183, 255, 0.34),
+    rgba(122, 247, 208, 0.42),
+    transparent
+  );
+  box-shadow:
+    0 0 16px rgba(105, 183, 255, 0.18),
+    0 0 34px rgba(122, 247, 208, 0.12);
+  transform: translateX(-50%);
 }
 
 .ship-stage__floor,
@@ -709,17 +1237,17 @@
   background-size:
     100% 28px,
     28px 100%;
-  opacity: 0.36;
+  opacity: 0.28;
 }
 
 .ship-stage__glow {
-  inset: 10% 10% 18%;
+  inset: 12% 8% 16%;
   background: radial-gradient(
-    circle at center,
-    rgba(105, 183, 255, 0.18),
-    transparent 50%
+    ellipse at center,
+    rgba(105, 183, 255, 0.14),
+    transparent 54%
   );
-  filter: blur(16px);
+  filter: blur(18px);
   transform: translate3d(
     calc(var(--parallax-x) * -20px),
     calc(var(--parallax-y) * -16px),
@@ -730,8 +1258,16 @@
 .ship-stage__rotation {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 3;
   pointer-events: auto;
+}
+
+.ship-stage .rotation3d-page--projection {
+  display: block;
+}
+
+.ship-stage .rotation3d-page--projection .rotation3d-stage {
+  transform: translate(-50%, -50%) scale(0.9);
 }
 
 .ship-scene {
@@ -739,7 +1275,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  z-index: 1;
   pointer-events: none;
   transform: translate3d(
       calc(var(--parallax-x) * 18px),
@@ -751,7 +1287,7 @@
 
 .ship-grid path {
   fill: none;
-  stroke: rgba(116, 190, 241, 0.08);
+  stroke: rgba(116, 190, 241, 0.06);
   stroke-width: 1;
 }
 
@@ -761,17 +1297,17 @@
 }
 
 .ship-projection__glow {
-  opacity: 0.34;
+  opacity: 0.22;
   filter: brightness(1.08) saturate(0.82)
-    drop-shadow(0 0 26px rgba(105, 183, 255, 0.24))
-    drop-shadow(0 0 54px rgba(122, 247, 208, 0.14));
+    drop-shadow(0 0 22px rgba(105, 183, 255, 0.18))
+    drop-shadow(0 0 46px rgba(122, 247, 208, 0.1));
 }
 
 .ship-projection__asset {
-  opacity: 0.94;
+  opacity: 0.42;
   filter: saturate(0.84) contrast(1.06)
-    drop-shadow(0 12px 28px rgba(0, 0, 0, 0.34))
-    drop-shadow(0 0 18px rgba(105, 183, 255, 0.12));
+    drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 0 14px rgba(105, 183, 255, 0.1));
 }
 
 .ship-core-dot {
@@ -784,7 +1320,7 @@
   fill: none;
   stroke-width: 1.9;
   stroke-dasharray: 7 11;
-  animation: linkDrift 5.6s linear infinite;
+  animation: linkDrift var(--hero-motion-instrument) linear infinite;
   filter: drop-shadow(0 0 10px rgba(105, 183, 255, 0.16));
 }
 
@@ -794,12 +1330,12 @@
 
 .connector-line--warning {
   stroke: rgba(255, 98, 98, 0.86);
-  animation-duration: 2.3s;
+  animation-duration: calc(var(--hero-motion-instrument) * 0.62);
 }
 
 .connector-line--standby {
   stroke: rgba(122, 247, 208, 0.88);
-  animation-duration: 7.2s;
+  animation-duration: var(--hero-motion-slow);
 }
 
 .flow-particle {
@@ -837,9 +1373,9 @@
     0 0 22px color-mix(in srgb, var(--pod-color) 20%, transparent),
     inset 0 1px 0 rgba(188, 233, 255, 0.06);
   transition:
-    transform 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
+    transform var(--hero-motion-micro) ease,
+    border-color var(--hero-motion-micro) ease,
+    box-shadow var(--hero-motion-micro) ease;
   cursor: pointer;
 }
 
@@ -1168,9 +1704,9 @@
     0 100%
   );
   transition:
-    transform 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
+    transform var(--hero-motion-micro) ease,
+    border-color var(--hero-motion-micro) ease,
+    box-shadow var(--hero-motion-micro) ease;
 }
 
 .quick-dock__btn:hover {
@@ -1198,10 +1734,166 @@
   }
 }
 
+@keyframes bridgeSignalScan {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+
+  42%,
+  58% {
+    opacity: 1;
+  }
+
+  76% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes bridgeSignalMeter {
+  from {
+    opacity: 0.46;
+    transform: scaleY(0.56);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes starshipAiHaloPulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes starshipAiFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes starshipAiCore {
+  0%,
+  100% {
+    opacity: 0.76;
+    transform: scale(0.94);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes starshipAiThrust {
+  0%,
+  100% {
+    opacity: 0.42;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    opacity: 0.94;
+    stroke-dashoffset: -18;
+  }
+}
+
+@keyframes starshipAiNode {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes radarBackdropPulse {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 0.36;
+  }
+}
+
+@keyframes radarRangeOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes radarGridBreath {
+  0%,
+  100% {
+    stroke-opacity: 0.72;
+  }
+
+  50% {
+    stroke-opacity: 1;
+  }
+}
+
+@keyframes radarCorePulse {
+  0%,
+  100% {
+    opacity: 0.46;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 0.86;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes radarPulseRing {
+  0% {
+    opacity: 0;
+    stroke-width: 1.8;
+    transform: scale(0.74);
+  }
+
+  22% {
+    opacity: 0.76;
+  }
+
+  100% {
+    opacity: 0;
+    stroke-width: 0.65;
+    transform: scale(1.34);
+  }
+}
+
 @keyframes radarLinePulse {
   0%,
   100% {
-    opacity: 0.68;
+    opacity: 0.56;
   }
 
   50% {
@@ -1219,6 +1911,18 @@
   50% {
     opacity: 1;
     transform: scale(1.08);
+  }
+}
+
+@keyframes radarTargetPing {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+
+  42% {
+    opacity: 1;
+    filter: drop-shadow(0 0 16px var(--target-color));
   }
 }
 
@@ -1288,8 +1992,13 @@
     flex-direction: column;
   }
 
+  .bridge-layout::after {
+    display: none;
+  }
+
   .bridge-header__copy {
     text-align: left;
+    width: 100%;
   }
 
   .bridge-header__subtitle {
@@ -1320,44 +2029,44 @@
   }
 
   .ship-card {
-    min-height: 760px;
+    min-height: 640px;
   }
 
   .ship-stage {
-    min-height: 680px;
-  }
-
-  .module-pod {
-    width: 172px;
+    min-height: 540px;
   }
 }
 
 @media (max-width: 720px) {
   .bridge-console {
     min-height: auto;
+    padding: 12px;
   }
 
   .bridge-header h1 {
     font-size: 32px;
   }
 
+  .bridge-signal-stack {
+    min-width: 0;
+    width: 100%;
+    font-size: 8px;
+  }
+
+  .bridge-signal-line {
+    gap: 8px;
+  }
+
   .ship-card {
-    min-height: 880px;
+    min-height: 580px;
   }
 
   .ship-stage {
-    min-height: 800px;
+    min-height: 500px;
   }
 
-  .module-pod {
-    width: 150px;
-    min-height: 98px;
-    padding-right: 12px;
-  }
-
-  .module-pod p {
-    /* min-height: 44px; */
-    font-size: 11px;
+  .ship-stage .rotation3d-page--projection .rotation3d-stage {
+    transform: translate(-50%, -50%) scale(0.78);
   }
 
   .quick-dock__btn {
@@ -1375,7 +2084,46 @@
     width: 100%;
   }
 
-  .module-pod {
-    width: 138px;
+  .ship-stage {
+    min-height: 450px;
+  }
+
+  .ship-stage .rotation3d-page--projection .rotation3d-stage {
+    transform: translate(-50%, -50%) scale(0.66);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bridge-guide,
+  .bridge-guide__pulse,
+  .bridge-signal-stack::before,
+  .bridge-signal-meter i,
+  .radar-wrap::before,
+  .radar-grid circle,
+  .radar-grid line,
+  .radar-range-band,
+  .radar-pulse-ring,
+  .radar-sweep,
+  .radar-sweep__line,
+  .radar-core-halo--outer,
+  .radar-target-echo,
+  .radar-target-dot,
+  .connector-line,
+  .module-pod__cell,
+  .starship-ai-emblem__halo,
+  .starship-ai-emblem__ship,
+  .starship-ai-emblem__core,
+  .starship-ai-emblem__thruster,
+  .starship-ai-emblem__nodes circle {
+    animation: none;
+  }
+
+  .starship-ai-emblem__particles {
+    display: none;
+  }
+
+  .radar-pulse-ring {
+    opacity: 0.28;
+    transform: none;
   }
 }

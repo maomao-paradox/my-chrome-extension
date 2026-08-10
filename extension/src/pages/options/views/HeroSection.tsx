@@ -350,6 +350,7 @@ const HeroSection: FC<HeroSectionProps> = ({
 
   const projectionItems = useMemo(() => {
     return peripheralModules.map((module) => ({
+      id: module.id,
       name: module.title,
       type:
         module.telemetry.status === "warning"
@@ -700,11 +701,36 @@ const HeroSection: FC<HeroSectionProps> = ({
           </div>
 
           <div className="bridge-header__copy">
-            <p className="bridge-header__eyebrow">Command Bridge / MRIA-07</p>
-            <h1>星舰指挥中心</h1>
-            <p className="bridge-header__subtitle">
-              用舰桥视角统一调度所有模块状态。全息投影、链路流向和舱段参数都集中于此。
-            </p>
+            <h1 className="visually-hidden">星舰指挥中心</h1>
+            <div className="bridge-signal-stack" aria-label="舰桥信号">
+              <div className="bridge-signal-line bridge-signal-line--primary">
+                <span>RX // MRIA-07</span>
+                <strong>{activeModule.code}</strong>
+                <span>SYNC_{String(syncPercent).padStart(3, "0")}</span>
+              </div>
+              <div className="bridge-signal-line bridge-signal-line--secondary">
+                <span>{hudCoordinates}</span>
+                <span>0x7A / 4F / C1</span>
+                <span>{currentTime || "00:00:00"}</span>
+              </div>
+              <div className="bridge-signal-line bridge-signal-line--noise">
+                <span>/// . . / / / ░▒▓ {activeModule.section}</span>
+                <span>AI_LINK::{activeModule.telemetry.metric}</span>
+              </div>
+              <div className="bridge-signal-meter" aria-hidden="true">
+                {Array.from({ length: 18 }, (_, index) => (
+                  <i
+                    key={index}
+                    style={
+                      {
+                        "--signal-height": `${28 + ((index * 17 + syncPercent) % 68)}%`,
+                        "--signal-delay": `${index * 0.045}s`,
+                      } as CSSProperties
+                    }
+                  ></i>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="hud-rail hud-rail--right">
@@ -774,30 +800,107 @@ const HeroSection: FC<HeroSectionProps> = ({
 
         {/* 左侧边栏 */}
         <aside className="bridge-sidebar bridge-sidebar--left">
-          <section className="bridge-card compact-card">
+          <section className="bridge-card compact-card starship-ai-card">
             <div className="card-heading">
-              <span>CORE STATUS</span>
-              <strong>{syncPercent}%</strong>
+              <span>STARSHIP AI</span>
+              <strong>{syncPercent}% SYNC</strong>
             </div>
 
-            <div className="metric-stack">
-              {coreMetrics.map((metric) => (
-                <div key={metric.label} className="metric-row">
-                  <div className="metric-row__top">
-                    <span>{metric.label}</span>
-                    <strong>{metric.value}</strong>
-                  </div>
-                  <div className="metric-row__track">
-                    <div
-                      className={`metric-row__fill metric-row__fill--${metric.tone}`}
-                      style={{ width: `${metric.fill}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
+            <div className="starship-ai-emblem" aria-label="星舰智能 AI">
+              <div className="starship-ai-emblem__halo"></div>
+              <svg viewBox="0 0 220 220" className="starship-ai-emblem__svg">
+                <defs>
+                  <linearGradient
+                    id="aiShipHull"
+                    x1="50"
+                    y1="172"
+                    x2="170"
+                    y2="48"
+                  >
+                    <stop offset="0%" stopColor="#7af7d0" stopOpacity="0.92" />
+                    <stop offset="52%" stopColor="#e9fbff" stopOpacity="0.96" />
+                    <stop offset="100%" stopColor="#69b7ff" stopOpacity="0.9" />
+                  </linearGradient>
+                  <radialGradient id="aiCoreGlow">
+                    <stop offset="0%" stopColor="#f7ffff" stopOpacity="1" />
+                    <stop offset="42%" stopColor="#7af7d0" stopOpacity="0.72" />
+                    <stop offset="100%" stopColor="#69b7ff" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+
+                <g className="starship-ai-emblem__orbit" aria-hidden="true">
+                  <ellipse cx="110" cy="110" rx="76" ry="34" />
+                  <ellipse cx="110" cy="110" rx="54" ry="88" />
+                </g>
+
+                <g className="starship-ai-emblem__particles" aria-hidden="true">
+                  <circle r="3.2">
+                    <animateMotion
+                      dur="7.6s"
+                      repeatCount="indefinite"
+                      path="M34 110 A76 34 0 1 1 186 110 A76 34 0 1 1 34 110"
+                    />
+                  </circle>
+                  <circle r="2.4">
+                    <animateMotion
+                      dur="7.6s"
+                      begin="-3.8s"
+                      repeatCount="indefinite"
+                      path="M34 110 A76 34 0 1 1 186 110 A76 34 0 1 1 34 110"
+                    />
+                  </circle>
+                  <circle r="2.8">
+                    <animateMotion
+                      dur="9.4s"
+                      begin="-1.2s"
+                      repeatCount="indefinite"
+                      path="M110 22 A54 88 0 1 1 110 198 A54 88 0 1 1 110 22"
+                    />
+                  </circle>
+                  <circle r="2.2">
+                    <animateMotion
+                      dur="9.4s"
+                      begin="-5.7s"
+                      repeatCount="indefinite"
+                      path="M110 22 A54 88 0 1 1 110 198 A54 88 0 1 1 110 22"
+                    />
+                  </circle>
+                </g>
+
+                <g className="starship-ai-emblem__ship">
+                  <path
+                    d="M110 34 L144 128 L110 111 L76 128 Z"
+                    className="starship-ai-emblem__hull"
+                  />
+                  <path
+                    d="M91 130 L70 169 L103 151 M129 130 L150 169 L117 151"
+                    className="starship-ai-emblem__wing"
+                  />
+                  <path
+                    d="M101 119 L110 153 L119 119"
+                    className="starship-ai-emblem__keel"
+                  />
+                  <circle
+                    cx="110"
+                    cy="92"
+                    r="16"
+                    className="starship-ai-emblem__core"
+                  />
+                  <path
+                    d="M87 146 Q110 160 133 146"
+                    className="starship-ai-emblem__thruster"
+                  />
+                </g>
+
+                <g className="starship-ai-emblem__nodes" aria-hidden="true">
+                  <circle cx="54" cy="112" r="3.5" />
+                  <circle cx="164" cy="77" r="3.2" />
+                  <circle cx="154" cy="160" r="3" />
+                </g>
+              </svg>
             </div>
 
-            <div className="core-footer">
+            <div className="starship-ai-card__status">
               <span>ACTIVE {onlineCount}</span>
               <span>ALERT {warningCount}</span>
               <span>STANDBY {standbyCount}</span>
@@ -823,47 +926,57 @@ const HeroSection: FC<HeroSectionProps> = ({
                   className="radar-svg"
                 >
                   <defs>
-                    <radialGradient id="radarGlow">
+                    <radialGradient id="radarPlateGlow">
                       <stop
                         offset="0%"
                         stopColor="#7af7d0"
-                        stopOpacity="0.62"
+                        stopOpacity="0.28"
                       />
-                      <stop offset="100%" stopColor="#7af7d0" stopOpacity="0" />
+                      <stop
+                        offset="48%"
+                        stopColor="#1e8bff"
+                        stopOpacity="0.1"
+                      />
+                      <stop offset="100%" stopColor="#020a12" stopOpacity="0" />
                     </radialGradient>
                     <linearGradient
-                      id="radarSweepLead"
+                      id="radarSweepBeam"
                       x1="110"
                       y1="110"
-                      x2="198"
-                      y2="62"
+                      x2="204"
+                      y2="56"
                       gradientUnits="userSpaceOnUse"
                     >
                       <stop offset="0%" stopColor="#7af7d0" stopOpacity="0" />
                       <stop
-                        offset="78%"
+                        offset="64%"
                         stopColor="#7af7d0"
-                        stopOpacity="0.08"
+                        stopOpacity="0.1"
                       />
                       <stop
                         offset="100%"
                         stopColor="#7af7d0"
-                        stopOpacity="0.52"
+                        stopOpacity="0.62"
                       />
                     </linearGradient>
                     <linearGradient
-                      id="radarSweepTrail"
+                      id="radarSweepWake"
                       x1="110"
                       y1="110"
-                      x2="196"
-                      y2="72"
+                      x2="198"
+                      y2="84"
                       gradientUnits="userSpaceOnUse"
                     >
                       <stop offset="0%" stopColor="#69b7ff" stopOpacity="0" />
                       <stop
+                        offset="74%"
+                        stopColor="#69b7ff"
+                        stopOpacity="0.08"
+                      />
+                      <stop
                         offset="100%"
                         stopColor="#69b7ff"
-                        stopOpacity="0.22"
+                        stopOpacity="0.3"
                       />
                     </linearGradient>
                     <filter
@@ -877,15 +990,38 @@ const HeroSection: FC<HeroSectionProps> = ({
                     </filter>
                   </defs>
 
-                  <g className="radar-grid">
-                    <circle cx="110" cy="110" r="96" />
-                    <circle cx="110" cy="110" r="72" />
-                    <circle cx="110" cy="110" r="48" />
-                    <circle cx="110" cy="110" r="24" />
-                    <line x1="110" y1="14" x2="110" y2="206" />
-                    <line x1="14" y1="110" x2="206" y2="110" />
-                    <line x1="42" y1="42" x2="178" y2="178" />
-                    <line x1="42" y1="178" x2="178" y2="42" />
+                  <circle cx="110" cy="110" r="103" className="radar-plate" />
+
+                  <g className="radar-grid radar-grid--rings">
+                    {[96, 72, 48, 24].map((radius) => (
+                      <circle
+                        key={`ring-${radius}`}
+                        cx="110"
+                        cy="110"
+                        r={radius}
+                      />
+                    ))}
+                    {[96, 72, 48].map((radius, index) => (
+                      <circle
+                        key={`range-band-${radius}`}
+                        cx="110"
+                        cy="110"
+                        r={radius}
+                        className="radar-range-band"
+                        style={
+                          {
+                            animationDelay: `${index * 0.32}s`,
+                          } as CSSProperties
+                        }
+                      />
+                    ))}
+                  </g>
+
+                  <g className="radar-grid radar-grid--bearings">
+                    <line x1="110" y1="10" x2="110" y2="210" />
+                    <line x1="10" y1="110" x2="210" y2="110" />
+                    <line x1="39" y1="39" x2="181" y2="181" />
+                    <line x1="39" y1="181" x2="181" y2="39" />
                     {radarTicks.map((tick) => (
                       <line
                         key={tick.id}
@@ -894,6 +1030,23 @@ const HeroSection: FC<HeroSectionProps> = ({
                         x2={tick.x2}
                         y2={tick.y2}
                         className="radar-grid__tick"
+                      />
+                    ))}
+                  </g>
+
+                  <g className="radar-pulse-rings" aria-hidden="true">
+                    {[22, 52, 82].map((radius, index) => (
+                      <circle
+                        key={`pulse-${radius}`}
+                        cx="110"
+                        cy="110"
+                        r={radius}
+                        className="radar-pulse-ring"
+                        style={
+                          {
+                            animationDelay: `${index * 0.42}s`,
+                          } as CSSProperties
+                        }
                       />
                     ))}
                   </g>
@@ -911,41 +1064,62 @@ const HeroSection: FC<HeroSectionProps> = ({
                     ))}
                   </g>
 
+                  <g className="radar-target-vectors" aria-hidden="true">
+                    {radarTargets.map((target) => (
+                      <line
+                        key={`${target.id}-vector`}
+                        x1="110"
+                        y1="110"
+                        x2={target.x}
+                        y2={target.y}
+                        className="radar-target-vector"
+                        style={
+                          {
+                            "--target-color": target.color,
+                          } as CSSProperties
+                        }
+                      />
+                    ))}
+                  </g>
+
                   <g className="radar-sweep">
                     <path
                       className="radar-sweep__trail"
-                      d="M110 110 L110 14 A96 96 0 0 1 194 74 Z"
-                      fill="url(#radarSweepTrail)"
+                      d="M110 110 L110 7 A103 103 0 0 1 205 70 Z"
+                      fill="url(#radarSweepWake)"
                       filter="url(#radarBlur)"
                     />
                     <path
-                      className="radar-sweep__mid"
-                      d="M110 110 L110 14 A96 96 0 0 1 198 62 Z"
-                      fill="url(#radarGlow)"
-                    />
-                    <path
                       className="radar-sweep__lead"
-                      d="M110 110 L110 14 A96 96 0 0 1 198 62 Z"
-                      fill="url(#radarSweepLead)"
+                      d="M110 110 L110 7 A103 103 0 0 1 204 55 Z"
+                      fill="url(#radarSweepBeam)"
                     />
                     <line
                       x1="110"
                       y1="110"
                       x2="110"
-                      y2="14"
+                      y2="7"
                       className="radar-sweep__line"
                     />
                   </g>
 
-                  <circle
-                    cx="110"
-                    cy="110"
-                    r="10"
-                    className="radar-core-halo"
-                  />
-                  <circle cx="110" cy="110" r="6" className="radar-core" />
+                  <g className="radar-core-cluster" aria-hidden="true">
+                    <circle
+                      cx="110"
+                      cy="110"
+                      r="18"
+                      className="radar-core-halo radar-core-halo--outer"
+                    />
+                    <circle
+                      cx="110"
+                      cy="110"
+                      r="10"
+                      className="radar-core-halo"
+                    />
+                    <circle cx="110" cy="110" r="5.6" className="radar-core" />
+                  </g>
 
-                  {radarTargets.map((target) => (
+                  {radarTargets.map((target, index) => (
                     <g
                       key={target.id}
                       className={`radar-target-unit ${
@@ -954,11 +1128,13 @@ const HeroSection: FC<HeroSectionProps> = ({
                           : ""
                       } ${activePanelKey === target.id ? "radar-target-unit--active" : ""}`}
                       style={
-                        { "--target-color": target.color } as CSSProperties
+                        {
+                          "--target-color": target.color,
+                          "--target-delay": `${index * 0.16}s`,
+                        } as CSSProperties
                       }
                       onPointerEnter={() => setHoveredRadar(target.id)}
                       onPointerLeave={clearHoveredRadar}
-                      onClick={() => onNavigatePanel(target.id)}
                     >
                       <circle
                         cx={target.x}
@@ -1010,7 +1186,13 @@ const HeroSection: FC<HeroSectionProps> = ({
               <Rotation3DShowcase
                 className="ship-stage__rotation"
                 projection={true}
+                activeItemId={activePanelKey}
                 items={projectionItems}
+                onItemClick={(item) => {
+                  if (item.id) {
+                    onNavigatePanel(item.id as StarshipPanelId);
+                  }
+                }}
               />
 
               <svg viewBox="0 0 1000 700" className="ship-scene">
@@ -1022,7 +1204,7 @@ const HeroSection: FC<HeroSectionProps> = ({
 
                 <g className="ship-projection">
                   <image
-                    href="/static/img/starship.png"
+                    href="/static/imgs/starship.png"
                     x="160"
                     y="134"
                     width="700"
@@ -1031,7 +1213,7 @@ const HeroSection: FC<HeroSectionProps> = ({
                     preserveAspectRatio="xMidYMid meet"
                   />
                   <image
-                    href="/static/img/starship.png"
+                    href="/static/imgs/starship.png"
                     x="160"
                     y="134"
                     width="700"
@@ -1040,77 +1222,7 @@ const HeroSection: FC<HeroSectionProps> = ({
                     preserveAspectRatio="xMidYMid meet"
                   />
                 </g>
-
-                <g className="link-architecture">
-                  {peripheralModules.map((module) => (
-                    <path
-                      key={`${module.id}-link`}
-                      d={getConnectorPath(module)}
-                      className={`connector-line connector-line--${module.telemetry.status}`}
-                    />
-                  ))}
-
-                  {enableLinkMotion &&
-                    peripheralModules.map((module) => (
-                      <circle
-                        key={`${module.id}-flow`}
-                        r="4.4"
-                        className="flow-particle"
-                        style={
-                          {
-                            "--flow-color": statusColor(
-                              module.telemetry.status,
-                            ),
-                          } as CSSProperties
-                        }
-                      >
-                        <animateMotion
-                          path={getConnectorPath(module)}
-                          dur={flowDuration(module)}
-                          repeatCount="indefinite"
-                        />
-                      </circle>
-                    ))}
-                </g>
               </svg>
-
-              {/* 模块 Pod 按钮 */}
-              {peripheralModules.map((module) => (
-                <button
-                  key={module.id}
-                  ref={(el) => setPodRefForModule(module, el)}
-                  type="button"
-                  className={`module-pod ${
-                    module.id === activePanelKey ? "module-pod--active" : ""
-                  } ${module.id === hoveredRadarId ? "module-pod--tracking" : ""}`}
-                  data-status={module.telemetry.status}
-                  style={getPodStyle(module)}
-                  onClick={() => onNavigatePanel(module.id)}
-                >
-                  <div className="module-pod__strip">
-                    {Array.from({ length: 6 }, (_, cell) => (
-                      <span
-                        key={`${module.id}-${cell}`}
-                        className="module-pod__cell"
-                        style={getStripCellStyle(module, cell + 1)}
-                      ></span>
-                    ))}
-                  </div>
-
-                  <div className="module-pod__content">
-                    <div className="module-pod__meta">
-                      <span>{module.glyph}</span>
-                      <small>{serialFor(module)}</small>
-                    </div>
-                    <strong>{module.title}</strong>
-                    <p>{module.telemetry.headline}</p>
-                    <div className="module-pod__footer">
-                      <em>{statusText(module.telemetry.status)}</em>
-                      <span>{module.telemetry.metric}</span>
-                    </div>
-                  </div>
-                </button>
-              ))}
             </div>
           </section>
         </main>

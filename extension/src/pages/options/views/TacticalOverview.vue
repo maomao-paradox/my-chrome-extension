@@ -49,9 +49,9 @@
           <circle cx="500" cy="350" r="92" fill="url(#coreGlow)" class="overview-core-glow" />
 
           <g class="ship-projection">
-            <image href="/static/img/starship.png" x="150" y="126" width="720" height="405.6"
+            <image href="/static/imgs/starship.png" x="150" y="126" width="720" height="405.6"
               class="ship-projection__glow" preserveAspectRatio="xMidYMid meet" />
-            <image href="/static/img/starship.png" x="150" y="126" width="720" height="405.6"
+            <image href="/static/imgs/starship.png" x="150" y="126" width="720" height="405.6"
               class="ship-projection__asset" preserveAspectRatio="xMidYMid meet" />
             <circle cx="458" cy="350" r="18" class="ship-core-dot" />
           </g>

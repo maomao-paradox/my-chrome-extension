@@ -17,9 +17,15 @@
  * @version v1.0.0
  * @license MIT
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { getStaticAbstractPath } from "@/utils/common";
-import type { Tool, PluginConfigs } from "@/types/index.js";
+import type { Tool, PluginConfig, PluginConfigMap } from "@/types";
 import { appConfigKey } from "@/config";
 import { useFloatingballStore } from "@/stores/floatingball";
 import FloatingBall from "./FloatingBall";
@@ -46,6 +52,12 @@ interface AppProps {
 /** 默认工具列表 */
 const DEFAULT_TOOLS: Tool[] = [
   { id: "script", label: "执行脚本", icon: "Script" },
+  {
+    id: "spectrum",
+    label: "光谱效应",
+    icon: "BgColors",
+    details: "预览棱镜、极光、光谱环和衍射薄膜等 CSS 视觉效果",
+  },
 ];
 
 /**
@@ -63,7 +75,6 @@ const App: React.FC<AppProps> = ({
   const openDrawer = useFloatingballStore((s) => s.openDrawer);
   const activeTool = useFloatingballStore((s) => s.activeTool);
   const isEnabled = useFloatingballStore((s) => s.isEnabled);
-  const clickBehavior = useFloatingballStore((s) => s.clickBehavior);
 
   // 毛玻璃卡片局部状态（不进 store，组件内部管理）
   const [glassCardVisible, setGlassCardVisible] = useState(false);
@@ -74,8 +85,8 @@ const App: React.FC<AppProps> = ({
 
   /** 抽屉标题 */
   const drawerTitle = useMemo(
-    () => (activeTool ? activeTool.label : menuTitle ?? "未命名的工具"),
-    [activeTool, menuTitle]
+    () => (activeTool ? activeTool.label : (menuTitle ?? "未命名的工具")),
+    [activeTool, menuTitle],
   );
 
   /** 悬浮球点击处理 */
@@ -144,16 +155,14 @@ const App: React.FC<AppProps> = ({
   useEffect(() => {
     const setupConfigListener = (
       changes: { [key: string]: chrome.storage.StorageChange },
-      namespace: string
+      namespace: string,
     ) => {
       if (namespace === "local" && changes[appConfigKey]) {
         maLogger.log("应用配置变化:", changes[appConfigKey]);
-        const newConfig = changes[appConfigKey].newValue as PluginConfigs;
+        const newConfig = changes[appConfigKey].newValue as PluginConfigMap;
         if (newConfig && newConfig.floatingball) {
-          const behavior = newConfig.floatingball.type || "dialog";
           const store = storeActionsRef.current;
-          store.setClickBehavior(behavior);
-          store.setEnabled(newConfig.floatingball.value !== false);
+          store.setEnabled(newConfig.floatingball.enabled !== false);
         }
       }
     };

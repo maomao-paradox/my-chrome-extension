@@ -30,9 +30,11 @@ floatingball/
     ├── index.ts            # 工具映射表 { image, script }
     ├── ImageDownload.tsx   # 图片扫描/打包下载
     ├── ScriptRunner.tsx    # 脚本执行（code/file/url）
+    ├── SpectrumEffects.tsx # 光谱效应组件集（预览/复制 CSS）
     └── styles/
         ├── image-download.scss
-        └── script-runner.scss
+        ├── script-runner.scss
+        └── spectrum-effects.scss
 ```
 
 #### 关键设计
@@ -42,6 +44,7 @@ floatingball/
 - **Draggable 共享组件**：React 版位于 `@/assets/components/Draggable.tsx`，用 `forwardRef` + `useImperativeHandle` 暴露 `getCurrentPosition/setPosition/setPositionImmediate`，高频更新用 `useRef` 保证 60fps
 - **全屏动画**：用 `requestAnimationFrame` + `easeInOutCubic` 缓动函数，通过 Draggable 命令式 API 直接驱动位置，绕过 React 渲染周期
 - **状态管理**：Zustand store 位于 `@/stores/floatingball`，React 中用 selector 订阅，非组件代码用 `getState()` 调用
+- **光谱效应工具**：`SpectrumEffects.tsx` 提供棱镜折射、极光幕布、光谱环和衍射薄膜四种 CSS 效果，可在抽屉内切换预览、调节强度并复制样式片段
 
 #### 保留的 Vue 文件
 

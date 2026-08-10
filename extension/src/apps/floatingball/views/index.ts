@@ -14,6 +14,7 @@
 import type { ComponentType } from "react";
 import ImageDownload from "./ImageDownload";
 import ScriptRunner from "./ScriptRunner";
+import SpectrumEffects from "./SpectrumEffects";
 
 /** 工具组件类型：带 onAddMessage 回调的 React 组件 */
 export type ToolComponent = ComponentType<{
@@ -27,6 +28,7 @@ export type ToolComponent = ComponentType<{
 const toolMap: Record<string, ToolComponent> = {
   image: ImageDownload,
   script: ScriptRunner,
+  spectrum: SpectrumEffects,
 };
 
 export default toolMap;

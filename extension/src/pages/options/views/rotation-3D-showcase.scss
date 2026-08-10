@@ -70,7 +70,7 @@
   height: 516px;
   margin: auto;
   pointer-events: none;
-  background: url("/static/img/baseMap.png") center / contain no-repeat;
+  background: url("/static/imgs/baseMap.png") center / contain no-repeat;
 
   &::before {
     position: absolute;
@@ -82,7 +82,7 @@
     height: 318px;
     margin: auto;
     content: "";
-    background: url("/static/img/baseLogo.png") center / contain no-repeat;
+    background: url("/static/imgs/baseLogo.png") center / contain no-repeat;
     animation: rotation3d-bounce-up-down 10s ease-in-out infinite;
   }
 }
@@ -172,7 +172,7 @@
     color: #01e9fc;
 
     .baseImg {
-      background: url("/static/img/蓝底.png");
+      background: url("/static/imgs/蓝底.png");
     }
   }
 
@@ -180,7 +180,7 @@
     color: #02e943;
 
     .baseImg {
-      background: url("/static/img/绿底.png");
+      background: url("/static/imgs/绿底.png");
     }
   }
 
@@ -188,7 +188,22 @@
     color: #ffd200;
 
     .baseImg {
-      background: url("/static/img/黄底.png");
+      background: url("/static/imgs/黄底.png");
+    }
+  }
+
+  &--active {
+    .fallback-icon {
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 0 0 1px currentColor,
+        0 0 22px currentColor;
+    }
+
+    .item-name {
+      text-shadow:
+        0 0 12px currentColor,
+        0 0 22px currentColor;
     }
   }
 }
@@ -371,5 +386,16 @@
   .rotation3d-stage {
     min-width: 960px;
     padding: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotation3D-baseMap::before,
+  .rotation3D__line svg path,
+  .rotation3D__line .dot1,
+  .rotation3D__line .dot2,
+  .rotation3D__line .dot3,
+  .rotation3D__line .dot4 {
+    animation: none;
   }
 }

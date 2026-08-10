@@ -83,6 +83,12 @@ class FloatingBall implements AppModule {
         "创建一个可拖动、可调宽高和透明度的毛玻璃悬浮卡片，双击空白区域即可关闭",
     },
     {
+      id: "spectrum",
+      label: "光谱效应",
+      icon: "BgColors",
+      details: "预览棱镜、极光、光谱环和衍射薄膜等 CSS 视觉效果",
+    },
+    {
       id: "image",
       label: "下载图片",
       details:
@@ -221,7 +227,7 @@ class FloatingBall implements AppModule {
           visible,
           icon: icon || getStaticAbstractPath("icons/floatingball.png"),
           drawerContainer: this.drawerContainer,
-        })
+        }),
       );
     } catch (error) {
       maLogger.error("注入悬浮球失败:", error);

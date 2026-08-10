@@ -26,7 +26,7 @@ sidebar/
 
 ### 入口交互
 
-- 工具入口使用 `public/static/img/miku.png`。
+- 工具入口使用 `public/static/imgs/miku.png`。
 - 鼠标靠近浏览器右侧边缘时，Miku 图片会从右侧滑出，同时展开侧边栏工具。
 - 点击图片会打开或收起 Miku 角色对话窗口。
 - 对话窗口原复用 `AIConversation` 流式对话组件，迁移期间以 `AIConversationPlaceholder` 占位，
