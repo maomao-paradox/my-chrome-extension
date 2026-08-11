@@ -1,1 +1,4 @@
-export { default as QuickLogin } from "./QuickLogin";
+export {
+  default as QuickLogin,
+  type QuickLoginProps,
+} from "./QuickLogin/QuickLogin";

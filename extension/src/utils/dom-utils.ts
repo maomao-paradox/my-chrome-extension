@@ -5,24 +5,26 @@
  */
 
 // 导出各模块
-export * from './shadow-dom';
-export * from './element-control';
-export * from './route-watcher';
-export * from './llm-code-executor';
-export * from './esm-module-loader';
-export * from './image-zip-download';
-export * from './ai-config';
-export * from './auth';
+export * from "./shadow-dom";
+export * from "./element-control";
+export * from "./route-watcher";
+export * from "./llm-code-executor";
+export * from "./esm-module-loader";
+export * from "./image-zip-download";
+export * from "./ai-config";
+export * from "./auth";
+export * from "./elementPosition";
 
 // 命名空间导出，便于统一导入
-import * as ShadowDomExports from './shadow-dom';
-import * as ElementControlExports from './element-control';
-import * as RouteWatcherExports from './route-watcher';
-import * as LlmCodeExecutorExports from './llm-code-executor';
-import * as EsmModuleLoaderExports from './esm-module-loader';
-import * as ImageZipDownloadExports from './image-zip-download';
-import * as AiConfigExports from './ai-config';
-import * as AuthExports from './auth';
+import * as ShadowDomExports from "./shadow-dom";
+import * as ElementControlExports from "./element-control";
+import * as RouteWatcherExports from "./route-watcher";
+import * as LlmCodeExecutorExports from "./llm-code-executor";
+import * as EsmModuleLoaderExports from "./esm-module-loader";
+import * as ImageZipDownloadExports from "./image-zip-download";
+import * as AiConfigExports from "./ai-config";
+import * as AuthExports from "./auth";
+import * as ElementPositionExports from "./elementPosition";
 
 export const domUtils = {
   ...ShadowDomExports,
@@ -32,7 +34,8 @@ export const domUtils = {
   ...EsmModuleLoaderExports,
   ...ImageZipDownloadExports,
   ...AiConfigExports,
-  ...AuthExports
+  ...AuthExports,
+  ...ElementPositionExports,
 };
 
 export type DomUtils = typeof domUtils;

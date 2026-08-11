@@ -5,7 +5,7 @@
  * @file src/pages/popup/composables/useDomainManager.ts
  * @description React 版域名配置管理 Hook
  */
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { contentDomains, domainConfigsKey } from "@/config";
 import { storage } from "@/stores";
 
@@ -28,7 +28,7 @@ export interface DomainConfigs {
  * 域名配置管理 Hook
  */
 export const useDomainManager = () => {
-  const domainConfigs = useRef<DomainConfigs>({});
+  const [domainConfigs, setDomainConfigs] = useState<DomainConfigs>({});
 
   /**
    * 加载域名配置
@@ -44,7 +44,7 @@ export const useDomainManager = () => {
           };
           return acc;
         }, {} as DomainConfigs);
-        domainConfigs.current = testConfigs;
+        setDomainConfigs(testConfigs);
         return;
       }
       let configs = await storage.ext.local.get(domainConfigsKey, null);
@@ -61,7 +61,7 @@ export const useDomainManager = () => {
         configs["Eve"] = { enabled: true, domains: "*:*" };
         await storage.ext.local.set(domainConfigsKey, configs);
       }
-      domainConfigs.current = configs;
+      setDomainConfigs(configs);
     } catch (error) {
       maLogger.error("加载域名配置失败:", error);
     }
@@ -79,6 +79,7 @@ export const useDomainManager = () => {
 
   return {
     domainConfigs,
+    setDomainConfigs,
     loadDomainConfigs,
     saveDomainConfigs,
   };

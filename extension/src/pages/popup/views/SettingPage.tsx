@@ -5,7 +5,14 @@
  * @file src/pages/popup/views/SettingPage.tsx
  * @description React 版设置页面 - 主题、站点脚本与功能入口集中配置
  */
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  FC,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  ChangeEvent,
+} from "react";
 import MaSwitch from "@/assets/components/MaSwitch";
 import {
   SettingOutlined,
@@ -51,7 +58,7 @@ const MESSAGE_TYPE = {
 /**
  * 设置页面组件
  */
-export const SettingPage: React.FC = () => {
+export const SettingPage: FC<{}> = () => {
   const { activeTheme, setPopupTheme, loadPopupTheme } = usePopupTheme();
   const {
     isMouseTrailEnabled,
@@ -60,8 +67,12 @@ export const SettingPage: React.FC = () => {
     setPopupMouseTrail,
     setPopupMouseTrailPreset,
   } = usePopupMouseTrail();
-  const { domainConfigs, loadDomainConfigs, saveDomainConfigs } =
-    useDomainManager();
+  const {
+    domainConfigs,
+    setDomainConfigs,
+    loadDomainConfigs,
+    saveDomainConfigs,
+  } = useDomainManager();
   const { pluginConfigs, setPluginConfigs, loadPluginConfigs, isLoaded } =
     usePluginManager();
 
@@ -91,7 +102,7 @@ export const SettingPage: React.FC = () => {
   );
 
   /** 可用的内容脚本列表 */
-  const availableContentScripts = Object.entries(domainConfigs.current)
+  const availableContentScripts = Object.entries(domainConfigs)
     .filter(([key, config]) => {
       if (key === "Eve") return false;
       if (typeof config === "object" && config !== null) {
@@ -124,35 +135,29 @@ export const SettingPage: React.FC = () => {
     ? "当前站点未识别"
     : selectedContentScript || "当前站点未绑定脚本";
 
-  /** 是否正在保存 */
-  const isSaving = useRef(false);
+  const isSaving = () => saveState === "saving";
 
   /** 保存按钮标题 */
-  const saveButtonTitle = useRef<string>("保存配置");
+  const saveButtonTitle = () =>
+    saveState === "saving"
+      ? "保存中"
+      : saveState === "saved"
+        ? "已保存"
+        : saveState === "error"
+          ? "保存失败"
+          : "保存配置";
   /** 保存按钮提示 */
-  const saveButtonHint = useRef<string>("保存配置");
-  useEffect(() => {
-    isSaving.current = saveState === "saving";
-    saveButtonTitle.current =
-      saveState === "saving"
-        ? "保存中"
-        : saveState === "saved"
-          ? "已保存"
-          : saveState === "error"
-            ? "保存失败"
-            : "保存配置";
-    saveButtonHint.current =
-      saveState === "saving"
-        ? "正在写入本地并同步页面"
-        : saveState === "saved"
-          ? "配置已同步到当前页面"
-          : saveState === "error"
-            ? "请稍后重试或检查当前页面状态"
-            : "写入本地并同步到当前页面";
-  }, [saveState]);
+  const saveButtonHint = () =>
+    saveState === "saving"
+      ? "正在写入本地并同步页面"
+      : saveState === "saved"
+        ? "配置已同步到当前页面"
+        : saveState === "error"
+          ? "请稍后重试或检查当前页面状态"
+          : "写入本地并同步到当前页面";
 
   /** 解析域名列表字符串 */
-  const parseDomains = useCallback((domainsString: string): string[] => {
+  const parseDomains = (domainsString: string): string[] => {
     if (!domainsString) return [];
     return Array.from(
       new Set(
@@ -162,24 +167,24 @@ export const SettingPage: React.FC = () => {
           .filter(Boolean),
       ),
     );
-  }, []);
+  };
 
   /** 获取域名配置字符串 */
   const getDomainsString = useCallback(
     (scriptKey: string): string => {
-      const config = domainConfigs.current[scriptKey];
+      const config = domainConfigs[scriptKey];
       if (typeof config === "object" && config !== null) {
         return (config as DomainConfigItem).domains || "";
       }
       return typeof config === "string" ? config : "";
     },
-    [domainConfigs.current],
+    [domainConfigs],
   );
 
   /** 确保域名配置为对象格式 */
   const ensureDomainConfigObject = useCallback(
     (scriptKey: string): DomainConfigItem => {
-      const currentConfig = domainConfigs.current[scriptKey];
+      const currentConfig = domainConfigs[scriptKey];
       if (typeof currentConfig === "object" && currentConfig !== null) {
         return currentConfig as DomainConfigItem;
       }
@@ -199,8 +204,8 @@ export const SettingPage: React.FC = () => {
     async (scriptKey: string): Promise<void> => {
       if (!currentActivedTabDomain) return;
 
-      const newDomainConfigs = { ...domainConfigs.current };
-      for (const [key] of Object.entries(domainConfigs.current)) {
+      const newDomainConfigs = { ...domainConfigs };
+      for (const [key] of Object.entries(domainConfigs)) {
         if (key === "Eve") continue;
 
         const config = ensureDomainConfigObject(key);
@@ -219,7 +224,7 @@ export const SettingPage: React.FC = () => {
       // 实际使用时需要根据项目结构调整
       await saveDomainConfigs(newDomainConfigs);
     },
-    [selectedContentScript, domainConfigs.current, currentActivedTabDomain],
+    [selectedContentScript, domainConfigs, currentActivedTabDomain],
   );
 
   /** 解析选中脚本 */
@@ -280,31 +285,9 @@ export const SettingPage: React.FC = () => {
     if (!chrome.tabs) {
       // 模拟返回一个活动标签页勇于测试
       console.warn("chrome.tabs not available, use test data");
+      //@ts-ignore
       return {
-        active: true,
-        audible: false,
-        autoDiscardable: true,
-        discarded: false,
-        favIconUrl: "https://example.com/favicon.ico",
-        frozen: false,
-        groupId: -1,
-        height: 945,
-        highlighted: true,
-        id: 1344925606,
-        incognito: false,
-        index: 6,
-        lastAccessed: 1786410821762.949,
-        mutedInfo: {
-          muted: false,
-        },
-        pinned: false,
-        selected: true,
-        splitViewId: -1,
-        status: "complete",
-        title: "测试站点",
         url: "https://example.com/",
-        width: 1920,
-        windowId: 1344925415,
       };
     }
     const tabs = await chrome.tabs.query({
@@ -321,7 +304,7 @@ export const SettingPage: React.FC = () => {
   }, [getActivedTab]);
 
   /** 安排保存状态重置 */
-  const scheduleSaveStateReset = useCallback((): void => {
+  const scheduleSaveStateReset = (): void => {
     if (saveResetTimerRef.current) {
       clearTimeout(saveResetTimerRef.current);
     }
@@ -330,18 +313,17 @@ export const SettingPage: React.FC = () => {
       setSaveState("idle");
       saveResetTimerRef.current = undefined;
     }, 1800);
-  }, []);
+  };
 
   /** 保存配置 */
   const saveAllConfigs = useCallback(async (): Promise<void> => {
-    if (isSaving.current) return;
-
+    if (isSaving()) return;
     setSaveState("saving");
 
     try {
       if (chrome.storage?.local) {
         await storage.ext.local.set(appConfigKey, localPluginConfigs);
-        await storage.ext.local.set(domainConfigsKey, domainConfigs.current);
+        await storage.ext.local.set(domainConfigsKey, domainConfigs);
       }
 
       console.log("同步当前域名选择", selectedContentScript);
@@ -351,22 +333,22 @@ export const SettingPage: React.FC = () => {
         type: MESSAGE_TYPE["1"],
         payload: localPluginConfigs,
       });
-      maLogger.log(res);
+      console.log(res);
       if (res?.success) {
         setSaveState("saved");
       } else {
         setSaveState("error");
       }
     } catch (error) {
-      maLogger.error("保存配置失败:", error);
+      console.error("保存配置失败:", error);
       setSaveState("error");
     } finally {
       scheduleSaveStateReset();
     }
   }, [
-    isSaving.current,
+    isSaving,
     localPluginConfigs,
-    domainConfigs.current,
+    domainConfigs,
     selectedContentScript,
     scheduleSaveStateReset,
   ]);
@@ -382,6 +364,26 @@ export const SettingPage: React.FC = () => {
   /** 初始化加载 */
   useEffect(() => {
     async function init() {
+      console.log("【触发重新渲染】");
+      // 打印所有的state
+      console.table([
+        {
+          name: "selectedContentScript",
+          value: selectedContentScript,
+        },
+        {
+          name: "currentActivedTabDomain",
+          value: currentActivedTabDomain,
+        },
+        {
+          name: "saveState",
+          value: saveState,
+        },
+        {
+          name: "activeTheme",
+          value: activeTheme,
+        },
+      ]);
       await loadConfig();
       if (!chrome.storage?.local && !chrome.tabs) {
         // 测试环境，使用默认脚本
@@ -397,8 +399,15 @@ export const SettingPage: React.FC = () => {
         setSelectedContentScript(selectedScript);
       });
     }
-
-    void init();
+    return (
+      void init(),
+      /** 清理定时器 */
+      () => {
+        if (saveResetTimerRef.current) {
+          clearTimeout(saveResetTimerRef.current);
+        }
+      }
+    );
   }, []);
 
   /** 加载主题和鼠标拖尾 */
@@ -407,14 +416,13 @@ export const SettingPage: React.FC = () => {
     loadPopupMouseTrail();
   }, [loadPopupTheme, loadPopupMouseTrail]);
 
-  /** 清理定时器 */
-  useEffect(() => {
-    return () => {
-      if (saveResetTimerRef.current) {
-        clearTimeout(saveResetTimerRef.current);
-      }
-    };
-  }, []);
+  const handleChangeContentScript = useCallback(
+    (e: ChangeEvent<HTMLSelectElement, HTMLSelectElement>): void => {
+      console.log("选择脚本", e.target.value);
+      setSelectedContentScript(e.target.value);
+    },
+    [setSelectedContentScript],
+  );
 
   return (
     <TableContainer
@@ -533,10 +541,7 @@ export const SettingPage: React.FC = () => {
                     availableContentScripts.length === 0 ||
                     !currentActivedTabDomain
                   }
-                  onChange={(e) => {
-                    console.log("选择脚本", e.target.value);
-                    setSelectedContentScript(e.target.value);
-                  }}
+                  onChange={handleChangeContentScript}
                 >
                   <option value="">不启用内容脚本</option>
                   {availableContentScripts.map((script) => (
@@ -628,15 +633,15 @@ export const SettingPage: React.FC = () => {
       <div className={`save-dock save-dock--${saveState}`} aria-live="polite">
         <button
           className="primary-btn"
-          disabled={isSaving.current}
+          disabled={isSaving()}
           onClick={saveAllConfigs}
         >
           <span className="primary-btn__icon">
             <CheckCircleOutlined />
           </span>
           <span className="primary-btn__copy">
-            <strong>{saveButtonTitle.current}</strong>
-            <small>{saveButtonHint.current}</small>
+            <strong>{saveButtonTitle()}</strong>
+            <small>{saveButtonHint()}</small>
           </span>
         </button>
       </div>

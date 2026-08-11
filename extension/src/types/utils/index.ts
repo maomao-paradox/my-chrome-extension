@@ -146,11 +146,9 @@ export interface XHR_PATCH_CONFIG {
 
 export interface AppModule {
   _ctx: any;
-  shadowHostId: string;
+  _root: HTMLElement | null;
+  _instance: any | null;
   isInjected: boolean;
-  vueContainer: HTMLElement | null;
-  shadowRoot: ShadowRoot | null;
-  appInstance: any | null;
   isEnabled: boolean;
   init(options?: any): Promise<void>;
   enable(): void;

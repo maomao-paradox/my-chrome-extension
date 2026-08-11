@@ -1,62 +1,74 @@
 // toast.ts
-import { createRoot } from 'react-dom/client'
-import Toast, { type ToastType } from '@/assets/components/Toast'
+import { createRoot } from "react-dom/client";
+import Toast, { ToastType } from "@/assets/components/Toast";
 
-let toastContainer: HTMLDivElement | null = null
-let toastRoot: any = null
+let toastContainer: HTMLDivElement | null = null;
+let toastRoot: any = null;
 
 interface ToastOptions {
-  duration?: number
-  onClose?: () => void
+  appendTo?: HTMLElement;
+  duration?: number;
+  onClose?: () => void;
 }
 
-export const toast = {
-  show: (message: string, type: ToastType = 'success', options?: ToastOptions) => {
+const toast = {
+  show: ({
+    message,
+    type = ToastType.Success,
+    options,
+  }: {
+    message: string;
+    type: ToastType;
+    options?: ToastOptions;
+  }) => {
     // 清理旧 Toast
     if (toastContainer) {
-      toastRoot?.unmount()
-      document.body.removeChild(toastContainer)
-      toastContainer = null
-      toastRoot = null
+      toastRoot?.unmount();
+      options?.appendTo?.removeChild(toastContainer);
+      toastContainer = null;
+      toastRoot = null;
     }
 
-    toastContainer = document.createElement('div')
-    document.body.appendChild(toastContainer)
+    toastContainer = document.createElement("div");
+    options?.appendTo?.appendChild(toastContainer);
 
-    toastRoot = createRoot(toastContainer)
+    toastRoot = createRoot(toastContainer);
     toastRoot.render(
       <Toast
         message={message}
         type={type}
+        appendTo={options?.appendTo}
         duration={options?.duration}
         onClose={() => {
-          options?.onClose?.()
+          options?.onClose?.();
           setTimeout(() => {
             if (toastContainer) {
-              toastRoot?.unmount()
-              document.body.removeChild(toastContainer)
-              toastContainer = null
-              toastRoot = null
+              toastRoot?.unmount();
+              options?.appendTo?.removeChild(toastContainer);
+              toastContainer = null;
+              toastRoot = null;
             }
-          }, 300)
+          }, 300);
         }}
-      />
-    )
+      />,
+    );
   },
 
   success: (message: string, options?: ToastOptions) => {
-    toast.show(message, 'success', options)
+    toast.show({ message, type: ToastType.Success, options });
   },
 
   error: (message: string, options?: ToastOptions) => {
-    toast.show(message, 'error', options)
+    toast.show({ message, type: ToastType.Error, options });
   },
 
-  warning: (message: string, options?: ToastOptions) => {
-    toast.show(message, 'warning', options)
+  warn: (message: string, options?: ToastOptions) => {
+    toast.show({ message, type: ToastType.Warn, options });
   },
 
   info: (message: string, options?: ToastOptions) => {
-    toast.show(message, 'info', options)
-  }
-}
+    toast.show({ message, type: ToastType.Info, options });
+  },
+};
+
+export default toast;

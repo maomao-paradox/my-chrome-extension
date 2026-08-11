@@ -31,7 +31,7 @@ import type { AppModule } from "@/types/utils/index.js";
 
 // 通过 ?inline 导入所有聚合 SCSS 为字符串
 // 这样 Vite 会把所有样式打包到当前 chunk，避免创建 <link> 标签
-import floatingballStyles from "./styles/index.scss?inline";
+import floatingballStyles from "./styles/index.scss?raw";
 
 /**
  * @author 月光下的牧师

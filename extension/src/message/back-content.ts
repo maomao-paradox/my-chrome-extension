@@ -7,10 +7,10 @@
  * @date 2026-02-05T02:38:01.695Z
  */
 
-import type { ExtMessage } from '@/types';
+import type { ExtMessage } from "@/types";
 
 interface SendMessageOptions {
-    preferredTabId?: number;
+  preferredTabId?: number;
 }
 
 function isUsableContentScriptTab(tab: chrome.tabs.Tab): boolean {
@@ -18,55 +18,69 @@ function isUsableContentScriptTab(tab: chrome.tabs.Tab): boolean {
     return false;
   }
 
-  const url = tab.url || '';
-  return !url.startsWith('chrome://')
-        && !url.startsWith('chrome-extension://')
-        && !url.startsWith('devtools://')
-        && !url.startsWith('edge://')
-        && !url.startsWith('about:');
+  const url = tab.url || "";
+  return (
+    !url.startsWith("chrome://") &&
+    !url.startsWith("chrome-extension://") &&
+    !url.startsWith("devtools://") &&
+    !url.startsWith("edge://") &&
+    !url.startsWith("about:")
+  );
 }
 
-function dispatchToTab(tabId: number, message: ExtMessage, callback?: (response: any) => void): Promise<any> {
+function dispatchToTab(
+  tabId: number,
+  message: ExtMessage,
+  callback?: (response: any) => void,
+): Promise<any> {
   return new Promise((resolve, reject) => {
-    chrome.tabs.sendMessage(tabId, { ...message, target: 'content' }, (response: any) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
+    chrome.tabs.sendMessage(
+      tabId,
+      { ...message, target: "content" },
+      (response: any) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
 
-      if (callback) {
-        callback(response);
-      }
-      resolve(response);
-    });
+        if (callback) {
+          callback(response);
+        }
+        resolve(response);
+      },
+    );
   });
 }
 
 export async function sendMessageToContentScript(
   message: ExtMessage,
   callback?: (response: any) => void,
-  options: SendMessageOptions = {}
+  options: SendMessageOptions = {},
 ): Promise<any> {
   // 向内容脚本发送消息的通用函数，page脚本不可用
-  if (!chrome.tabs) {
-    throw new Error('chrome.tabs API 不可用');
+  if (chrome.tabs === undefined) {
+    throw new Error("chrome.tabs API 未定义");
+    // // 使用测试数据模拟chrome.tabs API调用
+    // return new Promise((resolve, reject) => {
+    //   resolve({ success: true });
+    // });
   }
 
   return new Promise((resolve, reject) => {
     const { preferredTabId } = options;
-    maLogger.log('开始查询标签页...');
+    maLogger.log("开始查询标签页...");
 
     const tryPreferredTab = () => {
-      if (typeof preferredTabId !== 'number') {
+      if (typeof preferredTabId !== "number") {
         queryActiveTab();
         return;
       }
 
-      maLogger.log('优先向指定标签页发送消息:', preferredTabId, message);
+      maLogger.log("优先向指定标签页发送消息:", preferredTabId, message);
       dispatchToTab(preferredTabId, message, callback)
         .then(resolve)
         .catch((error) => {
-          maLogger.warn('向指定标签页发送消息失败，回退到活动标签页:', error);
+          maLogger.warn("向指定标签页发送消息失败，回退到活动标签页:", error);
           queryActiveTab();
         });
     };
@@ -74,21 +88,21 @@ export async function sendMessageToContentScript(
     const queryActiveTab = () => {
       // 首先尝试查询活动标签页
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        maLogger.log('查询活动标签页结果:', tabs);
+        maLogger.log("查询活动标签页结果:", tabs);
         const validTabs = tabs.filter(isUsableContentScriptTab);
 
         if (validTabs && validTabs.length > 0) {
-          maLogger.log('找到活动标签页:', validTabs[0].id, validTabs[0].url);
-          maLogger.log('向内容脚本发送消息:', message);
+          maLogger.log("找到活动标签页:", validTabs[0].id, validTabs[0].url);
+          maLogger.log("向内容脚本发送消息:", message);
           dispatchToTab(validTabs[0].id!, message, callback)
             .then(resolve)
             .catch((error) => {
-              maLogger.error('向内容脚本发送消息失败:', error);
+              maLogger.error("向内容脚本发送消息失败:", error);
               // 如果向活动标签页发送消息失败，尝试向所有标签页发送
               sendToAllTabs(message, callback, resolve, reject, preferredTabId);
             });
         } else {
-          maLogger.error('未找到活动标签页，尝试查询所有标签页...');
+          maLogger.error("未找到活动标签页，尝试查询所有标签页...");
           // 如果没有找到活动标签页，尝试查询所有标签页
           sendToAllTabs(message, callback, resolve, reject, preferredTabId);
         }
@@ -97,7 +111,7 @@ export async function sendMessageToContentScript(
 
     tryPreferredTab();
   });
-};
+}
 
 // 向所有标签页发送消息的后备函数
 function sendToAllTabs(
@@ -105,10 +119,10 @@ function sendToAllTabs(
   callback?: (response: any) => void,
   resolve?: (value: any) => void,
   reject?: (reason?: any) => void,
-  preferredTabId?: number
+  preferredTabId?: number,
 ) {
   chrome.tabs.query({}, (tabs) => {
-    maLogger.log('查询所有标签页结果:', tabs);
+    maLogger.log("查询所有标签页结果:", tabs);
     const validTabs = tabs
       .filter(isUsableContentScriptTab)
       .sort((left, right) => {
@@ -124,25 +138,25 @@ function sendToAllTabs(
     if (validTabs && validTabs.length > 0) {
       // 尝试向第一个标签页发送消息
       const firstTab = validTabs[0];
-      maLogger.log('尝试向第一个标签页发送消息:', firstTab.id, firstTab.url);
+      maLogger.log("尝试向第一个标签页发送消息:", firstTab.id, firstTab.url);
 
       dispatchToTab(firstTab.id!, message, callback)
         .then((response) => {
-          maLogger.log('收到标签页响应:', response);
+          maLogger.log("收到标签页响应:", response);
           if (resolve) {
             resolve(response);
           }
         })
         .catch((error) => {
-          maLogger.error('向第一个标签页发送消息也失败:', error);
+          maLogger.error("向第一个标签页发送消息也失败:", error);
           if (reject) {
             reject(new Error(`所有标签页都无法接收消息: ${error.message}`));
           }
         });
     } else {
-      maLogger.error('未找到任何标签页');
+      maLogger.error("未找到任何标签页");
       if (reject) {
-        reject(new Error('未找到任何标签页'));
+        reject(new Error("未找到任何标签页"));
       }
     }
   });

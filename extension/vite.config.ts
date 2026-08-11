@@ -117,7 +117,7 @@ export default defineConfig({
               components: ["@/assets/components"],
             }
           : undefined,
-        chunkFileNames: `assets/js/chunks/chunk-[${isProduction ? "hash" : "name"}].js`,
+        chunkFileNames: `assets/js/chunks/chunk-[name]-[${isProduction ? "hash" : "name"}].js`,
         assetFileNames: (assetInfo) => {
           const fileExtname = path.extname(assetInfo.name || "");
           if (

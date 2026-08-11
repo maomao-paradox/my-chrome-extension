@@ -12,7 +12,7 @@
     animation: slideOut 0.3s cubic-bezier(0.55, 0, 1, 1) forwards;
   }
 
-  // 不同主题的颜色配置
+  /* 不同主题的颜色配置 */
   &[id="success"] {
     .toast-content {
       border-color: rgba(13, 148, 136, 0.22);
@@ -27,7 +27,7 @@
     }
   }
 
-  &[id="warning"] {
+  &[id="warn"] {
     .toast-content {
       border-color: rgba(255, 196, 0, 0.22);
       color: #ffc400;

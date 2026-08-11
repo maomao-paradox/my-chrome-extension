@@ -25,10 +25,13 @@ import {
   addFileInput,
   waitForSelector,
   injectVueComponent,
-  getElementAbsolutePosition,
   createEl,
-  PositionStrategy,
 } from "@/utils/element-control";
+
+import {
+  getElementAbsolutePosition,
+  PositionStrategy,
+} from "@/utils/elementPosition";
 import {
   Requester,
   getFormCodeByName,
@@ -56,7 +59,7 @@ import type {
   MessageHandler,
   Tool,
 } from "@/types";
-import { QuickLogin } from "@components/index";
+import { QuickLogin, QuickLoginProps } from "@components/index";
 import { storage } from "@/stores";
 import { getRuntimeScript } from "@/utils";
 import { whenDomReady } from "@/utils/element-control";
@@ -468,13 +471,15 @@ export default (ctx: AppContext, config = {}) => {
   const enrichQuickLogin = (
     byElement: HTMLElement,
     position: {
-      position: PositionStrategy | undefined;
-      offset: { x?: number; y?: number };
+      strategy?: PositionStrategy;
+      offset?: { x?: number; y?: number };
     },
   ): void => {
     if (!byElement) {
       return;
     }
+
+    maLogger.log(byElement);
 
     const shadowRoot = ctx.gmod("__SHADOW_DOM");
     if (!shadowRoot) {
@@ -483,6 +488,7 @@ export default (ctx: AppContext, config = {}) => {
     }
 
     const positionInfo = getElementAbsolutePosition(byElement);
+    maLogger.log("positionInfo:", positionInfo);
     const loginContainer = createEl({
       tag: "div",
       style: "width: 180px; height: 20px;",
@@ -507,11 +513,14 @@ export default (ctx: AppContext, config = {}) => {
       />,
     );
 
+    const { strategy = PositionStrategy.Right, offset } = position;
+
     positionInfo.positionElement({
       targetElement: loginContainer,
-      strategy: position.position,
+      strategy,
       alignment: "center",
-      offset: position.offset,
+      offset,
+      pinned: true,
       observeReference: true,
     });
   };
@@ -574,7 +583,7 @@ export default (ctx: AppContext, config = {}) => {
       waitForSelector({
         selector: "#app > div > div.login-main > form > div.login-form-title",
         callback: enrichQuickLogin,
-        callbackArgs: [{ position: "right", offset: { x: -180, y: 0 } }],
+        callbackArgs: [{ strategy: "right", offset: { x: -180, y: 0 } }],
         maxWaitTimes: 10,
         useMutationObserver: true,
         timeout: 5000,
@@ -584,7 +593,7 @@ export default (ctx: AppContext, config = {}) => {
     waitForSelector({
       selector: "#app > div > div.navbar > div.right-menu",
       callback: enrichQuickLogin,
-      callbackArgs: [{ position: "left", offset: { x: 113, y: 0 } }],
+      callbackArgs: [{ strategy: "left", offset: { x: 113, y: 0 } }],
       maxWaitTimes: 10,
     });
 
@@ -881,6 +890,8 @@ export default (ctx: AppContext, config = {}) => {
   initMessageListener();
   // 初始化页面配置
   initPageConfig(ctx);
+
+  ctx.message.success("MRIA脚本初始化完成！");
 
   return {
     // 返回可调用的公共API
