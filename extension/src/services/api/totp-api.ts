@@ -126,7 +126,7 @@ async function writeStoredAccounts(
 
 function readFallbackAccounts(): StoredTOTPAccount[] {
   try {
-    if (!localStorage.length) {
+    if (!localStorage.length || !localStorage.getItem(TOTP_STORAGE_KEY)) {
       console.warn("local storage not available, use test data!");
       return [
         {
