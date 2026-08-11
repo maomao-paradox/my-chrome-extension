@@ -151,7 +151,7 @@
 .sci-fi-switch.active .switch-indicator {
   color: #00f0ff;
   text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
-  right: 50px;
+  right: 42px;
 }
 
 /* 悬停状态 */

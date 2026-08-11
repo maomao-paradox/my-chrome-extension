@@ -33,7 +33,7 @@ export const useDomainManager = () => {
   /**
    * 加载域名配置
    */
-  const loadDomainConfigs = useCallback(async (): Promise<void> => {
+  const loadDomainConfigs = async (): Promise<void> => {
     try {
       if (!chrome.storage) {
         console.warn("local storage not available, use test data");
@@ -65,7 +65,7 @@ export const useDomainManager = () => {
     } catch (error) {
       maLogger.error("加载域名配置失败:", error);
     }
-  }, []);
+  };
 
   const saveDomainConfigs = async (
     domainConfigs: DomainConfigs,

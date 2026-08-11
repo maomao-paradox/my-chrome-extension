@@ -91,81 +91,65 @@ export const SettingPage: React.FC = () => {
   );
 
   /** 可用的内容脚本列表 */
-  const availableContentScripts = () => {
-    debugger;
-    return Object.entries(domainConfigs.current)
-      .filter(([key, config]) => {
-        if (key === "Eve") return false;
-        if (typeof config === "object" && config !== null) {
-          return (config as DomainConfigItem).enabled;
-        }
-        return true;
-      })
-      .map(([key]) => key);
-  };
+  const availableContentScripts = Object.entries(domainConfigs.current)
+    .filter(([key, config]) => {
+      if (key === "Eve") return false;
+      if (typeof config === "object" && config !== null) {
+        return (config as DomainConfigItem).enabled;
+      }
+      return true;
+    })
+    .map(([key]) => key);
 
   /** 插件配置条目列表 */
-  const pluginConfigEntries = (): [string, ConfigItem][] => {
-    return Object.entries(localPluginConfigs);
-  };
+  const pluginConfigEntries = Object.entries(localPluginConfigs);
 
   /** 已启用的插件数量 */
-  const enabledPluginCount = () => {
-    return pluginConfigEntries().filter(([, app]) => Boolean(app.enabled))
-      .length;
-  };
+  const enabledPluginCount = pluginConfigEntries.filter(([, app]) =>
+    Boolean(app.enabled),
+  ).length;
 
   /** 已配置路由的插件数量 */
-  const routedPluginCount = () => {
-    return pluginConfigEntries().filter(([, value]) => value.type !== undefined)
-      .length;
-  };
+  const routedPluginCount = pluginConfigEntries.filter(
+    ([, value]) => value.type !== undefined,
+  ).length;
 
   /** 当前主题标签 */
-  const currentThemeLabel = () => {
-    return (
-      popupThemes.find((theme) => theme.key === activeTheme)?.label ??
-      popupThemes[0].label
-    );
-  };
+  const currentThemeLabel =
+    popupThemes.find((theme) => theme.key === activeTheme)?.label ??
+    popupThemes[0].label;
 
   /** 选中脚本标签 */
-  const selectedScriptLabel = () => {
-    debugger;
-    if (!currentActivedTabDomain) return "当前站点未识别";
-    return selectedContentScript || "当前站点未绑定脚本";
-  };
+  const selectedScriptLabel = !currentActivedTabDomain
+    ? "当前站点未识别"
+    : selectedContentScript || "当前站点未绑定脚本";
 
   /** 是否正在保存 */
-  const isSaving = saveState === "saving";
+  const isSaving = useRef(false);
 
   /** 保存按钮标题 */
-  const saveButtonTitle = () => {
-    switch (saveState) {
-      case "saving":
-        return "保存中";
-      case "saved":
-        return "已保存";
-      case "error":
-        return "保存失败";
-      default:
-        return "保存配置";
-    }
-  };
-
+  const saveButtonTitle = useRef<string>("保存配置");
   /** 保存按钮提示 */
-  const saveButtonHint = () => {
-    switch (saveState) {
-      case "saving":
-        return "正在写入本地并同步页面";
-      case "saved":
-        return "配置已同步到当前页面";
-      case "error":
-        return "请稍后重试或检查当前页面状态";
-      default:
-        return "写入本地并同步到当前页面";
-    }
-  };
+  const saveButtonHint = useRef<string>("保存配置");
+  useEffect(() => {
+    isSaving.current = saveState === "saving";
+    saveButtonTitle.current =
+      saveState === "saving"
+        ? "保存中"
+        : saveState === "saved"
+          ? "已保存"
+          : saveState === "error"
+            ? "保存失败"
+            : "保存配置";
+    saveButtonHint.current =
+      saveState === "saving"
+        ? "正在写入本地并同步页面"
+        : saveState === "saved"
+          ? "配置已同步到当前页面"
+          : saveState === "error"
+            ? "请稍后重试或检查当前页面状态"
+            : "写入本地并同步到当前页面";
+  }, [saveState]);
 
   /** 解析域名列表字符串 */
   const parseDomains = useCallback((domainsString: string): string[] => {
@@ -241,16 +225,12 @@ export const SettingPage: React.FC = () => {
   /** 解析选中脚本 */
   const resolveSelectedScript = useCallback(
     (currentDomain: string): string => {
-      console.error("当前活动标签页域名:", currentDomain);
-      console.error("当前可用脚本:", availableContentScripts);
+      console.log("当前活动标签页域名:", currentDomain);
+      console.log("当前可用脚本:", availableContentScripts);
 
       if (!currentDomain) return "";
-      debugger;
-      for (const scriptKey of availableContentScripts()) {
-        console.error(
-          "当前脚本域名:",
-          parseDomains(getDomainsString(scriptKey)),
-        );
+      for (const scriptKey of availableContentScripts) {
+        console.log("当前脚本域名:", parseDomains(getDomainsString(scriptKey)));
         if (parseDomains(getDomainsString(scriptKey)).includes(currentDomain)) {
           return scriptKey;
         }
@@ -296,15 +276,43 @@ export const SettingPage: React.FC = () => {
   }, [loadPluginConfigs, loadDomainConfigs]);
 
   /** 获取当前活动标签页 */
-  const getActivedTab =
-    useCallback(async (): Promise<chrome.tabs.Tab | null> => {
-      if (!chrome.tabs) return null;
-      const tabs = await chrome.tabs.query({
+  const getActivedTab = async (): Promise<chrome.tabs.Tab | null> => {
+    if (!chrome.tabs) {
+      // 模拟返回一个活动标签页勇于测试
+      console.warn("chrome.tabs not available, use test data");
+      return {
         active: true,
-        currentWindow: true,
-      });
-      return tabs[0];
-    }, []);
+        audible: false,
+        autoDiscardable: true,
+        discarded: false,
+        favIconUrl: "https://example.com/favicon.ico",
+        frozen: false,
+        groupId: -1,
+        height: 945,
+        highlighted: true,
+        id: 1344925606,
+        incognito: false,
+        index: 6,
+        lastAccessed: 1786410821762.949,
+        mutedInfo: {
+          muted: false,
+        },
+        pinned: false,
+        selected: true,
+        splitViewId: -1,
+        status: "complete",
+        title: "测试站点",
+        url: "https://example.com/",
+        width: 1920,
+        windowId: 1344925415,
+      };
+    }
+    const tabs = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    return tabs[0];
+  };
 
   /** 获取当前活动标签页域名 */
   const getActivedTabDomain = useCallback(async (): Promise<string> => {
@@ -326,7 +334,7 @@ export const SettingPage: React.FC = () => {
 
   /** 保存配置 */
   const saveAllConfigs = useCallback(async (): Promise<void> => {
-    if (isSaving) return;
+    if (isSaving.current) return;
 
     setSaveState("saving");
 
@@ -336,8 +344,7 @@ export const SettingPage: React.FC = () => {
         await storage.ext.local.set(domainConfigsKey, domainConfigs.current);
       }
 
-      console.error("同步当前域名选择", selectedContentScript);
-      debugger;
+      console.log("同步当前域名选择", selectedContentScript);
       await syncCurrentDomainSelection(selectedContentScript);
 
       const res = await sendMessageToContentScript({
@@ -357,7 +364,7 @@ export const SettingPage: React.FC = () => {
       scheduleSaveStateReset();
     }
   }, [
-    isSaving,
+    isSaving.current,
     localPluginConfigs,
     domainConfigs.current,
     selectedContentScript,
@@ -375,18 +382,19 @@ export const SettingPage: React.FC = () => {
   /** 初始化加载 */
   useEffect(() => {
     async function init() {
-      debugger;
       await loadConfig();
+      if (!chrome.storage?.local && !chrome.tabs) {
+        // 测试环境，使用默认脚本
+        setCurrentActivedTabDomain("example.com:443");
+        setSelectedContentScript("Radius");
+        return;
+      }
       getActivedTabDomain().then((domain) => {
         maLogger.log("当前活动标签页域名:", domain);
         setCurrentActivedTabDomain(domain);
         const selectedScript = resolveSelectedScript(domain);
-        console.error("当前选中脚本:", selectedScript);
+        console.log("当前选中脚本:", selectedScript);
         setSelectedContentScript(selectedScript);
-
-        if (!chrome.storage?.local && !chrome.tabs) {
-          setSelectedContentScript(availableContentScripts()[0]);
-        }
       });
     }
 
@@ -421,11 +429,11 @@ export const SettingPage: React.FC = () => {
         <div className="settings-summary">
           <div className="summary-chip">
             <span>配置项</span>
-            <strong>{pluginConfigEntries().length}</strong>
+            <strong>{pluginConfigEntries.length}</strong>
           </div>
           <div className="summary-chip summary-chip--accent">
             <span>已启用</span>
-            <strong>{enabledPluginCount()}</strong>
+            <strong>{enabledPluginCount}</strong>
           </div>
         </div>
       }
@@ -441,7 +449,7 @@ export const SettingPage: React.FC = () => {
               <p className="card-kicker">Appearance</p>
               <h3 className="card-title">主题设置</h3>
             </div>
-            <span className="panel-status">{currentThemeLabel()}</span>
+            <span className="panel-status">{currentThemeLabel}</span>
           </div>
 
           <div className="theme-grid">
@@ -522,16 +530,16 @@ export const SettingPage: React.FC = () => {
                   value={selectedContentScript}
                   className="content-script-select"
                   disabled={
-                    availableContentScripts().length === 0 ||
+                    availableContentScripts.length === 0 ||
                     !currentActivedTabDomain
                   }
                   onChange={(e) => {
-                    console.error("选择脚本", e.target.value);
+                    console.log("选择脚本", e.target.value);
                     setSelectedContentScript(e.target.value);
                   }}
                 >
                   <option value="">不启用内容脚本</option>
-                  {availableContentScripts().map((script) => (
+                  {availableContentScripts.map((script) => (
                     <option key={script} value={script}>
                       {script}
                     </option>
@@ -546,10 +554,10 @@ export const SettingPage: React.FC = () => {
               }`}
             >
               <span className="selection-dot"></span>
-              <span>{selectedScriptLabel()}</span>
+              <span>{selectedScriptLabel}</span>
             </div>
 
-            {availableContentScripts().length === 0 && (
+            {availableContentScripts.length === 0 && (
               <p className="selector-hint">暂无可用内容脚本</p>
             )}
           </div>
@@ -565,12 +573,12 @@ export const SettingPage: React.FC = () => {
               <p className="card-kicker">Feature Routing</p>
               <h3 className="card-title">功能设置</h3>
             </div>
-            <span className="panel-status">{routedPluginCount()} 个入口</span>
+            <span className="panel-status">{routedPluginCount} 个入口</span>
           </div>
 
-          {pluginConfigEntries().length > 0 ? (
+          {pluginConfigEntries.length > 0 ? (
             <div className="switch-list">
-              {pluginConfigEntries().map(([key, app]) => (
+              {pluginConfigEntries.map(([key, app]) => (
                 <div key={key} className="switch-row">
                   <MaSwitch
                     label={(app as any).name}
@@ -620,15 +628,15 @@ export const SettingPage: React.FC = () => {
       <div className={`save-dock save-dock--${saveState}`} aria-live="polite">
         <button
           className="primary-btn"
-          disabled={isSaving}
+          disabled={isSaving.current}
           onClick={saveAllConfigs}
         >
           <span className="primary-btn__icon">
             <CheckCircleOutlined />
           </span>
           <span className="primary-btn__copy">
-            <strong>{saveButtonTitle()}</strong>
-            <small>{saveButtonHint()}</small>
+            <strong>{saveButtonTitle.current}</strong>
+            <small>{saveButtonHint.current}</small>
           </span>
         </button>
       </div>
