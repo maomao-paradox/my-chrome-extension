@@ -59,11 +59,10 @@ export async function sendMessageToContentScript(
 ): Promise<any> {
   // 向内容脚本发送消息的通用函数，page脚本不可用
   if (chrome.tabs === undefined) {
-    throw new Error("chrome.tabs API 未定义");
-    // // 使用测试数据模拟chrome.tabs API调用
-    // return new Promise((resolve, reject) => {
-    //   resolve({ success: true });
-    // });
+    // 使用测试数据模拟chrome.tabs API调用
+    return new Promise((resolve, reject) => {
+      resolve({ success: true });
+    });
   }
 
   return new Promise((resolve, reject) => {

@@ -12,6 +12,7 @@ import React, {
   useCallback,
   useRef,
   ChangeEvent,
+  useMemo,
 } from "react";
 import MaSwitch from "@/assets/components/MaSwitch";
 import {
@@ -101,16 +102,19 @@ export const SettingPage: FC<{}> = () => {
     undefined,
   );
 
-  /** 可用的内容脚本列表 */
-  const availableContentScripts = Object.entries(domainConfigs)
-    .filter(([key, config]) => {
-      if (key === "Eve") return false;
-      if (typeof config === "object" && config !== null) {
-        return (config as DomainConfigItem).enabled;
-      }
-      return true;
-    })
-    .map(([key]) => key);
+  const availableContentScripts = useMemo(
+    () =>
+      Object.entries(domainConfigs)
+        .filter(([key, config]) => {
+          if (key === "Eve") return false;
+          if (typeof config === "object" && config !== null) {
+            return (config as DomainConfigItem).enabled;
+          }
+          return true;
+        })
+        .map(([key]) => key),
+    [domainConfigs],
+  );
 
   /** 插件配置条目列表 */
   const pluginConfigEntries = Object.entries(localPluginConfigs);
@@ -227,24 +231,6 @@ export const SettingPage: FC<{}> = () => {
     [selectedContentScript, domainConfigs, currentActivedTabDomain],
   );
 
-  /** 解析选中脚本 */
-  const resolveSelectedScript = useCallback(
-    (currentDomain: string): string => {
-      console.log("当前活动标签页域名:", currentDomain);
-      console.log("当前可用脚本:", availableContentScripts);
-
-      if (!currentDomain) return "";
-      for (const scriptKey of availableContentScripts) {
-        console.log("当前脚本域名:", parseDomains(getDomainsString(scriptKey)));
-        if (parseDomains(getDomainsString(scriptKey)).includes(currentDomain)) {
-          return scriptKey;
-        }
-      }
-      return "";
-    },
-    [parseDomains, getDomainsString],
-  );
-
   /** 选择主题 */
   const selectTheme = useCallback(
     async (themeKey: PopupThemeKey): Promise<void> => {
@@ -296,12 +282,6 @@ export const SettingPage: FC<{}> = () => {
     });
     return tabs[0];
   };
-
-  /** 获取当前活动标签页域名 */
-  const getActivedTabDomain = useCallback(async (): Promise<string> => {
-    const tab = await getActivedTab();
-    return extractDomain(tab?.url || "");
-  }, [getActivedTab]);
 
   /** 安排保存状态重置 */
   const scheduleSaveStateReset = (): void => {
@@ -364,51 +344,51 @@ export const SettingPage: FC<{}> = () => {
   /** 初始化加载 */
   useEffect(() => {
     async function init() {
-      console.log("【触发重新渲染】");
-      // 打印所有的state
-      console.table([
-        {
-          name: "selectedContentScript",
-          value: selectedContentScript,
-        },
-        {
-          name: "currentActivedTabDomain",
-          value: currentActivedTabDomain,
-        },
-        {
-          name: "saveState",
-          value: saveState,
-        },
-        {
-          name: "activeTheme",
-          value: activeTheme,
-        },
-      ]);
+      maLogger.log("【挂载组件-执行初始化】");
       await loadConfig();
-      if (!chrome.storage?.local && !chrome.tabs) {
-        // 测试环境，使用默认脚本
-        setCurrentActivedTabDomain("example.com:443");
-        setSelectedContentScript("Radius");
+
+      /** 获取当前活动标签页域名 */
+      const tab = await getActivedTab();
+      const domain = tab ? extractDomain(tab?.url || "") : "";
+      setCurrentActivedTabDomain(domain);
+    }
+    init();
+
+    return () => {
+      /** 清理定时器 */
+      if (saveResetTimerRef.current) {
+        clearTimeout(saveResetTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!chrome.storage?.local) {
+      // 测试环境，使用默认脚本
+      setSelectedContentScript("Radius");
+      return;
+    }
+    if (!currentActivedTabDomain) return;
+
+    maLogger.log("当前活动标签页域名:", currentActivedTabDomain);
+    maLogger.log("当前可用脚本:", availableContentScripts);
+
+    for (const scriptKey of availableContentScripts) {
+      maLogger.log(
+        "当前脚本域名列表:",
+        parseDomains(getDomainsString(scriptKey)),
+      );
+      if (
+        parseDomains(getDomainsString(scriptKey)).includes(
+          currentActivedTabDomain,
+        )
+      ) {
+        maLogger.log("当前域名活跃脚本:", scriptKey);
+        setSelectedContentScript(scriptKey);
         return;
       }
-      getActivedTabDomain().then((domain) => {
-        maLogger.log("当前活动标签页域名:", domain);
-        setCurrentActivedTabDomain(domain);
-        const selectedScript = resolveSelectedScript(domain);
-        console.log("当前选中脚本:", selectedScript);
-        setSelectedContentScript(selectedScript);
-      });
     }
-    return (
-      void init(),
-      /** 清理定时器 */
-      () => {
-        if (saveResetTimerRef.current) {
-          clearTimeout(saveResetTimerRef.current);
-        }
-      }
-    );
-  }, []);
+  }, [currentActivedTabDomain, availableContentScripts]);
 
   /** 加载主题和鼠标拖尾 */
   useEffect(() => {
@@ -423,6 +403,31 @@ export const SettingPage: FC<{}> = () => {
     },
     [setSelectedContentScript],
   );
+
+  maLogger.log("【新一轮渲染提交】");
+  // 打印所有的state
+  maLogger.table([
+    {
+      name: "selectedContentScript",
+      value: selectedContentScript,
+    },
+    {
+      name: "currentActivedTabDomain",
+      value: currentActivedTabDomain,
+    },
+    {
+      name: "domainConfigs",
+      value: domainConfigs,
+    },
+    {
+      name: "availableContentScripts",
+      value: availableContentScripts,
+    },
+    {
+      name: "activeTheme",
+      value: activeTheme,
+    },
+  ]);
 
   return (
     <TableContainer
