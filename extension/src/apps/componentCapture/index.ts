@@ -27,17 +27,16 @@ import { bus } from "@/event/bus";
 
 // 通过 ?inline 导入聚合 SCSS 为字符串
 // 这样 Vite 会把所有样式打包到当前 chunk，避免创建 <link> 标签
-import componentCaptureStyles from "./styles/app.scss?inline";
+import componentCaptureStyles from "./styles/app.scss?raw";
 
 const pluginName = "componentCapture";
 
 class ComponentCaptureModule implements AppModule {
-  _ctx: any = null;
-  shadowHostId: string = shadowHostId;
+  _ctx = null;
+  _root: Root | null = null;
+  _container: HTMLElement | null = null;
+  _instance = null;
   isInjected: boolean = false;
-  reactContainer: HTMLElement | null = null;
-  shadowRoot: ShadowRoot | null = null;
-  appRoot: Root | null = null;
   isCapturing: boolean = false;
   isEnabled: boolean = false;
   stylesInjected: boolean = false;
@@ -72,49 +71,40 @@ class ComponentCaptureModule implements AppModule {
       // 已注入则跳过
       if (
         this.isInjected &&
-        this.appRoot &&
-        this.reactContainer &&
-        this.shadowRoot &&
-        $id(this.shadowHostId)
+        this._root &&
+        this._container &&
+        $id(shadowHostId)
       ) {
         return;
       }
 
       // 创建 shadow root
-      if (!this.shadowRoot) {
-        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
-        this.shadowRoot = shadowRoot;
-      }
+      const { shadowRoot } = createShadowHost(shadowHostId, "open");
 
-      // 注入聚合 SCSS（?inline 导入的字符串）
-      if (!this.stylesInjected && this.shadowRoot) {
-        injectStyles(this.shadowRoot, componentCaptureStyles);
+      // 注入聚合 SCSS（?raw 导入的字符串）
+      if (!this.stylesInjected && shadowRoot) {
+        injectStyles(shadowRoot, componentCaptureStyles);
         this.stylesInjected = true;
       }
 
       // 创建 React 容器
-      if (
-        !this.reactContainer &&
-        !this.shadowRoot?.getElementById(`shadow-app-${pluginName}`)
-      ) {
-        this.reactContainer = addElementToDom({
-          tag: "div",
-          attrs: {
-            id: `shadow-app-${pluginName}`,
-          },
-          style: "position: fixed; z-index: var(--z-index);",
-        })(this.shadowRoot as ShadowRoot);
+      if (!this._container) {
+        this._container =
+          shadowRoot?.getElementById(`shadow-app-${pluginName}`) ||
+          addElementToDom({
+            tag: "div",
+            attrs: {
+              id: `shadow-app-${pluginName}`,
+            },
+            style: "position: fixed; z-index: var(--z-index);",
+          })(shadowRoot);
       }
 
-      // 卸载旧的 React root
-      if (this.appRoot) {
-        this.appRoot.unmount();
-        this.appRoot = null;
+      if (!this._root) {
+        // 创建 React root 并渲染组件
+        this._root = createRoot(this._container);
+        this._root.render(React.createElement(ComponentCaptureApp));
       }
-
-      // 创建 React root 并渲染组件
-      this.appRoot = createRoot(this.reactContainer!);
-      this.appRoot.render(React.createElement(ComponentCaptureApp));
     } catch (error) {
       maLogger.error("注入组件捕获模块失败:", error);
     }
@@ -147,8 +137,8 @@ class ComponentCaptureModule implements AppModule {
       await this.inject();
 
       // 显示 React 容器
-      if (this.reactContainer) {
-        this.reactContainer.style.display = "block";
+      if (this._container) {
+        this._container.style.display = "block";
       }
 
       // 通过事件总线启动捕获（React 组件监听此事件）
@@ -169,8 +159,8 @@ class ComponentCaptureModule implements AppModule {
    * 隐藏捕获界面
    */
   private hide(): void {
-    if (this.reactContainer) {
-      this.reactContainer.style.display = "none";
+    if (this._container) {
+      this._container.style.display = "none";
       this.isCapturing = false;
       maLogger.log("组件捕获界面已隐藏");
     }
@@ -180,18 +170,18 @@ class ComponentCaptureModule implements AppModule {
    * 清理资源
    */
   private cleanup(): void {
-    if (this.appRoot) {
-      this.appRoot.unmount();
-      this.appRoot = null;
+    if (this._root) {
+      this._root.unmount();
+      this._root = null;
     }
 
-    if (this.reactContainer) {
+    if (this._container) {
       try {
-        this.reactContainer.remove();
+        this._container.remove();
       } catch (error) {
         // 元素可能已经被移除
       }
-      this.reactContainer = null;
+      this._container = null;
     }
 
     this.isCapturing = false;

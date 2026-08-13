@@ -148,6 +148,12 @@ await chrome.runtime.sendMessage({
 - 开发模式可访问 `http://127.0.0.1:5173/pages/profile.html`
 - 浏览器插件环境下访问插件的 options 页面；当前已将 `PanelNav`、星舰总览弹层 `TacticalOverview`、玻璃星轨光标 `GlassCursor`、浏览器变量查看器迁移为 React 组件
 
+### 战役选择页
+- 新增 React + Tailwind CSS 战役选择 UI，入口为 `src/pages/campaign.html`
+- 页面采用三栏战术面板布局：左侧战役档案列表、中间战区全息投影、右侧任务状态与难度选择
+- 中间主视图使用 `@react-three/fiber`、`@react-three/drei` 和 Three.js 渲染线框全息地球，包含星点背景、地表点阵、陆地海岸线、国家边界线、区域环线、自转与鼠标拖拽旋转；点击地球任务点可在右侧面板查看任务信息
+- 开发模式可访问 `http://127.0.0.1:5173/pages/campaign.html`
+
 ### 3D 旋转展示页
 - `src/pages/index.html` 已封装为 Vue 3 入口，页面逻辑集中在 `src/pages/index/App.vue`
 - 保留旧版 `rotation3D` 插件的底座、节点、连线、点击和拖拽旋转行为，并改为加载本地脚本资源

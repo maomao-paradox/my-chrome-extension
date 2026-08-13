@@ -1,0 +1,312 @@
+/* CSS变量定义 - 科技感主题 */
+:root {
+  /* 主色调 - 科技蓝 */
+  --primary-color: #165dff;
+  --primary-light: #4080ff;
+  --primary-dark: #0e42d2;
+
+  /* 渐变色 */
+  --gradient-primary: linear-gradient(135deg, #165dff 0%, #4080ff 100%);
+  --gradient-secondary: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  --gradient-card: linear-gradient(
+    135deg,
+    rgba(22, 93, 255, 0.05) 0%,
+    rgba(64, 128, 255, 0.1) 100%
+  );
+
+  /* 背景色 */
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: rgba(22, 27, 34, 0.8);
+  --bg-hover: rgba(22, 93, 255, 0.1);
+
+  /* 文本色 */
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-tertiary: #484f58;
+
+  /* 边框和分隔线 */
+  --border-color: #30363d;
+  --border-light: rgba(48, 54, 61, 0.5);
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* 发光效果 */
+  --glow-primary: 0 0 8px rgba(22, 93, 255, 0.5);
+  --glow-secondary: 0 0 12px rgba(64, 128, 255, 0.3);
+
+  /* 动画时间 */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  color: var(--text-primary);
+  background: var(--gradient-secondary);
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 应用容器 */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 100%;
+  background: var(--bg-primary);
+}
+
+/* 导航栏样式 */
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* 横向滚动容器 - 隐藏滚动条但保持滚动功能 */
+.nav-tabs-scroll {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Chrome, Safari, Edge 隐藏滚动条 */
+.nav-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* 品牌标识 */
+.nav-logo {
+  display: flex;
+  align-items: center;
+}
+
+.version-badge {
+  font-size: 11px;
+  color: var(--text-secondary);
+  background-color: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 10px;
+  min-width: min-content;
+  margin-left: 10px;
+  padding: 8px 16px;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px 8px 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.nav-tab:hover {
+  background: rgba(22, 93, 255, 0.08);
+  color: var(--text-primary);
+  border-color: rgba(22, 93, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.nav-tab.active {
+  background: linear-gradient(135deg, #165dff 0%, #4080ff 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 10px rgba(22, 93, 255, 0.3);
+}
+
+.tab-icon {
+  font-size: 14px;
+}
+
+.automation-tab-icon {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  position: relative;
+  display: inline-block;
+}
+
+.automation-tab-icon::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+.tab-label {
+  font-weight: 500;
+}
+
+/* 主内容区域 */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: var(--bg-primary);
+}
+
+/* 功能面板容器 */
+.features-container {
+  max-width: 100%;
+}
+
+/* 变量查看器容器 */
+.var-inspector-container {
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 路径扫描工具容器 */
+.path-scanner-container {
+  padding: 0;
+  height: 100%;
+  overflow: visible;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+h1 {
+  font-size: 20px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* 功能卡片布局 */
+.feature-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.feature-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(4px);
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), var(--glow-secondary);
+  border-color: var(--primary-light);
+}
+
+/* 状态栏 */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-secondary);
+  padding: 8px 20px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  backdrop-filter: blur(10px);
+}
+
+.status-left,
+.status-center,
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00c853 0%, #007e33 100%);
+  box-shadow: 0 0 8px rgba(0, 200, 83, 0.6);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* 淡入动画 */
+.fade-in {
+  animation: fadeIn 0.14s ease-out-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

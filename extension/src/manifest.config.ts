@@ -37,9 +37,9 @@ export default defineManifest({
   //   "interact": true      // 是否允许交互操作（点击、设置值等）
   // },
 
-  // side_panel: {
-  //   default_path: 'pages/sidepanel.html'
-  // },
+  side_panel: {
+    default_path: 'pages/sidepanel.html'
+  },
 
   options_page: 'pages/options.html' as never,
 

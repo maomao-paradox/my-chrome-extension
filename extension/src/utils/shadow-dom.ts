@@ -9,16 +9,18 @@
 
 import { $id } from "./element-control";
 import shadowThemeCss from "@/assets/styles/shadow-theme.css?raw";
-import elementPlusCss from "element-plus/dist/index.css?raw";
 
-export function createShadowHost(id: string, mode: ShadowRootMode) {
+export function createShadowHost(
+  id: string,
+  mode: ShadowRootMode,
+): { shadowHost: HTMLElement; shadowRoot: ShadowRoot } {
   // 检查是否已存在
   const existingHost = $id(id);
   if (existingHost) {
     // maLogger.log("已存在Shadow Host:", existingHost);
     return {
       shadowHost: existingHost,
-      shadowRoot: existingHost.shadowRoot,
+      shadowRoot: existingHost?.shadowRoot as ShadowRoot,
     };
   }
 
@@ -38,8 +40,8 @@ export function createShadowHost(id: string, mode: ShadowRootMode) {
 
   // 创建 Shadow Root
   const shadowRoot = shadowHost.attachShadow({ mode });
-  // 注入 Element Plus 样式
-  injectStyles(shadowRoot, elementPlusCss, true);
+  // // 注入 Element Plus 样式
+  // injectStyles(shadowRoot, elementPlusCss, true);
   // 注入主题CSS，覆盖 Element Plus 样式
   injectStyles(shadowRoot, shadowThemeCss);
 

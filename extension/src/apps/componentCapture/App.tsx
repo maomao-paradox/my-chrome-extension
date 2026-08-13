@@ -59,24 +59,21 @@ const ComponentCaptureApp: React.FC = () => {
   // ===== 稳定包装函数（引用永远不变，用于 add/removeEventListener） =====
   const handleMouseMoveStable = useCallback(
     (e: MouseEvent) => handleMouseMoveRef.current(e),
-    []
+    [],
   );
   const handleClickStable = useCallback(
     (e: MouseEvent) => handleClickRef.current(e),
-    []
+    [],
   );
   const handleKeyDownStable = useCallback(
     (e: KeyboardEvent) => handleKeyDownRef.current(e),
-    []
+    [],
   );
   const handleDragMoveStable = useCallback(
     (e: MouseEvent) => handleDragMoveRef.current(e),
-    []
+    [],
   );
-  const handleMouseUpStable = useCallback(
-    () => handleMouseUpRef.current(),
-    []
-  );
+  const handleMouseUpStable = useCallback(() => handleMouseUpRef.current(), []);
 
   // ===== 基础工具函数 =====
   const createHighlightOverlay = useCallback((): HTMLDivElement => {
@@ -106,7 +103,9 @@ const ComponentCaptureApp: React.FC = () => {
 
   const removeHighlight = useCallback((): void => {
     if (highlightOverlayRef.current && highlightOverlayRef.current.parentNode) {
-      highlightOverlayRef.current.parentNode.removeChild(highlightOverlayRef.current);
+      highlightOverlayRef.current.parentNode.removeChild(
+        highlightOverlayRef.current,
+      );
       highlightOverlayRef.current = null;
     }
   }, []);
@@ -170,7 +169,9 @@ const ComponentCaptureApp: React.FC = () => {
       ];
       attributesToRemove.forEach((attr) => {
         clone.removeAttribute(attr);
-        clone.querySelectorAll(`[${attr}]`).forEach((el) => el.removeAttribute(attr));
+        clone
+          .querySelectorAll(`[${attr}]`)
+          .forEach((el) => el.removeAttribute(attr));
       });
 
       let html = clone.outerHTML;
@@ -192,7 +193,7 @@ ${tagName}${idSelector}${classSelector} {
 ${styles}}
 </style>`;
     },
-    [extractElementStyles]
+    [extractElementStyles],
   );
 
   // ===== 业务函数 =====
@@ -205,7 +206,12 @@ ${styles}}
     document.removeEventListener("click", handleClickStable, true);
     document.removeEventListener("keydown", handleKeyDownStable);
     maLogger.log("组件捕获模式已退出");
-  }, [removeHighlight, handleMouseMoveStable, handleClickStable, handleKeyDownStable]);
+  }, [
+    removeHighlight,
+    handleMouseMoveStable,
+    handleClickStable,
+    handleKeyDownStable,
+  ]);
 
   // 让 exitCapture 可在 ref 中被其他处理函数调用（避免 stale closure）
   exitCaptureRef.current = exitCapture;
@@ -271,7 +277,7 @@ ${styles}}
       document.addEventListener("mousemove", handleDragMoveStable);
       document.addEventListener("mouseup", handleMouseUpStable);
     },
-    [handleDragMoveStable, handleMouseUpStable]
+    [handleDragMoveStable, handleMouseUpStable],
   );
 
   // ===== 事件处理函数实现（每轮渲染更新到 ref，保证访问最新 state） =====
@@ -376,10 +382,17 @@ ${styles}}
     document.addEventListener("keydown", handleKeyDownStable);
 
     maLogger.log("组件捕获模式已启动");
-  }, [createHighlightOverlay, handleMouseMoveStable, handleClickStable, handleKeyDownStable]);
+  }, [
+    createHighlightOverlay,
+    handleMouseMoveStable,
+    handleClickStable,
+    handleKeyDownStable,
+  ]);
 
   // ===== 监听事件总线启动捕获 + 卸载时清理 =====
   useEffect(() => {
+    maLogger.log("组件捕获应用挂载，启动监听事件总线");
+    // 监听事件总线启动捕获
     const onStart = () => startCapture();
     bus.on("start-component-capture", onStart);
 

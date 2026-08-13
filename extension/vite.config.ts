@@ -70,6 +70,7 @@ export default defineConfig({
       },
       input: {
         "pages/profile": path.resolve(__dirname, "src/pages/profile.html"),
+        "pages/campaign": path.resolve(__dirname, "src/pages/campaign.html"),
         ...(isProduction
           ? {
               ...scanFiles({

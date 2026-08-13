@@ -7,6 +7,8 @@
  * @date 2026-02-05T02:38:01.698Z
  */
 
+import { Root } from "react-dom/client";
+
 export interface ImageInfo {
   src: string;
   alt: string;
@@ -146,7 +148,7 @@ export interface XHR_PATCH_CONFIG {
 
 export interface AppModule {
   _ctx: any;
-  _root: HTMLElement | null;
+  _root: Root | null;
   _instance: any | null;
   isInjected: boolean;
   isEnabled: boolean;

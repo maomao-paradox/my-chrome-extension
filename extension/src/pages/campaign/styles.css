@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.campaign-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.campaign-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.campaign-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.campaign-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+}
+
+.campaign-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 180, 216, 0.55);
+}
