@@ -212,7 +212,6 @@ export const createMessageHandlers = (
 
   CALCULATE_POW: async (data, sendResponse) => {
     maLogger.log("=====计算 POW=====", data);
-    maLogger.log("=====计算 POW=====", data);
     try {
       const { challenge } = data;
       if (!challenge) {

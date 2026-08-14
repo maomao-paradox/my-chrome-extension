@@ -24,7 +24,6 @@ import {
   injectScriptToActivateTab,
   addFileInput,
   waitForSelector,
-  injectVueComponent,
   createEl,
 } from "@/utils/element-control";
 
@@ -602,17 +601,6 @@ export default (ctx: AppContext, config = {}) => {
       callback: appendCustomNavLinks,
       maxWaitTimes: 10,
     });
-
-    waitForSelector({
-      selector: "div#pane-linkLibryay",
-      callback: injectVueComponent(
-        // ElInputSearch,
-        {},
-        getFormSearchComponentConfig(),
-      ),
-      callbackArgs: ["afterbegin"],
-      maxWaitTimes: 10,
-    }).then((res) => maLogger.log(res));
   };
 
   // 命令处理器对象，将每个action的处理逻辑提取为单独的方法

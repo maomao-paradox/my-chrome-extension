@@ -2,27 +2,31 @@
  * App 组件 - Preact 版本
  * 文本选择工具栏主容器，管理所有子组件和状态
  */
-import React, { Suspense, lazy } from "react";
-// 如果需要类型，React 18+ 使用 ReactNode
-import type { ReactNode } from "react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import type { TextTool } from "@/types";
 import { componentManager } from "@/utils/componentManager";
 import { eventManager } from "@/event";
-import { showSuccessMessage } from "@/utils";
+import toast from "@/utils/toast";
 import type { Comment } from "@/services/commentStorage";
-import TextToolbar from "./TextToolbar";
-import type { ReplaceOptions } from "./ReplaceModal";
-import "./styles/app.scss";
-import "./styles/textarea-ai.scss";
+import TextToolbar from "./views/TextToolbar";
+import type { ReplaceOptions } from "./views/ReplaceModal";
+import "./views/styles/app.scss";
+import "./views/styles/textarea-ai.scss";
 
 /**
  * 懒加载组件 - 按需加载以减小初始包体积
  */
-const LazyTranslationPanel = lazy(() => import("./TranslationPanel"));
-const LazyReplaceModal = lazy(() => import("./ReplaceModal"));
-const LazyCommentModal = lazy(() => import("./CommentModal"));
-const LazyCommentDisplay = lazy(() => import("./CommentDisplay"));
+const LazyTranslationPanel = lazy(() => import("./views/TranslationPanel"));
+const LazyReplaceModal = lazy(() => import("./views/ReplaceModal"));
+const LazyCommentModal = lazy(() => import("./views/CommentModal"));
+const LazyCommentDisplay = lazy(() => import("./views/CommentDisplay"));
 
 /**
  * 动态导入 CommentStorage
@@ -368,7 +372,7 @@ const App: React.FC<AppProps> = ({
 
         // 动态导入以减少初始加载体积
         const { default: findAndReplaceDOMText } =
-          await import("../findAndReplaceDOMText");
+          await import("./findAndReplaceDOMText");
 
         const instance = findAndReplaceDOMText(document.body, {
           find: regex,
@@ -379,7 +383,7 @@ const App: React.FC<AppProps> = ({
         maLogger.log("替换完成，共替换:", instance.matches.length, "处");
 
         if (instance.matches.length > 0) {
-          showSuccessMessage(`成功替换 ${instance.matches.length} 处文本！`);
+          toast.success(`成功替换 ${instance.matches.length} 处文本！`);
         }
       } catch (error) {
         maLogger.error("替换失败:", error);
@@ -650,7 +654,7 @@ const App: React.FC<AppProps> = ({
         hideCommentModal();
         setCurrentRangeInfo(null);
         await loadPageComments();
-        showSuccessMessage("留言保存成功！");
+        toast.success("留言保存成功！");
       } catch (error) {
         maLogger.error("保存留言失败:", error);
       }
@@ -669,7 +673,7 @@ const App: React.FC<AppProps> = ({
         maLogger.log("删除留言成功:", commentId);
         hideCommentModal();
         await loadPageComments();
-        showSuccessMessage("留言删除成功！");
+        toast.success("留言删除成功！");
       } catch (error) {
         maLogger.error("删除留言失败:", error);
       }
@@ -712,7 +716,7 @@ const App: React.FC<AppProps> = ({
 
   // 监听事件总线更新
   useEffect(() => {
-    const unsubscribe = eventManager.useBus(
+    const [_, unsubscribe] = eventManager.useBus(
       "update:toolbar:tools",
       (newTools: TextTool[]) => {
         maLogger.log("接收到事件总线更新tools:", newTools);

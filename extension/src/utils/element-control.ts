@@ -7,7 +7,6 @@
  * @date 2026-02-05T02:38:01.698Z
  */
 
-import { createApp, App } from "vue";
 import type {
   StyleObject,
   AttributeObject,
@@ -284,7 +283,8 @@ const createScriptElement = async (
 
   script.onload = (evt: Event) => {
     (evt.target as HTMLElement)?.remove();
-    showSuccessMessage("脚本已生效!");
+    // showSuccessMessage("脚本已生效!");
+    maLogger.info("脚本已生效!");
   };
 
   script.onerror = (evt: Event | any) => {
@@ -685,27 +685,6 @@ export function waitForSelector(
   });
 }
 
-export function injectVueComponent(
-  component: any,
-  props?: Record<string, any> | null,
-  emitFunc?: Function,
-): (byElement?: HTMLElement, position?: string) => void {
-  const duration = props?.duration ? props.duration + 1000 : null;
-
-  return function (byElement?: HTMLElement, position?: string) {
-    const container = addElementToDom({
-      tag: "div",
-      attrs: { id: `vue-container-${Date.now()}` },
-      style: { zIndex: "9999" },
-      autoRemoveDelay: duration,
-    })(byElement, position);
-
-    const app: App = createApp(component, props);
-    app.mount(container);
-    return { app, container };
-  };
-}
-
 export function saveToLocal(blob: Blob, fileName: string): void {
   try {
     const downloadLink = addElementToDom({
@@ -734,75 +713,75 @@ export function saveToLocal(blob: Blob, fileName: string): void {
   }
 }
 
-export const showSuccessMessage = (message: string) => {
-  const successContainer = document.createElement("div");
-  successContainer.style.cssText = `
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(13, 148, 136, 0.22);
-        border-radius: 12px;
-        padding: 14px 18px;
-        font-size: 14px;
-        line-height: 1.5;
-        max-width: 280px;
-        position: fixed;
-        z-index: 9999999;
-        right: 20px;
-        top: 20px;
-        box-shadow: 
-            0 18px 42px rgba(15, 23, 42, 0.18),
-            0 4px 12px rgba(13, 148, 136, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.84);
-        animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    `;
+// export const showSuccessMessage = (message: string) => {
+//   const successContainer = document.createElement("div");
+//   successContainer.style.cssText = `
+//         background: rgba(255, 255, 255, 0.96);
+//         backdrop-filter: blur(12px);
+//         border: 1px solid rgba(13, 148, 136, 0.22);
+//         border-radius: 12px;
+//         padding: 14px 18px;
+//         font-size: 14px;
+//         line-height: 1.5;
+//         max-width: 280px;
+//         position: fixed;
+//         z-index: 9999999;
+//         right: 20px;
+//         top: 20px;
+//         box-shadow:
+//             0 18px 42px rgba(15, 23, 42, 0.18),
+//             0 4px 12px rgba(13, 148, 136, 0.12),
+//             inset 0 1px 0 rgba(255, 255, 255, 0.84);
+//         animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+//     `;
 
-  successContainer.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span style="color: #134e4a; font-weight: 700;">${message}</span>
-        </div>
-    `;
+//   successContainer.innerHTML = `
+//         <div style="display: flex; align-items: center; gap: 10px;">
+//             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+//                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+//             </svg>
+//             <span style="color: #134e4a; font-weight: 700;">${message}</span>
+//         </div>
+//     `;
 
-  const style = document.createElement("style");
-  style.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%) scale(0.95);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0) scale(1);
-                opacity: 1;
-            }
-        }
+//   const style = document.createElement("style");
+//   style.textContent = `
+//         @keyframes slideIn {
+//             from {
+//                 transform: translateX(100%) scale(0.95);
+//                 opacity: 0;
+//             }
+//             to {
+//                 transform: translateX(0) scale(1);
+//                 opacity: 1;
+//             }
+//         }
 
-        @keyframes slideOut {
-            from {
-                transform: translateX(0) scale(1);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%) scale(0.95);
-                opacity: 0;
-            }
-        }
-    `;
-  document.head.appendChild(style);
+//         @keyframes slideOut {
+//             from {
+//                 transform: translateX(0) scale(1);
+//                 opacity: 1;
+//             }
+//             to {
+//                 transform: translateX(100%) scale(0.95);
+//                 opacity: 0;
+//             }
+//         }
+//     `;
+//   document.head.appendChild(style);
 
-  document.body.appendChild(successContainer);
+//   document.body.appendChild(successContainer);
 
-  setTimeout(() => {
-    successContainer.style.animation =
-      "slideOut 0.3s cubic-bezier(0.55, 0, 1, 1) forwards";
-    setTimeout(() => {
-      try {
-        document.body.removeChild(successContainer);
-        document.head.removeChild(style);
-      } catch (error) {
-        // 元素可能已经被移除
-      }
-    }, 500);
-  }, 1500);
-};
+//   setTimeout(() => {
+//     successContainer.style.animation =
+//       "slideOut 0.3s cubic-bezier(0.55, 0, 1, 1) forwards";
+//     setTimeout(() => {
+//       try {
+//         document.body.removeChild(successContainer);
+//         document.head.removeChild(style);
+//       } catch (error) {
+//         // 元素可能已经被移除
+//       }
+//     }, 500);
+//   }, 1500);
+// };

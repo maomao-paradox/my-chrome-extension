@@ -375,6 +375,7 @@ export const SettingPage: FC<{}> = () => {
 
     for (const scriptKey of availableContentScripts) {
       maLogger.log(
+        scriptKey,
         "当前脚本域名列表:",
         parseDomains(getDomainsString(scriptKey)),
       );
@@ -397,7 +398,7 @@ export const SettingPage: FC<{}> = () => {
   }, [loadPopupTheme, loadPopupMouseTrail]);
 
   const handleChangeContentScript = useCallback(
-    (e: ChangeEvent<HTMLSelectElement, HTMLSelectElement>): void => {
+    (e: any): void => {
       console.log("选择脚本", e.target.value);
       setSelectedContentScript(e.target.value);
     },

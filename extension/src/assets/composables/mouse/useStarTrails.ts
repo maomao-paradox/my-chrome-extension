@@ -1,7 +1,6 @@
-import { getCurrentInstance, onBeforeUnmount } from 'vue';
-import { shadowHostId } from '@/config';
-import { createShadowHost } from '@/utils/shadow-dom';
-import type { MouseTrailPreset } from './mouseTrailPreference';
+import { shadowHostId } from "@/config";
+import { createShadowHost } from "@/utils/shadow-dom";
+import type { MouseTrailPreset } from "./mouseTrailPreference";
 
 interface MusicNoteTrailOptions {
   hostId?: string;
@@ -29,7 +28,7 @@ interface PointerPosition {
   moved: boolean;
 }
 
-const DEFAULT_CANVAS_ID = 'musicNoteTrailCanvas';
+const DEFAULT_CANVAS_ID = "musicNoteTrailCanvas";
 const DEFAULT_MAX_PARTICLES = 180;
 const DEFAULT_SPAWN_INTERVAL = 24;
 const DEFAULT_BURST_COUNT = 36;
@@ -37,9 +36,9 @@ const DEFAULT_JITTER = 18;
 const DEFAULT_Z_INDEX = 2147483646;
 const MAX_DEVICE_PIXEL_RATIO = 2;
 const TRAIL_SYMBOLS: Record<MouseTrailPreset, string[]> = {
-  star: ['✦', '✧', '✡', '⚝', '✩'],
-  snowflake: ['❄', '❅', '❆', '✻'],
-  music: ['♩', '♪', '♫', '♬', '♯', '♭', '♮', '𝄞', '𝄢']
+  star: ["✦", "✧", "✡", "⚝", "✩"],
+  snowflake: ["❄", "❅", "❆", "✻"],
+  music: ["♩", "♪", "♫", "♬", "♯", "♭", "♮", "𝄞", "𝄢"],
 };
 
 let activeControls: MusicNoteTrailControls | null = null;
@@ -63,7 +62,7 @@ class MusicNoteParticle {
     private x: number,
     private y: number,
     preset: MouseTrailPreset,
-    burst = false
+    burst = false,
   ) {
     this.preset = preset;
     this.size = this.createSize();
@@ -71,7 +70,8 @@ class MusicNoteParticle {
     this.vx = (Math.random() - 0.5) * this.getVelocityRange(burst);
     this.vy = this.createInitialVerticalVelocity(burst);
     this.opacitySpeed = this.createOpacitySpeed();
-    this.rotateSpeed = (Math.random() - 0.5) * (this.preset === 'snowflake' ? 0.055 : 0.12);
+    this.rotateSpeed =
+      (Math.random() - 0.5) * (this.preset === "snowflake" ? 0.055 : 0.12);
     this.scaleSpeed = Math.random() * 0.018 + 0.01;
 
     this.image = this.createImage();
@@ -108,11 +108,11 @@ class MusicNoteParticle {
   }
 
   private createImage(): HTMLCanvasElement {
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     const imageSize = Math.ceil(this.size * 3.2);
     const center = imageSize / 2;
     const color = this.createColor();
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
 
     canvas.width = imageSize;
     canvas.height = imageSize;
@@ -121,9 +121,9 @@ class MusicNoteParticle {
       return canvas;
     }
 
-    ctx.font = `${this.preset === 'snowflake' ? 500 : 700} ${this.size}px "Times New Roman", Georgia, serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.font = `${this.preset === "snowflake" ? 500 : 700} ${this.size}px "Times New Roman", Georgia, serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillStyle = color;
     ctx.shadowColor = color;
     ctx.shadowBlur = this.size * 0.8;
@@ -138,11 +138,11 @@ class MusicNoteParticle {
   }
 
   private createSize(): number {
-    if (this.preset === 'snowflake') {
+    if (this.preset === "snowflake") {
       return Math.random() * 10 + 14;
     }
 
-    if (this.preset === 'star') {
+    if (this.preset === "star") {
       return Math.random() * 10 + 15;
     }
 
@@ -150,11 +150,11 @@ class MusicNoteParticle {
   }
 
   private createColor(): string {
-    if (this.preset === 'snowflake') {
+    if (this.preset === "snowflake") {
       return `hsl(${Math.floor(Math.random() * 18) + 198}, 86%, 82%)`;
     }
 
-    if (this.preset === 'star') {
+    if (this.preset === "star") {
       return `hsl(${Math.floor(Math.random() * 48) + 38}, 92%, 66%)`;
     }
 
@@ -162,7 +162,7 @@ class MusicNoteParticle {
   }
 
   private getVelocityRange(burst: boolean): number {
-    if (this.preset === 'snowflake') {
+    if (this.preset === "snowflake") {
       return burst ? 5 : 1.8;
     }
 
@@ -174,7 +174,7 @@ class MusicNoteParticle {
       return (Math.random() - 0.5) * this.getVelocityRange(true);
     }
 
-    if (this.preset === 'snowflake') {
+    if (this.preset === "snowflake") {
       return Math.random() * 0.8 + 0.18;
     }
 
@@ -182,7 +182,7 @@ class MusicNoteParticle {
   }
 
   private createOpacitySpeed(): number {
-    if (this.preset === 'snowflake') {
+    if (this.preset === "snowflake") {
       return Math.random() * 0.007 + 0.005;
     }
 
@@ -194,11 +194,13 @@ const createNoopControls = (): MusicNoteTrailControls => ({
   canvas: null,
   start: () => undefined,
   stop: () => undefined,
-  isRunning: () => false
+  isRunning: () => false,
 });
 
-const getEventPoint = (event: MouseEvent | TouchEvent): { x: number; y: number } | null => {
-  if ('touches' in event) {
+const getEventPoint = (
+  event: MouseEvent | TouchEvent,
+): { x: number; y: number } | null => {
+  if ("touches" in event) {
     const touch = event.touches[0] || event.changedTouches[0];
     return touch ? { x: touch.clientX, y: touch.clientY } : null;
   }
@@ -206,65 +208,75 @@ const getEventPoint = (event: MouseEvent | TouchEvent): { x: number; y: number }
   return { x: event.clientX, y: event.clientY };
 };
 
-const trimParticles = (particles: MusicNoteParticle[], maxParticles: number): void => {
+const trimParticles = (
+  particles: MusicNoteParticle[],
+  maxParticles: number,
+): void => {
   if (particles.length > maxParticles) {
     particles.splice(0, particles.length - maxParticles);
   }
 };
 
-export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNoteTrailControls {
+export function useMusicNoteTrails(
+  options: MusicNoteTrailOptions = {},
+): MusicNoteTrailControls {
   if (activeControls?.isRunning()) {
-    if (getCurrentInstance()) {
-      onBeforeUnmount(activeControls.stop);
-    }
+    // if (getCurrentInstance()) {
+    //   onBeforeUnmount(activeControls.stop);
+    // }
     return activeControls;
   }
 
-  if (typeof window === 'undefined' || typeof document === 'undefined' || !document.body) {
+  if (
+    typeof window === "undefined" ||
+    typeof document === "undefined" ||
+    !document.body
+  ) {
     return createNoopControls();
   }
 
   const hostId = options.hostId ?? shadowHostId;
-  const { shadowHost, shadowRoot } = createShadowHost(hostId, 'open');
+  const { shadowHost, shadowRoot } = createShadowHost(hostId, "open");
   if (!shadowRoot) {
     return createNoopControls();
   }
 
   if (options.hostId) {
     Object.assign(shadowHost.style, {
-      position: 'fixed',
-      inset: '0',
-      width: '100vw',
-      height: '100vh',
-      overflow: 'hidden',
-      pointerEvents: 'none',
-      zIndex: String(options.zIndex ?? DEFAULT_Z_INDEX)
+      position: "fixed",
+      inset: "0",
+      width: "100vw",
+      height: "100vh",
+      overflow: "hidden",
+      pointerEvents: "none",
+      zIndex: String(options.zIndex ?? DEFAULT_Z_INDEX),
     });
   }
 
   const canvasId = options.canvasId ?? DEFAULT_CANVAS_ID;
   const existingElement = shadowRoot.getElementById(canvasId);
-  let canvas = existingElement instanceof HTMLCanvasElement ? existingElement : null;
+  let canvas =
+    existingElement instanceof HTMLCanvasElement ? existingElement : null;
 
   if (!canvas) {
     existingElement?.remove();
-    canvas = document.createElement('canvas');
+    canvas = document.createElement("canvas");
     canvas.id = canvasId;
-    canvas.setAttribute('aria-hidden', 'true');
+    canvas.setAttribute("aria-hidden", "true");
     shadowRoot.appendChild(canvas);
   }
 
   Object.assign(canvas.style, {
-    position: 'fixed',
-    inset: '0',
-    width: '100vw',
-    height: '100vh',
-    display: 'block',
-    pointerEvents: 'none',
-    zIndex: String(options.zIndex ?? DEFAULT_Z_INDEX)
+    position: "fixed",
+    inset: "0",
+    width: "100vw",
+    height: "100vh",
+    display: "block",
+    pointerEvents: "none",
+    zIndex: String(options.zIndex ?? DEFAULT_Z_INDEX),
   });
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) {
     return createNoopControls();
   }
@@ -274,14 +286,15 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
     active: false,
-    moved: false
+    moved: false,
   };
   const cleanupFns: Array<() => void> = [];
-  const maxParticles = options.maxParticles ?? options.maxStars ?? DEFAULT_MAX_PARTICLES;
+  const maxParticles =
+    options.maxParticles ?? options.maxStars ?? DEFAULT_MAX_PARTICLES;
   const spawnInterval = options.spawnInterval ?? DEFAULT_SPAWN_INTERVAL;
   const burstCount = options.burstCount ?? DEFAULT_BURST_COUNT;
   const jitter = options.jitter ?? DEFAULT_JITTER;
-  const preset = options.preset ?? 'music';
+  const preset = options.preset ?? "music";
 
   let animationFrameId: number | null = null;
   let lastSpawnTime = 0;
@@ -292,10 +305,16 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
   const addWindowListener = <K extends keyof WindowEventMap>(
     type: K,
     handler: (event: WindowEventMap[K]) => void,
-    listenerOptions?: AddEventListenerOptions
+    listenerOptions?: AddEventListenerOptions,
   ): void => {
     window.addEventListener(type, handler as EventListener, listenerOptions);
-    cleanupFns.push(() => window.removeEventListener(type, handler as EventListener, listenerOptions));
+    cleanupFns.push(() =>
+      window.removeEventListener(
+        type,
+        handler as EventListener,
+        listenerOptions,
+      ),
+    );
   };
 
   const resizeCanvas = (): void => {
@@ -322,8 +341,8 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
         x + (Math.random() - 0.5) * jitter,
         y + (Math.random() - 0.5) * jitter,
         preset,
-        burst
-      )
+        burst,
+      ),
     );
     trimParticles(particles, maxParticles);
   };
@@ -367,7 +386,11 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
     animationFrameId = requestAnimationFrame(render);
     ctx.clearRect(0, 0, viewportWidth, viewportHeight);
 
-    if (pointer.active && pointer.moved && time - lastSpawnTime >= spawnInterval) {
+    if (
+      pointer.active &&
+      pointer.moved &&
+      time - lastSpawnTime >= spawnInterval
+    ) {
       spawnNote();
       pointer.moved = false;
       lastSpawnTime = time;
@@ -396,11 +419,11 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
         shadowRoot.appendChild(canvas);
       }
       resizeCanvas();
-      addWindowListener('resize', resizeCanvas, { passive: true });
-      addWindowListener('mousemove', updatePointer, { passive: true });
-      addWindowListener('touchmove', updatePointer, { passive: true });
-      addWindowListener('click', handlePointerBurst, { passive: true });
-      addWindowListener('touchstart', handlePointerBurst, { passive: true });
+      addWindowListener("resize", resizeCanvas, { passive: true });
+      addWindowListener("mousemove", updatePointer, { passive: true });
+      addWindowListener("touchmove", updatePointer, { passive: true });
+      addWindowListener("click", handlePointerBurst, { passive: true });
+      addWindowListener("touchstart", handlePointerBurst, { passive: true });
       animationFrameId = requestAnimationFrame(render);
     },
     stop: () => {
@@ -424,15 +447,15 @@ export function useMusicNoteTrails(options: MusicNoteTrailOptions = {}): MusicNo
         activeControls = null;
       }
     },
-    isRunning: () => running
+    isRunning: () => running,
   };
 
   controls.start();
   activeControls = controls;
 
-  if (getCurrentInstance()) {
-    onBeforeUnmount(controls.stop);
-  }
+  // if (getCurrentInstance()) {
+  //   onBeforeUnmount(controls.stop);
+  // }
 
   return controls;
 }

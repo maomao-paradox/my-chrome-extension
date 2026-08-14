@@ -12,15 +12,14 @@ import {
   syncGlobalLoggerFromStorage,
 } from "@/utils/logger";
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import { pinia } from "@/stores";
+import App from "./App";
 import { useFloatingballStore } from "@/stores/floatingball";
 
 installGlobalLogger({ title: "MRIA SIDEPANEL", enabled: false });
 void syncGlobalLoggerFromStorage();
 
 // 创建React应用
-const root = createRoot(document.getElementById("app"));
+const root = createRoot(document.getElementById("app")!);
 
 root.render(<App />);
 

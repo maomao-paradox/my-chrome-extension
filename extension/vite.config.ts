@@ -71,6 +71,10 @@ export default defineConfig({
       input: {
         "pages/profile": path.resolve(__dirname, "src/pages/profile.html"),
         "pages/campaign": path.resolve(__dirname, "src/pages/campaign.html"),
+        "pages/hand-portals": path.resolve(
+          __dirname,
+          "src/pages/hand-portals.html",
+        ),
         ...(isProduction
           ? {
               ...scanFiles({

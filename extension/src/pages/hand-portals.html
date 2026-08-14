@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="MediaPipe 双手异色空间互动 Demo" />
+    <link rel="icon" type="image/png" href="/static/icons/favicon.ico" />
+    <meta name="theme-color" content="#050507" />
+    <title>Hand Portals Demo</title>
+  </head>
+  <body>
+    <main class="hand-portals" aria-label="双手异色空间互动 Demo">
+      <video class="hand-portals__video" playsinline muted></video>
+      <canvas class="hand-portals__canvas"></canvas>
+
+      <section class="hand-portals__hud" aria-live="polite">
+        <div>
+          <p class="hand-portals__eyebrow">MediaPipe Hand Portals</p>
+          <h1>双手三片异色空间</h1>
+        </div>
+        <p class="hand-portals__status" data-status>等待启动摄像头</p>
+        <button class="hand-portals__start" type="button" data-start>
+          启动摄像头
+        </button>
+      </section>
+
+      <section class="hand-portals__legend" aria-label="空间映射图例">
+        <span><i class="is-red"></i>拇指 - 食指</span>
+        <span><i class="is-blue"></i>食指 - 中指</span>
+        <span><i class="is-green"></i>中指 - 小指</span>
+      </section>
+    </main>
+    <script type="module" src="./hand-portals/main.ts"></script>
+  </body>
+</html>

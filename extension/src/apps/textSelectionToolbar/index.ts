@@ -7,9 +7,9 @@
  */
 
 import { AppModule } from "@/types/index.js";
-import { shadowHostId } from "@/config";
+import { shadowRoot, setShadowRoot } from "@/utils/shadow-dom";
 import { createRoot, type Root } from "react-dom/client";
-import App from "./preact/App";
+import App from "./App";
 import { createShadowHost, injectCssDom } from "@/utils/shadow-dom";
 import { storage } from "@/stores";
 import {
@@ -17,8 +17,8 @@ import {
   ElementPositionInfo,
   addElementToDom,
   PositionStrategy,
-  showSuccessMessage,
 } from "@/utils";
+import toast from "@/utils/toast";
 import { componentManager } from "@/utils/componentManager";
 import { TextTool } from "@/types";
 import { getAssetsAbstractPathSync } from "@/utils/common";
@@ -130,10 +130,11 @@ type TextareaAIDotState = "idle" | "generating" | "filled" | "error";
  * 文本选择工具栏模块 - Preact 版本
  */
 class TextSelectionToolbarModule implements AppModule {
-  shadowHostId: string = shadowHostId;
+  _ctx: AppContext | null = null;
+  _root: Root | null = null;
+  _instance = null;
+  _container: HTMLElement | null = null;
   isInjected: boolean = false;
-  preactContainer: HTMLElement | null = null;
-  shadowRoot: ShadowRoot | null = null;
   isEnabled: boolean = false;
   private isVisible: boolean = false;
   private positionTimer: ReturnType<typeof setTimeout> | null = null;
@@ -146,7 +147,7 @@ class TextSelectionToolbarModule implements AppModule {
   private textareaAIEnabled: boolean = true;
   private textareaAIButtons = new Map<HTMLTextAreaElement, HTMLButtonElement>();
   private textareaAIObserver: MutationObserver | null = null;
-  private textareaAIPositionTimer: ReturnType<typeof setTimeout> | null = null;
+  private textareaAIPositionTimer: number | null = null;
   private activeTextareaAI: HTMLTextAreaElement | null = null;
   private readonly textareaAIStyleId =
     "text-selection-toolbar-textarea-ai-style";
@@ -215,36 +216,11 @@ class TextSelectionToolbarModule implements AppModule {
     );
   }
 
-  private createErrorContainer(error: any): HTMLElement {
-    const container = document.createElement("div");
-    container.style.cssText = `
-      background-color: #ffebee;
-      border: 1px solid #ffcdd2;
-      border-radius: 4px;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 14px;
-      line-height: 1.5;
-      max-width: 800px;
-      position: fixed;
-      z-index: 999999;
-      left: 100px;
-      top: 100px;
-    `;
-
-    const content = document.createElement("div");
-    content.style.color = "#c62828";
-    content.textContent = `翻译失败: ${error instanceof Error ? error.message : String(error)}`;
-    container.appendChild(content);
-
-    return container;
-  }
-
   /**
    * 处理翻译功能
    */
-  private async handleTranslation(): Promise<void> {
-    const textToTranslate = this.selectedText.trim();
+  private async handleTranslation(text: string): Promise<void> {
+    const textToTranslate = (text || this.selectedText).trim();
     if (!textToTranslate) {
       return;
     }
@@ -334,16 +310,11 @@ class TextSelectionToolbarModule implements AppModule {
       });
 
       maLogger.log("书签保存成功:", bookmark);
-      this.showBookmarkSuccess();
+      toast.success("书签保存成功！");
     } catch (error) {
       maLogger.error("书签保存失败:", error);
-      const errorContainer = this.createErrorContainer(error);
-      document.body.appendChild(errorContainer);
+      toast.error("书签保存失败，请稍后重试！");
     }
-  }
-
-  private showBookmarkSuccess(): void {
-    showSuccessMessage("书签保存成功！");
   }
 
   private isTextareaAICandidate(textarea: HTMLTextAreaElement): boolean {
@@ -362,14 +333,6 @@ class TextSelectionToolbarModule implements AppModule {
 
     const rect = textarea.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0;
-  }
-
-  private ensureTextareaAIStyle(): void {
-    if (!this.shadowRoot) {
-      return;
-    }
-    // 样式已通过 SCSS 文件注入到 Shadow DOM，无需额外的内联样式
-    // 此方法保留用于向后兼容
   }
 
   private setTextareaAIDotState(
@@ -401,7 +364,7 @@ class TextSelectionToolbarModule implements AppModule {
   private createTextareaAIDot(
     textarea: HTMLTextAreaElement,
   ): HTMLButtonElement | null {
-    if (!this.shadowRoot) {
+    if (!shadowRoot) {
       return null;
     }
 
@@ -415,16 +378,14 @@ class TextSelectionToolbarModule implements AppModule {
       this.handleTextareaAIClick(textarea, button);
     });
 
-    this.shadowRoot.appendChild(button);
+    shadowRoot.appendChild(button);
     return button;
   }
 
   private syncTextareaAIDots = (): void => {
-    if (!this.textareaAIEnabled || !this.shadowRoot || !document.body) {
+    if (!this.textareaAIEnabled || !shadowRoot || !document.body) {
       return;
     }
-
-    this.ensureTextareaAIStyle();
 
     const candidates = new Set(
       Array.from(
@@ -548,11 +509,11 @@ class TextSelectionToolbarModule implements AppModule {
     };
     document.addEventListener("keydown", handleKeydown);
 
-    if (!this.shadowRoot) {
+    if (!shadowRoot) {
       return;
     }
 
-    this.shadowRoot.appendChild(overlay);
+    shadowRoot.appendChild(overlay);
     this.promptDialog = overlay;
     this.promptTextarea = promptTextarea;
 
@@ -597,7 +558,7 @@ class TextSelectionToolbarModule implements AppModule {
       );
       if (result.success && button) {
         this.setTextareaAIDotState(button, "filled", result.msg);
-        showSuccessMessage(result.msg);
+        toast.success(result.msg);
       } else if (button) {
         this.setTextareaAIDotState(button, "error", result.msg);
       }
@@ -629,7 +590,6 @@ class TextSelectionToolbarModule implements AppModule {
       return;
     }
 
-    this.ensureTextareaAIStyle();
     this.syncTextareaAIDots();
 
     if (!this.textareaAIObserver && document.body) {
@@ -672,6 +632,7 @@ class TextSelectionToolbarModule implements AppModule {
   }
 
   constructor(options?: TextSelectionToolbarOptions) {
+    //@ts-ignore
     this.customTools = options?.tools || [
       {
         id: "copy",
@@ -680,9 +641,9 @@ class TextSelectionToolbarModule implements AppModule {
           const textToCopy = text || this.selectedText;
           navigator.clipboard
             .writeText(textToCopy)
-            .then(() => showSuccessMessage("复制成功！"))
+            .then(() => toast.success("复制成功！"))
             .catch((err) => {
-              showSuccessMessage(`复制失败: ${err}`);
+              toast.success(`复制失败: ${err}`);
             });
         },
       },
@@ -764,7 +725,7 @@ class TextSelectionToolbarModule implements AppModule {
       {
         id: "translate",
         label: "问AI",
-        handler: () => this.handleTranslation(),
+        handler: (text: string) => this.handleTranslation(text),
       },
       {
         id: "bookmark",
@@ -793,7 +754,7 @@ class TextSelectionToolbarModule implements AppModule {
    * 显示并定位组件
    */
   private showAndPositionComponent = () => {
-    if (!this.shadowRoot || !this.preactContainer || !this.selectionRange) {
+    if (!shadowRoot || !this._container || !this.selectionRange) {
       maLogger.error("Shadow DOM、Preact 容器或选区不存在");
       return;
     }
@@ -810,7 +771,7 @@ class TextSelectionToolbarModule implements AppModule {
     });
 
     positionInfo.positionElement({
-      targetElement: this.preactContainer,
+      targetElement: this._container,
       strategy: PositionStrategy.Down,
       alignment: "center",
       offset: { x: 0, y: 10 },
@@ -827,7 +788,7 @@ class TextSelectionToolbarModule implements AppModule {
    * 隐藏组件
    */
   private hideComponent = () => {
-    if (!this.preactContainer) {
+    if (!this._container) {
       return;
     }
 
@@ -842,13 +803,13 @@ class TextSelectionToolbarModule implements AppModule {
     this.clearPositionTimer();
 
     // 移除容器元素
-    if (this.preactContainer) {
+    if (this._container) {
       try {
-        this.preactContainer.remove();
+        this._container.remove();
       } catch (error) {
         // 元素可能已经被移除
       }
-      this.preactContainer = null;
+      this._container = null;
     }
   };
 
@@ -994,25 +955,12 @@ class TextSelectionToolbarModule implements AppModule {
       }
 
       // 如果已经注入，则不重复注入
-      if (
-        this.isInjected &&
-        this.preactContainer &&
-        this.shadowRoot &&
-        document.getElementById(this.shadowHostId)
-      ) {
+      if (this.isInjected && this._container && this._root && shadowRoot) {
         return;
       }
 
-      if (!this.shadowRoot) {
-        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
-        this.shadowRoot = shadowRoot;
-      }
-
       if (!this.isInjected) {
-        injectCssDom(
-          this.shadowRoot!,
-          getAssetsAbstractPathSync(`css/${appName}`),
-        );
+        injectCssDom(shadowRoot, getAssetsAbstractPathSync(`css/${appName}`));
         // 注入懒加载组件的 CSS 到 Shadow DOM，避免 Vite preload helper 使用相对路径报错
         // file-map.json 中记录了各懒加载组件的 CSS 路径，通过 injectCssDom 从 chrome-extension:// 加载
         const lazyComponentCssList = [
@@ -1022,39 +970,26 @@ class TextSelectionToolbarModule implements AppModule {
           "css/CommentDisplay",
         ];
         lazyComponentCssList.forEach((cssKey) => {
-          injectCssDom(this.shadowRoot!, getAssetsAbstractPathSync(cssKey));
+          injectCssDom(shadowRoot, getAssetsAbstractPathSync(cssKey));
         });
         this.isInjected = true;
       }
 
-      // 阻止 Vite 的 CSS preload 错误（动态导入组件时 Vite 会尝试通过 <link> 预加载 CSS，
-      // 但路径是相对的，在 content script 场景下会请求网站资源失败）
-      // CSS 已通过 injectCssDom 注入到 Shadow DOM，无需 Vite 的预加载
-      if (!(window as any).__vitePreloadErrorHandler) {
-        (window as any).__vitePreloadErrorHandler = true;
-        window.addEventListener("vite:preloadError", (event) => {
-          event.preventDefault();
-        });
-      }
-
-      // 创建Preact容器
+      // 创建react容器
       if (
-        !this.preactContainer &&
-        !this.shadowRoot?.getElementById(`shadow-app-${appName}`)
+        !this._container &&
+        !shadowRoot?.getElementById(`shadow-app-${appName}`)
       ) {
-        this.preactContainer = addElementToDom({
+        this._container = addElementToDom({
           tag: "div",
           attrs: {
             id: `shadow-app-${appName}`,
           },
           style: "position: fixed; z-index: var(--z-index);",
-        })(this.shadowRoot!);
-      }
+        })(shadowRoot);
 
-      // 渲染Preact应用
-      if (this.preactContainer) {
-        const root = createRoot(this.preactContainer);
-        root.render(
+        this._root = createRoot(this._container);
+        this._root.render(
           React.createElement(App, {
             initialText: "",
             customTools: this.customTools,
@@ -1072,11 +1007,7 @@ class TextSelectionToolbarModule implements AppModule {
       const selection = window.getSelection();
       const selectedText = selection?.toString().trim() || this.selectedText;
 
-      if (
-        selectedText.length > 0 &&
-        this.selectionRange &&
-        this.preactContainer
-      ) {
+      if (selectedText.length > 0 && this.selectionRange && this._container) {
         maLogger.log("用户按下 ~ 键，显示工具栏");
         this.showAndPositionComponent();
       }
@@ -1084,7 +1015,7 @@ class TextSelectionToolbarModule implements AppModule {
   };
 
   private handleScroll = () => {
-    if (this.isVisible && this.selectionRange && this.preactContainer) {
+    if (this.isVisible && this.selectionRange && this._container) {
       const rect = this.selectionRange.getBoundingClientRect();
       if (rect.width > 0 || rect.height > 0) {
         const positionInfo = new ElementPositionInfo({
@@ -1099,7 +1030,7 @@ class TextSelectionToolbarModule implements AppModule {
         });
 
         positionInfo.positionElement({
-          targetElement: this.preactContainer,
+          targetElement: this._container,
           strategy: PositionStrategy.Down,
           alignment: "center",
           offset: { x: 0, y: 10 },
@@ -1115,17 +1046,11 @@ class TextSelectionToolbarModule implements AppModule {
    */
   enable(options?: any): void {
     try {
-      if (!this.shadowRoot) {
-        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
-        this.shadowRoot = shadowRoot;
-      }
-
-      if (!this.isInjected || !document.getElementById(this.shadowHostId)) {
+      if (!this.isInjected) {
         this.inject().catch((error) => {
           maLogger.error("注入文本选择工具栏失败:", error);
         });
       }
-      maLogger.log("设置品牌颜色:", options?.brandColor);
       this.brandColor = options?.brandColor || this.brandColor;
       if (Object.prototype.hasOwnProperty.call(options || {}, "textareaAI")) {
         this.textareaAIEnabled = options?.textareaAI !== false;
@@ -1149,7 +1074,7 @@ class TextSelectionToolbarModule implements AppModule {
       }
 
       this.isEnabled = true;
-      maLogger.log("文本选择工具栏已启用(Preact版本)");
+      maLogger.log("文本选择工具栏已启用");
     } catch (error) {
       maLogger.error("启用文本选择工具栏失败:", error);
     }
@@ -1166,6 +1091,7 @@ class TextSelectionToolbarModule implements AppModule {
       );
       document.removeEventListener("keydown", this.handleKeyDown);
       window.removeEventListener("scroll", this.handleScroll, true);
+      //@ts-ignore
       window.removeEventListener(
         "iframe-selectionchange",
         this.handleIframeSelectionChange,
@@ -1189,6 +1115,7 @@ class TextSelectionToolbarModule implements AppModule {
     context?: any,
     options?: TextSelectionToolbarOptions,
   ): Promise<void> {
+    this._ctx = context;
     try {
       if (options?.tools) {
         this.customTools = [...options.tools];

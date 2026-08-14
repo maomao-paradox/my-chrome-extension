@@ -9,6 +9,8 @@
 
 import { $id } from "./element-control";
 import shadowThemeCss from "@/assets/styles/shadow-theme.css?raw";
+import { shadowHostId } from "@/config";
+import { useState } from "react";
 
 export function createShadowHost(
   id: string,
@@ -102,3 +104,8 @@ export function injectStyleLink(shadowRoot: ShadowRoot, href: string) {
   link.href = href;
   shadowRoot.appendChild(link);
 }
+
+export const { shadowHost, shadowRoot } = createShadowHost(
+  shadowHostId,
+  "open",
+);

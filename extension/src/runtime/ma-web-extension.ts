@@ -11,8 +11,6 @@
 // 直接导入CSS文件内容，Vite会将其转换为字符串
 //@ts-ignore
 import shadowThemeCss from "@/assets/styles/shadow-theme.css?raw";
-//@ts-ignore
-import elementPlusCss from "element-plus/dist/index.css?raw";
 (function () {
   class MaWebExtension extends HTMLElement {
     private _shadowRoot: ShadowRoot | null = null;
@@ -24,7 +22,6 @@ import elementPlusCss from "element-plus/dist/index.css?raw";
       this.setShadowRoot(this.attachShadow({ mode: "open" }));
 
       // 注入样式
-      this.injectStyles(elementPlusCss, true);
       this.injectStyles(shadowThemeCss);
 
       // 设置默认样式

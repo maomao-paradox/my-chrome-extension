@@ -147,14 +147,15 @@ export interface XHR_PATCH_CONFIG {
 }
 
 export interface AppModule {
-  _ctx: any;
-  _root: Root | null;
-  _instance: any | null;
-  isInjected: boolean;
-  isEnabled: boolean;
-  init(options?: any): Promise<void>;
-  enable(): void;
-  disable(): void;
+  _ctx: any; // 上下文对象
+  _root: Root | null; // react根实例
+  _instance: any | null; // react实例
+  _container: HTMLElement | null; // react容器
+  isInjected: boolean; // 是否已注入
+  isEnabled: boolean; // 是否启用
+  init: (options?: any) => Promise<void>; // 初始化应用，返回react实例和事件清理函数
+  enable: () => void; // 启用应用
+  disable: () => void; // 禁用应用
 }
 
 export type AddElementFunc = (

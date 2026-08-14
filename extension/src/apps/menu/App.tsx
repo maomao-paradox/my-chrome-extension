@@ -12,7 +12,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { AppstoreOutlined } from "@ant-design/icons";
 import type { Tool } from "@/types";
-import { showSuccessMessage } from "@/utils/element-control";
+import toast from "@/utils/toast";
 import AutoClick from "./tools/AutoClick";
 import "./styles/app.scss";
 
@@ -59,7 +59,7 @@ const MenuApp: React.FC<MenuAppProps> = ({ tools }) => {
     const onToggleClick = () => {
       count++;
       if (count >= 10 && count % 10 === 0) {
-        showSuccessMessage(`达成成就：点击菜单${count}次`);
+        toast.success(`达成成就：点击菜单${count}次`);
         count = 0;
       }
 

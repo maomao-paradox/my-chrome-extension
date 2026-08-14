@@ -154,6 +154,11 @@ await chrome.runtime.sendMessage({
 - 中间主视图使用 `@react-three/fiber`、`@react-three/drei` 和 Three.js 渲染线框全息地球，包含星点背景、地表点阵、陆地海岸线、国家边界线、区域环线、自转与鼠标拖拽旋转；点击地球任务点可在右侧面板查看任务信息
 - 开发模式可访问 `http://127.0.0.1:5173/pages/campaign.html`
 
+### 双手异色空间 Demo
+- 新增全屏摄像头互动页 `src/pages/hand-portals.html`，使用 MediaPipe Tasks Vision 在浏览器端识别双手。
+- 页面取左右手的拇指、食指、中指和小指指尖，相邻指尖连接出红、蓝、绿三片四边形空间；每片空间通过 Canvas 四边形蒙版裁切一套不同滤镜风格的实时摄像头画面。
+- 指尖位置使用指数平滑跟随，降低手部检测抖动；开发模式可访问 `http://127.0.0.1:5173/pages/hand-portals.html`。
+
 ### 3D 旋转展示页
 - `src/pages/index.html` 已封装为 Vue 3 入口，页面逻辑集中在 `src/pages/index/App.vue`
 - 保留旧版 `rotation3D` 插件的底座、节点、连线、点击和拖拽旋转行为，并改为加载本地脚本资源
