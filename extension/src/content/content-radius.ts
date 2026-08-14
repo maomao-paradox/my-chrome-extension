@@ -278,7 +278,7 @@ export default (ctx: AppContext, config = {}) => {
         const result = await requestAI(
           `请根据表头 \`${headerTitle.map(
             (item) => item.textContent,
-          )}\` 和表体${bodyRows.length}行，生成一个合法的JSON字符串。JSON输出结构如下：[{"key1": "value1", "key2": "value2", "..."}, {...}, {...} ...]`,
+          )}\` 和表体${bodyRows.length}行，生成一个合法的JSON字符串。JSON输出结构如下：[{"key1": "你好", "key2": "2026-04-21", "..."}, {...}, {...} ...]`,
           {
             systemPrompt:
               "你是一个数据处理助手，请只输出合法的JSON字符串，不要包含任何其他文字或解释。",
@@ -301,11 +301,15 @@ export default (ctx: AppContext, config = {}) => {
           }
           maLogger.log("rowData:", rowData);
           cells.forEach((cell, index) => {
-            const input = cell.querySelector("input");
+            const input =
+              cell.querySelector("input") || cell.querySelector("textarea");
             if (input && headerTitle[index]) {
               input.value = rowData[headerTitle[index].textContent || ""] || "";
-              const event = new Event("input", { bubbles: true });
-              input.dispatchEvent(event);
+              input.dispatchEvent(new Event("input", { bubbles: true }));
+              if (input.ariaHasPopup === "dialog") {
+                input.dispatchEvent(new Event("change", { bubbles: true }));
+                input.dispatchEvent(new Event("blur", { bubbles: true }));
+              }
             }
           });
         });
