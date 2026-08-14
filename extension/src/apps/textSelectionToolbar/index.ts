@@ -6,27 +6,26 @@
  * @description Preact 版本的文本选择工具栏入口
  */
 
-import { AppModule } from "@/types/index.js";
-import { shadowRoot, setShadowRoot } from "@/utils/shadow-dom";
+import React from "react";
+import { AppModule, TextTool } from "@/types";
 import { createRoot, type Root } from "react-dom/client";
 import App from "./App";
-import { createShadowHost, injectCssDom } from "@/utils/shadow-dom";
 import { storage } from "@/stores";
 import {
+  shadowRoot,
+  injectCssDom,
   debounce,
   ElementPositionInfo,
   addElementToDom,
   PositionStrategy,
+  getAssetsAbstractPathSync,
+  generateId,
+  componentManager,
 } from "@/utils";
 import toast from "@/utils/toast";
-import { componentManager } from "@/utils/componentManager";
-import { TextTool } from "@/types";
-import { getAssetsAbstractPathSync } from "@/utils/common";
-import { generateId } from "@/utils/base";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
 import { loadAIConfig } from "@/utils/ai-config";
 import { fillTextareaElementByAI } from "./textarea-ai";
-import React from "react";
 
 const appName = "textSelectionToolbar";
 
@@ -130,6 +129,7 @@ type TextareaAIDotState = "idle" | "generating" | "filled" | "error";
  * 文本选择工具栏模块 - Preact 版本
  */
 class TextSelectionToolbarModule implements AppModule {
+  _name: string = "textSelectionToolbar";
   _ctx: AppContext | null = null;
   _root: Root | null = null;
   _instance = null;

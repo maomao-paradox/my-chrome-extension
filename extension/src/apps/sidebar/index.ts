@@ -9,29 +9,27 @@
  * Sidebar 应用入口（React 版）
  * 从 Vue 版 index.ts 迁移而来
  *
- * 关键变更：
- * - createApp → createRoot（react-dom/client）
- * - App.vue → App.tsx（React 组件）
- * - injectCssDom (chrome-extension://) → injectStyles (?inline SCSS)
- *   避免 Vite CSS 代码分割创建 <link> 标签导致相对路径请求失败
- * - 通过 bus.emit('update:sidebar:tools', tools) 保持与原事件总线协议一致
- * - 保留所有原有方法：customTools、loadBookmarkTools、updateTools 等
  */
 
 import React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import SidebarApp from "./App";
 import type { Tool, AppModule, Bookmark } from "@/types";
-import { $id, addElementToDom } from "@/utils/element-control";
-import { createShadowHost, injectStyles } from "@/utils/shadow-dom";
+import {
+  $id,
+  addElementToDom,
+  shadowHost,
+  shadowRoot,
+  injectStyles,
+} from "@/utils";
 import { bus } from "@/event/bus";
 import { storage } from "@/stores";
-import { shadowHostId, appConfigKey } from "@/config";
+import { appConfigKey, shadowHostId } from "@/config";
 import { IconDocument, IconBookmark } from "@/assets/icons";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
 
-// 通过 ?inline 导入聚合 SCSS 为字符串
-import sidebarStyles from "./styles/index.scss?inline";
+// 通过 ?raw 导入聚合 SCSS 为字符串
+import sidebarStyles from "./styles/index.scss?raw";
 
 /**
  * @author 不可以是我吗
@@ -48,12 +46,11 @@ declare interface SideBarOptions {
 
 class SideBar implements AppModule {
   _ctx: any = null;
+  _root: Root | null = null;
+  _instance: any | null = null;
+  _container: HTMLElement | null = null;
   _name: string = "sidebar";
-  shadowHostId: string = shadowHostId;
   isInjected: boolean = false;
-  reactContainer: HTMLElement | null = null;
-  shadowRoot: ShadowRoot | null = null;
-  appRoot: Root | null = null;
   visible: boolean = false;
   isEnabled: boolean = false;
   stylesInjected: boolean = false;
@@ -166,9 +163,7 @@ class SideBar implements AppModule {
 
       // 更新工具列表，保留原有工具并添加书签
       const updatedTools = [
-        ...this.customTools.filter(
-          (tool) => !tool.id.startsWith("bookmark-"),
-        ),
+        ...this.customTools.filter((tool) => !tool.id.startsWith("bookmark-")),
         {
           id: "bookmarks",
           label: "书签",
@@ -220,54 +215,42 @@ class SideBar implements AppModule {
       await this.waitForBodyReady();
 
       // 如果已经注入，则不重复注入
-      if (
-        this.isInjected &&
-        this.appRoot &&
-        this.reactContainer &&
-        this.shadowRoot &&
-        $id(this.shadowHostId)
-      ) {
+      if (this.isInjected && this._root && this._container && shadowRoot) {
         return;
       }
 
-      // 创建 Shadow DOM
-      if (!this.shadowRoot) {
-        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
-        this.shadowRoot = shadowRoot;
-      }
-
       // 注入聚合 SCSS（?inline 导入的字符串）
-      if (!this.stylesInjected && this.shadowRoot) {
-        injectStyles(this.shadowRoot, sidebarStyles);
+      if (!this.stylesInjected && shadowRoot) {
+        injectStyles(shadowRoot, sidebarStyles);
         this.stylesInjected = true;
         this.isInjected = true;
       }
 
       // 创建 React 容器
       if (
-        !this.reactContainer &&
-        !this.shadowRoot?.getElementById(`shadow-app-${this._name}`)
+        !this._container &&
+        !shadowRoot?.getElementById(`shadow-app-${this._name}`)
       ) {
-        this.reactContainer = addElementToDom({
+        this._container = addElementToDom({
           tag: "div",
           attrs: { id: `shadow-app-${this._name}` },
           style: "position: fixed; z-index: var(--z-index);",
-        })(this.shadowRoot as ShadowRoot);
+        })(shadowRoot);
       }
 
       // 设置事件监听器
       this.setupEventListeners();
 
       // 卸载旧的 React root
-      if (this.appRoot) {
-        this.appRoot.unmount();
-        this.appRoot = null;
+      if (this._root) {
+        this._root.unmount();
+        this._root = null;
       }
 
       // 创建 React root 并渲染 App
       const { tools, visible = this.visible } = options || {};
-      this.appRoot = createRoot(this.reactContainer!);
-      this.appRoot.render(
+      this._root = createRoot(this._container!);
+      this._root.render(
         React.createElement(SidebarApp, {
           tools: tools || this.customTools,
           visible,
@@ -296,7 +279,7 @@ class SideBar implements AppModule {
   public async enable(): Promise<void> {
     try {
       // 如果未注入，则先注入
-      if (!this.isInjected || !$id(this.shadowHostId)) {
+      if (!this.isInjected) {
         await this.inject({ visible: true });
       } else {
         // 触发加载事件
@@ -306,8 +289,8 @@ class SideBar implements AppModule {
         }, 1000);
 
         // 直接操作 DOM，确保组件显示
-        if (this.reactContainer) {
-          this.reactContainer.style.display = "block";
+        if (this._container) {
+          this._container.style.display = "block";
         }
       }
     } catch (error) {
@@ -324,8 +307,8 @@ class SideBar implements AppModule {
       window.dispatchEvent(this.unloadSidebarEvent);
 
       // 直接操作 DOM，确保组件被隐藏
-      if (this.reactContainer) {
-        this.reactContainer.style.display = "none";
+      if (this._container) {
+        this._container.style.display = "none";
         maLogger.info("侧边栏已直接隐藏");
       }
     } catch (error) {
@@ -406,7 +389,7 @@ class SideBar implements AppModule {
       bus.emit("update:sidebar:tools", this.customTools);
 
       // 如果工具栏还未注入，则注入
-      if (!this.appRoot) {
+      if (!this._root && !this.isInjected) {
         this.inject({
           tools: this.customTools,
         });

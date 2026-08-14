@@ -147,6 +147,7 @@ export interface XHR_PATCH_CONFIG {
 }
 
 export interface AppModule {
+  _name: string; // 应用名称
   _ctx: any; // 上下文对象
   _root: Root | null; // react根实例
   _instance: any | null; // react实例
