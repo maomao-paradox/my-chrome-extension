@@ -34,6 +34,10 @@ export const useDomainState = () => {
    * 检查当前域名是否被禁用
    */
   const checkDomainStatus = useCallback(async (): Promise<void> => {
+    if (!chrome.tabs) {
+      maLogger.warn("chrome.tabs 未定义");
+      return;
+    }
     try {
       const [tab] = await chrome.tabs.query({
         active: true,
@@ -61,7 +65,7 @@ export const useDomainState = () => {
       setIsDomainDisabled(disabledDomains.includes(domain));
       maLogger.log("域名禁用状态:", disabledDomains.includes(domain));
     } catch (error) {
-      maLogger.error("检查域名状态失败:", error);
+      maLogger.warn("检查域名状态失败:", error);
     }
   }, []);
 

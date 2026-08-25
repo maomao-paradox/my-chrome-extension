@@ -345,6 +345,8 @@ export const SettingPage: FC<{}> = () => {
   useEffect(() => {
     async function init() {
       maLogger.log("【挂载组件-执行初始化】");
+      loadPopupTheme();
+      loadPopupMouseTrail();
       await loadConfig();
 
       /** 获取当前活动标签页域名 */
@@ -391,12 +393,6 @@ export const SettingPage: FC<{}> = () => {
     }
   }, [currentActivedTabDomain, availableContentScripts]);
 
-  /** 加载主题和鼠标拖尾 */
-  useEffect(() => {
-    loadPopupTheme();
-    loadPopupMouseTrail();
-  }, [loadPopupTheme, loadPopupMouseTrail]);
-
   const handleChangeContentScript = useCallback(
     (e: any): void => {
       console.log("选择脚本", e.target.value);
@@ -406,8 +402,7 @@ export const SettingPage: FC<{}> = () => {
   );
 
   maLogger.log("【新一轮渲染提交】");
-  // 打印所有的state
-  maLogger.table([
+  maLogger.log([
     {
       name: "selectedContentScript",
       value: selectedContentScript,

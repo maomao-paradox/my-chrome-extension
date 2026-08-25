@@ -172,6 +172,21 @@ await chrome.runtime.sendMessage({
 - 悬浮球工具箱新增“光谱效应”，内置棱镜折射、极光幕布、光谱环和衍射薄膜四种视觉组件
 - 支持在抽屉内切换预览、调节光谱强度、暂停动效，并复制当前效果的 CSS 片段用于开发参考
 
+### 滚动时间轴组件
+- 新增可复用 React 组件 `src/assets/components/ScrollingTimeline.tsx`
+- 样式位于 `src/assets/components/ScrollingTimeline.scss`，使用项目已有的 `lucide-react` 图标
+- 支持横向滚动、左右导航、节点/卡片点击、键盘方向键与 Home/End 导航
+- 通过 `items` 传入时间轴数据；使用 `activeId` + `onActiveIdChange` 受控，或省略 `activeId` 使用组件内部状态
+
+```tsx
+<ScrollingTimeline
+  activeId={activeId}
+  items={timelineItems}
+  onActiveIdChange={setActiveId}
+  onSelect={handleTimelineSelect}
+/>
+```
+
 ## License
 
 MIT

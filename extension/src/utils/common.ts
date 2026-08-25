@@ -10,8 +10,8 @@
 import type { DEBUGER } from "@/types";
 import WasmFileMapDecryptor from "./wasmFileMapDecryptor";
 
-//@ts-ignore
 const FILE_MAP_KEY =
+  //@ts-ignore
   import.meta.env.VITE_FILE_MAP_KEY ||
   "mria_extension_default_key_32bytes_1234567890abcdef";
 const decryptor = new WasmFileMapDecryptor(FILE_MAP_KEY);
@@ -204,6 +204,10 @@ export function loadFileMap(): FileMapLoader {
 export const getChunkFileMap = loadFileMap();
 
 export const getAssetsAbstractPath = async (path: string) => {
+  if (!chrome.runtime) {
+    maLogger.warn("chrome.runtime 未定义");
+    return "";
+  }
   try {
     const map = await getChunkFileMap();
     if (map && map[path]) {
@@ -218,6 +222,10 @@ export const getAssetsAbstractPath = async (path: string) => {
 };
 
 export const getAssetsAbstractPathSync = (path: string) => {
+  if (!chrome.runtime) {
+    maLogger.warn("chrome.runtime 未定义");
+    return "";
+  }
   try {
     const map = getChunkFileMap() as FileMap;
     // maLogger.info("获取资产路径:", path, map);
