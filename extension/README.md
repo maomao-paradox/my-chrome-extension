@@ -71,6 +71,11 @@ npx vitest run test/BookmarkPage.spec.ts
 
 ## 核心功能
 
+### 自定义组件展示页
+- 新增独立组件展示页，可在浏览器中浏览 `src/assets/components` 下的自研组件
+- 页面采用左侧目录、中间预览、右侧信息面板的结构，风格参考组件库文档站
+- 入口为 `src/pages/components.html`，开发模式下可直接访问 `/pages/components.html`
+
 ### AI 智能助手
 - 集成 DeepSeek 对话能力，基于当前页面上下文提供智能建议
 - 支持流式响应，会话持久化

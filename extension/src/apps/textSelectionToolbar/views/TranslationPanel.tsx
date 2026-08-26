@@ -3,7 +3,7 @@
  * 可拖拽的翻译/AI 解释面板，支持流式更新和震动反馈
  */
 import { useState, useEffect, useRef, useCallback } from "react";
-import "./styles/translation-panel.scss";
+// import "./styles/translation-panel.scss";
 
 /**
  * 翻译状态类型
@@ -121,7 +121,7 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
    * 使用 ref 存储拖拽状态和处理器，避免闭包陷阱和多次拖拽后的监听器累积
    */
   const handlePointerDown = useCallback(
-    (e: PointerEvent) => {
+    (e: React.PointerEvent<HTMLDivElement>) => {
       e.preventDefault();
       isDraggingRef.current = true;
       setIsDragging(true);
@@ -226,14 +226,16 @@ const TranslationPanel: React.FC<TranslationPanelProps> = ({
     >
       <div
         className={`translation-panel__header${isDragging ? " is-dragging" : ""}`}
-        onPointerDown={(e: PointerEvent) => handlePointerDown(e)}
+        onPointerDown={handlePointerDown}
       >
         <div className="translation-panel__title">{title}</div>
         <button
           className="translation-panel__close"
           type="button"
           aria-label="关闭翻译结果"
-          onPointerDown={(e: PointerEvent) => e.stopPropagation()}
+          onPointerDown={(e: React.PointerEvent<HTMLButtonElement>) =>
+            e.stopPropagation()
+          }
           onClick={() => onClose?.()}
         >
           ×

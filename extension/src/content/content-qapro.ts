@@ -19,8 +19,8 @@ import messenger from "@/message";
 import { ExtMessage, MessageHandler } from "@/types";
 import { storage } from "@/stores";
 import { getQueryParams } from "@/utils/base";
-import { injectXhrPatch } from "@/runtime/xhr-patch/xhr_message_handler";
-import xhrRules from "@/runtime/xhr-patch/rules";
+import { injectXhrPatch } from "@/sfs/xhr-patch/xhr_message_handler";
+import xhrRules from "@/sfs/xhr-patch/rules";
 import { createApp } from "vue";
 
 const _ADMIN = "admin";

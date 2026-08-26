@@ -1,6 +1,6 @@
 import { injectScriptToActivateTab } from '@/utils/element-control';
 import { storage } from '@/stores';
-import { getRuntimeScript } from '@/utils/common';
+import { getSingleFileScript } from '@/utils/common';
 
 export interface PageTools {
     batchReplaceText: (oldText: string, newText: string) => { success: boolean; msg: string };
@@ -129,7 +129,7 @@ export const createPageTools = (ctx: AppContext): PageTools => {
     let result;
     switch (varPath) {
       default: {
-        injectScriptToActivateTab({file: getRuntimeScript('getPageVariable')});
+        injectScriptToActivateTab({file: getSingleFileScript('getPageVariable')});
         const callbackResult = storage.page.session.get('env_config_value', null);
         if (callbackResult == null) {
           maLogger.error('获取页面变量失败: 未找到变量');

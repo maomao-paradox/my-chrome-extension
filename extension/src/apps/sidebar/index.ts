@@ -28,8 +28,8 @@ import { appConfigKey, shadowHostId } from "@/config";
 import { IconDocument, IconBookmark } from "@/assets/icons";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
 
-// 通过 ?raw 导入聚合 SCSS 为字符串
-import sidebarStyles from "./styles/index.scss?raw";
+// 通过 ?inline 导入聚合 SCSS 为字符串
+import sidebarStyles from "./styles/index.scss?inline";
 
 /**
  * @author 不可以是我吗

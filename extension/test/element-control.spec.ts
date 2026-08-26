@@ -567,7 +567,7 @@ describe("injectScriptToActivateTab", () => {
   it("scriptStr 模式通过 sessionStorage 中转 + getRuntimeScript 解析", async () => {
     const setSpy = vi.spyOn(Storage.prototype, "setItem");
     await injectScriptToActivateTab({ scriptStr: "console.log(1)" });
-    expect(setSpy).toHaveBeenCalledWith("js-code", "console.log(1)");
+    expect(setSpy).toHaveBeenCalledWith("--script-content--", "console.log(1)");
     const script = document.body.querySelector("#inject-script");
     expect(script).not.toBeNull();
     setSpy.mockRestore();

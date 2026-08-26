@@ -3,7 +3,7 @@
  * 留言编辑/添加模态框，支持创建和编辑留言
  */
 import { useState, useEffect, useCallback } from "react";
-import "./styles/comment-modal.scss";
+// import "./styles/comment-modal.scss";
 
 /**
  * CommentModal 组件属性接口
@@ -92,10 +92,13 @@ const CommentModal: React.FC<CommentModalProps> = ({
   /**
    * 处理输入变化
    */
-  const handleInputChange = useCallback((e: Event) => {
-    const target = e.target as HTMLTextAreaElement;
-    setCommentContent(target.value);
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const target = e.target as HTMLTextAreaElement;
+      setCommentContent(target.value);
+    },
+    [],
+  );
 
   // 计算标题
   const title = isEdit ? "编辑留言" : "添加留言";
@@ -109,7 +112,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
   return (
     <div
       className="comment-modal-overlay"
-      onClick={(e: Event) => {
+      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) handleClose();
       }}
     >

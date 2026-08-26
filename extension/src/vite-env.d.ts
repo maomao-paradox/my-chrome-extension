@@ -26,7 +26,7 @@ declare module "*.scss" {
   export default content;
 }
 
-declare module "*.scss?raw" {
+declare module "*.scss?inline" {
   const content: string;
   export default content;
 }

@@ -54,7 +54,7 @@ export default defineConfig({
     manifest: true,
 
     chunkSizeWarningLimit: 1024,
-    sourcemap: false,
+    sourcemap: true,
     cssCodeSplit: true,
     rollupOptions: {
       onwarn(warning, warn) {
@@ -69,6 +69,7 @@ export default defineConfig({
         warn(warning);
       },
       input: {
+        "pages/components": path.resolve(__dirname, "src/pages/components.html"),
         // "pages/campaign": path.resolve(__dirname, "src/pages/campaign.html"),
         // "pages/hand-portals": path.resolve(
         //   __dirname,
@@ -93,8 +94,8 @@ export default defineConfig({
                 extFilter: ".html",
               }),
               ...scanFiles({
-                dirPath: "src/runtime",
-                prefix: "runtime",
+                dirPath: "src/sfs",
+                prefix: "sfs",
                 useIndexFile: true,
                 recursive: true,
               }),
@@ -154,8 +155,8 @@ export default defineConfig({
           const chunkName = chunkInfo.name || "";
           if (chunkName.startsWith("content/")) {
             return `assets/js/content/[hash].js`;
-          } else if (chunkName.startsWith("runtime/")) {
-            return `assets/js/runtime/[hash].js`;
+          } else if (chunkName.startsWith("sfs/")) {
+            return `assets/js/sfs/[hash].js`;
           } else if (chunkName.startsWith("apps/")) {
             return `assets/js/apps/[hash].js`;
           } else if (chunkName.startsWith("devtools/")) {

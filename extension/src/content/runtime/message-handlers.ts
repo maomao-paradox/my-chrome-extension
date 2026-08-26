@@ -260,7 +260,7 @@ export const createMessageHandlers = (
     try {
       const utilsModule = await import(
         /* @vite-ignore */
-        getAssetsAbstractPathSync("js/runtime/accessibility-utils")
+        getAssetsAbstractPathSync("js/sfs/accessibility-utils")
       );
       const utils = utilsModule.default || utilsModule;
 

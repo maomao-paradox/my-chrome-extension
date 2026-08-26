@@ -18,7 +18,7 @@ import type { Comment } from "@/services/commentStorage";
 import TextToolbar from "./views/TextToolbar";
 import type { ReplaceOptions } from "./views/ReplaceModal";
 import "./views/styles/app.scss";
-import "./views/styles/textarea-ai.scss";
+// import "./views/styles/textarea-ai.scss";
 
 /**
  * 懒加载组件 - 按需加载以减小初始包体积

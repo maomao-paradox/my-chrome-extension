@@ -11,7 +11,7 @@
 import { waitForSelector, addElementToDom, injectScriptToActivateTab } from '@/utils/element-control';
 import { Tool } from '@/types';
 import messenger from '@/message';
-import { getRuntimeScript } from '@/utils/common';
+import { getSingleFileScript } from '@/utils/common';
 
 
 /**
@@ -112,8 +112,8 @@ export default (ctx: AppContext, config = {}) => {
     selector: 'body',
     timeout: 10000,
     callback: async () => {
-      await injectScriptToActivateTab({ file: getRuntimeScript('docker-portainer-button') });
-      await injectScriptToActivateTab({ file: getRuntimeScript('update-stacks') });
+      await injectScriptToActivateTab({ file: getSingleFileScript('docker-portainer-button') });
+      await injectScriptToActivateTab({ file: getSingleFileScript('update-stacks') });
       observeCodeEditorElements();
     }
   });

@@ -6,24 +6,25 @@
  */
 
 (() => {
-  'use strict';
-  const scriptStr = sessionStorage.getItem('js-code');
-  sessionStorage.removeItem('js-code');
-  if (!scriptStr) {return;}
+  "use strict";
+  const scriptStr = sessionStorage.getItem("--script-content--");
+  sessionStorage.removeItem("--script-content--");
+  if (!scriptStr) {
+    return;
+  }
 
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   Object.assign(script, {
     innerHTML: scriptStr,
     async: true,
     defer: true,
-    crossOrigin: 'anonymous'
+    crossOrigin: "anonymous",
   });
 
   document.body.appendChild(script);
 
   setTimeout(() => {
     if (document.body.contains(script)) {
-      // console.log('Removing script after execution');
       script.remove();
     }
   }, 100);

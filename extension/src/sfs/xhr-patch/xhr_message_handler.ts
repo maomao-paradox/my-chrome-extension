@@ -12,7 +12,7 @@ import { storage } from '@/stores';
 import  messenger  from '@/message';
 import { injectScriptToActivateTab } from '@/utils/element-control';
 import { sendMessageToPage, listenForPageMessages } from '@/message/content-page';
-import { getRuntimeScript } from '@/utils/common';
+import { getSingleFileScript } from '@/utils/common';
 
 /**
  * XHR 消息中转站 - 用于 处理 sidepanel和页面的通信
@@ -189,5 +189,5 @@ export function injectXhrPatch(defaultRules: XhrRulesMap) {
   listenForPageMessages();
 
   // 注入XHR补丁脚本
-  injectScriptToActivateTab({file: getRuntimeScript('xhr-patch')});
+  injectScriptToActivateTab({file: getSingleFileScript('xhr-patch')});
 }

@@ -37,7 +37,7 @@ function generateFileMap() {
                     continue;
                 }
 
-                if (originalPath.includes('runtime/')) {
+                if (originalPath.includes('sfs/')) {
                     const originalFilePath = `js/${entryData.name}`;
                     fileMap[originalFilePath] = entryData.file;
                 }

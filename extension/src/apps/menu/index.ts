@@ -38,14 +38,18 @@ const waitForBodyReady = async (): Promise<void> => {
     return;
   }
   await new Promise<void>((resolve) => {
-    const check = () => (document.body ? resolve() : requestAnimationFrame(check));
+    const check = () =>
+      document.body ? resolve() : requestAnimationFrame(check);
     check();
   });
 };
 
 class Menu implements AppModule {
-  _context: any = null;
+  _ctx: any = null;
   _name: string = "menu";
+  _root: any = null;
+  _instance: any = null;
+  _container: any = null;
   shadowHostId: string = shadowHostId;
   isInjected: boolean = false;
   reactContainer: HTMLElement | null = null;
@@ -59,13 +63,15 @@ class Menu implements AppModule {
     {
       id: "glass-card",
       label: "悬浮毛玻璃卡片",
-      details: "创建一个可拖动、可调宽高和透明度的毛玻璃悬浮卡片，双击空白区域即可关闭",
+      details:
+        "创建一个可拖动、可调宽高和透明度的毛玻璃悬浮卡片，双击空白区域即可关闭",
       icon: "ai-chat",
     },
     {
       id: "image",
       label: "下载图片",
-      details: "下载当前页面的所有图片，包括base64编码的图片，src属性中的图片和svg矢量图",
+      details:
+        "下载当前页面的所有图片，包括base64编码的图片，src属性中的图片和svg矢量图",
       icon: "ai-chat",
     },
     {
@@ -176,7 +182,7 @@ class Menu implements AppModule {
         React.createElement(MenuApp, {
           tools: tools || this.customTools,
           visible,
-        })
+        }),
       );
     } catch (error) {
       maLogger.error("注入固定菜单失败:", error);
@@ -240,7 +246,11 @@ class Menu implements AppModule {
   async init(): Promise<void> {
     try {
       const config = await storage.ext.local.get(appConfigKey);
-      if (config && config.floatingBall && config.floatingBall.value !== false) {
+      if (
+        config &&
+        config.floatingBall &&
+        config.floatingBall.value !== false
+      ) {
         this.enable();
       }
       this.setupEventListeners();

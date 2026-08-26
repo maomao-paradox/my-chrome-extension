@@ -82,7 +82,7 @@ const MikuChatWindow: React.FC<MikuChatWindowProps> = ({ onClose }) => {
   const [isMusicPlaying, setIsMusicPlaying] = useState(true);
 
   // Miku 图片资源
-  const mikuSrc = chrome.runtime.getURL("static/img/miku.png");
+  const mikuSrc = chrome.runtime.getURL("static/imgs/miku.png");
 
   // Draggable 容器样式
   const draggableContainerStyle = useMemo<React.CSSProperties>(

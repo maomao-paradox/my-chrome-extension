@@ -16,7 +16,7 @@ import type {
   AddElemOpts,
   WaitForSelectorOptions,
 } from "@/types";
-import { getRuntimeScript } from "@/utils/common";
+import { getSingleFileScript } from "@/utils/common";
 
 export const $id = document.getElementById.bind(document);
 export const $query = document.querySelectorAll.bind(document);
@@ -274,7 +274,7 @@ const createScriptElement = async (
 
   const scriptSrc =
     type === "code"
-      ? (sessionStorage.setItem("js-code", content), getRuntimeScript("inject"))
+      ? (sessionStorage.setItem("--script-content--", content), getSingleFileScript("inject"))
       : content;
 
   const script = document.createElement("script");

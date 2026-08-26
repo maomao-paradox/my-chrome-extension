@@ -240,8 +240,8 @@ export const getAssetsAbstractPathSync = (path: string) => {
   }
 };
 
-export const getRuntimeScript = (scriptName: string) => {
-  const scriptPath = "js/runtime/" + scriptName;
+export const getSingleFileScript = (scriptName: string) => {
+  const scriptPath = "js/sfs/" + scriptName;
   return getAssetsAbstractPathSync(scriptPath);
 };
 

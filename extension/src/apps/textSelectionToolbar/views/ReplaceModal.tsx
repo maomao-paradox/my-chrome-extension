@@ -3,7 +3,7 @@
  * 文本替换模态框，支持查找和替换功能
  */
 import { useState, useEffect, useRef, useCallback } from "react";
-import "./styles/replace-modal.scss";
+// import "./styles/replace-modal.scss";
 
 /**
  * 替换选项接口
@@ -98,16 +98,19 @@ const ReplaceModal: React.FC<ReplaceModalProps> = ({
   /**
    * 处理输入变化
    */
-  const handleInputChange = useCallback((e: Event) => {
-    const target = e.target as HTMLInputElement;
-    setReplaceText(target.value);
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const target = e.target as HTMLInputElement;
+      setReplaceText(target.value);
+    },
+    [],
+  );
 
   /**
    * 处理回车键
    */
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
         e.preventDefault();
         handleReplace();
@@ -133,7 +136,7 @@ const ReplaceModal: React.FC<ReplaceModalProps> = ({
   return (
     <div
       className="replace-modal-overlay"
-      onClick={(e: Event) => {
+      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) handleClose();
       }}
     >

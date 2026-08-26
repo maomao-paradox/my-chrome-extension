@@ -10,7 +10,7 @@
 import { addElementToDom, injectScriptToActivateTab, waitForSelector } from '@/utils/element-control';
 import messenger from '@/message';
 import { ExtMessage, Tool, TextTool } from '@/types';
-import { getRuntimeScript } from '@/utils/common';
+import { getSingleFileScript } from '@/utils/common';
 import { sendMessageToBackground } from '@/utils';
 
 const convertToCSV = (data: any[]): string => {
@@ -237,7 +237,7 @@ export default (ctx: AppContext, config = {}) => {
 				    type: 'CREATE_TAB_WITH_SCRIPT',
 				    payload: {
 				      url: 'https://baidu.com',
-				      scriptPath: 'js/runtime/test.js'
+				      scriptPath: 'js/sfs/test.js'
 				    }
 				  });
 				};
@@ -259,7 +259,7 @@ export default (ctx: AppContext, config = {}) => {
 				    type: 'CREATE_TAB_WITH_SCRIPT',
 				    payload: {
 				      url: 'https://baidu.com',
-				      scriptPath: 'js/runtime/test.js'
+				      scriptPath: 'js/sfs/test.js'
 				    }
 				  });
 				};
@@ -271,7 +271,7 @@ export default (ctx: AppContext, config = {}) => {
       selector: ['#dataform > div > div.side-col.col-4 > div.cell', '#dataform > table > tfoot'],
       iframeSelector: '#appIframe-qa',
       useMutationObserver: true,
-      initCallback: () => injectScriptToActivateTab({ file: getRuntimeScript('zentao-content-replace') }),
+      initCallback: () => injectScriptToActivateTab({ file: getSingleFileScript('zentao-content-replace') }),
       callback: (el: HTMLElement) => {
         const newEl = document.createElement('zentao-content-replace');
         if (el.classList.contains('cell')) {

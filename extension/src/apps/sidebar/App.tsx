@@ -27,6 +27,7 @@ import type { Tool } from "@/types";
 import { bus } from "@/event/bus";
 import HoverMenu from "./HoverMenu";
 import SimpleCarousel from "./components/SimpleCarousel";
+import "./styles/index.scss";
 
 /** SidebarApp Props */
 export interface SidebarAppProps {
@@ -132,11 +133,7 @@ const SidebarApp: React.FC<SidebarAppProps> = ({
 
   return (
     <>
-      <HoverMenu
-        items={localTools}
-        visible={visible}
-        onClick={handleClick}
-      />
+      <HoverMenu items={localTools} visible={visible} onClick={handleClick} />
       <SimpleCarousel
         visible={contextMenuVisible}
         tools={carouselItems}

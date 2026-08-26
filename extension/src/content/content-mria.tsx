@@ -60,11 +60,11 @@ import type {
 } from "@/types";
 import { QuickLogin, QuickLoginProps } from "@components/index";
 import { storage } from "@/stores";
-import { getRuntimeScript } from "@/utils";
+import { getSingleFileScript } from "@/utils";
 import { whenDomReady } from "@/utils/element-control";
 import messenger from "@/message";
-import xhrRules from "@/runtime/xhr-patch/rules";
-import { injectXhrPatch } from "@/runtime/xhr-patch/xhr_message_handler";
+import xhrRules from "@/sfs/xhr-patch/rules";
+import { injectXhrPatch } from "@/sfs/xhr-patch/xhr_message_handler";
 import { createRoot } from "react-dom/client";
 
 export const tools: Tool[] = [
@@ -785,7 +785,7 @@ export default (ctx: AppContext, config = {}) => {
                 const target = j.target || j.currentTarget;
                 if (target instanceof HTMLElement) {
                   injectScriptToActivateTab({
-                    file: getRuntimeScript("editComponent"),
+                    file: getSingleFileScript("editComponent"),
                   });
                 }
               },

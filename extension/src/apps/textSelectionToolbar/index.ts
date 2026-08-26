@@ -963,15 +963,15 @@ class TextSelectionToolbarModule implements AppModule {
         injectCssDom(shadowRoot, getAssetsAbstractPathSync(`css/${appName}`));
         // 注入懒加载组件的 CSS 到 Shadow DOM，避免 Vite preload helper 使用相对路径报错
         // file-map.json 中记录了各懒加载组件的 CSS 路径，通过 injectCssDom 从 chrome-extension:// 加载
-        const lazyComponentCssList = [
-          "css/TranslationPanel",
-          "css/ReplaceModal",
-          "css/CommentModal",
-          "css/CommentDisplay",
-        ];
-        lazyComponentCssList.forEach((cssKey) => {
-          injectCssDom(shadowRoot, getAssetsAbstractPathSync(cssKey));
-        });
+        // const lazyComponentCssList = [
+        //   "css/TranslationPanel",
+        //   "css/ReplaceModal",
+        //   "css/CommentModal",
+        //   "css/CommentDisplay",
+        // ];
+        // lazyComponentCssList.forEach((cssKey) => {
+        //   injectCssDom(shadowRoot, getAssetsAbstractPathSync(cssKey));
+        // });
         this.isInjected = true;
       }
 

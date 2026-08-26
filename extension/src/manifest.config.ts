@@ -55,14 +55,14 @@ export default defineManifest({
   web_accessible_resources: [
     {
       resources: [
-        'assets/js/runtime/*.js',
+        'assets/js/sfs/*.js',
         'assets/js/*.js',
         'assets/css/*.css',
         'static/wasm/*.js',
         'static/wasm/*.wasm',
         'static/icons/*.ico',
         'static/icons/*.png',
-        'static/img/*.png',
+        'static/imgs/*.png',
         'static/keytone/Piano/*.wav',
         'static/fonts/*',
         'static/css/*.css',

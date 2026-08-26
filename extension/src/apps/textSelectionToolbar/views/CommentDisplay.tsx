@@ -2,9 +2,9 @@
  * CommentDisplay 组件 - Preact 版本
  * 留言内容展示面板，显示原文、留言内容和时间戳
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, MouseEventHandler } from "react";
 import type { Comment } from "@/services/commentStorage";
-import "./styles/comment-display.scss";
+// import "./styles/comment-display.scss";
 
 /**
  * CommentDisplay 组件属性接口
@@ -85,7 +85,7 @@ const CommentDisplay: React.FC<CommentDisplayProps> = ({
   return (
     <div
       className="comment-display-overlay"
-      onClick={(e: Event) => {
+      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) handleClose();
       }}
     >

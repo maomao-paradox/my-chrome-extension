@@ -38,7 +38,13 @@ export function createShadowHost(
   });
 
   // 添加到文档体的开头
-  document.body.insertBefore(shadowHost, document.body.firstChild);
+  if (document.body) {
+    document.body.insertBefore(shadowHost, document.body.firstChild);
+  } else {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.insertBefore(shadowHost, document.body.firstChild);
+    });
+  }
 
   // 创建 Shadow Root
   const shadowRoot = shadowHost.attachShadow({ mode });
