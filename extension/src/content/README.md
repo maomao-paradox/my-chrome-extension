@@ -3,6 +3,32 @@
 ## 概述
 内容脚本（Content Script）是 Chrome 扩展的重要组成部分，用于在网页上下文中执行 JavaScript 代码，实现对网页的操作和增强。
 
+## 功能块注册与配置
+
+内容脚本可以从 `src/content/runtime/content-feature-manager.ts` 创建功能注册器，将一个脚本拆分为多个可独立开关的业务功能：
+
+```typescript
+const registry = createContentFeatureRegistry({
+  scriptId: 'radius',
+  scriptName: 'Radius'
+});
+
+registry.register('radius.example', () => {
+  const handleClick = () => {};
+  document.addEventListener('click', handleClick);
+
+  return () => document.removeEventListener('click', handleClick);
+}, '示例功能');
+
+void registry.initialize();
+```
+
+- 配置保存到网页 `localStorage`，键名格式为 `kria-nove:content-script-config:{scriptId}`。
+- 首次没有配置时，所有功能默认关闭，并显示网页内配置面板。
+- 使用 `Ctrl+Shift+K`（macOS 使用 `Command+Shift+K`）打开配置面板。
+- 功能块的 `setup` 可以返回清理函数；保存配置时会调用已运行功能的清理函数，但不会立即重新启用功能。
+- 执行脚本字符串的功能应在清理函数中执行反向脚本，例如将配置值恢复为 `undefined`。
+
 ## 已有脚本
 
 ### content-textarea-ai

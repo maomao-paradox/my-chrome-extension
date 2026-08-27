@@ -24,6 +24,10 @@ extension/rust-wasm/target
 extension/rust-wasm/pkg
 extension/src/pages/study*
 extension/src/deps.json
+extension/.env*
+!extension/.env.template
+
+
 
 # Backend
 

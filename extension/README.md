@@ -30,6 +30,17 @@ npm run build
 npm run build:enc
 ```
 
+构建时可以通过 `.env` 控制扩展页面是否打包。页面开关同时控制 Rollup 入口和 Manifest 声明，避免生成无效页面引用；默认值均为 `true`：
+
+```env
+VITE_BUILD_POPUP=false
+VITE_BUILD_OPTIONS=true
+VITE_BUILD_SIDEPANEL=false
+VITE_BUILD_DEVTOOLS=false
+```
+
+支持的变量：`VITE_BUILD_POPUP`、`VITE_BUILD_OPTIONS`、`VITE_BUILD_SIDEPANEL`、`VITE_BUILD_DEVTOOLS`。设置为 `false` 后，对应页面不会加入构建产物，Manifest 中也不会声明该页面。
+
 扩展加载: 打开 `chrome://extensions` → 开启开发者模式 → 加载已解压的扩展程序 → 选择 `dist` 文件夹
 
 ## 测试
@@ -70,6 +81,12 @@ npx vitest run test/BookmarkPage.spec.ts
 | `src/message/index.ts` | `test/message.spec.ts` | 单元测试 | 32 |
 
 ## 核心功能
+
+### 内容脚本功能配置
+- `Radius` 内容脚本支持网页内功能注册和独立开关。
+- 首次进入未保存过配置的 Radius 页面时，面板默认关闭全部功能并引导用户配置。
+- 使用 `Ctrl+Shift+K`（macOS 使用 `Command+Shift+K`）打开当前页面的配置面板。
+- 配置保存在当前网页的 `localStorage`，键名为 `kria-nove:content-script-config:{contentScriptId}`；修改后需要刷新页面生效。
 
 ### 自定义组件展示页
 - 新增独立组件展示页，可在浏览器中浏览 `src/assets/components` 下的自研组件

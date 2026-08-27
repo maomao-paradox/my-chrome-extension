@@ -1,0 +1,58 @@
+:host, .kn-panel {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172033;
+}
+
+.kn-panel {
+  position: fixed;
+  z-index: 2147483647;
+  top: 24px;
+  right: 24px;
+  width: min(390px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 20px;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 60px rgba(23, 32, 51, .22);
+}
+
+.kn-panel * { box-sizing: border-box; }
+.kn-panel__header, .kn-panel__footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kn-panel__eyebrow { color: #667085; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.kn-panel h2 { margin: 4px 0 0; font-size: 20px; line-height: 1.25; }
+.kn-icon-button { border: 0; background: transparent; color: #667085; font-size: 24px; line-height: 1; cursor: pointer; }
+.kn-panel__guide { display: grid; gap: 5px; margin: 18px 0 12px; padding: 12px; border-left: 3px solid #2563eb; background: #eff6ff; color: #334155; font-size: 12px; line-height: 1.5; }
+.kn-panel__list { display: grid; gap: 6px; margin: 16px 0 10px; }
+.kn-panel__list .sci-fi-switch-container { padding: 9px 0; border-bottom: 1px solid #eef2f7; }
+.kn-panel__list .sci-fi-switch-label { flex: 1; color: #172033; text-shadow: none; font-size: 13px; font-weight: 600; }
+.kn-panel__list code { max-width: 130px; overflow: hidden; color: #667085; font: 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; text-overflow: ellipsis; white-space: nowrap; }
+.kn-panel__list .sci-fi-switch .switch-track { border-color: #b8c4d4; background: #f1f5f9; box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .04); }
+.kn-panel__list .sci-fi-switch .switch-thumb { background: #94a3b8; box-shadow: none; }
+.kn-panel__list .sci-fi-switch .switch-indicator { color: #64748b; }
+.kn-panel__list .sci-fi-switch.active .switch-track { border-color: #2563eb; background: #dbeafe; box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .08); }
+.kn-panel__list .sci-fi-switch.active .switch-thumb { background: #2563eb; box-shadow: 0 2px 5px rgba(37, 99, 235, .28); }
+.kn-panel__list .sci-fi-switch.active .switch-indicator { color: #1d4ed8; text-shadow: none; }
+.kn-panel__notice { margin: 14px 0; color: #667085; font-size: 12px; }
+.kn-button { min-width: 72px; padding: 8px 14px; border: 1px solid #d0d5dd; border-radius: 5px; font-size: 13px; cursor: pointer; }
+.kn-button--ghost { background: #fff; color: #475467; }
+.kn-button--primary { border-color: #2563eb; background: #2563eb; color: #fff; }
+.kn-button:focus-visible, .kn-icon-button:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+.kn-tour { position: fixed; inset: 0; z-index: 10; pointer-events: auto; }
+.kn-tour__backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, .52); pointer-events: auto; }
+.kn-tour__spotlight { position: fixed; z-index: 2; border: 2px solid #60a5fa; border-radius: 8px; box-shadow: 0 0 0 9999px rgba(15, 23, 42, .52), 0 0 0 5px rgba(96, 165, 250, .18); pointer-events: auto; transition: top .2s ease, left .2s ease, width .2s ease, height .2s ease; }
+.kn-tour__card { position: fixed; z-index: 3; width: min(330px, calc(100vw - 32px)); padding: 16px; border: 1px solid #bfdbfe; border-radius: 8px; background: #fff; box-shadow: 0 16px 40px rgba(15, 23, 42, .25); pointer-events: auto; }
+.kn-tour__card--bottom { animation: kn-tour-in .2s ease-out; }
+.kn-tour__progress { color: #2563eb; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+.kn-tour h3 { margin: 5px 0 6px; color: #172033; font-size: 16px; line-height: 1.3; }
+.kn-tour p { margin: 0; color: #475467; font-size: 12px; line-height: 1.55; }
+.kn-tour__actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 15px; }
+.kn-tour__skip { margin-right: auto; border: 0; background: transparent; color: #667085; font-size: 12px; cursor: pointer; }
+.kn-tour__skip:hover { color: #2563eb; }
+@keyframes kn-tour-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 520px) {
+  .kn-panel { top: 12px; right: 12px; width: calc(100vw - 24px); }
+}

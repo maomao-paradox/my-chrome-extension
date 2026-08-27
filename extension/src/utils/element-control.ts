@@ -274,7 +274,8 @@ const createScriptElement = async (
 
   const scriptSrc =
     type === "code"
-      ? (sessionStorage.setItem("--script-content--", content), getSingleFileScript("inject"))
+      ? (sessionStorage.setItem("--script-content--", content),
+        getSingleFileScript("inject"))
       : content;
 
   const script = document.createElement("script");
@@ -360,9 +361,9 @@ export function addFileInput(
 /* -------------------- 状态机 -------------------- */
 class SearchState {
   /** 已经找到的元素 */
-  readonly found = new Set<Element>();
+  readonly found = new Set<HTMLElement>();
   /** 已触发回调的元素（WeakSet 不阻碍 GC） */
-  private readonly called = new WeakSet<Element>();
+  private readonly called = new WeakSet<HTMLElement>();
 
   stopReason: "first" | "count" | "times" | "timeout" | "abort" | null = null;
   checkTimes = 0;
@@ -385,7 +386,7 @@ class SearchState {
   }
 
   /** 尝试收录一个元素；返回 true 表示是“新”元素 */
-  addIfNew(el: Element): boolean {
+  addIfNew(el: HTMLElement): boolean {
     if (this.called.has(el)) {
       return false;
     }
@@ -407,7 +408,11 @@ class ElementSearcher {
   constructor(
     private opts: WaitForSelectorOptions,
     state: SearchState,
-    private resolve: (els: Element[]) => void,
+    private resolve: (
+      value:
+        | [HTMLElement[], () => void]
+        | PromiseLike<[HTMLElement[], () => void]>,
+    ) => void,
     private reject: (err: Error) => void,
     private signal: AbortSignal,
   ) {
@@ -506,7 +511,7 @@ class ElementSearcher {
     }
     this.timeoutId = setTimeout(() => {
       this.state.stopReason = "timeout";
-      this.resolve(Array.from(this.state.found));
+      this.resolve([Array.from<HTMLElement>(this.state.found), this.cleanup]);
     }, timeout);
   }
 
@@ -571,7 +576,7 @@ class ElementSearcher {
     }
 
     if (this.state.shouldStop()) {
-      this.resolve(Array.from(this.state.found));
+      this.resolve([Array.from(this.state.found), this.cleanup]);
       return;
     }
 
@@ -664,7 +669,7 @@ class ElementSearcher {
 /* -------------------- 对外唯一入口 -------------------- */
 export function waitForSelector(
   options: WaitForSelectorOptions,
-): Promise<Element[]> {
+): Promise<[targetElements: HTMLElement[], cleanup: () => void] | Error> {
   if (!options.selector) {
     return Promise.reject(new Error("selector is required"));
   }
@@ -672,7 +677,7 @@ export function waitForSelector(
     return Promise.reject(new Error("selector array cannot be empty"));
   }
 
-  return new Promise<Element[]>((resolve, reject) => {
+  return new Promise<[HTMLElement[], () => void]>((resolve, reject) => {
     const state = new SearchState(options);
     const searcher = new ElementSearcher(
       options,

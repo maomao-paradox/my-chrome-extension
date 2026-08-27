@@ -29,3 +29,21 @@ initRuntimeConnectionListener({
 initClearAiSessionListener();
 initMenuListener();
 initMessageListener(createBackgroundMessageHandlers(devToolsPortManager));
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command !== "open-content-feature-panel") {
+    return;
+  }
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id) {
+    try {
+      await chrome.tabs.sendMessage(tab.id, {
+        type: "OPEN_CONTENT_FEATURE_PANEL",
+        target: "content",
+      });
+    } catch (error) {
+      console.warn("当前页面没有可用的内容脚本:", error);
+    }
+  }
+});

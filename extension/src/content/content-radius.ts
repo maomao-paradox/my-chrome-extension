@@ -7,10 +7,16 @@
  * @date 2026-02-05T02:38:01.694Z
  */
 
-import { addElementToDom, waitForSelector } from "@/utils/element-control";
+import {
+  addElementToDom,
+  injectScriptToActivateTab,
+  waitForSelector,
+  whenDomReady,
+} from "@/utils/element-control";
 import { Tool } from "@/types";
 import messenger from "@/message";
 import { requestAI } from "@/utils/ai-request";
+import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 
 function addLoadingMask(el: HTMLElement, loadingText: string = "填写中...") {
   if (!el) {
@@ -151,6 +157,10 @@ function removeLoadingMask(el: HTMLElement): number {
 }
 
 export default (ctx: AppContext, config = {}) => {
+  const featureRegistry = createContentFeatureRegistry({
+    scriptId: "radius",
+    scriptName: "Radius",
+  });
   const tools: Tool[] = [
     {
       id: "contentReplace",
@@ -230,14 +240,18 @@ export default (ctx: AppContext, config = {}) => {
     element.parentNode?.replaceChild(selectElement, element);
   };
 
-  // 切换版本
-  waitForSelector({
-    selector:
-      "#app > div > div > div.top-menu-bar > div.top-menu-bar__left > span",
-    timeout: 10000,
-    callback: (element: HTMLElement) => {
-      element.innerText = "内测版";
-    },
+  featureRegistry.register("radius.version-label", "版本标记", async () => {
+    const controller = new AbortController();
+    waitForSelector({
+      selector:
+        "#app > div > div > div.top-menu-bar > div.top-menu-bar__left > span",
+      signal: controller.signal,
+      timeout: 10000,
+      callback: (element: HTMLElement) => {
+        element.innerText = "内测版";
+      },
+    }).catch((err) => maLogger.error(err));
+    return () => controller.abort();
   });
 
   // cypress();
@@ -321,59 +335,101 @@ export default (ctx: AppContext, config = {}) => {
     };
   };
 
-  waitForSelector({
-    selector: [
-      "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div",
-      "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div > div.el-overlay.el-modal-dialog > div > div > div.el-dialog__body",
-    ],
-    timeout: 10000,
-    callback: (el: HTMLElement) => {
-      const buttonEl =
-        el.querySelector<HTMLButtonElement>(
-          ".operation-buttons-wrapper > div > button:nth-child(3)",
-        ) ||
-        el.querySelector<HTMLButtonElement>(
-          ".sub-form-toolbar > .el-button--primary",
-        )!;
-      maLogger.log("buttonEl:", buttonEl);
-      const tableEl = el.querySelector<HTMLElement>(
-        ".el-table__inner-wrapper",
-      )!;
-      if (!tableEl) {
-        return;
-      }
-      addElementToDom({
-        tag: buttonEl,
-        attrs: {
-          innerText: "填充表单",
-        },
-        eventlistener: {
-          click: handleFillForm(tableEl),
-        },
-      })(buttonEl, "afterend");
-    },
+  featureRegistry.register("radius.fill-form", "AI 填充表单", async () => {
+    const controller = new AbortController();
+    const inserted: HTMLElement[] = [];
+    void waitForSelector({
+      selector: [
+        "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div",
+        "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div > div.el-overlay.el-modal-dialog > div > div > div.el-dialog__body",
+      ],
+      signal: controller.signal,
+      timeout: 10000,
+      callback: (el: HTMLElement) => {
+        const buttonEl =
+          el.querySelector<HTMLButtonElement>(
+            ".operation-buttons-wrapper > div > button:nth-child(3)",
+          ) ||
+          el.querySelector<HTMLButtonElement>(
+            ".sub-form-toolbar > .el-button--primary",
+          );
+        maLogger.log("buttonEl:", buttonEl);
+        const tableEl = el.querySelector<HTMLElement>(
+          ".el-table__inner-wrapper",
+        );
+        if (!buttonEl || !tableEl) {
+          return;
+        }
+        const added = addElementToDom({
+          tag: buttonEl,
+          attrs: {
+            innerText: "填充表单",
+          },
+          eventlistener: {
+            click: handleFillForm(tableEl),
+          },
+        })(buttonEl, "afterend") as HTMLElement;
+        inserted.push(added);
+      },
+    }).catch((err) => maLogger.error(err));
+    return () => {
+      controller.abort();
+      inserted.forEach((element) => element.remove());
+    };
   });
 
-  waitForSelector({
-    selector:
-      "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-source-header > span",
-    timeout: 10000,
-    callback: (element: HTMLElement) => {
-      addElementToDom({
-        tag: "a",
-        attrs: {
-          href: "/#/datalake/config-driven-designer",
-          target: "_self",
-          innerText: "通用配置",
+  featureRegistry.register(
+    "radius.general-config-link",
+    "通用配置入口",
+    async () => {
+      const controller = new AbortController();
+      let inserted: HTMLElement | null = null;
+      waitForSelector({
+        selector:
+          "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-source-header > span",
+        signal: controller.signal,
+        timeout: 10000,
+        callback: (element: HTMLElement) => {
+          inserted = addElementToDom({
+            tag: "a",
+            attrs: {
+              href: "/#/datalake/config-driven-designer",
+              target: "_self",
+              innerText: "通用配置",
+            },
+            style: {
+              marginLeft: "10px",
+              color: "var(--el-color-primary)",
+              fontSize: "14px",
+            },
+          })(element, "afterend") as HTMLElement;
         },
-        style: {
-          marginLeft: "10px",
-          color: "var(--el-color-primary)",
-          fontSize: "14px",
-        },
-      })(element, "afterend");
+      }).catch((err) => maLogger.error(err));
+      return () => {
+        controller.abort();
+        inserted?.remove();
+      };
     },
-  });
+  );
+
+  featureRegistry.register(
+    "radius.legacy-import-tab",
+    "注入旧版数据页签配置",
+    async () => {
+      await new Promise<void>((resolve) => whenDomReady(resolve));
+      await injectScriptToActivateTab({
+        scriptStr: "__APP_CONFIG__.ENABLE_LEGACY_DATA_INPUT_TAB_IMPORT=true",
+      });
+      return async () => {
+        await injectScriptToActivateTab({
+          scriptStr:
+            "__APP_CONFIG__.ENABLE_LEGACY_DATA_INPUT_TAB_IMPORT=undefined",
+        });
+      };
+    },
+  );
+
+  void featureRegistry.initialize();
 
   return {};
 };
