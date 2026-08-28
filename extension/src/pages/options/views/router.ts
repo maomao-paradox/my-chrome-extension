@@ -7,55 +7,21 @@
  * @date 2026-02-05T02:38:01.695Z
  */
 
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import ContentScriptDomainConfig from './ContentScriptDomainConfig.vue';
-// @ts-ignore
-import ExtensionSettings from './ExtensionSettings.vue';
-import LoginView from './LoginView.vue';
-// @ts-ignore
-import UserOption from './UserOption.vue';
-import ErrorMonitorConfig from './ErrorMonitorConfig.vue';
+export interface OptionsRoute {
+  path: string;
+  public: boolean;
+}
 
-const routes: RouteRecordRaw[] = [
-  // 公开页面 - 不需要登录
-  { path: '/login', component: LoginView },
-  
-  // 需要登录的管理页面
-  { path: '/user', component: UserOption },
-  { path: '/domain-config', component: ContentScriptDomainConfig },
-  { path: '/extension-settings', component: ExtensionSettings },
-  { path: '/error-monitor', component: ErrorMonitorConfig },
-  
-  // 重定向规则
-  { path: '/', redirect: '/home' },
-  { path: '/:pathMatch(.*)*', redirect: '/home' }
+export const optionsRoutes: OptionsRoute[] = [
+  { path: "/home", public: true },
+  { path: "/login", public: true },
+  { path: "/user", public: false },
+  { path: "/domain-config", public: false },
+  { path: "/extension-settings", public: false },
+  { path: "/error-monitor", public: false },
 ];
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-});
+export const isOptionsRoutePublic = (path: string): boolean =>
+  optionsRoutes.some((route) => route.path === path && route.public);
 
-// 路由守卫
-router.beforeEach((to, from, next) => {
-  // 公开页面不需要验证
-  const publicPages = ['/home', '/login'];
-  const isPublicPage = publicPages.includes(to.path);
-  
-  if (isPublicPage) {
-    next();
-    return;
-  }
-
-  // 检查是否已登录
-  const isLoggedIn = localStorage.getItem('mria-logged-in') === 'true';
-
-  if (isLoggedIn) {
-    next();
-  } else {
-    // 未登录，重定向到登录页面
-    next('/login');
-  }
-});
-
-export default router;
+export default optionsRoutes;

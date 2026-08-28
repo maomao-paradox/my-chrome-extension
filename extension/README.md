@@ -168,7 +168,7 @@ await chrome.runtime.sendMessage({
 ### 个人主页
 - 提供独立创意个人主页，包含动漫赛博主视觉、幻想展柜、技法展示、丰富动画交互与静态模式切换
 - 开发模式可访问 `http://127.0.0.1:5173/pages/profile.html`
-- 浏览器插件环境下访问插件的 options 页面；当前已将 `PanelNav`、星舰总览弹层 `TacticalOverview`、玻璃星轨光标 `GlassCursor`、浏览器变量查看器迁移为 React 组件
+- 浏览器插件环境下访问插件的 options 页面；当前已将 `PanelNav`、星舰总览弹层 `TacticalOverview`、玻璃星轨光标 `GlassCursor`、浏览器变量查看器以及 7 个星舰配置视图迁移为 React 组件
 
 ### 战役选择页
 - 新增 React + Tailwind CSS 战役选择 UI，入口为 `src/pages/campaign.html`

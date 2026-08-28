@@ -236,11 +236,11 @@ const removeDisabled = (): void => {
   Array.from(["div", "button", "li", "span", "label", "input"]).forEach((s) =>
     waitForSelector({
       selector: s + ".is-disabled",
-      callback: (el: HTMLElement) => {
+      callback: (
+        el: HTMLElement & { disabled: boolean; "aria-disabled": boolean },
+      ) => {
         el.classList.remove("is-disabled", "disabled", "disabledBtn");
-        //@ts-ignore
-        el["disabled"] = false;
-        //@ts-ignore
+        el.disabled = false;
         el["aria-disabled"] = false;
         el.childNodes?.length > 0 &&
           Array.from(el.childNodes).forEach((e) => {
@@ -270,7 +270,12 @@ const sendRequestToBack = async (
   );
 };
 
-const initializeMriaContent = (ctx: AppContext, config = {}) => {
+export default (ctx: AppContext & { userInfo: any }, config = {}) => {
+  const featureRegistry = createContentFeatureRegistry({
+    scriptId: "mria",
+    scriptName: "MRIA",
+  });
+
   const roles = Array.from(ROLES);
   const handleRequest = createHandleRequest(ctx);
   const handleResponse = createHandleResponse(ctx);
@@ -462,7 +467,26 @@ const initializeMriaContent = (ctx: AppContext, config = {}) => {
       await processUserInfoConfig(pageContext);
     }
 
-    await storage.page.local.set(key, pageContext[key] || {});
+    storage.page.local.set(key, pageContext[key] || {});
+  };
+
+  const quickLogin = async (username: string, password: string) => {
+    if (!username || !password) {
+      ctx.message.error("用户名或密码不能为空");
+      return;
+    }
+    try {
+      await handleRequest(userLogout);
+      const userInfo = await handleRequest(userLogin, username, password).then(
+        (res) => handleResponse(res as Response<any>),
+      );
+      storage.page.local.set("Manteia-UserInfo", JSON.stringify(userInfo));
+      document.cookie = "Manteia-token=" + userInfo["access_token"];
+      ctx?.requester?.restruct?.();
+      location.reload();
+    } catch (err) {
+      maLogger.error(err);
+    }
   };
 
   /**
@@ -507,9 +531,9 @@ const initializeMriaContent = (ctx: AppContext, config = {}) => {
             enabled: true,
             role: "管理员",
           },
-          //@ts-ignore
-          ...ctx["userInfo"],
+          ...ctx.userInfo,
         }}
+        onLogin={quickLogin}
       />,
     );
 
@@ -538,18 +562,24 @@ const initializeMriaContent = (ctx: AppContext, config = {}) => {
   /**
    * 在顶部菜单追加自定义导航链接
    */
-  const appendCustomNavLinks = (el: HTMLElement): void => {
-    getCustomNavLinks().forEach(([name, url]) => {
-      const cloned = cloneEl({
-        deep: true,
-        el: el.children[0] as HTMLElement,
-        eventlistener: { click: () => ctx.open(url, "_blank") },
-      });
-      cloned.classList.remove("is-active");
-      (cloned.children[0] as HTMLElement).innerText = name;
-      el.appendChild(cloned);
+  featureRegistry.register("mria.appendCustomNavLinks", "增加导航链接", () => {
+    waitForSelector({
+      selector: "#app > div > div.navbar > div.top-menu",
+      callback: (el: HTMLElement): void => {
+        getCustomNavLinks().forEach(([name, url]) => {
+          const cloned = cloneEl({
+            deep: true,
+            el: el.children[0] as HTMLElement,
+            eventlistener: { click: () => ctx.open(url, "_blank") },
+          });
+          cloned.classList.remove("is-active");
+          (cloned.children[0] as HTMLElement).innerText = name;
+          el.appendChild(cloned);
+        });
+      },
+      maxWaitTimes: 10,
     });
-  };
+  });
 
   /**
    * 表单库搜索框输入事件处理
@@ -578,7 +608,9 @@ const initializeMriaContent = (ctx: AppContext, config = {}) => {
     handleInput: handleFormSearchInput,
   });
 
-  const parasitism = (): void => {
+  featureRegistry.register("mria.enrichQuickLogin", "MRIA 快速登录", () => {
+    // 监听 quickLogin 事件
+    document.addEventListener("quickLogin", messageHandlers.quickLogin);
     if (location.hash.match("#/login")) {
       waitForSelector({
         selector: "#app > div > div.login-main > form > div.login-form-title",
@@ -589,45 +621,19 @@ const initializeMriaContent = (ctx: AppContext, config = {}) => {
         timeout: 5000,
       });
     }
-
     waitForSelector({
       selector: "#app > div > div.navbar > div.right-menu",
       callback: enrichQuickLogin,
       callbackArgs: [{ strategy: "left", offset: { x: 113, y: 0 } }],
       maxWaitTimes: 10,
     });
-
-    waitForSelector({
-      selector: "#app > div > div.navbar > div.top-menu",
-      callback: appendCustomNavLinks,
-      maxWaitTimes: 10,
-    });
-  };
+    return () => {
+      document.removeEventListener("quickLogin", messageHandlers.quickLogin);
+    };
+  });
 
   // 命令处理器对象，将每个action的处理逻辑提取为单独的方法
   const messageHandlers: MessageHandler = {
-    quickLogin: async (data: any) => {
-      const { username, password } = data;
-      if (!username || !password) {
-        ctx.message.error("用户名或密码不能为空");
-        return;
-      }
-      try {
-        await handleRequest(userLogout);
-        const userInfo = await handleRequest(
-          userLogin,
-          username,
-          password,
-        ).then((res) => handleResponse(res as Response<any>));
-        storage.page.local.set("Manteia-UserInfo", JSON.stringify(userInfo));
-        document.cookie = "Manteia-token=" + userInfo["access_token"];
-        ctx?.requester?.restruct?.();
-        location.reload();
-      } catch (err) {
-        maLogger.error(err);
-      }
-    },
-
     registerPatient: async (data: any) => {
       // 创建患者
       const patientData: PatientRegistrationData = {
@@ -867,11 +873,15 @@ const initializeMriaContent = (ctx: AppContext, config = {}) => {
     }
   };
 
+  featureRegistry.register("mria.removeDisabled", "解除元素禁用状态", () =>
+    whenDomReady(removeDisabled),
+  );
+
+  featureRegistry.register("mria.xhrPatch", "XHR补丁注入", () =>
+    whenDomReady(() => injectXhrPatch(xhrRules["mria"])),
+  );
+
   whenDomReady(() => {
-    // 注入XHR补丁
-    injectXhrPatch(xhrRules["mria"]);
-    // 初始化寄生式注入
-    parasitism();
     // 初始化侧边栏
     updateSidebar(tools);
   });
@@ -882,20 +892,6 @@ const initializeMriaContent = (ctx: AppContext, config = {}) => {
 
   ctx.message.success("MRIA脚本初始化完成！");
 
-  return {
-    // 返回可调用的公共API
-    createTestUser: messageHandlers.createTestUser,
-  };
-};
-
-export default (ctx: AppContext, config = {}) => {
-  const featureRegistry = createContentFeatureRegistry({
-    scriptId: "mria",
-    scriptName: "MRIA",
-  });
-  featureRegistry.register("mria.main", "MRIA 内容增强", async () => {
-    initializeMriaContent(ctx, config);
-  });
   void featureRegistry.initialize();
   return {};
 };

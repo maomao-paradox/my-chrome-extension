@@ -22,16 +22,10 @@ export const $id = document.getElementById.bind(document);
 export const $query = document.querySelectorAll.bind(document);
 
 export function whenDomReady(callback: () => void) {
-  if (document.body) {
+  if (document?.body) {
     callback();
   } else {
-    window.addEventListener(
-      "load",
-      function () {
-        callback();
-      },
-      { once: true },
-    );
+    window.addEventListener("load", callback, { once: true });
   }
 }
 

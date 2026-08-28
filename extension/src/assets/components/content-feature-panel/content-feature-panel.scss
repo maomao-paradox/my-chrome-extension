@@ -1,3 +1,5 @@
+@use "@/assets/styles/custom-scrollbar.scss";
+
 :host,
 .kn-panel-container {
   all: initial;
@@ -68,7 +70,11 @@
   display: grid;
   gap: 6px;
   margin: 16px 0 10px;
+  max-height: 30vh;
+  overflow-y: auto;
+  background: transparent;
 }
+
 .kn-panel__list code {
   max-width: 130px;
   overflow: hidden;

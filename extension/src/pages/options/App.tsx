@@ -23,6 +23,15 @@ import PanelNav, {
 } from "@components/layout/PanelNav";
 import { STARSHIP_MODULES, StarshipPanelId } from "./views/starshipModules";
 import Static404 from "@/assets/components/Static404";
+import ContentScriptDomainConfig from "./views/ContentScriptDomainConfig";
+import ExtensionSettings from "./views/ExtensionSettings";
+import ErrorMonitorConfig from "./views/ErrorMonitorConfig";
+import BrowserVarView from "./views/BrowserVarView";
+import XHRuleOption from "./views/XHRuleOption";
+import AITerminalView from "./views/AITerminalView";
+import KnowledgeGraphView from "./views/KnowledgeGraphView";
+import UserOption from "./views/UserOption";
+import "./views/options-views.scss";
 
 // 懒加载组件
 const HeroSection = lazy(() => import("./views/HeroSection"));
@@ -49,14 +58,14 @@ const componentMap: Record<
   ComponentType | LazyExoticComponent<React.FC<any>>
 > = {
   main: HeroSection,
-  top: Static404,
-  "top-left": Static404,
-  "top-right": Static404,
-  left: Static404,
-  right: Static404,
-  bottom: Static404,
-  "bottom-left": Static404,
-  "bottom-right": Static404,
+  top: ErrorMonitorConfig,
+  "top-left": XHRuleOption,
+  "top-right": BrowserVarView,
+  left: ExtensionSettings,
+  right: UserOption,
+  bottom: ContentScriptDomainConfig,
+  "bottom-left": KnowledgeGraphView,
+  "bottom-right": AITerminalView,
 };
 
 const createBasePanels = (): Record<StarshipPanelId, PanelBase> => {

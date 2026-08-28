@@ -2,12 +2,12 @@
 
 ## 1. 页面概述
 
-Options Page 是一个基于 Vue 3 + TypeScript 开发的现代化浏览器扩展选项页面，采用科技感十足的 UI 设计风格，集成了个人主页、登录管理、扩展配置等核心功能模块。
+Options Page 是一个基于 React + TypeScript 开发的现代化浏览器扩展选项页面，采用科技感十足的 UI 设计风格，集成了个人主页、用户管理和扩展配置等核心功能模块。
 
 ## 2. 核心功能
 
 ### 2.1 星舰指挥中心主页 (HeroSection)
-- **功能描述**：Options 主面板保留星舰指挥中心主页，中间全息投影区域使用 `src/pages/index/App.vue` 的 3D 旋转效果替代原 2D 星舰图
+- **功能描述**：Options 主面板保留星舰指挥中心主页，中间全息投影区域使用 React 版 `Rotation3DShowcase` 展示 3D 旋转效果
 - **主要特性**：
   - 保留主页标题、状态卡、雷达、模块舱卡、链路流向和实时日志等原有内容
   - 复用独立 `pages/index.html` 的 3D 旋转节点、底座和连线动画作为中央投影
@@ -46,9 +46,9 @@ Options Page 是一个基于 Vue 3 + TypeScript 开发的现代化浏览器扩�
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
-| Vue | 3.x | 核心前端框架 |
+| React | 19.x | Options 页面核心前端框架 |
 | TypeScript | 5.x | 类型安全支持 |
-| Vue Router | 4.x | 路由管理 |
+| React DOM | 19.x | Options 页面渲染入口 |
 | Element Plus | 2.x | UI 组件库 |
 | GSAP | 3.x | 高级动画效果 |
 | SVG | - | 知识图谱节点、连线、拖拽与缩放画布 |
@@ -77,7 +77,9 @@ src/pages/options/
     └── XHRuleOption.vue            # XHR 规则配置视图
 ```
 
-Options 主面板的主页组件位于 `src/pages/options/views/HeroSection.vue`，其中中央投影区域以 `projection` 模式复用 `src/pages/index/App.vue` 的 3D 旋转组件。
+Options 主面板的主页组件位于 `src/pages/options/views/HeroSection.tsx`，中央投影区域使用 `Rotation3DShowcase.tsx`。
+
+当前星舰导航实际使用的配置视图均已迁移为 React：`ContentScriptDomainConfig.tsx`、`ExtensionSettings.tsx`、`ErrorMonitorConfig.tsx`、`UserOption.tsx`、`XHRuleOption.tsx`、`KnowledgeGraphView.tsx` 和 `AITerminalView.tsx`。这些视图由 `src/assets/components/layout/PanelNav.tsx` 加载，旧 Vue 文件暂时保留但不再参与 Options 运行路径。
 
 ## 5. 路由配置
 
@@ -94,7 +96,7 @@ Options 主面板的主页组件位于 `src/pages/options/views/HeroSection.vue`
 | / | - | - | 默认重定向到 /home |
 | /* | - | - | 404 页面重定向到 /home |
 
-> 当前 Options 入口使用 `App2.vue` + `PanelNav.vue` 的星舰舱段导航。主页 `main` 面板使用 `HeroSection.vue`，中央投影区域复用 `src/pages/index/App.vue` 的 3D 效果；知识图谱挂载在 `bottom-left` 面板，属于面板导航模块，不依赖单独的 Vue Router 路径。
+> 当前 Options 入口使用 `App.tsx` + `PanelNav.tsx` 的星舰舱段导航。主页 `main` 面板使用 `HeroSection.tsx`，知识图谱挂载在 `bottom-left` 面板，不依赖 Vue Router 路径。
 
 ## 6. 登录状态管理
 
@@ -144,7 +146,7 @@ npm run build
 ### 8.3 代码规范
 - ESLint + Prettier 代码检查与格式化
 - TypeScript 严格模式
-- Vue 3 Composition API 语法规范
+- React Hooks 与 TypeScript 组件规范
 - 组件化开发最佳实践
 
 ## 9. 浏览器兼容性

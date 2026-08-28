@@ -1,0 +1,65 @@
+.options-view {
+  display: grid;
+  gap: 16px;
+  color: rgba(228, 245, 255, 0.92);
+}
+
+.options-view__heading {
+  border-bottom: 1px solid rgba(105, 183, 255, 0.2);
+  padding: 0 0 12px;
+}
+
+.options-view__heading span,
+.options-panel h3,
+.options-config-row__top strong {
+  color: #69b7ff;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.options-view__heading h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+  color: #edfaff;
+}
+
+.options-panel,
+.options-config-row,
+.options-user-card,
+.options-rule {
+  border: 1px solid rgba(105, 183, 255, 0.2);
+  background: rgba(5, 13, 24, 0.78);
+  box-shadow: inset 0 1px 0 rgba(197, 236, 255, 0.05);
+  padding: 16px;
+}
+
+.options-panel h3 { margin: 0 0 14px; color: #dff7ff; font-size: 13px; }
+.options-grid-2, .options-knowledge__layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.options-panel label { display: grid; gap: 6px; margin: 12px 0; color: rgba(189, 221, 240, 0.82); font-size: 13px; }
+.options-panel input:not([type="checkbox"]):not([type="color"]):not([type="range"]), .options-panel select, .options-panel textarea, .options-config-row input, .options-user-card input, .options-rule input, .options-rule textarea, .options-inline textarea { width: 100%; border: 1px solid rgba(96, 181, 239, 0.2); background: rgba(3, 10, 18, 0.82); color: #edfaff; padding: 9px 10px; }
+.options-panel textarea, .options-rule textarea { resize: vertical; min-height: 84px; }
+.options-actions, .options-inline, .options-config-row__controls, .options-config-row__top, .options-panel__toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.options-actions button, .options-inline button, .options-config-row button, .options-panel button, .options-user-card button, .options-rule button { border: 1px solid rgba(122, 247, 208, 0.45); background: rgba(122, 247, 208, 0.08); color: #eaffff; padding: 8px 12px; cursor: pointer; }
+.options-actions button:hover, .options-inline button:hover, .options-panel button:hover { background: rgba(122, 247, 208, 0.18); }
+.options-config-row__top { justify-content: space-between; }
+.options-config-row__controls input { flex: 1 1 280px; }
+.options-config-row small, .options-view__notice { color: rgba(170, 207, 228, 0.68); font-size: 12px; }
+.options-view__notice { min-height: 18px; }
+.options-tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(105, 183, 255, 0.18); }
+.options-tabs button, .options-node-list button { border: 0; background: transparent; color: rgba(189, 221, 240, 0.72); padding: 9px 12px; cursor: pointer; text-align: left; }
+.options-tabs button.is-active, .options-node-list button.is-active { color: #7af7d0; border-bottom: 1px solid #7af7d0; }
+.options-user-list, .options-node-list { display: grid; gap: 10px; }
+.options-user-card { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; align-items: center; gap: 8px; }
+.options-rule { display: grid; gap: 8px; margin-top: 10px; }
+.options-chat { display: grid; grid-template-rows: minmax(280px, 1fr) auto; gap: 12px; }
+.options-chat__log { min-height: 280px; max-height: 56vh; overflow: auto; display: grid; align-content: start; gap: 10px; }
+.options-chat__message { padding: 10px; border-left: 2px solid #69b7ff; background: rgba(15, 33, 54, 0.55); }
+.options-chat__message--user { border-left-color: #7af7d0; }
+.options-chat__message p { margin: 5px 0 0; white-space: pre-wrap; }
+.options-node-list button { display: grid; gap: 3px; border-bottom: 1px solid rgba(105, 183, 255, 0.1); }
+.options-node-list small { color: rgba(170, 207, 228, 0.62); }
+.options-node-editor { align-self: start; }
+.options-list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(105, 183, 255, 0.12); }
+@media (max-width: 760px) { .options-grid-2, .options-knowledge__layout { grid-template-columns: 1fr; } .options-user-card { grid-template-columns: 1fr; } }

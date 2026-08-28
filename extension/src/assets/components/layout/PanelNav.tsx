@@ -11,7 +11,16 @@ import React, {
 } from "react";
 
 import GlowingArrow from "@icons/GlowingArrow";
-import Static404 from "@/assets/components/Static404";
+import TacticalOverview from "@/pages/options/views/TacticalOverview";
+import HeroSection from "@/pages/options/views/HeroSection";
+import ContentScriptDomainConfig from "@/pages/options/views/ContentScriptDomainConfig";
+import ExtensionSettings from "@/pages/options/views/ExtensionSettings";
+import ErrorMonitorConfig from "@/pages/options/views/ErrorMonitorConfig";
+import BrowserVarView from "@/pages/options/views/BrowserVarView";
+import XHRuleOption from "@/pages/options/views/XHRuleOption";
+import AITerminalView from "@/pages/options/views/AITerminalView";
+import KnowledgeGraphView from "@/pages/options/views/KnowledgeGraphView";
+import UserOption from "@/pages/options/views/UserOption";
 
 // 类型定义
 import {
@@ -828,13 +837,12 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
       }}
     >
       <Suspense fallback={null}>
-        {/* <TacticalOverview
+        <TacticalOverview
           modules={moduleStates}
           activePanelKey={activePanelKey}
           onClose={() => setShowTacticalOverview(false)}
           onSelectPanel={focusPanel}
-        /> */}
-        <Static404 />
+        />
       </Suspense>
     </div>
   ) : null;
@@ -950,7 +958,7 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
                 >
                   {key === "main" && shouldRenderPanel(key) && (
                     <Suspense fallback={null}>
-                      <panel.page
+                      <HeroSection
                         modules={moduleStates}
                         activePanelKey={activePanelKey}
                         onOpenOverview={openTacticalOverview}
@@ -1006,7 +1014,10 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
 
                       <div className="module-shell__body">
                         <Suspense fallback={null}>
-                          <panel.page />
+                          {(() => {
+                            const PanelPage = panel.page as ComponentType<any>;
+                            return <PanelPage />;
+                          })()}
                         </Suspense>
                       </div>
                     </section>

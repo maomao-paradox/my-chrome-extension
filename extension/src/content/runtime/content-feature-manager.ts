@@ -63,6 +63,7 @@ export const createContentFeatureRegistry = (
   let currentConfig: Record<string, boolean> = {};
   let initialized = false;
 
+  // 注册功能块，应该在最顶层调用，确保所有功能块都已注册，不要放在异步或者setTimeout中
   const register = (
     id: string,
     label: string,
