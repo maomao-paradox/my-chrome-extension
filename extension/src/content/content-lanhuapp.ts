@@ -10,8 +10,23 @@
 import { addElementToDom, injectScriptToActivateTab, waitForSelector } from '@/utils/element-control';
 import messenger from '@/message';
 import { ExtMessage, Tool, TextTool } from '@/types';
+import { createContentFeatureRegistry } from './runtime/content-feature-manager';
 
 export default (ctx: AppContext, config = {}) => {
+  const featureRegistry = createContentFeatureRegistry({
+    scriptId: 'lanhuapp',
+    scriptName: '蓝湖'
+  });
+
+  featureRegistry.register('lanhuapp.main', '蓝湖内容增强', async () => {
+    initializeLanhuappContent();
+  });
+
+  void featureRegistry.initialize();
+  return {};
+};
+
+const initializeLanhuappContent = (): void => {
 
   const messageHandlers = {
     default: (...args: any) => {
@@ -54,5 +69,4 @@ export default (ctx: AppContext, config = {}) => {
     // 例如：添加自定义按钮、修改页面元素等
   };
 
-  return {};
 };

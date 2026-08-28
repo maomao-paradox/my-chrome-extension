@@ -66,6 +66,7 @@ import messenger from "@/message";
 import xhrRules from "@/sfs/xhr-patch/rules";
 import { injectXhrPatch } from "@/sfs/xhr-patch/xhr_message_handler";
 import { createRoot } from "react-dom/client";
+import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 
 export const tools: Tool[] = [
   {
@@ -269,7 +270,7 @@ const sendRequestToBack = async (
   );
 };
 
-export default (ctx: AppContext, config = {}) => {
+const initializeMriaContent = (ctx: AppContext, config = {}) => {
   const roles = Array.from(ROLES);
   const handleRequest = createHandleRequest(ctx);
   const handleResponse = createHandleResponse(ctx);
@@ -885,4 +886,16 @@ export default (ctx: AppContext, config = {}) => {
     // 返回可调用的公共API
     createTestUser: messageHandlers.createTestUser,
   };
+};
+
+export default (ctx: AppContext, config = {}) => {
+  const featureRegistry = createContentFeatureRegistry({
+    scriptId: "mria",
+    scriptName: "MRIA",
+  });
+  featureRegistry.register("mria.main", "MRIA 内容增强", async () => {
+    initializeMriaContent(ctx, config);
+  });
+  void featureRegistry.initialize();
+  return {};
 };

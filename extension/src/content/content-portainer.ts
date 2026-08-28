@@ -12,6 +12,7 @@ import { waitForSelector, addElementToDom, injectScriptToActivateTab } from '@/u
 import { Tool } from '@/types';
 import messenger from '@/message';
 import { getSingleFileScript } from '@/utils/common';
+import { createContentFeatureRegistry } from './runtime/content-feature-manager';
 
 
 /**
@@ -44,7 +45,7 @@ const addButtonToCodeEditor = (editorElement: HTMLElement) => {
 /**
  * 监听并处理 CodeEditor 元素
  */
-const observeCodeEditorElements = () => {
+const observeCodeEditorElements = (): (() => void) => {
   // 选择器：匹配包含这些 class 的元素
   const editorSelector = '.app-react-components-CodeEditor-CodeEditor-module__root.app-react-components-CodeEditor-CodeEditor-module__codeEditor';
 
@@ -79,9 +80,13 @@ const observeCodeEditorElements = () => {
     childList: true,
     subtree: true
   });
+
+  return () => observer.disconnect();
 };
 
-export default (ctx: AppContext, config = {}) => {
+const initializePortainerContent = (ctx: AppContext): (() => void) => {
+  const controller = new AbortController();
+  let disconnectObserver: (() => void) | undefined;
   const tools: Tool[] = [{
     id: 'dockerPortainerReplace',
     label: 'Portainer文本替换'
@@ -110,13 +115,35 @@ export default (ctx: AppContext, config = {}) => {
   // 等待页面加载后开始监听
   waitForSelector({
     selector: 'body',
+    signal: controller.signal,
     timeout: 10000,
     callback: async () => {
       await injectScriptToActivateTab({ file: getSingleFileScript('docker-portainer-button') });
       await injectScriptToActivateTab({ file: getSingleFileScript('update-stacks') });
-      observeCodeEditorElements();
+      if (!controller.signal.aborted) {
+        disconnectObserver = observeCodeEditorElements();
+      }
+    }
+  }).catch((error) => {
+    if (!controller.signal.aborted) {
+      maLogger.error('Portainer 页面初始化失败:', error);
     }
   });
 
+  return () => {
+    controller.abort();
+    disconnectObserver?.();
+  };
+};
+
+export default (ctx: AppContext, config = {}) => {
+  const featureRegistry = createContentFeatureRegistry({
+    scriptId: 'portainer',
+    scriptName: 'Portainer'
+  });
+  featureRegistry.register('portainer.main', 'Portainer 文本替换', async () => {
+    return initializePortainerContent(ctx);
+  });
+  void featureRegistry.initialize();
   return {};
 };

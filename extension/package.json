@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test:react": "vitest run --config vitest.config.react.ts",
     "cp": "du -sh dist && rm -rf /mnt/h/my-chrome-extension/* && cp -rf ./dist/ /mnt/h/my-chrome-extension/",
+    "zip": "zip -r dist.zip dist/* && mv dist.zip /mnt/h/my-chrome-extension/",
     "build": "vite build",
     "build:dev": "GENERATE_SOURCE_MAPS=true vite build",
     "build:enc": "ENCRYPT_FILE_MAP=true VITE_FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef FILE_MAP_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef vite build"

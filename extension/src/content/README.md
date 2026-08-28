@@ -13,18 +13,19 @@ const registry = createContentFeatureRegistry({
   scriptName: 'Radius'
 });
 
-registry.register('radius.example', () => {
+registry.register('radius.example', '示例功能', () => {
   const handleClick = () => {};
   document.addEventListener('click', handleClick);
 
   return () => document.removeEventListener('click', handleClick);
-}, '示例功能');
+});
 
 void registry.initialize();
 ```
 
 - 配置保存到网页 `localStorage`，键名格式为 `kria-nove:content-script-config:{scriptId}`。
 - 首次没有配置时，所有功能默认关闭，并显示网页内配置面板。
+- 每个内容脚本都应使用独立的 `scriptId` 注册自己的功能块；例如 `radius`、`mria`、`qapro`、`teach`、`lanhuapp`、`portainer` 和 `zentao`。
 - 使用 `Ctrl+Shift+K`（macOS 使用 `Command+Shift+K`）打开配置面板。
 - 功能块的 `setup` 可以返回清理函数；保存配置时会调用已运行功能的清理函数，但不会立即重新启用功能。
 - 执行脚本字符串的功能应在清理函数中执行反向脚本，例如将配置值恢复为 `undefined`。
@@ -167,17 +168,19 @@ window.onload = () => {
 - 合理使用 setTimeout 和 setInterval
 
 ### 4. 注册内容脚本
-要使内容脚本生效，需要在 `src/content/index.ts` 中注册：
+内容脚本模块已经由 `src/config/index.ts` 统一注册到动态加载表中。新增内容脚本时，先在该表中添加模块，再在脚本默认导出函数中创建功能注册器：
 
 ```typescript
-const contentModules: Map<string, ModuleOption> = new Map([
-    // 其他内容脚本
-    ["{domain}", {
-        domainKey: 'content{Domain}Domains',
-        flag: '__CONTENT_SCRIPT_{DOMAIN}',
-        path: getContentScriptUrl('{domain}')
-    }]
-]);
+const registry = createContentFeatureRegistry({
+  scriptId: '{domain}',
+  scriptName: '{Domain}'
+});
+
+registry.register('{domain}.main', '{Domain} 内容增强', async () => {
+  // 页面功能初始化
+});
+
+void registry.initialize();
 ```
 
 ### 5. 域名配置

@@ -27,8 +27,6 @@ extension/src/deps.json
 extension/.env*
 !extension/.env.template
 
-
-
 # Backend
 
 # Editor directories and files

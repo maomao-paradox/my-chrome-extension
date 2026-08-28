@@ -205,7 +205,7 @@ export const getChunkFileMap = loadFileMap();
 
 export const getAssetsAbstractPath = async (path: string) => {
   if (!chrome.runtime) {
-    maLogger.warn("chrome.runtime 未定义");
+    console.warn("chrome.runtime 未定义");
     return "";
   }
   try {
@@ -216,14 +216,14 @@ export const getAssetsAbstractPath = async (path: string) => {
 
     return chrome.runtime.getURL(getAssetsPath(path));
   } catch (error) {
-    maLogger.error("获取资产路径失败:", error);
+    console.error("获取资产路径失败:", error);
     return "";
   }
 };
 
 export const getAssetsAbstractPathSync = (path: string) => {
   if (!chrome.runtime) {
-    maLogger.warn("chrome.runtime 未定义");
+    console.warn("chrome.runtime 未定义");
     return "";
   }
   try {
@@ -235,7 +235,7 @@ export const getAssetsAbstractPathSync = (path: string) => {
 
     return chrome.runtime.getURL(getAssetsPath(path));
   } catch (error) {
-    maLogger.error("获取资产路径失败:", error);
+    console.error("获取资产路径失败:", error);
     return "";
   }
 };

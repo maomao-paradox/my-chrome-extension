@@ -22,10 +22,11 @@ import { getQueryParams } from "@/utils/base";
 import { injectXhrPatch } from "@/sfs/xhr-patch/xhr_message_handler";
 import xhrRules from "@/sfs/xhr-patch/rules";
 import { createApp } from "vue";
+import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 
 const _ADMIN = "admin";
 
-function struct(ctx: AppContext, config = {}) {
+function initializeQaproContent(ctx: AppContext, config = {}) {
   const userInfo = storage.page.local.get("Manteia-UserInfo");
   const {
     hospital_code,
@@ -306,4 +307,14 @@ function struct(ctx: AppContext, config = {}) {
   return {};
 }
 
-export { struct as default };
+export default (ctx: AppContext, config = {}) => {
+  const featureRegistry = createContentFeatureRegistry({
+    scriptId: "qapro",
+    scriptName: "QA Pro",
+  });
+  featureRegistry.register("qapro.main", "QA Pro 内容增强", async () => {
+    initializeQaproContent(ctx, config);
+  });
+  void featureRegistry.initialize();
+  return {};
+};

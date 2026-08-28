@@ -20,10 +20,11 @@ import type { Response, ExtMessage, MessageHandler, Tool } from "@/types";
 // import { QuickLogin } from '@components/index';
 import { storage } from "@/stores";
 import messenger from "@/message";
+import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 
 export const tools: Tool[] = [];
 
-export default (ctx: AppContext, config = {}) => {
+const initializeTeachContent = (ctx: AppContext, config = {}) => {
   const roles = Array.from([
       "医生",
       "助理医生",
@@ -343,4 +344,16 @@ export default (ctx: AppContext, config = {}) => {
     // 返回可调用的公共API
     createTestUser: messageHandlers.createTestUser,
   };
+};
+
+export default (ctx: AppContext, config = {}) => {
+  const featureRegistry = createContentFeatureRegistry({
+    scriptId: "teach",
+    scriptName: "Teach",
+  });
+  featureRegistry.register("teach.main", "Teach 内容增强", async () => {
+    initializeTeachContent(ctx, config);
+  });
+  void featureRegistry.initialize();
+  return {};
 };

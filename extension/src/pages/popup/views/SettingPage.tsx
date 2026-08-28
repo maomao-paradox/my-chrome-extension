@@ -197,10 +197,9 @@ export const SettingPage: FC<{}> = () => {
         enabled: true,
         domains: typeof currentConfig === "string" ? currentConfig : "",
       };
-      // 注意：此处不应直接修改 domainConfigs.current，需要通过 setter
       return normalizedConfig;
     },
-    [domainConfigs.current],
+    [domainConfigs],
   );
 
   /** 同步当前域名选择 */
@@ -224,7 +223,6 @@ export const SettingPage: FC<{}> = () => {
         config.domains = Array.from(new Set(filteredDomains)).join(",");
         newDomainConfigs[key] = config;
       }
-      // 这里需要调用 setdomainConfigs.current，但目前没有这个 setter
       // 实际使用时需要根据项目结构调整
       await saveDomainConfigs(newDomainConfigs);
     },

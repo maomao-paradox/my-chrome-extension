@@ -12,6 +12,7 @@ import messenger from '@/message';
 import { ExtMessage, Tool, TextTool } from '@/types';
 import { getSingleFileScript } from '@/utils/common';
 import { sendMessageToBackground } from '@/utils';
+import { createContentFeatureRegistry } from './runtime/content-feature-manager';
 
 const convertToCSV = (data: any[]): string => {
   const columns = Object.keys(data[0]).join(',');
@@ -131,7 +132,7 @@ const initZenTaoMessageListener = (): void => {
   });
 };
 
-export default (ctx: AppContext, config = {}) => {
+const initializeZentaoContent = (ctx: AppContext, config = {}) => {
   let bugData: any[];
   let filename: string;
 
@@ -287,5 +288,17 @@ export default (ctx: AppContext, config = {}) => {
     });
   };
 
+  return {};
+};
+
+export default (ctx: AppContext, config = {}) => {
+  const featureRegistry = createContentFeatureRegistry({
+    scriptId: 'zentao',
+    scriptName: '禅道'
+  });
+  featureRegistry.register('zentao.main', '禅道内容增强', async () => {
+    initializeZentaoContent(ctx, config);
+  });
+  void featureRegistry.initialize();
   return {};
 };

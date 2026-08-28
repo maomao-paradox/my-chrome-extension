@@ -83,10 +83,10 @@ npx vitest run test/BookmarkPage.spec.ts
 ## 核心功能
 
 ### 内容脚本功能配置
-- `Radius` 内容脚本支持网页内功能注册和独立开关。
-- 首次进入未保存过配置的 Radius 页面时，面板默认关闭全部功能并引导用户配置。
+- `Radius`、`MRIA`、`QA Pro`、`Teach`、`蓝湖`、`Portainer` 和 `禅道` 内容脚本支持网页内功能注册和独立开关。
+- 首次进入未保存过配置的内容脚本页面时，面板默认关闭全部功能并引导用户配置。
 - 使用 `Ctrl+Shift+K`（macOS 使用 `Command+Shift+K`）打开当前页面的配置面板。
-- 配置保存在当前网页的 `localStorage`，键名为 `kria-nove:content-script-config:{contentScriptId}`；修改后需要刷新页面生效。
+- 配置保存在当前网页的 `localStorage`，键名为 `kria-nove:content-script-config:{contentScriptId}`；保存配置后重新启用功能需要刷新页面。
 
 ### 自定义组件展示页
 - 新增独立组件展示页，可在浏览器中浏览 `src/assets/components` 下的自研组件
