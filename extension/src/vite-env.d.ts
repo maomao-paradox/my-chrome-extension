@@ -1,3 +1,14 @@
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_APP_TITLE: string;
+  // 更多环境变量...
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 // CSS模块类型声明
 declare module "*.module.css" {
   const classes: { readonly [key: string]: string };

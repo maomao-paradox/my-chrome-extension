@@ -22,6 +22,7 @@ export default ({
   isPreview: boolean;
 }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  // console.log(env);
   const isEnvEnabled = (key: string, defaultValue = true): boolean =>
     env[key] === undefined ? defaultValue : env[key].toLowerCase() !== "false";
   const pages: ManifestPageFlags = {
@@ -30,12 +31,11 @@ export default ({
     sidepanel: isEnvEnabled("VITE_BUILD_SIDEPANEL"),
     devtools: isEnvEnabled("VITE_BUILD_DEVTOOLS"),
   };
-  // console.log({ mode, command, isSsrBuild, isPreview });
-  const isProduction = process.env.NODE_ENV === "production";
-  const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
-  const isGenerateSourceMaps = process.env.GENERATE_SOURCE_MAPS === "true";
 
-  console.log("process.env.NODE_ENV", process.env.NODE_ENV);
+  const isEncryptEnabled = isEnvEnabled("ENCRYPT_FILE_MAP");
+  const isGenerateSourceMaps = isEnvEnabled("GENERATE_SOURCE_MAPS");
+  const isProduction = env.NODE_ENV === "production";
+
   return defineConfig({
     resolve: {
       alias: {
@@ -62,7 +62,9 @@ export default ({
         external: ["error", "warn"], // 保留 console.error 和 console.warn
       }),
       generateFileMapPlugin(),
-      isEncryptEnabled ? encryptFileMapPlugin() : undefined,
+      isEncryptEnabled
+        ? encryptFileMapPlugin(env.VITE_FILE_MAP_KEY)
+        : undefined,
       // 自定义插件，用于执行构建后的操作
       {
         name: "post-build-actions", // 插件名称

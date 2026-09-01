@@ -17,6 +17,7 @@ import { Tool } from "@/types";
 import messenger from "@/message";
 import { requestAI } from "@/utils/ai-request";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
+import lmaskStyles from "@/assets/styles/lmask.scss?inline";
 
 function addLoadingMask(el: HTMLElement, loadingText: string = "填写中...") {
   if (!el) {
@@ -28,72 +29,7 @@ function addLoadingMask(el: HTMLElement, loadingText: string = "填写中...") {
   if (!document.getElementById(styleId)) {
     const styleSheet = document.createElement("style");
     styleSheet.id = styleId;
-    styleSheet.textContent = `
-          @keyframes lmask-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          @keyframes lmask-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-          }
-          .lmask-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            border-radius: inherit;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-            pointer-events: auto;
-            box-sizing: border-box;
-          }
-          .lmask-spinner {
-            width: 44px;
-            height: 44px;
-            border: 4px solid rgba(37, 99, 235, 0.12);
-            border-top-color: #2563eb;
-            border-radius: 50%;
-            animation: lmask-spin 0.8s linear infinite;
-            margin-bottom: 14px;
-            flex-shrink: 0;
-          }
-          .lmask-spinner-sm {
-            width: 32px;
-            height: 32px;
-            border-width: 3px;
-          }
-          .lmask-text {
-            font-weight: 500;
-            font-size: 0.9rem;
-            background: rgba(0, 0, 0, 0.75);
-            padding: 6px 20px;
-            border-radius: 60px;
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
-            color: #249bd9;
-            letter-spacing: 0.3px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            animation: lmask-pulse 1.5s ease-in-out infinite;
-          }
-          .lmask-dots::after {
-            content: '';
-            animation: lmask-dots 1.2s steps(3, end) infinite;
-          }
-          @keyframes lmask-dots {
-            0% { content: ''; }
-            33% { content: '.'; }
-            66% { content: '..'; }
-            100% { content: '...'; }
-          }
-        `;
+    styleSheet.textContent = lmaskStyles;
     document.head.appendChild(styleSheet);
   }
 
@@ -396,6 +332,40 @@ export default (ctx: AppContext, config = {}) => {
               href: "/#/datalake/config-driven-designer",
               target: "_self",
               innerText: "通用配置",
+            },
+            style: {
+              marginLeft: "10px",
+              color: "var(--el-color-primary)",
+              fontSize: "14px",
+            },
+          })(element, "afterend") as HTMLElement;
+        },
+      }).catch((err) => maLogger.error(err));
+      return () => {
+        controller.abort();
+        inserted?.remove();
+      };
+    },
+  );
+
+  featureRegistry.register(
+    "radius.database-view-link",
+    "数据库视图入口",
+    async () => {
+      const controller = new AbortController();
+      let inserted: HTMLElement | null = null;
+      waitForSelector({
+        selector:
+          "#app > div > div > div.main-content > div.main-content-wrapper > div > div.search-header-wrapper > div.search-header-left > span",
+        signal: controller.signal,
+        timeout: 10000,
+        callback: (element: HTMLElement) => {
+          inserted = addElementToDom({
+            tag: "a",
+            attrs: {
+              href: "/#/dict-config/dbviewer",
+              target: "_self",
+              innerText: "数据库视图",
             },
             style: {
               marginLeft: "10px",

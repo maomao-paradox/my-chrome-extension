@@ -37,7 +37,7 @@ export const useDomainManager = () => {
     try {
       if (!chrome.storage) {
         console.warn("local storage not available, use test data");
-        const testConfigs = contentDomains.reduce((acc, domain) => {
+        const testConfigs = contentDomains.reduce((acc: DomainConfigs, domain: string) => {
           acc[domain] = {
             enabled: true,
             domains: "",
@@ -51,7 +51,7 @@ export const useDomainManager = () => {
 
       // 当没有存储配置时，使用默认配置
       if (!configs || Object.keys(configs).length === 0) {
-        configs = contentDomains.reduce((acc, domain) => {
+        configs = contentDomains.reduce((acc: DomainConfigs, domain: string) => {
           acc[domain] = {
             enabled: true,
             domains: "",

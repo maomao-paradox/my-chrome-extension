@@ -10,12 +10,12 @@
 import { PluginConfigMap } from "@/types";
 
 export const defaultPluginConfigs: PluginConfigMap = {
-  floatingball: {
-    id: "floatingball",
-    name: "悬浮球",
-    type: "floating",
-    enabled: false,
-  },
+  // floatingball: {
+  //   id: "floatingball",
+  //   name: "悬浮球",
+  //   type: "floating",
+  //   enabled: false,
+  // },
 
   pianoEffect: {
     id: "pianoEffect",
@@ -24,12 +24,12 @@ export const defaultPluginConfigs: PluginConfigMap = {
     enabled: false,
   },
 
-  sidebar: {
-    id: "sidebar",
-    name: "侧边工具栏",
-    type: "sidebar",
-    enabled: false,
-  },
+  // sidebar: {
+  //   id: "sidebar",
+  //   name: "侧边工具栏",
+  //   type: "sidebar",
+  //   enabled: false,
+  // },
 
   textSelectionToolbar: {
     id: "textSelectionToolbar",
@@ -41,10 +41,10 @@ export const defaultPluginConfigs: PluginConfigMap = {
     },
   },
 
-  menu: {
-    id: "menu",
-    name: "菜单",
-    type: "menu",
-    enabled: true,
-  },
+  // menu: {
+  //   id: "menu",
+  //   name: "菜单",
+  //   type: "menu",
+  //   enabled: true,
+  // },
 };

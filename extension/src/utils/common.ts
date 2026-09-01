@@ -11,9 +11,8 @@ import type { DEBUGER } from "@/types";
 import WasmFileMapDecryptor from "./wasmFileMapDecryptor";
 
 const FILE_MAP_KEY =
-  //@ts-ignore
   import.meta.env.VITE_FILE_MAP_KEY ||
-  "mria_extension_default_key_32bytes_1234567890abcdef";
+  "extension_default_key_32bytes_1234567890abcdef";
 const decryptor = new WasmFileMapDecryptor(FILE_MAP_KEY);
 
 interface DebuggerOptions {
