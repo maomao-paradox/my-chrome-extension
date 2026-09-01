@@ -7,26 +7,29 @@
  * @date 2026-02-05T02:38:01.694Z
  */
 
-import { addElementToDom, injectScriptToActivateTab, waitForSelector } from '@/utils/element-control';
-import messenger from '@/message';
-import { ExtMessage, Tool, TextTool } from '@/types';
-import { getSingleFileScript } from '@/utils/common';
-import { sendMessageToBackground } from '@/utils';
-import { createContentFeatureRegistry } from './runtime/content-feature-manager';
+import {
+  addElementToDom,
+  injectScriptToActivateTab,
+  waitForSelector,
+} from "@/utils/element-control";
+import messenger from "@/message";
+import { ExtMessage, Tool, TextTool } from "@/types";
+import { getSingleFileScript, sendMessageToBackground } from "@/utils";
+import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 
 const convertToCSV = (data: any[]): string => {
-  const columns = Object.keys(data[0]).join(',');
-  const rows = data.map(item => Object.values(item).join(','));
-  return [columns, ...rows].join('\n');
+  const columns = Object.keys(data[0]).join(",");
+  const rows = data.map((item) => Object.values(item).join(","));
+  return [columns, ...rows].join("\n");
 };
 
 const downloadCSV = (csvContent: string, filename: string): void => {
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
-  link.download = filename || 'data.csv';
-  link.style.display = 'none';
+  link.download = filename || "data.csv";
+  link.style.display = "none";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -34,10 +37,13 @@ const downloadCSV = (csvContent: string, filename: string): void => {
 };
 
 const parseCSV = (csvContent: string): any[] => {
-  const rows = csvContent.split('\n');
-  const keys = rows[0].split(',').map(key => key.replace(/"/g, ''));
-  return rows.slice(1, -1).map(row => {
-    const values = row.split(',').map(value => value.replace(/"/g, '')).slice(0, -1);
+  const rows = csvContent.split("\n");
+  const keys = rows[0].split(",").map((key) => key.replace(/"/g, ""));
+  return rows.slice(1, -1).map((row) => {
+    const values = row
+      .split(",")
+      .map((value) => value.replace(/"/g, ""))
+      .slice(0, -1);
     return values.reduce((obj: Record<string, string>, value, index) => {
       obj[keys[index]] = value;
       return obj;
@@ -48,26 +54,35 @@ const parseCSV = (csvContent: string): any[] => {
 const fetchBugComments = async (bugData: any[]): Promise<void> => {
   for await (const bug of bugData) {
     try {
-      const id = bug['Bug编号'];
-      bug['禅道地址'] = `http://192.168.10.230/zentao/bug-view-${id}.html`;
+      const id = bug["Bug编号"];
+      bug["禅道地址"] = `http://192.168.10.230/zentao/bug-view-${id}.html`;
       const docText = await fetch(`/zentao/bug-view-${id}.html`, {
-        method: 'GET',
+        method: "GET",
         headers: { Cookie: document.cookie },
-        redirect: 'follow'
-      }).then(res => res.text());
+        redirect: "follow",
+      }).then((res) => res.text());
       const parser = new DOMParser();
-      const doc = parser.parseFromString(docText, 'text/html');
-      const commentElements = (doc.querySelector('#actionbox > div.detail-content > ol.histories-list') as HTMLElement)?.children;
-      if (!commentElements) {continue;}
-      let textContent = '';
+      const doc = parser.parseFromString(docText, "text/html");
+      const commentElements = (
+        doc.querySelector(
+          "#actionbox > div.detail-content > ol.histories-list",
+        ) as HTMLElement
+      )?.children;
+      if (!commentElements) {
+        continue;
+      }
+      let textContent = "";
       for (let i = 0; i < commentElements.length; i++) {
-        const content = commentElements[i].querySelector('.comment-content');
+        const content = commentElements[i].querySelector(".comment-content");
         if (content) {
-          textContent += (content as HTMLElement).innerText.trim().replaceAll('\n', '；');
+          textContent += (content as HTMLElement).innerText
+            .trim()
+            //@ts-ignore
+            .replaceAll("\n", "；");
         }
       }
-      await new Promise(resolve => setTimeout(resolve, 500));
-      bug['解决步骤'] = textContent;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      bug["解决步骤"] = textContent;
     } catch (error) {
       maLogger.error(error);
     }
@@ -75,38 +90,59 @@ const fetchBugComments = async (bugData: any[]): Promise<void> => {
 };
 
 const getDocumentContext = (): Document =>
-  (document.getElementById('appIframe-qa') as HTMLIFrameElement)?.contentDocument || document;
+  (document.getElementById("appIframe-qa") as HTMLIFrameElement)
+    ?.contentDocument || document;
 
 const setupBatchEditFormStoryButton = (): void => {
   const dom = getDocumentContext();
-  const cases = dom.querySelectorAll('#batchEditForm > div > table > tbody > tr');
-  const story_id = (cases[0].querySelector('td:nth-child(7) > select > option') as HTMLOptionElement)?.value || '';
+  const cases = dom.querySelectorAll(
+    "#batchEditForm > div > table > tbody > tr",
+  );
+  const story_id =
+    (
+      cases[0].querySelector(
+        "td:nth-child(7) > select > option",
+      ) as HTMLOptionElement
+    )?.value || "";
   maLogger.log(story_id);
-  cases.forEach(e => {
-    (e.querySelector('td:nth-child(7) > div > div > input') as HTMLInputElement).value = story_id;
-    (e.querySelector('td:nth-child(7) > select > option') as HTMLOptionElement).value = story_id;
+  cases.forEach((e) => {
+    (
+      e.querySelector("td:nth-child(7) > div > div > input") as HTMLInputElement
+    ).value = story_id;
+    (
+      e.querySelector("td:nth-child(7) > select > option") as HTMLOptionElement
+    ).value = story_id;
   });
 };
 
 const setupBatchEditFormModuleButton = (): void => {
   const dom = getDocumentContext();
-  const cases = dom.querySelectorAll('#batchEditForm > div > table > tbody > tr');
-  const module_id = (cases[0].querySelector('td:nth-child(5) > select') as HTMLOptionElement)?.value || '';
+  const cases = dom.querySelectorAll(
+    "#batchEditForm > div > table > tbody > tr",
+  );
+  const module_id =
+    (cases[0].querySelector("td:nth-child(5) > select") as HTMLOptionElement)
+      ?.value || "";
   maLogger.log(module_id);
-  cases.forEach(e => {
-    (e.querySelector('td:nth-child(5) > div >a> div > input') as HTMLInputElement).value = module_id;
-    (e.querySelector('td:nth-child(5) > select') as HTMLOptionElement).value = module_id;
+  cases.forEach((e) => {
+    (
+      e.querySelector(
+        "td:nth-child(5) > div >a> div > input",
+      ) as HTMLInputElement
+    ).value = module_id;
+    (e.querySelector("td:nth-child(5) > select") as HTMLOptionElement).value =
+      module_id;
   });
 };
 
 const messageHandlers = {
   default: (...args: any) => {
-    maLogger.error('未定义的消息类型', args);
-  }
+    maLogger.error("未定义的消息类型", args);
+  },
 };
 
 const shouldHandleZenTaoMessage = (message: ExtMessage): boolean =>
-  message.target === 'content-zentao' && !!message.type;
+  message.target === "content-zentao" && !!message.type;
 
 const executeZenTaoMessageHandlers = (type: string, data: any): void => {
   const steps = [type];
@@ -122,12 +158,22 @@ const executeZenTaoMessageHandlers = (type: string, data: any): void => {
 
 const initZenTaoMessageListener = (): void => {
   messenger.ext.listen((message: ExtMessage, sender) => {
-    maLogger.log('Received message:', message, 'from', sender.tab ? `tab ${sender.tab.id}` : 'background');
+    maLogger.log(
+      "Received message:",
+      message,
+      "from",
+      sender.tab ? `tab ${sender.tab.id}` : "background",
+    );
     const { type, payload } = message;
     if (!shouldHandleZenTaoMessage(message) || !type) {
       return true;
     }
-    maLogger.info(`Received request: ${type}`, payload, 'from', sender.tab ? `tab ${sender.tab.id}` : 'background');
+    maLogger.info(
+      `Received request: ${type}`,
+      payload,
+      "from",
+      sender.tab ? `tab ${sender.tab.id}` : "background",
+    );
     executeZenTaoMessageHandlers(type, payload as any);
   });
 };
@@ -137,10 +183,16 @@ const initializeZentaoContent = (ctx: AppContext, config = {}) => {
   let filename: string;
 
   const exportBugComment = () => {
-    const csvFileInput = document.getElementById('csvFileInput') as HTMLInputElement;
-    const exportConfirmButton = document.getElementById('export_confirm') as HTMLButtonElement;
-    csvFileInput.addEventListener('change', function (event) {
-      if (!event.target) {return;}
+    const csvFileInput = document.getElementById(
+      "csvFileInput",
+    ) as HTMLInputElement;
+    const exportConfirmButton = document.getElementById(
+      "export_confirm",
+    ) as HTMLButtonElement;
+    csvFileInput.addEventListener("change", function (event) {
+      if (!event.target) {
+        return;
+      }
       const file = (event.target as HTMLInputElement).files![0];
       filename = file.name;
       if (file) {
@@ -152,8 +204,10 @@ const initializeZentaoContent = (ctx: AppContext, config = {}) => {
         reader.readAsText(file);
       }
     });
-    exportConfirmButton.addEventListener('click', async function () {
-      if (!bugData) {return;}
+    exportConfirmButton.addEventListener("click", async function () {
+      if (!bugData) {
+        return;
+      }
       await fetchBugComments(bugData);
       maLogger.log(bugData);
       const csvContent = convertToCSV(bugData);
@@ -165,139 +219,183 @@ const initializeZentaoContent = (ctx: AppContext, config = {}) => {
   const updateToolbar = async (tools: Tool[]) => {
     try {
       if (ctx.self === ctx.top) {
-        const toolBarInstance = ctx.gmod('__MODULE_TEXTSELECTIONTOOLBAR');
+        const toolBarInstance = ctx.gmod("__MODULE_TEXTSELECTIONTOOLBAR");
         if (!toolBarInstance) {
-          maLogger.info('无法访问textSelectionToolbar实例，尝试加载');
+          maLogger.info("无法访问textSelectionToolbar实例，尝试加载");
           messenger.ext.send({
-            type: 'UPDATE_TOOLBAR_TOOLS',
+            type: "UPDATE_TOOLBAR_TOOLS",
             payload: { tools },
-            target: 'content'
+            target: "content",
           });
         } else {
           toolBarInstance.updateTools(tools);
         }
       }
     } catch (error) {
-      maLogger.log('发送侧边栏工具更新请求失败: ', error);
+      maLogger.log("发送侧边栏工具更新请求失败: ", error);
     }
   };
 
   initZenTaoMessageListener();
 
-  window.onload = () => {
-    maLogger.log('禅道页面加载完成,开始监听消息');
+  // window.onload = () => {
+  //   maLogger.log("禅道页面加载完成,开始监听消息");
 
-    location.pathname.match('bug-browse') &&
-			waitForSelector({
-			  selector: '#exportActionMenu > li:last-child',
-			  filter: (el: HTMLElement) => el.textContent?.trim() == '导出数据',
-			  callback: addElementToDom({
-			    tag: 'li',
-			    attrs: { id: 'exportBugCommentLi', 'innerHTML': "<a class='export'>从外部索引导出bug</a>" },
-			    eventlistener: { 'click': exportBugComment }
-			  })
-			});
+  //   location.pathname.match("bug-browse") &&
+  //     waitForSelector({
+  //       selector: "#exportActionMenu > li:last-child",
+  //       filter: (el: HTMLElement) => el.textContent?.trim() == "导出数据",
+  //       callback: addElementToDom({
+  //         tag: "li",
+  //         attrs: {
+  //           id: "exportBugCommentLi",
+  //           innerHTML: "<a class='export'>从外部索引导出bug</a>",
+  //         },
+  //         eventlistener: { click: exportBugComment },
+  //       }),
+  //     });
 
-    waitForSelector({
-      selector: '#batchEditForm > div > table > thead > tr > th.c-story',
-      // filter: (el: HTMLElement) => el.textContent?.trim() == "相关研发需求",
-      useMutationObserver: true,
-      callback: addElementToDom({
-        tag: 'button',
-        attrs: { id: 'replaceC-Story', innerText: '一键同上' },
-        style: { 'margin': '5px 5px 5px 5px' },
-        eventlistener: { 'click': setupBatchEditFormStoryButton }
-      }),
-      iframeSelector: '#appIframe-qa'
-    });
+  //   waitForSelector({
+  //     selector: "#batchEditForm > div > table > thead > tr > th.c-story",
+  //     // filter: (el: HTMLElement) => el.textContent?.trim() == "相关研发需求",
+  //     useMutationObserver: true,
+  //     callback: addElementToDom({
+  //       tag: "button",
+  //       attrs: { id: "replaceC-Story", innerText: "一键同上" },
+  //       style: { margin: "5px 5px 5px 5px" },
+  //       eventlistener: { click: setupBatchEditFormStoryButton },
+  //     }),
+  //     iframeSelector: "#appIframe-qa",
+  //   });
 
-    waitForSelector({
-      selector: '#batchEditForm > div > table > thead > tr > th.c-module',
-      // filter: (el: HTMLElement) => el.textContent?.trim() == "所属模块",
-      useMutationObserver: true,
-      callback: addElementToDom({
-        tag: 'button',
-        attrs: { id: 'replaceC-Module', innerText: '一键同上' },
-        style: { 'margin': '5px 5px 5px 5px' },
-        eventlistener: { 'click': setupBatchEditFormModuleButton }
-      }),
-      iframeSelector: '#appIframe-qa'
-    });
+  //   waitForSelector({
+  //     selector: "#batchEditForm > div > table > thead > tr > th.c-module",
+  //     // filter: (el: HTMLElement) => el.textContent?.trim() == "所属模块",
+  //     useMutationObserver: true,
+  //     callback: addElementToDom({
+  //       tag: "button",
+  //       attrs: { id: "replaceC-Module", innerText: "一键同上" },
+  //       style: { margin: "5px 5px 5px 5px" },
+  //       eventlistener: { click: setupBatchEditFormModuleButton },
+  //     }),
+  //     iframeSelector: "#appIframe-qa",
+  //   });
 
-    waitForSelector({
-      selector: '#mainContent > div.main-col.col-8 > div.main-actions > div > a:nth-child(3)',
-      iframeSelector: '#appIframe-qa',
-      useMutationObserver: true,
-      filter: (el) => el.firstElementChild?.classList.contains('icon-testtask-runCase'),
-      callback: (el: HTMLElement) => {
-        const newEl = el.cloneNode(true) as HTMLElement;
-				newEl.lastElementChild!.innerHTML = '自动化执行';
-				newEl.removeAttribute('href');
-				newEl.onclick = async () => {
-				  sendMessageToBackground({
-				    type: 'CREATE_TAB_WITH_SCRIPT',
-				    payload: {
-				      url: 'https://baidu.com',
-				      scriptPath: 'js/sfs/test.js'
-				    }
-				  });
-				};
-				el.after(newEl);
-      }
-    });
-
-    waitForSelector({
-      selector: '#mainContent > div.main-col.col-8 > div.main-actions > div > a:nth-child(3)',
-      iframeSelector: '#appIframe-qa',
-      useMutationObserver: true,
-      filter: (el) => el.firstElementChild?.classList.contains('icon-testtask-runCase'),
-      callback: (el: HTMLElement) => {
-        const newEl = el.cloneNode(true) as HTMLElement;
-				newEl.lastElementChild!.innerHTML = '录制';
-				newEl.removeAttribute('href');
-				newEl.onclick = async () => {
-				  sendMessageToBackground({
-				    type: 'CREATE_TAB_WITH_SCRIPT',
-				    payload: {
-				      url: 'https://baidu.com',
-				      scriptPath: 'js/sfs/test.js'
-				    }
-				  });
-				};
-				el.after(newEl);
-      }
-    });
-
-    waitForSelector({
-      selector: ['#dataform > div > div.side-col.col-4 > div.cell', '#dataform > table > tfoot'],
-      iframeSelector: '#appIframe-qa',
-      useMutationObserver: true,
-      initCallback: () => injectScriptToActivateTab({ file: getSingleFileScript('zentao-content-replace') }),
-      callback: (el: HTMLElement) => {
-        const newEl = document.createElement('zentao-content-replace');
-        if (el.classList.contains('cell')) {
-          newEl.classList.add('detail');
-        }
-        Object.assign(newEl.style, {
-          display: 'block',
-          unicodeBidi: 'isolate',
-          minWidth: '500px'
-        });
-        el.insertAdjacentElement('afterbegin', newEl);
-      }
-    });
-  };
+  //   // waitForSelector({
+  //   //   selector:
+  //   //     "#mainContent > div.main-col.col-8 > div.main-actions > div > a:nth-child(3)",
+  //   //   iframeSelector: "#appIframe-qa",
+  //   //   useMutationObserver: true,
+  //   //   filter: (el) =>
+  //   //     el.firstElementChild?.classList.contains("icon-testtask-runCase"),
+  //   //   callback: (el: HTMLElement) => {
+  //   //     const newEl = el.cloneNode(true) as HTMLElement;
+  //   //     newEl.lastElementChild!.innerHTML = "自动化执行";
+  //   //     newEl.removeAttribute("href");
+  //   //     newEl.onclick = async () => {
+  //   //       sendMessageToBackground({
+  //   //         type: "CREATE_TAB_WITH_SCRIPT",
+  //   //         payload: {
+  //   //           url: "https://baidu.com",
+  //   //           scriptPath: "js/sfs/test.js",
+  //   //         },
+  //   //       });
+  //   //     };
+  //   //     el.after(newEl);
+  //   //   },
+  //   // });
+  // };
 
   return {};
 };
 
 export default (ctx: AppContext, config = {}) => {
   const featureRegistry = createContentFeatureRegistry({
-    scriptId: 'zentao',
-    scriptName: '禅道'
+    scriptId: "zentao",
+    scriptName: "禅道",
   });
-  featureRegistry.register('zentao.main', '禅道内容增强', async () => {
-    initializeZentaoContent(ctx, config);
+  featureRegistry.register(
+    "zentao.contentReplace",
+    "内容批量替换",
+    async () => {
+      waitForSelector({
+        selector: [
+          "#dataform > div > div.side-col.col-4 > div.cell",
+          "#dataform > table > tfoot",
+        ],
+        iframeSelector: "#appIframe-qa",
+        useMutationObserver: true,
+        initCallback: () =>
+          injectScriptToActivateTab({
+            file: getSingleFileScript("zentao-content-replace"),
+          }),
+        callback: (el: HTMLElement) => {
+          const newEl = document.createElement("zentao-content-replace");
+          if (el.classList.contains("cell")) {
+            newEl.classList.add("detail");
+          }
+          Object.assign(newEl.style, {
+            display: "block",
+            unicodeBidi: "isolate",
+            minWidth: "500px",
+          });
+          el.insertAdjacentElement("afterbegin", newEl);
+        },
+      });
+    },
+  );
+
+  featureRegistry.register("zentao.record", "录制", async () => {
+    waitForSelector({
+      selector:
+        "#mainContent > div.main-col.col-8 > div.main-actions > div > a:nth-child(3)",
+      iframeSelector: "#appIframe-qa",
+      useMutationObserver: true,
+      filter: (el) =>
+        el.firstElementChild?.classList.contains("icon-testtask-runCase"),
+      callback: (el: HTMLElement) => {
+        const newEl = el.cloneNode(true) as HTMLElement;
+        newEl.lastElementChild!.innerHTML = "录制";
+        newEl.removeAttribute("href");
+        newEl.onclick = async () => {
+          sendMessageToBackground({
+            type: "CREATE_TAB_WITH_SCRIPT",
+            payload: {
+              url: "https://baidu.com",
+              scriptPath: "js/sfs/test.js",
+            },
+          });
+        };
+        el.after(newEl);
+      },
+    });
+  });
+
+  featureRegistry.register("zentao.login", "重新登录", async () => {
+    if (location.pathname.includes("user-login")) {
+      console.log("登录页面");
+      const [name, pwd] =
+        document.querySelectorAll<HTMLInputElement>(".form-control");
+      name.value = "anmaoxing";
+      name.dispatchEvent(new Event("keydown", { bubbles: true }));
+      pwd.value = "ANmaoxing123";
+      pwd.dispatchEvent(new Event("keydown", { bubbles: true }));
+      document.getElementById("submit")?.click();
+    } else {
+      console.log("退出登录");
+      fetch("/zentao/user-logout.html", {
+        headers: {
+          accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "accept-language": "zh-CN,zh;q=0.9",
+          "upgrade-insecure-requests": "1",
+          cookie:
+            "zentaosid=dq4a1ka522o3vs8jhbn0724rb2; lang=zh-cn; vision=rnd; device=desktop; theme=default; tab=admin; windowWidth=1824; windowHeight=905",
+        },
+        body: null,
+        method: "GET",
+      }).then(() => window.location.reload());
+    }
   });
   void featureRegistry.initialize();
   return {};

@@ -1,6 +1,6 @@
 // QuickLogin.tsx
 import React, { useState } from "react";
-import quickLoginCss from "./QuickLogin.css?raw";
+import quickLoginCss from "./style.scss?inline";
 
 // 类型定义
 interface UserInfo {

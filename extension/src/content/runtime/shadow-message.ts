@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { shadowHostId } from "@/config";
 import { createShadowHost } from "@/utils/shadow-dom";
 import toast from "@/utils/toast";
-import { ToastType } from "@/assets/components/Toast";
+import { ToastType } from "@/assets/components/toast/main";
 
 export const initializeShadowMessage = (ctx: AppContext): ShadowRoot | null => {
   const { shadowRoot } = createShadowHost(shadowHostId, "open");

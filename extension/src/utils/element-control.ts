@@ -664,11 +664,11 @@ class ElementSearcher {
 export function waitForSelector(
   options: WaitForSelectorOptions,
 ): Promise<[targetElements: HTMLElement[], cleanup: () => void] | Error> {
-  if (!options.selector) {
+  if (
+    !options.selector ||
+    (Array.isArray(options.selector) && options.selector.length === 0)
+  ) {
     return Promise.reject(new Error("selector is required"));
-  }
-  if (Array.isArray(options.selector) && options.selector.length === 0) {
-    return Promise.reject(new Error("selector array cannot be empty"));
   }
 
   return new Promise<[HTMLElement[], () => void]>((resolve, reject) => {
@@ -680,6 +680,12 @@ export function waitForSelector(
       reject,
       options.signal || new AbortController().signal,
     );
+    if (!document || !document.body) {
+      window.addEventListener("DOMContentLoaded", () => searcher.start(), {
+        once: true,
+      });
+      return;
+    }
     searcher.start();
   });
 }

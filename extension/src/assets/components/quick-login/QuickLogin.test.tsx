@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import QuickLogin from "./QuickLogin";
+import QuickLogin from "./main";
 
 // Mock chrome.runtime.sendMessage
 const mockSendMessage = jest.fn();

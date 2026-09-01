@@ -1,4 +1,4 @@
-import { createContentFeaturePanel } from "@components/content-feature-panel";
+import { createContentFeaturePanel } from "@/assets/components/content-feature-panel/main";
 import messenger from "@/message";
 
 export const CONTENT_FEATURE_CONFIG_PREFIX = "kria-nove:content-script-config:";

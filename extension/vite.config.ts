@@ -30,7 +30,7 @@ export default ({
     sidepanel: isEnvEnabled("VITE_BUILD_SIDEPANEL"),
     devtools: isEnvEnabled("VITE_BUILD_DEVTOOLS"),
   };
-  console.log({ mode, command, isSsrBuild, isPreview });
+  // console.log({ mode, command, isSsrBuild, isPreview });
   const isProduction = process.env.NODE_ENV === "production";
   const isEncryptEnabled = process.env.ENCRYPT_FILE_MAP === "true";
   const isGenerateSourceMaps = process.env.GENERATE_SOURCE_MAPS === "true";
@@ -106,10 +106,40 @@ export default ({
           warn(warning);
         },
         input: {
-          ...(pages.popup ? { "pages/popup": path.resolve(__dirname, "src/pages/popup.html") } : {}),
-          ...(pages.options ? { "pages/options": path.resolve(__dirname, "src/pages/options.html") } : {}),
-          ...(pages.sidepanel ? { "pages/sidepanel": path.resolve(__dirname, "src/pages/sidepanel.html") } : {}),
-          ...(pages.devtools ? { "pages/devtools-page": path.resolve(__dirname, "src/pages/devtools.html") } : {}),
+          ...(pages.popup
+            ? { "pages/popup": path.resolve(__dirname, "src/pages/popup.html") }
+            : {}),
+          ...(pages.options
+            ? {
+                "pages/options": path.resolve(
+                  __dirname,
+                  "src/pages/options.html",
+                ),
+              }
+            : {}),
+          ...(pages.sidepanel
+            ? {
+                "pages/sidepanel": path.resolve(
+                  __dirname,
+                  "src/pages/sidepanel.html",
+                ),
+              }
+            : {}),
+          ...(pages.devtools
+            ? {
+                "pages/devtools-page": path.resolve(
+                  __dirname,
+                  "src/pages/devtools.html",
+                ),
+              }
+            : {}),
+          ...(pages.devtools
+            ? scanFiles({
+                dirPath: "src/pages/devtools",
+                prefix: "devtools",
+                extFilter: ".html",
+              })
+            : {}),
           ...(isProduction
             ? {
                 ...scanFiles({
@@ -124,19 +154,8 @@ export default ({
                   exclude: ["main.ts"],
                 }),
                 ...scanFiles({
-                  dirPath: "src/pages/devtools",
-                  prefix: "devtools",
-                  extFilter: ".html",
-                }),
-                ...scanFiles({
                   dirPath: "src/sfs",
                   prefix: "sfs",
-                  useIndexFile: true,
-                  recursive: true,
-                }),
-                ...scanFiles({
-                  dirPath: "src/workers",
-                  prefix: "workers",
                   useIndexFile: true,
                   recursive: true,
                 }),
@@ -154,12 +173,12 @@ export default ({
                 "infrastructure-dom": ["@/utils/dom-utils"],
                 message: ["@/message"],
                 "content-runtime": ["@/content/runtime"],
-                components: ["@/assets/components"],
               }
             : undefined,
-          chunkFileNames: `assets/js/chunks/chunk-[name]-[${isProduction ? "hash" : "name"}].js`,
+          chunkFileNames: `assets/js/chunks/chunk-${isProduction ? "" : "[name]-"}[hash].js`,
           assetFileNames: (assetInfo) => {
-            const fileExtname = path.extname(assetInfo.name || "");
+            const fileExtname = path.extname(assetInfo.names?.[0] || "");
+
             if (
               [
                 ".png",
@@ -196,8 +215,6 @@ export default ({
               return `assets/js/apps/[hash].js`;
             } else if (chunkName.startsWith("devtools/")) {
               return `pages/devtools/[hash].js`;
-            } else if (chunkName.startsWith("workers/")) {
-              return `static/js/[name].js`;
             } else {
               return `assets/js/[hash].js`;
             }

@@ -1,7 +1,7 @@
 // Toast.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import toastStyle from "./toast.css?raw";
+import toastStyle from "./style.scss?inline";
 
 export enum ToastType {
   Success = "success",
@@ -18,13 +18,13 @@ interface ToastProps {
   onClose?: () => void;
 }
 
-const Toast: React.FC<ToastProps> = ({
+const Toast = ({
   message,
-  type = "success",
+  type = ToastType.Success,
   duration = 1500,
   appendTo = document.body,
   onClose,
-}) => {
+}: ToastProps) => {
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {

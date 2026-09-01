@@ -1,17 +1,19 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
-import MASwitch from "@/assets/components/MaSwitch";
+import MASwitch from "@/assets/components/switch/main";
+
 import { shadowHostId } from "@/config";
 import { createShadowHost, injectStyles } from "@/utils/shadow-dom";
-import panelStyles from "./content-feature-panel.scss?inline";
-import switchStyles from "@/assets/components/ma-switch.scss?inline";
+import panelStyles from "./style.scss?inline";
+import switchStyles from "../switch/style.scss?inline";
+import { createRoot } from "react-dom/client";
+const PANEL_MOUNT_ID = "kria-nove-content-feature-panel";
 
 interface FeatureItem {
   id: string;
   label: string;
 }
 
-interface ContentFeaturePanelOptions {
+export interface ContentFeaturePanelOptions {
   scriptName: string;
   shortcut: string;
   isFirstUse: boolean;
@@ -19,8 +21,6 @@ interface ContentFeaturePanelOptions {
   config: Record<string, boolean>;
   onSave: (config: Record<string, boolean>) => void;
 }
-
-const PANEL_MOUNT_ID = "kria-nove-content-feature-panel";
 
 interface TourStep {
   title: string;
@@ -48,9 +48,7 @@ const TOUR_STEPS: TourStep[] = [
   },
 ];
 
-export const Panel: React.FC<
-  ContentFeaturePanelOptions & { onClose: () => void }
-> = ({
+const Panel: React.FC<ContentFeaturePanelOptions & { onClose: () => void }> = ({
   scriptName,
   shortcut,
   isFirstUse,
@@ -140,7 +138,7 @@ export const Panel: React.FC<
               key={feature.id}
               label={feature.label}
               checked={draft[feature.id] === true}
-              onChange={(checked) =>
+              onChange={(checked: boolean) =>
                 setDraft((current) => ({ ...current, [feature.id]: checked }))
               }
               openText="开"
@@ -166,6 +164,7 @@ export const Panel: React.FC<
             onClick={() => {
               onSave(draft);
               onClose();
+              window.location.reload();
             }}
           >
             保存
@@ -251,6 +250,8 @@ export const Panel: React.FC<
     </div>
   );
 };
+
+export default Panel;
 
 export const createContentFeaturePanel = (
   options: ContentFeaturePanelOptions,

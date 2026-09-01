@@ -1,6 +1,5 @@
 // MASwitch.tsx
-import React, { useState, useEffect, useRef } from "react";
-import "./ma-switch.scss";
+import React, { useEffect, useState } from "react";
 
 // 定义 Props 类型
 interface MASwitchProps {

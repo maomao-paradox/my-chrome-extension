@@ -58,7 +58,9 @@ import type {
   MessageHandler,
   Tool,
 } from "@/types";
-import { QuickLogin, QuickLoginProps } from "@components/index";
+import QuickLogin, {
+  QuickLoginProps,
+} from "@/assets/components/quick-login/main";
 import { storage } from "@/stores";
 import { getSingleFileScript } from "@/utils";
 import { whenDomReady } from "@/utils/element-control";

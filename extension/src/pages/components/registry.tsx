@@ -11,7 +11,7 @@ import {
   Waves,
 } from "lucide-react";
 import Draggable from "@/assets/components/Draggable";
-import QuickLogin from "@/assets/components/QuickLogin/QuickLogin";
+import QuickLogin from "@/assets/components/quick-login/main";
 import ScrollingTimeline from "@/assets/components/ScrollingTimeline";
 import Static404 from "@/assets/components/Static404";
 import WavesEffect from "@/assets/components/Waves";

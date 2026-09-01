@@ -1,6 +1,6 @@
 // toast.ts
 import { createRoot } from "react-dom/client";
-import Toast, { ToastType } from "@/assets/components/Toast";
+import Toast, { ToastType } from "@/assets/components/toast/main";
 
 let toastContainer: HTMLDivElement | null = null;
 let toastRoot: any = null;

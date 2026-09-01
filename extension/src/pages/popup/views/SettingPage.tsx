@@ -14,7 +14,8 @@ import React, {
   ChangeEvent,
   useMemo,
 } from "react";
-import MaSwitch from "@/assets/components/MaSwitch";
+import MASwitch from "@/assets/components/switch/main";
+import "@/assets/components/switch/style.scss";
 import {
   SettingOutlined,
   FileTextOutlined,
@@ -484,7 +485,7 @@ export const SettingPage: FC<{}> = () => {
           </div>
 
           <div className="switch-row switch-row--appearance">
-            <MaSwitch
+            <MASwitch
               label="鼠标拖尾"
               checked={isMouseTrailEnabled}
               onChange={(checked) => handleMouseTrailChange(checked)}
@@ -503,7 +504,7 @@ export const SettingPage: FC<{}> = () => {
                   </option>
                 ))}
               </select>
-            </MaSwitch>
+            </MASwitch>
           </div>
         </section>
 
@@ -584,7 +585,7 @@ export const SettingPage: FC<{}> = () => {
             <div className="switch-list">
               {pluginConfigEntries.map(([key, app]) => (
                 <div key={key} className="switch-row">
-                  <MaSwitch
+                  <MASwitch
                     label={(app as any).name}
                     checked={Boolean((app as any).enabled)}
                     onChange={(checked) => handlePluginToggle(key, checked)}
@@ -613,7 +614,7 @@ export const SettingPage: FC<{}> = () => {
                           <span>{(app as any).options.brandColor}</span>
                         </div>
                       )}
-                  </MaSwitch>
+                  </MASwitch>
                 </div>
               ))}
             </div>
