@@ -14,6 +14,7 @@ import { createPageTools } from "./page-tools";
 import { installTopFrameEventBridge } from "./iframe-event-bridge";
 import { initializeShadowMessage } from "./shadow-message";
 import { initializeWebpageMouseTrail } from "./mouse-trail";
+import { ModuleOption } from "@/utils";
 
 const getCurrentPort = (): string => {
   const { port, protocol } = new URL(window.location.origin);
@@ -30,25 +31,29 @@ const checkDomainMatch = (allowedDomains: [string, string][]): boolean => {
   );
 };
 
+interface DomainConfigItem {
+  enabled: boolean;
+  domains: string;
+}
+
 export async function genDomainPermissionChecker(): Promise<
   (configKey: string) => boolean
 > {
-  const domainConfigs: Record<string, any> =
-    (await storage.ext.local.get(domainConfigsKey)) || {};
+  const originDomainConfig = await storage.ext.local.get(domainConfigsKey);
+  const domainConfigs: Map<string, DomainConfigItem> = new Map(
+    Object.entries(originDomainConfig || {}),
+  );
   let shouldPersist = false;
 
-  for (const script of contentModules.values()) {
-    if (
-      !script.domainKey ||
-      Object.prototype.hasOwnProperty.call(domainConfigs, script.domainKey)
-    ) {
+  for (const domain of contentModules.keys()) {
+    if (domainConfigs.has(domain)) {
       continue;
     }
 
-    domainConfigs[script.domainKey] = {
+    domainConfigs.set(domain, {
       enabled: true,
       domains: "",
-    };
+    });
     shouldPersist = true;
   }
 
@@ -58,8 +63,11 @@ export async function genDomainPermissionChecker(): Promise<
 
   return (configKey: string): boolean => {
     try {
-      const config = domainConfigs[configKey];
-      if (!config?.enabled) {
+      if (!domainConfigs.has(configKey)) {
+        return false;
+      }
+      const config = domainConfigs.get(configKey)!;
+      if (!config.enabled) {
         return false;
       }
       if (!config.domains) {
@@ -193,9 +201,11 @@ export const initializeContent = async (ctx: AppContext): Promise<void> => {
     return;
   }
 
+  const version = chrome.runtime.getManifest().version;
+
   maLogger.info(
     String.raw`欢迎使用 %c ${chrome.runtime.getManifest().name} %c
-当前版本：%c paradox ${chrome.runtime.getManifest().version} %c`,
+当前版本：%c paradox ${version} %c`,
     "color:rgb(114, 207, 244)",
     "",
     "color:rgb(61, 247, 80)",
@@ -210,7 +220,7 @@ export const initializeContent = async (ctx: AppContext): Promise<void> => {
   });
 
   Object.defineProperty(ctx, "__CONTENT_SCRIPT", {
-    value: "v1.0.0.13",
+    value: version,
     writable: false,
     enumerable: false,
     configurable: false,

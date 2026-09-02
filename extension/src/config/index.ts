@@ -20,24 +20,18 @@ const getContentScriptUrl = async (domain: string) =>
 const getAppEntryUrl = async (appName: string) =>
   await getAssetsAbstractPath(`js/apps/${appName}`);
 
-export const contentDomains = import.meta.env.VITE_CONTENT_DOMAIN?.split(",") || [
-  "Radius",
-  "Zentao",
-  "Mria",
-  "Qapro",
-  "Teach",
-  "Lanhuapp",
-  "Portainer",
-];
+export const contentDomains = import.meta.env.VITE_CONTENT_DOMAIN?.split(
+  ",",
+) || ["Radius", "Zentao", "Mria", "Qapro", "Teach", "Lanhuapp", "Portainer"];
 
-export const contentModules = contentDomains.reduce(
+export const contentModules: Map<string, ModuleOption> = contentDomains.reduce(
   (acc: Map<string, ModuleOption>, domain: string) =>
     acc.set(domain, {
       domainKey: `content${domain}Domains`,
       flag: `__CONTENT_SCRIPT_${domain.toUpperCase()}`,
       path: getContentScriptUrl(domain.toLowerCase()),
     }),
-  new Map<string, ModuleOption>(),
+  new Map(),
 );
 
 const appDomains = import.meta.env.VITE_APP_DOMAIN?.split(",") || [

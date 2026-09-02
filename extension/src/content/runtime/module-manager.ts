@@ -1,6 +1,6 @@
-import type { PluginConfigMap } from '@/types';
-import { contentModules, appModules } from '@/config';
-import { ESMModuleLoader } from '@/utils/esm-module-loader';
+import type { PluginConfigMap } from "@/types";
+import { contentModules, appModules } from "@/config";
+import { ESMModuleLoader } from "@/utils/esm-module-loader";
 
 type DomainPermissionChecker = (configKey: string) => boolean;
 type RuntimeModule = Record<string, any>;
@@ -15,14 +15,14 @@ export interface ContentModuleManager {
 
 export const createModuleManager = (
   ctx: AppContext,
-  domainPermissionChecker: DomainPermissionChecker
+  domainPermissionChecker: DomainPermissionChecker,
 ): ContentModuleManager => {
   const moduleLoader = new ESMModuleLoader(ctx);
   const moduleInstanceMap = new Map<string, RuntimeModule>();
 
   const getOrLoadModule = async (
     moduleName: string,
-    options?: any
+    options?: any,
   ): Promise<RuntimeModule | null> => {
     if (moduleInstanceMap.has(moduleName)) {
       return moduleInstanceMap.get(moduleName) || null;
@@ -44,27 +44,25 @@ export const createModuleManager = (
       return;
     }
 
-    for (const [, script] of contentModules.entries()) {
+    for (const [domain, config] of contentModules.entries()) {
       try {
-        const hasPermission = script.domainKey
-          ? domainPermissionChecker(script.domainKey)
-          : true;
+        const hasPermission = domain ? domainPermissionChecker(domain) : true;
         if (!hasPermission) {
           continue;
         }
 
-        if (ctx.hasOwnProperty(script.flag)) {
+        if (ctx.hasOwnProperty(config.flag)) {
           continue;
         }
 
         try {
-          await moduleLoader.load(script);
-          maLogger.info(`成功加载脚本: ${script.flag}`);
+          await moduleLoader.load(config);
+          maLogger.info(`成功加载脚本: ${config.flag}`);
         } catch (msgError) {
-          maLogger.error(`动态加载脚本失败: ${script.flag}`, msgError);
+          maLogger.error(`动态加载脚本失败: ${config.flag}`, msgError);
         }
       } catch (error) {
-        maLogger.error(`加载脚本失败: ${script.flag}`, error);
+        maLogger.error(`加载脚本失败: ${config.flag}`, error);
       }
     }
   };
@@ -72,7 +70,7 @@ export const createModuleManager = (
   const toggleApp = async (
     moduleName: string,
     enabled: boolean,
-    options?: any
+    options?: any,
   ): Promise<void> => {
     const moduleConfig = appModules.get(moduleName);
     if (!moduleConfig) {
@@ -83,7 +81,7 @@ export const createModuleManager = (
     if (enabled) {
       try {
         const moduleInstance = await getOrLoadModule(moduleName, options);
-        if (moduleInstance && typeof moduleInstance.enable === 'function') {
+        if (moduleInstance && typeof moduleInstance.enable === "function") {
           moduleInstance.enable(options);
           maLogger.info(`${moduleConfig.flag}模块已启用`);
         }
@@ -94,14 +92,14 @@ export const createModuleManager = (
     }
 
     const moduleInstance = moduleInstanceMap.get(moduleName);
-    if (moduleInstance && typeof moduleInstance.disable === 'function') {
+    if (moduleInstance && typeof moduleInstance.disable === "function") {
       moduleInstance.disable();
       maLogger.info(`${moduleConfig.flag}模块已禁用`);
     }
   };
 
   const applyConfig = async (
-    config: PluginConfigMap | null | undefined
+    config: PluginConfigMap | null | undefined,
   ): Promise<void> => {
     if (ctx !== ctx.top || !config) {
       return;
@@ -115,10 +113,10 @@ export const createModuleManager = (
 
   const updateModuleTools = async (
     moduleName: string,
-    tools: any
+    tools: any,
   ): Promise<boolean> => {
     const module = await getOrLoadModule(moduleName);
-    if (!module || typeof module.updateTools !== 'function') {
+    if (!module || typeof module.updateTools !== "function") {
       return false;
     }
 
@@ -131,6 +129,6 @@ export const createModuleManager = (
     toggleApp,
     applyConfig,
     getOrLoadModule,
-    updateModuleTools
+    updateModuleTools,
   };
 };

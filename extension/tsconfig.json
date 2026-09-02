@@ -30,8 +30,7 @@
       "scripthost"
     ],
     "types": [
-      "chrome",
-      "vite/client"
+      "chrome"
     ],
     "skipLibCheck": true,
     "typeRoots": [

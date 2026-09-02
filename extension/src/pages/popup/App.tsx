@@ -43,13 +43,13 @@ const TABS: TabConfig[] = [
     icon: <PushpinOutlined />,
     component: BookmarkPage,
   },
-  {
-    key: "capture",
-    label: "捕获",
-    hint: "从当前页面拾取组件，结果同步到开发者工具。",
-    icon: <CameraOutlined />,
-    component: CapturePage,
-  },
+  // {
+  //   key: "capture",
+  //   label: "捕获",
+  //   hint: "从当前页面拾取组件，结果同步到开发者工具。",
+  //   icon: <CameraOutlined />,
+  //   component: CapturePage,
+  // },
   {
     key: "tokens",
     label: "令牌",

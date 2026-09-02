@@ -22,9 +22,10 @@ export const createManifest = (pages: ManifestPageFlags) =>
   defineManifest({
     manifest_version: 3,
     name: "__MSG_pluginName__",
-    version: "1.0.10",
+    version: "1.0.1.13",
     description: "__MSG_pluginDesc__",
     default_locale: "zh_CN",
+    // key: "ZXh0ZW5zaW9uX2RlZmF1bHRfcHVibGljX2tleQ==",
 
     icons: {
       16: "static/icons/favicon16.ico" as never,
