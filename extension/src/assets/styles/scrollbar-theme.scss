@@ -1,0 +1,48 @@
+// 使用 CSS 变量定义滚动条颜色，并设置默认值
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, #f1f1f1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #c1c1c1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #a8a8a8);
+}
+
+::-webkit-scrollbar-button {
+  display: none; /* 隐藏上下箭头按钮 */
+}
+
+// 定义不同的主题类，在特定容器内生效
+.scrollbar-teal {
+  --scrollbar-track: rgba(13, 148, 136, 0.08);
+  --scrollbar-thumb: #0d9488;
+  --scrollbar-thumb-hover: #0f766e;
+}
+
+.scrollbar-orange {
+  --scrollbar-track: rgba(249, 115, 22, 0.08);
+  --scrollbar-thumb: #f97316;
+  --scrollbar-thumb-hover: #ea580c;
+}
+
+.scrollbar-gray {
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #94a3b8;
+  --scrollbar-thumb-hover: #64748b;
+}
+
+.scrollbar-dark {
+  --scrollbar-track: rgba(255, 255, 255, 0.05);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.25);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.4);
+}

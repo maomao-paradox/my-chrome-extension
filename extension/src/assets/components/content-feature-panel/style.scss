@@ -1,6 +1,7 @@
-@use "@/assets/styles/custom-scrollbar.scss";
+@use "@/assets/styles/scrollbar-theme.scss";
 
 .kn-panel-container {
+  @extend .scrollbar-teal;
   all: initial;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #172033;
