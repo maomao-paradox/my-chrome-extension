@@ -24,6 +24,13 @@ export const defaultPluginConfigs: PluginConfigMap = {
     enabled: false,
   },
 
+  weather: {
+    id: "weather",
+    name: "沉浸式雨天",
+    type: "effect",
+    enabled: false,
+  },
+
   // sidebar: {
   //   id: "sidebar",
   //   name: "侧边工具栏",
@@ -33,7 +40,7 @@ export const defaultPluginConfigs: PluginConfigMap = {
 
   textSelectionToolbar: {
     id: "textSelectionToolbar",
-    name: "文本选择工具栏",
+    name: "文本选择工具",
     type: "toolbar",
     enabled: false,
     options: {

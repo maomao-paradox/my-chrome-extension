@@ -694,68 +694,36 @@ const HeroSection: FC<HeroSectionProps> = ({
       onPointerLeave={resetPointer}
     >
       <header className="bridge-header">
-        <div className="bridge-header__title">
-          <div className="hud-rail hud-rail--left">
-            <span className="hud-rail__line"></span>
-            <span className="hud-rail__text">{hudCoordinates}</span>
-          </div>
-
-          <div className="bridge-header__copy">
-            <h1 className="visually-hidden">星舰指挥中心</h1>
-            <div className="bridge-signal-stack" aria-label="舰桥信号">
-              <div className="bridge-signal-line bridge-signal-line--primary">
-                <span>RX // MRIA-07</span>
-                <strong>{activeModule.code}</strong>
-                <span>SYNC_{String(syncPercent).padStart(3, "0")}</span>
-              </div>
-              <div className="bridge-signal-line bridge-signal-line--secondary">
-                <span>{hudCoordinates}</span>
-                <span>0x7A / 4F / C1</span>
-                <span>{currentTime || "00:00:00"}</span>
-              </div>
-              <div className="bridge-signal-line bridge-signal-line--noise">
-                <span>/// . . / / / ░▒▓ {activeModule.section}</span>
-                <span>AI_LINK::{activeModule.telemetry.metric}</span>
-              </div>
-              <div className="bridge-signal-meter" aria-hidden="true">
-                {Array.from({ length: 18 }, (_, index) => (
-                  <i
-                    key={index}
-                    style={
-                      {
-                        "--signal-height": `${28 + ((index * 17 + syncPercent) % 68)}%`,
-                        "--signal-delay": `${index * 0.045}s`,
-                      } as CSSProperties
-                    }
-                  ></i>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="hud-rail hud-rail--right">
-            <span className="hud-rail__text">
-              {activeModule.code} / {activeModule.section}
-            </span>
-            <span className="hud-rail__line"></span>
-          </div>
-        </div>
-
         <div className="bridge-header__meta">
-          <div className="meta-chip">
-            <span className="meta-chip__label">FOCUS</span>
-            <strong>{activeModule.title}</strong>
-          </div>
-          <div className="meta-chip">
-            <span className="meta-chip__label">CLOCK</span>
-            <strong>{currentTime}</strong>
-          </div>
-          <div
-            className="meta-chip meta-chip--status"
-            data-status={activeModule.telemetry.status}
-          >
-            <span className="meta-chip__label">LINK</span>
-            <strong>{statusText(activeModule.telemetry.status)}</strong>
+          <h1 className="visually-hidden">星舰指挥中心</h1>
+          <div className="bridge-signal-stack" aria-label="舰桥信号">
+            <div className="bridge-signal-line bridge-signal-line--primary">
+              <span>RX // MRIA-07</span>
+              <strong>{activeModule.code}</strong>
+              <span>SYNC_{String(syncPercent).padStart(3, "0")}</span>
+            </div>
+            <div className="bridge-signal-line bridge-signal-line--secondary">
+              <span>{hudCoordinates}</span>
+              <span>0x7A / 4F / C1</span>
+              <span>{currentTime || "00:00:00"}</span>
+            </div>
+            <div className="bridge-signal-line bridge-signal-line--noise">
+              <span>/// . . / / / ░▒▓ {activeModule.section}</span>
+              <span>AI_LINK::{activeModule.telemetry.metric}</span>
+            </div>
+            <div className="bridge-signal-meter" aria-hidden="true">
+              {Array.from({ length: 18 }, (_, index) => (
+                <i
+                  key={index}
+                  style={
+                    {
+                      "--signal-height": `${28 + ((index * 17 + syncPercent) % 68)}%`,
+                      "--signal-delay": `${index * 0.045}s`,
+                    } as CSSProperties
+                  }
+                ></i>
+              ))}
+            </div>
           </div>
         </div>
       </header>

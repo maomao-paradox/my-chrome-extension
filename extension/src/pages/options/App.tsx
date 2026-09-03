@@ -20,7 +20,7 @@ import PanelNav, {
   Panel,
   PanelBase,
   PanelNavs,
-} from "@components/layout/PanelNav";
+} from "@/assets/layout/PanelNav";
 import { STARSHIP_MODULES, StarshipPanelId } from "./views/starshipModules";
 import Static404 from "@/assets/components/Static404";
 import ContentScriptDomainConfig from "./views/ContentScriptDomainConfig";

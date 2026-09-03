@@ -1,15 +1,20 @@
-export type StarshipPanelId =
-  | "main"
-  | "top"
-  | "top-left"
-  | "top-right"
-  | "left"
-  | "right"
-  | "bottom"
-  | "bottom-left"
-  | "bottom-right";
+export enum StarshipPanelId {
+  Main = "main",
+  Top = "top",
+  TopLeft = "top-left",
+  TopRight = "top-right",
+  Left = "left",
+  Right = "right",
+  Bottom = "bottom",
+  BottomLeft = "bottom-left",
+  BottomRight = "bottom-right",
+}
 
-export type StarshipStatus = "online" | "warning" | "standby";
+export enum StarshipStatus {
+  Online = "online",
+  Warning = "warning",
+  Standby = "standby",
+}
 
 export interface ModuleTelemetry {
   status: StarshipStatus;
@@ -68,7 +73,7 @@ export const STARSHIP_STATUS_TINT: Record<StarshipStatus, string> = {
 
 export const STARSHIP_MODULES: StarshipModuleMeta[] = [
   {
-    id: "main",
+    id: StarshipPanelId.Main,
     glyph: "CMD",
     title: "指挥中心",
     code: "Bridge Core",
@@ -76,14 +81,14 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     description: "汇总全舰模块状态，并作为星舰终端的统一调度入口。",
     position: { x: 0, y: 0 },
     defaultTelemetry: {
-      status: "online",
+      status: StarshipStatus.Online,
       headline: "舰桥链路稳定",
       detail: "等待各舱段回传状态数据",
       metric: "07/07",
     },
   },
   {
-    id: "top",
+    id: StarshipPanelId.Top,
     glyph: "MON",
     title: "哨兵监控",
     code: "Sentinel Watch",
@@ -91,7 +96,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     description: "异常监控、告警节流与白黑名单控制舱。",
     position: { x: 0, y: 1 },
     defaultTelemetry: {
-      status: "standby",
+      status: StarshipStatus.Standby,
       headline: "异常监控待命",
       detail: "尚未加载 WebSocket 回传参数",
       metric: "OFF",
@@ -103,7 +108,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     },
   },
   {
-    id: "top-left",
+    id: StarshipPanelId.TopLeft,
     glyph: "XHR",
     title: "拦截矩阵",
     code: "Interceptor Bay",
@@ -111,7 +116,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     description: "管理 XHR 规则、域名白名单与测试链路。",
     position: { x: -1, y: 1 },
     defaultTelemetry: {
-      status: "standby",
+      status: StarshipStatus.Standby,
       headline: "暂无拦截规则",
       detail: "可为接口响应建立定向篡改矩阵",
       metric: "00",
@@ -123,7 +128,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     },
   },
   {
-    id: "top-right",
+    id: StarshipPanelId.TopRight,
     glyph: "VAR",
     title: "观测台",
     code: "Telemetry Lab",
@@ -131,7 +136,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     description: "读取当前页面变量并执行定向修改的观测舱。",
     position: { x: 1, y: 1 },
     defaultTelemetry: {
-      status: "online",
+      status: StarshipStatus.Online,
       headline: "浏览器遥测正常",
       detail: "可直接连通当前活动标签页",
       metric: "LIVE",
@@ -143,7 +148,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     },
   },
   {
-    id: "left",
+    id: StarshipPanelId.Left,
     glyph: "CFG",
     title: "舰体设置",
     code: "Hull Config",
@@ -151,7 +156,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     description: "基础设置、界面主题与配置导入导出。",
     position: { x: -1, y: 0 },
     defaultTelemetry: {
-      status: "online",
+      status: StarshipStatus.Online,
       headline: "扩展设置已加载",
       detail: "等待同步主题与调试模式状态",
       metric: "AUTO",
@@ -163,7 +168,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     },
   },
   {
-    id: "right",
+    id: StarshipPanelId.Right,
     glyph: "USR",
     title: "船员档案",
     code: "Crew Registry",
@@ -171,7 +176,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     description: "维护用户身份、角色与启用状态。",
     position: { x: 1, y: 0 },
     defaultTelemetry: {
-      status: "standby",
+      status: StarshipStatus.Standby,
       headline: "暂无船员档案",
       detail: "可在此维护自动登录用户列表",
       metric: "00",
@@ -183,7 +188,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     },
   },
   {
-    id: "bottom",
+    id: StarshipPanelId.Bottom,
     glyph: "DNS",
     title: "航域许可",
     code: "Route Permissions",
@@ -191,7 +196,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     description: "管理内容脚本的启用范围与域名航线。",
     position: { x: 0, y: -1 },
     defaultTelemetry: {
-      status: "online",
+      status: StarshipStatus.Online,
       headline: "域名航线可用",
       detail: "等待统计当前已启用的脚本模块",
       metric: "00/00",
@@ -203,7 +208,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     },
   },
   {
-    id: "bottom-left",
+    id: StarshipPanelId.BottomLeft,
     glyph: "KGM",
     title: "知识图谱",
     code: "Skill Atlas",
@@ -212,7 +217,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
       "构建个人知识图谱与技能书，支持节点拖拽、缩放、增删与本地持久化。",
     position: { x: -1, y: -1 },
     defaultTelemetry: {
-      status: "online",
+      status: StarshipStatus.Online,
       headline: "技能图谱可编辑",
       detail: "拖拽节点整理结构，任意节点可继续扩展分支",
       metric: "MAP",
@@ -224,7 +229,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     },
   },
   {
-    id: "bottom-right",
+    id: StarshipPanelId.BottomRight,
     glyph: "AIX",
     title: "AI 终端",
     code: "Aegis Terminal",
@@ -232,7 +237,7 @@ export const STARSHIP_MODULES: StarshipModuleMeta[] = [
     description: "挂接模型链路、舰桥角色协议与实时智能对话的指挥终端。",
     position: { x: 1, y: -1 },
     defaultTelemetry: {
-      status: "standby",
+      status: StarshipStatus.Standby,
       headline: "等待接入 AI 链路",
       detail: "配置模型与舰桥协议后可启动智能协同",
       metric: "OFF",

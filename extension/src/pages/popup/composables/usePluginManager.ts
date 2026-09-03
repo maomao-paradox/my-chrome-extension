@@ -36,7 +36,19 @@ export const usePluginManager = () => {
         await storage.ext.local.set(appConfigKey, defaultPluginConfigs);
         setPluginConfigs(defaultPluginConfigs);
       } else {
-        setPluginConfigs(configs);
+        // 比较本地存储的配置和最新配置，更新默认配置
+        // 新增的配置要补充到里面
+        // 如果本地配置多，则保留本地配置，但是不展示在设置页面
+        const allowedConfigKeys = Object.keys(defaultPluginConfigs);
+        setPluginConfigs(
+          allowedConfigKeys.reduce(
+            (acc, key) => ({
+              ...acc,
+              [key]: configs[key] || defaultPluginConfigs[key],
+            }),
+            {} as PluginConfigMap,
+          ),
+        );
       }
       setIsLoaded(true);
     } catch (error) {

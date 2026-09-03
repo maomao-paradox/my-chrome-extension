@@ -357,6 +357,8 @@ export default (ctx: AppContext, config = {}) => {
       waitForSelector({
         selector:
           "#app > div > div > div.main-content > div.main-content-wrapper > div > div.search-header-wrapper > div.search-header-left > span",
+
+        filter: (el: HTMLElement) => el.textContent === "字典配置",
         signal: controller.signal,
         timeout: 10000,
         callback: (element: HTMLElement) => {
@@ -384,7 +386,7 @@ export default (ctx: AppContext, config = {}) => {
 
   featureRegistry.register(
     "radius.legacy-import-tab",
-    "注入旧版数据页签配置",
+    "旧版数据导入",
     async () => {
       await new Promise<void>((resolve) => whenDomReady(resolve));
       await injectScriptToActivateTab({

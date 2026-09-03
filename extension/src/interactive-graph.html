@@ -1,394 +1,704 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>项目依赖关系网 - 蜘蛛网力导向图</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-<head>
-  <meta charset="UTF-8">
-  <title>项目依赖关系网 - 蜘蛛网力导向图</title>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-    }
+      body,
+      html,
+      #chart {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #f5f7fa;
+      }
 
-    body,
-    html,
-    #chart {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #f5f7fa;
-    }
+      /* ===== 控制面板优化 ===== */
+      #controls {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 16px 20px 14px;
+        border-radius: 12px;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.1),
+          0 1px 4px rgba(0, 0, 0, 0.06);
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        z-index: 100;
+        pointer-events: auto;
+        min-width: 260px;
+        transition:
+          transform 0.2s ease,
+          opacity 0.2s ease;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
 
-    #controls {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 12px 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-      font-family: system-ui, sans-serif;
-      z-index: 100;
-      pointer-events: auto;
-      backdrop-filter: blur(4px);
-    }
+      #controls .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
 
-    input {
-      margin-left: 8px;
-      padding: 6px 12px;
-      border: 1px solid #ccc;
-      border-radius: 20px;
-      width: 220px;
-      font-size: 14px;
-    }
+      #controls .header label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-    .tip {
-      font-size: 12px;
-      color: #666;
-      margin-top: 6px;
-    }
-  </style>
-</head>
+      #controls .header .badge {
+        font-size: 11px;
+        background: #eef2f7;
+        color: #4a5568;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 400;
+      }
 
-<body>
-  <div id="controls">
-    🔍 <input type="text" id="search" placeholder="输入文件名或路径，高亮显示">
-    <div class="tip">💡 鼠标拖拽节点 / 滚轮缩放 / 蜘蛛网力导向布局</div>
-  </div>
-  <div id="chart"></div>
+      .search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
 
-  <script>
-    fetch('/deps.json')
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(rawData => {
-        console.log(rawData);
-        // 将 deps.json 转换为 ECharts graph 所需格式
-        const nodes = [];
-        const edges = [];
-        const nodeIndexMap = new Map(); // 路径 -> 索引
+      .search-wrapper .icon {
+        position: absolute;
+        left: 12px;
+        font-size: 14px;
+        opacity: 0.5;
+        pointer-events: none;
+      }
 
-        // 计算每个模块的依赖数量
-        const dependencyCount = new Map();
-        rawData.modules.forEach(module => {
-          const source = module.source;
-          const count = module.dependencies ? module.dependencies.length : 0;
-          dependencyCount.set(source, count);
+      .search-wrapper input {
+        width: 100%;
+        padding: 8px 14px 8px 36px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 24px;
+        font-size: 14px;
+        background: #f8fafc;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        outline: none;
+        color: #1a202c;
+      }
+
+      .search-wrapper input::placeholder {
+        color: #a0aec0;
+        font-weight: 300;
+      }
+
+      .search-wrapper input:focus {
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+        background: #ffffff;
+      }
+
+      .search-wrapper .clear-btn {
+        position: absolute;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 16px;
+        color: #a0aec0;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 50%;
+        transition: all 0.15s;
+        display: none;
+        line-height: 1;
+      }
+
+      .search-wrapper .clear-btn:hover {
+        color: #e53e3e;
+        background: #fff5f5;
+      }
+
+      .search-wrapper .clear-btn.visible {
+        display: block;
+      }
+
+      #controls .tip {
+        font-size: 12px;
+        color: #718096;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        border-top: 1px solid #edf2f7;
+        padding-top: 10px;
+      }
+
+      #controls .tip span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      #controls .tip .key {
+        display: inline-block;
+        background: #edf2f7;
+        padding: 0 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      /* ===== 统计信息浮窗 ===== */
+      #stats {
+        position: absolute;
+        bottom: 24px;
+        left: 24px;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 12px 18px;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        font-size: 13px;
+        color: #2d3748;
+        z-index: 100;
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+
+      #stats .stat-item {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+      }
+
+      #stats .stat-item .num {
+        font-weight: 600;
+        color: #2b6cb0;
+        font-size: 15px;
+      }
+
+      #stats .stat-item .label {
+        color: #718096;
+        font-size: 12px;
+      }
+
+      #stats .divider {
+        width: 1px;
+        height: 20px;
+        background: #e2e8f0;
+      }
+
+      /* ===== 响应式 ===== */
+      @media (max-width: 640px) {
+        #controls {
+          top: 12px;
+          right: 12px;
+          left: 12px;
+          min-width: unset;
+          padding: 12px 14px;
+        }
+
+        #controls .header .badge {
+          display: none;
+        }
+
+        #stats {
+          bottom: 12px;
+          left: 12px;
+          right: 12px;
+          font-size: 12px;
+          padding: 10px 14px;
+          flex-wrap: wrap;
+          gap: 8px 16px;
+          pointer-events: auto;
+        }
+
+        #stats .divider {
+          display: none;
+        }
+      }
+
+      /* ===== 加载状态 ===== */
+      #loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: system-ui, sans-serif;
+        color: #4a5568;
+        text-align: center;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      #loading .spinner {
+        width: 36px;
+        height: 36px;
+        margin: 0 auto 12px;
+        border: 3px solid #e2e8f0;
+        border-top-color: #4299e1;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #loading p {
+        font-size: 14px;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 加载状态 -->
+    <div id="loading">
+      <div class="spinner"></div>
+      <p>加载依赖数据中...</p>
+    </div>
+
+    <!-- 控制面板 -->
+    <div id="controls">
+      <div class="header">
+        <label>🔍 搜索节点</label>
+        <span class="badge" id="matchCount">0 个匹配</span>
+      </div>
+      <div class="search-wrapper">
+        <span class="icon">🔎</span>
+        <input
+          type="text"
+          id="search"
+          placeholder="输入文件名或路径..."
+          autocomplete="off"
+        />
+        <button class="clear-btn" id="clearBtn" aria-label="清空搜索">✕</button>
+      </div>
+      <div class="tip">
+        <span>🖱️ 拖拽节点</span>
+        <span>🔍 滚轮缩放</span>
+        <span><span class="key">⌘F</span> 快速搜索</span>
+      </div>
+    </div>
+
+    <!-- 统计信息 -->
+    <div id="stats" style="display: none">
+      <div class="stat-item">
+        <span class="num" id="nodeCount">0</span>
+        <span class="label">节点</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-item">
+        <span class="num" id="edgeCount">0</span>
+        <span class="label">依赖关系</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-item">
+        <span class="num" id="npmCount">0</span>
+        <span class="label">npm 依赖</span>
+      </div>
+    </div>
+
+    <!-- 图表容器 -->
+    <div id="chart"></div>
+
+    <script type="module">
+      import * as echarts from "echarts";
+
+      // ===== DOM 引用 =====
+      const chartDom = document.getElementById("chart");
+      const loadingEl = document.getElementById("loading");
+      const statsEl = document.getElementById("stats");
+      const searchInput = document.getElementById("search");
+      const clearBtn = document.getElementById("clearBtn");
+      const matchCountEl = document.getElementById("matchCount");
+      const nodeCountEl = document.getElementById("nodeCount");
+      const edgeCountEl = document.getElementById("edgeCount");
+      const npmCountEl = document.getElementById("npmCount");
+
+      // ===== 工具函数：提取文件名 =====
+      function getDisplayName(fullPath) {
+        const parts = fullPath.split("/");
+        let fileName = parts[parts.length - 1];
+        // index 文件显示上级目录名
+        if (
+          [
+            "index.ts",
+            "index.js",
+            "index.vue",
+            "index.tsx",
+            "index.jsx",
+          ].includes(fileName)
+        ) {
+          if (parts.length >= 2) return parts[parts.length - 2];
+        }
+        return fileName;
+      }
+
+      // ===== 键盘快捷键：Ctrl/Cmd + F 聚焦搜索 =====
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+          if (document.activeElement !== searchInput) {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+        if (e.key === "Escape" && document.activeElement === searchInput) {
+          searchInput.value = "";
+          clearBtn.classList.remove("visible");
+          triggerSearch("");
+          searchInput.blur();
+        }
+      });
+
+      // ===== 清空按钮 =====
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        clearBtn.classList.remove("visible");
+        triggerSearch("");
+        searchInput.focus();
+      });
+
+      searchInput.addEventListener("input", () => {
+        const val = searchInput.value.trim();
+        clearBtn.classList.toggle("visible", val.length > 0);
+        triggerSearch(val);
+      });
+
+      // ===== 搜索逻辑（分离出来便于复用） =====
+      let currentChart = null;
+      let currentNodes = [];
+
+      function triggerSearch(keyword) {
+        if (!currentChart || !currentNodes.length) return;
+
+        const lowerKeyword = keyword.toLowerCase();
+        let matchCount = 0;
+
+        const newData = currentNodes.map((node) => {
+          const isMatch =
+            lowerKeyword === ""
+              ? false
+              : node.name.toLowerCase().includes(lowerKeyword);
+          if (isMatch) matchCount++;
+
+          return {
+            name: node.name,
+            symbolSize: isMatch
+              ? node.symbolSize * 1.6
+              : node.symbolSize * (lowerKeyword ? 0.7 : 1),
+            category: node.category,
+            dependencyCount: node.dependencyCount,
+            label: {
+              show: true,
+              fontSize: isMatch ? 13 : lowerKeyword ? 9 : 10,
+              fontWeight: isMatch ? "bold" : "normal",
+              color: isMatch ? "#e53e3e" : lowerKeyword ? "#a0aec0" : "#333",
+              formatter: () => getDisplayName(node.name),
+            },
+            itemStyle: isMatch
+              ? {
+                  borderColor: "#e53e3e",
+                  borderWidth: 3,
+                  shadowBlur: 16,
+                  shadowColor: "rgba(229, 62, 62, 0.4)",
+                }
+              : lowerKeyword
+                ? { opacity: 0.25 }
+                : {},
+          };
         });
 
-        // 遍历所有模块
-        rawData.modules.forEach(module => {
-          const source = module.source;
-          // 添加源节点（如果未添加）
-          if (!nodeIndexMap.has(source)) {
-            nodeIndexMap.set(source, nodes.length);
-            // 根据模块类型设置不同的分类
+        matchCountEl.textContent = lowerKeyword
+          ? `${matchCount} 个匹配`
+          : "0 个匹配";
+        matchCountEl.style.color = matchCount > 0 ? "#e53e3e" : "#4a5568";
+
+        currentChart.setOption({ series: [{ data: newData }] });
+      }
+
+      // ===== 主数据加载 =====
+      fetch("/deps.json")
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((rawData) => {
+          console.log("📊 依赖数据加载成功", rawData);
+
+          const nodes = [];
+          const edges = [];
+          const nodeIndexMap = new Map();
+          const dependencyCount = new Map();
+
+          // 计算依赖数量
+          rawData.modules.forEach((module) => {
+            const count = module.dependencies ? module.dependencies.length : 0;
+            dependencyCount.set(module.source, count);
+          });
+
+          // 分类 & 节点生成
+          function getCategoryAndSize(path) {
             let category = 0;
             let baseSize = 12;
-            if (source.startsWith('node_modules/')) {
-              category = 1; // npm 依赖
+
+            if (path.startsWith("node_modules/")) {
+              category = 1;
               baseSize = 10;
-            } else if (source.includes('/')) {
-              const parts = source.split('/');
-              if (parts[0] === 'src') {
-                if (parts[1] === 'components') {
-                  category = 2; // 组件
-                  baseSize = 14;
-                } else if (parts[1] === 'utils') {
-                  category = 3; // 工具函数
-                  baseSize = 12;
-                } else if (parts[1] === 'stores') {
-                  category = 4; // 状态管理
-                  baseSize = 12;
-                } else if (parts[1] === 'types') {
-                  category = 5; // 类型定义
-                  baseSize = 10;
-                } else if (parts[1] === 'api') {
-                  category = 6; // API
-                  baseSize = 12;
-                } else if (parts[1] === 'message') {
-                  category = 7; // 消息
-                  baseSize = 12;
-                } else if (parts[1] === 'event') {
-                  category = 8; // 事件总线
-                  baseSize = 12;
+            } else if (path.includes("/")) {
+              const parts = path.split("/");
+              if (parts[0] === "src" && parts[1]) {
+                const map = {
+                  components: { cat: 2, size: 14 },
+                  utils: { cat: 3, size: 12 },
+                  stores: { cat: 4, size: 12 },
+                  types: { cat: 5, size: 10 },
+                  api: { cat: 6, size: 12 },
+                  message: { cat: 7, size: 12 },
+                  event: { cat: 8, size: 12 },
+                  "event-bus": { cat: 8, size: 12 },
+                };
+                const matched = map[parts[1]];
+                if (matched) {
+                  category = matched.cat;
+                  baseSize = matched.size;
                 }
               }
             }
-            // 根据依赖数量调整节点大小
-            const count = dependencyCount.get(source) || 0;
+            const count = dependencyCount.get(path) || 0;
             const symbolSize = Math.max(baseSize, baseSize + count * 0.8);
-            nodes.push({ 
-              name: source, 
-              symbolSize, 
-              category,
-              dependencyCount: count
+            return { category, symbolSize, dependencyCount: count };
+          }
+
+          // 添加节点
+          function addNode(path) {
+            if (nodeIndexMap.has(path)) return;
+            nodeIndexMap.set(path, nodes.length);
+            const info = getCategoryAndSize(path);
+            nodes.push({
+              name: path,
+              symbolSize: info.symbolSize,
+              category: info.category,
+              dependencyCount: info.dependencyCount,
             });
           }
-          
-          // 处理每个依赖
-          if (module.dependencies) {
-            module.dependencies.forEach(dependency => {
-              const target = dependency.resolved || dependency.module;
-              if (target) {
-                // 添加目标节点（如果未添加）
-                if (!nodeIndexMap.has(target)) {
-                  nodeIndexMap.set(target, nodes.length);
-                  // 根据目标类型设置不同的分类
-                  let category = 0;
-                  let baseSize = 12;
-                  if (target.startsWith('node_modules/')) {
-                    category = 1; // npm 依赖
-                    baseSize = 10;
-                  } else if (target.includes('/')) {
-                    const parts = target.split('/');
-                    if (parts[0] === 'src') {
-                      if (parts[1] === 'components') {
-                        category = 2; // 组件
-                        baseSize = 14;
-                      } else if (parts[1] === 'utils') {
-                        category = 3; // 工具函数
-                        baseSize = 12;
-                      } else if (parts[1] === 'stores') {
-                        category = 4; // 状态管理
-                        baseSize = 12;
-                      } else if (parts[1] === 'types') {
-                        category = 5; // 类型定义
-                        baseSize = 10;
-                      } else if (parts[1] === 'api') {
-                        category = 6; // API
-                        baseSize = 12;
-                      } else if (parts[1] === 'message') {
-                        category = 7; // 消息
-                        baseSize = 12;
-                      } else if (parts[1] === 'event-bus') {
-                        category = 8; // 事件总线
-                        baseSize = 12;
-                      }
-                    }
-                  }
-                  // 根据依赖数量调整节点大小
-                  const count = dependencyCount.get(target) || 0;
-                  const symbolSize = Math.max(baseSize, baseSize + count * 0.8);
-                  nodes.push({ 
-                    name: target, 
-                    symbolSize, 
-                    category,
-                    dependencyCount: count
+
+          // 遍历模块
+          rawData.modules.forEach((module) => {
+            addNode(module.source);
+            if (module.dependencies) {
+              module.dependencies.forEach((dep) => {
+                const target = dep.resolved || dep.module;
+                if (target) {
+                  addNode(target);
+                  edges.push({
+                    source: nodeIndexMap.get(module.source),
+                    target: nodeIndexMap.get(target),
                   });
                 }
-                edges.push({
-                  source: nodeIndexMap.get(source),
-                  target: nodeIndexMap.get(target)
-                });
-              }
-            });
-          }
-        });
-
-        // 可选：过滤掉孤立节点（没有连线的节点）
-        const connectedNodeSet = new Set();
-        edges.forEach(edge => {
-          connectedNodeSet.add(edge.source);
-          connectedNodeSet.add(edge.target);
-        });
-        const filteredNodes = nodes.filter((_, idx) => connectedNodeSet.has(idx));
-        // 重建索引映射
-        const newIndexMap = new Map();
-        filteredNodes.forEach((node, newIdx) => {
-          newIndexMap.set(node.name, newIdx);
-        });
-        const filteredEdges = edges.filter(edge => {
-          return newIndexMap.has(nodes[edge.source].name) && newIndexMap.has(nodes[edge.target].name);
-        }).map(edge => ({
-          source: newIndexMap.get(nodes[edge.source].name),
-          target: newIndexMap.get(nodes[edge.target].name)
-        }));
-
-        // 确保过滤后的节点保留dependencyCount属性
-        const finalNodes = filteredNodes.map(node => ({
-          ...node,
-          dependencyCount: node.dependencyCount || 0
-        }));
-        const finalEdges = filteredEdges;
-
-        // 初始化 ECharts 力导向图
-        const chart = echarts.init(document.getElementById('chart'));
-        const option = {
-          title: {
-            text: '🕸️ 项目依赖蛛网图',
-            left: 'center',
-            top: 10,
-            textStyle: { fontSize: 16, fontWeight: 'normal', color: '#333' }
-          },
-          tooltip: {
-            formatter: (params) => {
-              if (params.dataType === 'node') {
-                const node = params.data;
-                const dependencyCount = node.dependencyCount || 0;
-                return `${params.name}<br/>依赖数量: ${dependencyCount}`;
-              }
-              if (params.dataType === 'edge') {
-                const sourceNode = finalNodes[params.data.source];
-                const targetNode = finalNodes[params.data.target];
-                return `${sourceNode.name} → ${targetNode.name}`;
-              }
-              return '';
+              });
             }
-          },
-          legend: {
-            data: ['本地文件', 'npm依赖', '组件', '工具函数', '状态管理', '类型定义', 'API', '消息', '事件总线'],
-            orient: 'vertical',
-            left: 10,
-            top: 40,
-            textStyle: { fontSize: 12 }
-          },
-          series: [{
-            type: 'graph',
-            layout: 'force',          // 力导向布局 -> 蜘蛛网效果
-            force: {
-              repulsion: 2000,        // 节点斥力，越大越分散
-              edgeLength: 200,       // 边长理想长度
-              gravity: 0.05,         // 重力，避免飞太远
-              friction: 0.1,
-              layoutAnimation: true
-            },
-            roam: true,                // 允许缩放/平移
-            draggable: true,           // 节点可拖拽
-            data: finalNodes.map(node => ({
-              name: node.name,
-              symbolSize: node.symbolSize,
-              category: node.category,
-              dependencyCount: node.dependencyCount,
-              label: { 
-                show: true, 
-                position: 'right', 
-                fontSize: 10, 
-                offset: [5, 0],
-                formatter: (params) => {
-                  // 简化显示路径，只显示文件名
-                  const name = params.name;
-                  const parts = name.split('/');
-                  const fileName = parts[parts.length - 1];
-                  // 如果文件名为index，则显示所在目录的名称
-                  if (fileName === 'index.ts' || fileName === 'index.js' || fileName === 'index.vue') {
-                    if (parts.length >= 2) {
-                      return parts[parts.length - 2];
-                    }
-                  }
-                  return fileName;
-                }
-              }
-            })),
-            links: finalEdges,
-            categories: [
-              { name: '本地文件', itemStyle: { color: '#3498db' } },
-              { name: 'npm依赖', itemStyle: { color: '#27ae60' } },
-              { name: '组件', itemStyle: { color: '#e74c3c' } },
-              { name: '工具函数', itemStyle: { color: '#f39c12' } },
-              { name: '状态管理', itemStyle: { color: '#9b59b6' } },
-              { name: '类型定义', itemStyle: { color: '#1abc9c' } },
-              { name: 'API', itemStyle: { color: '#34495e' } },
-              { name: '消息', itemStyle: { color: '#e67e22' } },
-              { name: '事件总线', itemStyle: { color: '#16a085' } }
+          });
+
+          // 过滤孤立节点
+          const connectedSet = new Set();
+          edges.forEach((e) => {
+            connectedSet.add(e.source);
+            connectedSet.add(e.target);
+          });
+          const filteredNodes = nodes.filter((_, idx) => connectedSet.has(idx));
+          const newMap = new Map();
+          filteredNodes.forEach((n, i) => newMap.set(n.name, i));
+
+          const filteredEdges = edges
+            .filter(
+              (e) =>
+                newMap.has(nodes[e.source].name) &&
+                newMap.has(nodes[e.target].name),
+            )
+            .map((e) => ({
+              source: newMap.get(nodes[e.source].name),
+              target: newMap.get(nodes[e.target].name),
+            }));
+
+          currentNodes = filteredNodes.map((n) => ({ ...n }));
+
+          // ===== 统计信息 =====
+          const npmCount = filteredNodes.filter((n) =>
+            n.name.startsWith("node_modules/"),
+          ).length;
+          nodeCountEl.textContent = filteredNodes.length;
+          edgeCountEl.textContent = filteredEdges.length;
+          npmCountEl.textContent = npmCount;
+          statsEl.style.display = "flex";
+
+          // ===== 初始化 ECharts =====
+          const chart = echarts.init(chartDom);
+          currentChart = chart;
+
+          // 窗口自适应
+          window.addEventListener("resize", () => chart.resize());
+
+          const option = {
+            // 在 option 最外层添加
+            dataZoom: [
+              {
+                type: "inside",
+                disabled: false,
+                zoomOnMouseWheel: true,
+                moveOnMouseMove: true,
+                moveOnMouseWheel: false,
+              },
             ],
-            lineStyle: {
-              color: '#aaa',
-              curveness: 0.2,
-              width: 1,
-              opacity: 0.6
+            title: {
+              text: "🕸️ 项目依赖蛛网图",
+              left: "center",
+              top: 10,
+              textStyle: {
+                fontSize: 16,
+                fontWeight: "normal",
+                color: "#2d3748",
+              },
             },
-            edgeSymbol: ['none', 'arrow'],
-            edgeSymbolSize: [0, 6],
-            focusNodeAdjacency: true,
-            zoom: 0.8,
-            itemStyle: {
-              borderColor: '#fff',
-              borderWidth: 1
-            }
-          }]
-        };
-        chart.setOption(option);
-
-        // 搜索高亮功能
-        const searchInput = document.getElementById('search');
-        searchInput.addEventListener('input', (e) => {
-          const keyword = e.target.value.trim().toLowerCase();
-          if (!keyword) {
-            // 恢复所有节点默认样式
-            chart.setOption({
-              series: [{
-                data: finalNodes.map(node => ({
+            tooltip: {
+              formatter: (params) => {
+                if (params.dataType === "node") {
+                  const d = params.data;
+                  return `<strong>${d.name}</strong><br/>📦 依赖数量: ${d.dependencyCount || 0}`;
+                }
+                if (params.dataType === "edge") {
+                  const s = filteredNodes[params.data.source];
+                  const t = filteredNodes[params.data.target];
+                  return `${s?.name || "?"} → ${t?.name || "?"}`;
+                }
+                return "";
+              },
+            },
+            legend: {
+              data: [
+                "本地文件",
+                "npm依赖",
+                "组件",
+                "工具函数",
+                "状态管理",
+                "类型定义",
+                "API",
+                "消息",
+                "事件总线",
+              ],
+              orient: "vertical",
+              left: 10,
+              top: 40,
+              textStyle: { fontSize: 12 },
+              icon: "circle",
+              itemWidth: 10,
+              itemHeight: 10,
+            },
+            series: [
+              {
+                type: "graph",
+                layout: "force",
+                force: {
+                  repulsion: 2000,
+                  edgeLength: 200,
+                  gravity: 0.05,
+                  friction: 0.1,
+                  layoutAnimation: true,
+                },
+                roam: true,
+                draggable: true,
+                data: currentNodes.map((node) => ({
                   name: node.name,
                   symbolSize: node.symbolSize,
                   category: node.category,
-                  label: { 
-                    show: true, 
-                    fontSize: 10, 
-                    color: '#333',
-                    formatter: (params) => {
-                      const name = params.name;
-                      const parts = name.split('/');
-                      const fileName = parts[parts.length - 1];
-                      // 如果文件名为index，则显示所在目录的名称
-                      if (fileName === 'index.ts' || fileName === 'index.js' || fileName === 'index.vue') {
-                        if (parts.length >= 2) {
-                          return parts[parts.length - 2];
-                        }
-                      }
-                      return fileName;
-                    }
-                  },
                   dependencyCount: node.dependencyCount,
-                  itemStyle: { borderColor: '#fff', borderWidth: 1 }
-                }))
-              }]
-            });
-            return;
-          }
-          const newData = finalNodes.map(node => {
-            const isMatch = node.name.toLowerCase().includes(keyword);
-            return {
-              name: node.name,
-              symbolSize: isMatch ? node.symbolSize * 1.5 : node.symbolSize * 0.8,
-              category: node.category,
-              dependencyCount: node.dependencyCount,
-              label: {
-                show: true,
-                fontSize: isMatch ? 12 : 9,
-                fontWeight: isMatch ? 'bold' : 'normal',
-                color: isMatch ? '#e34f4f' : '#666',
-                formatter: (params) => {
-                  const name = params.name;
-                  const parts = name.split('/');
-                  const fileName = parts[parts.length - 1];
-                  // 如果文件名为index，则显示所在目录的名称
-                  if (fileName === 'index.ts' || fileName === 'index.js' || fileName === 'index.vue') {
-                    if (parts.length >= 2) {
-                      return parts[parts.length - 2];
-                    }
-                  }
-                  return fileName;
-                }
+                  label: {
+                    show: true,
+                    position: "right",
+                    fontSize: 10,
+                    offset: [5, 0],
+                    formatter: () => getDisplayName(node.name),
+                  },
+                })),
+                links: filteredEdges,
+                categories: [
+                  { name: "本地文件", itemStyle: { color: "#3498db" } },
+                  { name: "npm依赖", itemStyle: { color: "#27ae60" } },
+                  { name: "组件", itemStyle: { color: "#e74c3c" } },
+                  { name: "工具函数", itemStyle: { color: "#f39c12" } },
+                  { name: "状态管理", itemStyle: { color: "#9b59b6" } },
+                  { name: "类型定义", itemStyle: { color: "#1abc9c" } },
+                  { name: "API", itemStyle: { color: "#34495e" } },
+                  { name: "消息", itemStyle: { color: "#e67e22" } },
+                  { name: "事件总线", itemStyle: { color: "#16a085" } },
+                ],
+                lineStyle: {
+                  color: "#aaa",
+                  curveness: 0.2,
+                  width: 1.2,
+                  opacity: 0.5,
+                },
+                edgeSymbol: ["none", "arrow"],
+                edgeSymbolSize: [0, 6],
+                focusNodeAdjacency: true,
+                zoom: 0.8,
+                itemStyle: {
+                  borderColor: "#fff",
+                  borderWidth: 1.5,
+                },
               },
-              itemStyle: isMatch ? { 
-                borderColor: '#e34f4f', 
-                borderWidth: 2, 
-                shadowBlur: 10,
-                shadowColor: '#e34f4f'
-              } : {}
-            };
-          });
-          chart.setOption({ series: [{ data: newData }] });
-        });
-      })
-      .catch(err => {
-        document.body.innerHTML = `<div style="color:red; padding:30px; font-family:monospace;">❌ 加载 deps.json 失败：${err.message}<br>请先在项目根目录运行：<code>npx depcruise --output-type json src > deps.json</code></div>`;
-      });
-  </script>
-</body>
+            ],
+          };
 
+          chart.setOption(option);
+
+          // 隐藏加载状态
+          loadingEl.style.display = "none";
+
+          // ===== 延迟触发初始布局动画 =====
+          setTimeout(() => {
+            chart.resize();
+          }, 100);
+        })
+        .catch((err) => {
+          console.error("❌ 加载失败:", err);
+          document.body.innerHTML = `
+            <div style="color:#e53e3e; padding:40px; font-family:system-ui; text-align:center; max-width:600px; margin:60px auto; background:#fff5f5; border-radius:12px; border:1px solid #feb2b2;">
+              <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
+              <h3 style="margin-bottom:8px;">加载依赖数据失败</h3>
+              <p style="color:#718096; font-size:14px; margin-bottom:16px;">${err.message}</p>
+              <code style="background:#edf2f7; padding:8px 14px; border-radius:6px; font-size:13px; display:inline-block;">
+                npx depcruise --output-type json src > deps.json
+              </code>
+            </div>
+          `;
+        });
+    </script>
+  </body>
 </html>

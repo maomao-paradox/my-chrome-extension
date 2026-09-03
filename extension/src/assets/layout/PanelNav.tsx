@@ -27,16 +27,19 @@ import {
   buildDefaultTelemetry,
   STARSHIP_MODULES,
   STARSHIP_STATUS_TEXT,
+  StarshipPanelId,
+  StarshipStatus,
   type ModuleTelemetry,
   type StarshipModuleMeta,
   type StarshipModuleState,
-  type StarshipPanelId,
-  type StarshipStatus,
 } from "@/pages/options/views/starshipModules";
 import {
   normalizeOptionsPerformanceLevel,
   useOptionsPerformance,
 } from "@/pages/options/composables/useOptionsPerformance";
+
+// 样式
+import "./style.scss";
 
 export interface PanelNavs {
   top: boolean;
@@ -148,16 +151,14 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
     [panels],
   );
 
-  const activePanelKey = useMemo(() => {
-    return (
-      panelEntries.find(
-        ([, panel]) => panel.xPos === -posX && panel.yPos === posY,
-      )?.[0] || "main"
-    );
+  const activePanelKey = useMemo<StarshipPanelId>(() => {
+    return (panelEntries.find(
+      ([, panel]) => panel.xPos === -posX && panel.yPos === posY,
+    )?.[0] || StarshipPanelId.Main) as StarshipPanelId;
   }, [panelEntries, posX, posY]);
 
   const isBridgeView = useMemo(
-    () => activePanelKey === "main",
+    () => activePanelKey === StarshipPanelId.Main,
     [activePanelKey],
   );
 
@@ -185,7 +186,11 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
 
     const mainTelemetry: ModuleTelemetry = {
       status:
-        warningCount > 0 ? "warning" : standbyCount > 0 ? "standby" : "online",
+        warningCount > 0
+          ? StarshipStatus.Warning
+          : standbyCount > 0
+            ? StarshipStatus.Standby
+            : StarshipStatus.Online,
       metric: `${onlineCount}/${peripheralStates.length}`,
       headline:
         warningCount > 0 ? `${warningCount} 个舱段需要复核` : "全舰链路稳定",
@@ -499,7 +504,7 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
       );
 
       next.left = {
-        status: debugMode ? "warning" : "online",
+        status: debugMode ? StarshipStatus.Warning : StarshipStatus.Online,
         metric: autoUpdate ? "AUTO" : "MANUAL",
         headline: debugMode ? "调试模式已开启" : "基础设置稳定",
         detail: `主题 ${themeColor.toUpperCase()} / 语言 ${language.toUpperCase()} / 性能 ${performanceMode.toUpperCase()}`,
@@ -516,10 +521,10 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
       next.right = {
         status:
           totalUsers === 0
-            ? "standby"
+            ? StarshipStatus.Standby
             : enabledUsers === totalUsers
-              ? "online"
-              : "warning",
+              ? StarshipStatus.Online
+              : StarshipStatus.Warning,
         metric: String(totalUsers).padStart(2, "0"),
         headline:
           totalUsers === 0
@@ -543,7 +548,8 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
         return config?.enabled !== false;
       }).length;
       next.bottom = {
-        status: enabledRoutes > 0 ? "online" : "standby",
+        status:
+          enabledRoutes > 0 ? StarshipStatus.Online : StarshipStatus.Standby,
         metric: `${enabledRoutes}/${domainEntries.length}`,
         headline:
           domainEntries.length === 0
@@ -568,10 +574,10 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
       next["bottom-left"] = {
         status:
           knowledgeNodes.length === 0
-            ? "standby"
+            ? StarshipStatus.Standby
             : masteredNodes > 0
-              ? "online"
-              : "standby",
+              ? StarshipStatus.Online
+              : StarshipStatus.Standby,
         metric:
           knowledgeNodes.length > 0
             ? String(knowledgeNodes.length).padStart(2, "0")
@@ -605,10 +611,10 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
         : 0;
       next.top = {
         status: !monitorEnabled
-          ? "standby"
+          ? StarshipStatus.Standby
           : callbackUrl
-            ? "online"
-            : "warning",
+            ? StarshipStatus.Online
+            : StarshipStatus.Warning,
         metric: monitorEnabled
           ? `${monitorConfig.throttleInterval || 0}s`
           : "OFF",
@@ -632,7 +638,8 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
         (rule) => rule?.enabled !== false,
       ).length;
       next["top-left"] = {
-        status: enabledRules > 0 ? "online" : "standby",
+        status:
+          enabledRules > 0 ? StarshipStatus.Online : StarshipStatus.Standby,
         metric: `${enabledRules}/${rules.length}`,
         headline: enabledRules > 0 ? "拦截矩阵已部署" : "拦截矩阵空载",
         detail: `白名单 ${xhrWhitelist.length} 个域名入口`,
@@ -640,9 +647,11 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
 
       // @ts-ignore
       const platformLabel =
-        navigator.userAgentData?.platform || navigator.platform || "runtime";
+        navigator.userAgent || navigator.platform || "runtime";
       next["top-right"] = {
-        status: navigator.onLine ? "online" : "warning",
+        status: navigator.onLine
+          ? StarshipStatus.Online
+          : StarshipStatus.Warning,
         metric: (navigator.language || "N/A").toUpperCase(),
         headline: navigator.onLine ? "页面遥测在线" : "浏览器离线",
         detail: `${platformLabel} / Cookie ${navigator.cookieEnabled ? "ON" : "OFF"}`,
@@ -679,7 +688,11 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
       );
 
       next["bottom-right"] = {
-        status: aiReady ? "online" : aiPartial ? "warning" : "standby",
+        status: aiReady
+          ? StarshipStatus.Online
+          : aiPartial
+            ? StarshipStatus.Warning
+            : StarshipStatus.Standby,
         metric: aiModel
           ? aiModel.slice(0, 8).toUpperCase()
           : aiReady
@@ -1027,472 +1040,7 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
             ))}
           </div>
         </div>
-
-        {/* 底部状态栏 */}
-        <footer
-          className={`bridge-footer ${!isBridgeView ? "bridge-footer--module" : ""}`}
-        >
-          {isBridgeView ? (
-            <>
-              <span>EDGE NAV ACTIVE</span>
-              <span>
-                {activeModuleState.code} / {activeModuleState.section}
-              </span>
-              <span>模块 {moduleStates.length - 1} 个</span>
-              <span>`O` 打开总览</span>
-            </>
-          ) : (
-            <>
-              <span>
-                {activeModuleState.code} / {activeModuleState.section}
-              </span>
-              <span>{activeModuleState.telemetry.headline}</span>
-              <span>`O` 总览</span>
-              <span>返回指挥中心可用</span>
-            </>
-          )}
-        </footer>
       </div>
-
-      {/* 样式 */}
-      <style>{`
-        .panel-nav-shell {
-          position: relative;
-          min-height: 100vh;
-        }
-
-        .site-wrap {
-          position: fixed;
-          inset: 0;
-          overflow: hidden;
-          background:
-            radial-gradient(circle at top, rgba(54, 92, 166, 0.24), transparent 35%),
-            radial-gradient(circle at 20% 25%, rgba(26, 214, 214, 0.08), transparent 22%),
-            linear-gradient(180deg, #040812 0%, #07111f 45%, #03060d 100%);
-        }
-
-        .site-wrap--module {
-          background:
-            radial-gradient(circle at top right, rgba(53, 114, 184, 0.14), transparent 28%),
-            radial-gradient(circle at 18% 16%, rgba(44, 210, 198, 0.05), transparent 20%),
-            linear-gradient(180deg, #08111d 0%, #0b1421 48%, #050a12 100%);
-        }
-
-        .site-wrap::before,
-        .site-wrap::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-        }
-
-        .site-wrap::before {
-          background-image:
-            radial-gradient(circle at 12% 18%, rgba(122, 247, 208, 0.7) 0 1px, transparent 1.5px),
-            radial-gradient(circle at 32% 64%, rgba(255, 255, 255, 0.6) 0 1.2px, transparent 1.8px),
-            radial-gradient(circle at 84% 34%, rgba(122, 198, 255, 0.7) 0 1px, transparent 1.5px),
-            radial-gradient(circle at 74% 78%, rgba(255, 179, 71, 0.55) 0 1px, transparent 1.8px);
-          opacity: 0.8;
-        }
-
-        .site-wrap::after {
-          background:
-            linear-gradient(transparent 96%, rgba(76, 157, 214, 0.06) 100%),
-            linear-gradient(90deg, transparent 96%, rgba(76, 157, 214, 0.05) 100%);
-          background-size: 100% 28px, 28px 100%;
-          mix-blend-mode: screen;
-          opacity: 0.18;
-        }
-
-        .screen-scanlines,
-        .screen-glitch {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          z-index: 12;
-        }
-
-        .screen-scanlines {
-          opacity: 0.13;
-          background: repeating-linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.02) 0 1px,
-            transparent 1px 4px
-          );
-          mix-blend-mode: screen;
-        }
-
-        .site-wrap--module .screen-scanlines {
-          opacity: 0.08;
-        }
-
-        .screen-glitch {
-          opacity: 0;
-        }
-
-        .screen-glitch--active {
-          animation: bridge-glitch 0.14s steps(2, end);
-        }
-
-        .site-wrap.blur-active {
-          filter: blur(8px);
-          pointer-events: none;
-          user-select: none;
-        }
-
-        .panel-stage {
-          position: absolute;
-          inset: 0;
-        }
-
-        .panel-wrap {
-          position: absolute;
-          inset: 0;
-          transition: transform 0.55s cubic-bezier(0.55, 0, 0.1, 1);
-          will-change: transform;
-        }
-
-        .panel-wrap.is-transitioning {
-          filter: drop-shadow(0 0 22px rgba(39, 165, 255, 0.16));
-        }
-
-        .panel {
-          position: absolute;
-          inset: 0;
-          width: 100vw;
-          height: 100vh;
-          transform: translate3d(var(--panel-x), var(--panel-y), 0);
-          background: transparent;
-        }
-
-        .panel.is-active {
-          z-index: 2;
-        }
-
-        .panel-content {
-          height: 100%;
-          padding: 46px;
-          overflow-x: hidden;
-          overflow-y: auto;
-          scrollbar-width: none;
-        }
-
-        .panel-content::-webkit-scrollbar {
-          display: none;
-        }
-
-        .panel-content--module {
-          min-height: 100%;
-        }
-
-        .module-shell {
-          height: 100%;
-          padding-bottom: 20px;
-          margin: 0 auto;
-          padding: 20px;
-          border: 1px solid rgba(86, 170, 235, 0.16);
-          border-radius: 28px;
-          background:
-            linear-gradient(180deg, rgba(7, 16, 29, 0.94), rgba(4, 10, 18, 0.9)),
-            radial-gradient(circle at top right, rgba(60, 146, 255, 0.08), transparent 42%);
-          box-shadow:
-            0 18px 60px rgba(0, 0, 0, 0.32),
-            0 0 28px rgba(68, 165, 255, 0.06),
-            inset 0 1px 0 rgba(183, 231, 255, 0.05);
-        }
-
-        .module-shell--ai {
-          height: auto;
-          min-height: 100%;
-        }
-
-        .module-shell[data-status='online'] {
-          border-color: rgba(105, 183, 255, 0.2);
-        }
-
-        .module-shell[data-status='warning'] {
-          border-color: rgba(255, 179, 71, 0.24);
-        }
-
-        .module-shell[data-status='standby'] {
-          border-color: rgba(122, 247, 208, 0.18);
-        }
-
-        .module-shell__header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 18px;
-          margin-bottom: 16px;
-        }
-
-        .module-shell__title {
-          min-width: 0;
-        }
-
-        .module-shell__eyebrow,
-        .module-shell__status span,
-        .module-shell__status strong,
-        .module-shell__btn {
-          font-family: 'JetBrains Mono', 'Consolas', monospace;
-          letter-spacing: 0.12em;
-        }
-
-        .module-shell__eyebrow {
-          display: block;
-          margin-bottom: 10px;
-          font-size: 10px;
-          text-transform: uppercase;
-          color: rgba(137, 205, 241, 0.76);
-        }
-
-        .module-shell__title h1 {
-          margin: 0 0 10px;
-          font-size: 32px;
-          line-height: 1.05;
-          color: #f2fbff;
-        }
-
-        .module-shell__title p {
-          margin: 0;
-          max-width: 780px;
-          color: rgba(197, 225, 241, 0.8);
-          line-height: 1.6;
-        }
-
-        .module-shell__actions {
-          display: flex;
-          gap: 10px;
-        }
-
-        .module-shell__btn {
-          border: 1px solid rgba(94, 177, 237, 0.18);
-          border-radius: 14px;
-          padding: 10px 14px;
-          background: rgba(5, 14, 24, 0.7);
-          color: #def7ff;
-          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-          cursor: pointer;
-        }
-
-        .module-shell__btn:hover {
-          transform: translateY(-1px);
-          border-color: rgba(122, 247, 208, 0.34);
-          box-shadow: 0 0 18px rgba(122, 247, 208, 0.08);
-        }
-
-        .module-shell__btn--accent {
-          background: linear-gradient(135deg, rgba(61, 129, 255, 0.64), rgba(56, 204, 214, 0.24));
-          border-color: rgba(118, 220, 255, 0.3);
-        }
-
-        .module-shell__status {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          position: relative;
-          margin-top: 50px;
-          padding: 12px 14px;
-          border-radius: 18px;
-          border: 1px solid rgba(94, 177, 237, 0.14);
-          background: rgba(4, 11, 21, 0.72);
-          color: rgba(163, 216, 243, 0.8);
-        }
-
-        .module-shell__status strong {
-          color: #f3fbff;
-          font-size: 12px;
-        }
-
-        .module-shell__status span {
-          font-size: 11px;
-        }
-
-        .module-shell__status span:last-child {
-          margin-left: auto;
-        }
-
-        .module-shell__body {
-          position: relative;
-        }
-
-        .edge-nav {
-          position: absolute;
-          inset: 0;
-          z-index: 35;
-          pointer-events: none;
-          justify-content: center;
-          display: flex;
-        }
-
-        .panel__nav {
-          position: absolute;
-          border: 0;
-          background: transparent;
-          opacity: 0.3;
-          transition: opacity 0.25s ease, transform 0.25s ease;
-          pointer-events: auto;
-          cursor: pointer;
-        }
-
-        .panel__nav:hover {
-          opacity: 1;
-        }
-
-        .panel__nav--top {
-          top: 10px;
-          left: 50%;
-        }
-
-        .panel__nav--left {
-          left: 12px;
-          top: 50%;
-        }
-
-        .panel__nav--left-top {
-          left: 12px;
-          top: 10px;
-        }
-
-        .panel__nav--left-bottom {
-          left: 12px;
-          bottom: 56px;
-        }
-
-        .panel__nav--right {
-          right: 12px;
-          top: 50%;
-        }
-
-        .panel__nav--right-top {
-          right: 12px;
-          top: 10px;
-        }
-
-        .panel__nav--right-bottom {
-          right: 12px;
-          bottom: 56px;
-        }
-
-        .panel__nav--bottom {
-          left: 50%;
-          bottom: 56px;
-        }
-
-        .nav-arrow {
-          display: block;
-          filter:
-            drop-shadow(0 0 12px rgba(120, 215, 255, 0.8))
-            drop-shadow(0 0 24px rgba(120, 215, 255, 0.45));
-        }
-
-        .panel__nav:hover .nav-arrow {
-          transform: scale(1.08);
-        }
-
-        .bridge-footer {
-          position: absolute;
-          left: 22px;
-          right: 22px;
-          bottom: 14px;
-          z-index: 25;
-          display: flex;
-          justify-content: space-between;
-          gap: 14px;
-          padding: 10px 14px;
-          border-radius: 16px;
-          font-size: 11px;
-          color: rgba(151, 207, 240, 0.8);
-          border: 1px solid rgba(82, 177, 255, 0.22);
-          background: linear-gradient(180deg, rgba(4, 14, 26, 0.88), rgba(2, 8, 18, 0.68));
-          box-shadow:
-            0 14px 50px rgba(0, 0, 0, 0.35),
-            inset 0 1px 0 rgba(159, 220, 255, 0.08);
-          backdrop-filter: blur(16px);
-          font-family: 'JetBrains Mono', 'Consolas', monospace;
-          letter-spacing: 0.12em;
-        }
-
-        .bridge-footer--module {
-          justify-content: flex-start;
-          background: rgba(4, 12, 22, 0.76);
-        }
-
-        @keyframes bridge-glitch {
-          0% {
-            opacity: 0;
-            transform: translateX(0);
-            filter: hue-rotate(0deg);
-          }
-
-          20% {
-            opacity: 0.22;
-            transform: translateX(-6px);
-            background:
-              linear-gradient(90deg, rgba(255, 0, 84, 0.12), transparent 26%),
-              linear-gradient(180deg, transparent 68%, rgba(105, 183, 255, 0.16) 100%);
-            filter: hue-rotate(12deg);
-          }
-
-          60% {
-            opacity: 0.14;
-            transform: translateX(4px);
-            background:
-              linear-gradient(90deg, transparent 30%, rgba(0, 255, 209, 0.12) 55%, transparent 100%);
-          }
-
-          100% {
-            opacity: 0;
-            transform: translateX(0);
-            filter: hue-rotate(0deg);
-          }
-        }
-
-        @media (max-width: 1100px) {
-          .bridge-footer {
-            flex-wrap: wrap;
-          }
-
-          .module-shell__header {
-            flex-direction: column;
-          }
-
-          .module-shell__actions {
-            width: 100%;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .panel-content {
-            padding: calc(var(--bridge-hud-height, 108px) + 16px) 12px 74px;
-          }
-
-          .bridge-footer {
-            left: 12px;
-            right: 12px;
-            bottom: 10px;
-          }
-
-          .panel__nav--left,
-          .panel__nav--left-top,
-          .panel__nav--left-down {
-            left: 2px;
-          }
-
-          .panel__nav--right,
-          .panel__nav--right-top,
-          .panel__nav--right-down {
-            right: 2px;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .panel-wrap,
-          .panel__nav {
-            transition-duration: 0.01ms !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };
