@@ -68,8 +68,9 @@ export const useDomainManager = () => {
         await storage.ext.local.set(domainConfigsKey, configs);
       }
       const allowedConfigKeys = contentDomains.filter(Boolean);
-      setDomainConfigs(
-        allowedConfigKeys.reduce(
+      setDomainConfigs({
+        Eve: { enabled: true, domains: "*:*" },
+        ...allowedConfigKeys.reduce(
           (acc: DomainConfigs, key: string) => ({
             ...acc,
             [key]: configs[key] || {
@@ -79,7 +80,7 @@ export const useDomainManager = () => {
           }),
           {} as DomainConfigs,
         ),
-      );
+      });
     } catch (error) {
       maLogger.error("加载域名配置失败:", error);
     }
