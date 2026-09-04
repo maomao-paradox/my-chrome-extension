@@ -1,0 +1,118 @@
+.achievement-total {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--popup-accent);
+  font-size: 12px;
+}
+
+.achievement-total strong {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.achievement-total span {
+  color: var(--popup-text-subtle);
+  font-size: 11px;
+}
+
+.achievement-list {
+  display: grid;
+  gap: 7px;
+}
+
+.achievement-item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--popup-border);
+  border-radius: 8px;
+  background: var(--popup-panel-bg);
+  opacity: 0.72;
+}
+
+.achievement-item.is-unlocked {
+  border-color: var(--popup-border-strong);
+  opacity: 1;
+}
+
+.achievement-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  color: var(--popup-text-subtle);
+  background: var(--popup-control-bg);
+}
+
+.achievement-item.is-unlocked .achievement-icon {
+  color: var(--popup-accent);
+}
+
+.achievement-copy {
+  min-width: 0;
+}
+
+.achievement-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.achievement-heading strong {
+  overflow: hidden;
+  color: var(--popup-text-primary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.achievement-heading span {
+  flex: 0 0 auto;
+  color: var(--popup-accent);
+  font-size: 10px;
+}
+
+.achievement-copy p {
+  margin: 3px 0 6px;
+  overflow: hidden;
+  color: var(--popup-text-subtle);
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.achievement-progress {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--popup-control-bg);
+}
+
+.achievement-progress span {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+  background: var(--popup-accent);
+  transition: width 0.25s ease;
+}
+
+.achievement-item time {
+  color: var(--popup-text-subtle);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achievement-progress span {
+    transition: none;
+  }
+}

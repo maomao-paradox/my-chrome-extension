@@ -11,11 +11,13 @@ import {
   CameraOutlined,
   PushpinOutlined,
   ClockCircleOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
 import BookmarkPage from "./views/BookmarkPage";
 import SettingPage from "./views/SettingPage";
 import CapturePage from "./views/CapturePage";
 import TOTPTokenPage from "./views/TOTPTokenPage";
+import AchievementPage from "./views/AchievementPage";
 import { useDomainState } from "./composables/useDomainState";
 import { usePopupTheme } from "./composables/usePopupTheme";
 import { usePopupMouseTrail } from "./composables/usePopupMouseTrail";
@@ -56,6 +58,13 @@ const TABS: TabConfig[] = [
     hint: "查看后端生成的动态验证码。",
     icon: <ClockCircleOutlined />,
     component: TOTPTokenPage,
+  },
+  {
+    key: "achievements",
+    label: "成就",
+    hint: "查看已发现的隐藏成就。",
+    icon: <TrophyOutlined />,
+    component: AchievementPage,
   },
   {
     key: "settings",

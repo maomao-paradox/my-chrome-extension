@@ -15,6 +15,10 @@ import React, { useCallback, useRef } from "react";
 import { Draggable } from "@/assets/components/react-index";
 import type { DraggableHandle } from "@/assets/components/react-index";
 import { getStaticAbstractPath } from "@/utils/common";
+import {
+  trackFloatingBallDrag,
+  trackFloatingBallOpen,
+} from "@/services/achievements";
 import "./styles/floating-ball.scss";
 
 interface FloatingBallProps {
@@ -61,6 +65,7 @@ const FloatingBall: React.FC<FloatingBallProps> = ({
     y: 1200,
   });
   const showOrbitRef = useRef(true);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
 
   /**
    * 处理悬浮球点击事件
@@ -74,10 +79,25 @@ const FloatingBall: React.FC<FloatingBallProps> = ({
       const rootNode = target.getRootNode();
       maLogger.info("点击目标", target, rootNode);
       if (rootNode instanceof ShadowRoot) {
+        trackFloatingBallOpen();
         onClick?.(e);
       }
     },
     [onClick],
+  );
+
+  const handleDragStart = useCallback(() => {
+    dragStartRef.current = draggableRef.current?.getCurrentPosition() ?? null;
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (_event: MouseEvent | TouchEvent, x: number, y: number) => {
+      const start = dragStartRef.current;
+      dragStartRef.current = null;
+      if (!start) return;
+      trackFloatingBallDrag(Math.hypot(x - start.x, y - start.y));
+    },
+    [],
   );
 
   /**
@@ -115,6 +135,8 @@ const FloatingBall: React.FC<FloatingBallProps> = ({
         {...DRAGGABLE_PROPS}
         width={45}
         height={45}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         onDragging={handleDragging}
         onMove={handleMove}
       >

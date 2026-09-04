@@ -1,6 +1,7 @@
 import storage from "@/stores/chromestorge";
 import { Bookmark, BookmarkComment } from "@/types/components";
 import { generateId } from "@/utils/base";
+import { trackAchievement } from "@/services/achievements";
 
 const BOOKMARKS_STORAGE_KEY = "textSelectionToolbookmarks";
 
@@ -24,6 +25,9 @@ export class BookmarkStorage {
 
       bookmarks.push(newBookmark);
       await storage.ext.local.set(BOOKMARKS_STORAGE_KEY, bookmarks);
+      trackAchievement("bookmark.created", "content", {
+        siteBucket: createSiteBucket(bookmark.url),
+      });
 
       return newBookmark;
     } catch (error) {
@@ -191,5 +195,19 @@ export class BookmarkStorage {
       maLogger.error("删除留言失败:", error);
       return null;
     }
+  }
+}
+
+function createSiteBucket(url: string): string {
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    let hash = 2166136261;
+    for (let index = 0; index < hostname.length; index += 1) {
+      hash ^= hostname.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return `site-${(hash >>> 0).toString(16)}`;
+  } catch {
+    return "site-unknown";
   }
 }

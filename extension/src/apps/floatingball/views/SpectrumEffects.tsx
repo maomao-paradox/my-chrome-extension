@@ -11,6 +11,7 @@ import {
   PauseOutlined,
   PlayCircleOutlined,
 } from "@ant-design/icons";
+import { trackSpectrumPreview } from "@/services/achievements";
 import "./styles/spectrum-effects.scss";
 
 interface NotificationMessage {
@@ -122,6 +123,11 @@ const SpectrumEffects: React.FC<SpectrumEffectsProps> = ({ onAddMessage }) => {
     }
   }, [activeEffect, onAddMessage]);
 
+  const selectEffect = useCallback((effectId: EffectId) => {
+    setActiveEffectId(effectId);
+    trackSpectrumPreview(effectId);
+  }, []);
+
   return (
     <section className="spectrum-effects" aria-label="光谱效应组件集">
       <header className="spectrum-header">
@@ -157,7 +163,7 @@ const SpectrumEffects: React.FC<SpectrumEffectsProps> = ({ onAddMessage }) => {
           block
           options={SEGMENT_OPTIONS}
           value={activeEffectId}
-          onChange={(value) => setActiveEffectId(value as EffectId)}
+          onChange={(value) => selectEffect(value as EffectId)}
         />
 
         <div className="spectrum-control-row">
@@ -194,7 +200,7 @@ const SpectrumEffects: React.FC<SpectrumEffectsProps> = ({ onAddMessage }) => {
             className={`spectrum-card${
               effect.id === activeEffectId ? " is-active" : ""
             }`}
-            onClick={() => setActiveEffectId(effect.id)}
+            onClick={() => selectEffect(effect.id)}
           >
             <span className={`spectrum-card-preview ${effect.className}`} />
             <span className="spectrum-card-copy">

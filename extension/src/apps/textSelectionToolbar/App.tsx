@@ -12,6 +12,7 @@ import React, {
 } from "react";
 import type { TextTool } from "@/types";
 import { componentManager } from "@/utils/componentManager";
+import { trackTextAction } from "@/services/achievements";
 import { eventManager } from "@/event";
 import toast from "@/utils/toast";
 import type { Comment } from "@/services/commentStorage";
@@ -707,6 +708,13 @@ const App: React.FC<AppProps> = ({
    */
   const handleToolClick = useCallback((tool: TextTool) => {
     maLogger.log("工具栏工具点击(回调通知):", tool.id);
+    if (["copy", "search", "translate", "bookmark", "replace"].includes(tool.id)) {
+      void trackTextAction(tool.id).then((unlocked) => {
+        unlocked.forEach((achievement) => {
+          toast.success(`成就解锁：${achievement.name}`);
+        });
+      });
+    }
   }, []);
 
   // 同步 customTools prop 变化

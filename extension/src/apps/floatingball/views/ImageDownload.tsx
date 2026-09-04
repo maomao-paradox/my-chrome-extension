@@ -24,6 +24,7 @@ import {
   downloadAllImages,
   downloadSingleImage,
 } from "@/utils/image-zip-download";
+import { trackImageBatchDownload } from "@/services/achievements";
 import type { ImageInfo } from "@/types/utils";
 import "./styles/image-download.scss";
 
@@ -132,6 +133,7 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
         onProgress: (p: number) => setProgress(p),
         fileName: "page_images.zip",
       });
+      trackImageBatchDownload(images.length);
       onAddMessage?.({ message: "图片打包下载完成！", type: "success" });
     } catch (e: any) {
       maLogger.error(e);

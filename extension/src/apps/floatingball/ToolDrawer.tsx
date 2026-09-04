@@ -36,6 +36,7 @@ import {
 import toolMap from "./views";
 import { Static404 } from "@/assets/components/react-index";
 import type { Tool } from "@/types/index.js";
+import { achievements } from "@/services/achievements";
 import "./styles/tool-drawer.scss";
 
 /** 通知消息类型 */
@@ -152,6 +153,18 @@ const ToolDrawer: React.FC<ToolDrawerProps> = ({
     },
     []
   );
+
+  useEffect(() => {
+    return achievements.subscribe((_snapshot, unlocked) => {
+      unlocked.forEach((achievement) => {
+        addNotification({
+          title: `成就解锁：${achievement.name}`,
+          message: achievement.hint,
+          type: "success",
+        });
+      });
+    });
+  }, [addNotification]);
 
   /** 标记单条已读 */
   const markAsRead = useCallback((idx: number) => {
