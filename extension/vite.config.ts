@@ -109,36 +109,40 @@ export default ({
           warn(warning);
         },
         input: {
-          ...(pages.devtools
-            ? scanFiles({
-                dirPath: "src/pages/devtools",
-                prefix: "devtools",
-                extFilter: ".html",
-              })
+          ...(isProduction
+            ? {
+                ...(pages.devtools
+                  ? scanFiles({
+                      dirPath: "src/pages/devtools",
+                      prefix: "devtools",
+                      extFilter: ".html",
+                    })
+                  : {}),
+                ...scanFiles({
+                  dirPath: "src/apps",
+                  prefix: "apps",
+                  useIndexFile: true,
+                  recursive: true,
+                  nameFilter: [...env.VITE_APP_DOMAIN.split(",")],
+                }),
+                ...scanFiles({
+                  dirPath: "src/content",
+                  prefix: "content",
+                  exclude: ["main.ts"],
+                  nameFilter: [
+                    ...env.VITE_CONTENT_DOMAIN.toLowerCase()
+                      .split(",")
+                      .map((item) => "content-" + item.trim()),
+                  ],
+                }),
+                ...scanFiles({
+                  dirPath: "src/sfs",
+                  prefix: "sfs",
+                  useIndexFile: true,
+                  recursive: true,
+                }),
+              }
             : {}),
-          ...scanFiles({
-            dirPath: "src/apps",
-            prefix: "apps",
-            useIndexFile: true,
-            recursive: true,
-            nameFilter: [...env.VITE_APP_DOMAIN.split(",")],
-          }),
-          ...scanFiles({
-            dirPath: "src/content",
-            prefix: "content",
-            exclude: ["main.ts"],
-            nameFilter: [
-              ...env.VITE_CONTENT_DOMAIN.toLowerCase()
-                .split(",")
-                .map((item) => "content-" + item.trim()),
-            ],
-          }),
-          ...scanFiles({
-            dirPath: "src/sfs",
-            prefix: "sfs",
-            useIndexFile: true,
-            recursive: true,
-          }),
         },
         output: {
           manualChunks: isProduction

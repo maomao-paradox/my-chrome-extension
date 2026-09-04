@@ -10,8 +10,7 @@
 // pianoEffect.ts - 钢琴音效模块
 import { storage } from "@/stores";
 import { getStaticAbstractPath } from "@/utils/common";
-import { wzyTool } from "@/apps/rainmeter";
-import { AppModule } from "@/types";
+import { type AppModule } from "@/types";
 
 const fetchAndDecodeAudioBuffer = async (
   soundFile: string,
@@ -212,23 +211,6 @@ class PianoEffect implements AppModule {
       return;
     }
 
-    // 确保rainTextModule存在且方法有效
-    const hasRainModule =
-      this.rainTextModule &&
-      typeof this.rainTextModule.addCharDrop === "function";
-    // maLogger.log(`[PianoEffect] rainTextModule状态检查: 存在=${!!this.rainTextModule}, 方法有效=${hasRainModule}`);
-
-    // if (!hasRainModule) {
-    //   maLogger.error('[PianoEffect] 严重问题: rainTextModule未初始化或缺少addCharDrop方法');
-    //   // 尝试重新初始化wzyTool
-    //   if (!this.rainTextModule) {
-    //     maLogger.log('[PianoEffect] 尝试重新初始化wzyTool...');
-    //     this.initializeRainText().catch(err => {
-    //       maLogger.error('[PianoEffect] 重新初始化wzyTool失败:', err);
-    //     });
-    //   }
-    // }
-
     try {
       if (event.code === "Space") {
         this.playSound(" ");
@@ -329,36 +311,6 @@ class PianoEffect implements AppModule {
       await this.enable();
     } else {
       await this.disable();
-    }
-  }
-
-  // 重新初始化rainText模块的辅助方法
-  private async initializeRainText(): Promise<void> {
-    try {
-      maLogger.log("[PianoEffect] 进入initializeRainText辅助方法");
-      // 确保rainTextModule被正确初始化
-      if (
-        !this.rainTextModule ||
-        typeof this.rainTextModule.addCharDrop !== "function"
-      ) {
-        try {
-          maLogger.log("[PianoEffect] 尝试初始化wzyTool...");
-          await wzyTool.initialize();
-          this.rainTextModule = wzyTool;
-          maLogger.log("[PianoEffect] 辅助方法成功初始化wzyTool");
-        } catch (error) {
-          maLogger.error(
-            "[PianoEffect] initializeRainText辅助方法失败:",
-            error,
-          );
-          throw error;
-        }
-      } else {
-        maLogger.log("[PianoEffect] rainTextModule已经可用");
-      }
-    } catch (error) {
-      maLogger.error("[PianoEffect] 初始化rainText模块出错:", error);
-      throw error;
     }
   }
 }
