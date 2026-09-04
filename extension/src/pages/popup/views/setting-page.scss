@@ -319,6 +319,10 @@
   background: var(--popup-control-bg);
 }
 
+.script-field {
+  padding: 0 9px;
+}
+
 .field-label {
   font-size: 11px;
   font-weight: 700;
@@ -354,11 +358,12 @@
 
 .content-script-select,
 .dropdown-select {
+  width: 100%;
   flex: 0;
   min-height: 32px;
   padding: 0 10px;
   border-radius: 10px;
-  border: 1px solid var(--popup-border);
+  border: none;
   background: var(--popup-control-bg-strong);
   color: var(--popup-text-secondary);
   font-size: 12px;

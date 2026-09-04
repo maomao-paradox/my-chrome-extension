@@ -5,7 +5,7 @@
  * @file src/pages/popup/composables/usePluginManager.ts
  * @description React 版插件配置管理 Hook
  */
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { appConfigKey } from "@/config";
 import { storage } from "@/stores";
 import { type PluginConfigMap } from "@/types";

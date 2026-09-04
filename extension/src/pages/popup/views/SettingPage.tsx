@@ -548,7 +548,7 @@ export const SettingPage: FC<{}> = () => {
               }`}
             >
               <span className="selection-dot"></span>
-              <span>{selectedScriptLabel}</span>
+              <span>{selectedScriptLabel} 内容脚本生效中</span>
             </div>
 
             {availableContentScripts.length === 0 && (
