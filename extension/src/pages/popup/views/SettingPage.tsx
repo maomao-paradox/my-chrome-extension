@@ -75,28 +75,18 @@ export const SettingPage: FC<{}> = () => {
     loadDomainConfigs,
     saveDomainConfigs,
   } = useDomainManager();
-  const { pluginConfigs, setPluginConfigs, loadPluginConfigs, isLoaded } =
-    usePluginManager();
+  const {
+    pluginConfigs,
+    setPluginConfigs,
+    loadPluginConfigs,
+    savePluginConfigs,
+  } = usePluginManager();
 
   const [selectedContentScript, setSelectedContentScript] =
     useState<string>("");
   const [currentActivedTabDomain, setCurrentActivedTabDomain] =
     useState<string>("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
-
-  // 深拷贝 pluginConfigs 以便修改
-  const [localPluginConfigs, setLocalPluginConfigs] = useState<
-    Record<string, ConfigItem>
-  >(() => JSON.parse(JSON.stringify(pluginConfigs)));
-
-  // 首次加载存储配置后，将真实状态同步到本地副本（仅执行一次）
-  const hasSyncedRef = useRef(false);
-  useEffect(() => {
-    if (isLoaded && !hasSyncedRef.current) {
-      hasSyncedRef.current = true;
-      setLocalPluginConfigs(JSON.parse(JSON.stringify(pluginConfigs)));
-    }
-  }, [isLoaded, pluginConfigs]);
 
   // 保存状态重置定时器
   const saveResetTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -118,7 +108,7 @@ export const SettingPage: FC<{}> = () => {
   );
 
   /** 插件配置条目列表 */
-  const pluginConfigEntries = Object.entries(localPluginConfigs);
+  const pluginConfigEntries = Object.entries(pluginConfigs);
 
   /** 已启用的插件数量 */
   const enabledPluginCount = pluginConfigEntries.filter(([, app]) =>
@@ -301,16 +291,15 @@ export const SettingPage: FC<{}> = () => {
 
     try {
       if (chrome.storage?.local) {
-        await storage.ext.local.set(appConfigKey, localPluginConfigs);
-        await storage.ext.local.set(domainConfigsKey, domainConfigs);
-      }
+        await savePluginConfigs(pluginConfigs);
 
-      console.log("同步当前域名选择", selectedContentScript);
-      await syncCurrentDomainSelection(selectedContentScript);
+        console.log("同步当前域名选择", selectedContentScript);
+        await syncCurrentDomainSelection(selectedContentScript);
+      }
 
       const res = await sendMessageToContentScript({
         type: MESSAGE_TYPE["1"],
-        payload: localPluginConfigs,
+        payload: pluginConfigs,
       });
       console.log(res);
       if (res?.success) {
@@ -326,7 +315,7 @@ export const SettingPage: FC<{}> = () => {
     }
   }, [
     isSaving,
-    localPluginConfigs,
+    pluginConfigs,
     domainConfigs,
     selectedContentScript,
     scheduleSaveStateReset,
@@ -334,7 +323,7 @@ export const SettingPage: FC<{}> = () => {
 
   /** 更新插件启用状态 */
   const handlePluginToggle = useCallback((key: string, enabled: boolean) => {
-    setLocalPluginConfigs((prev: any) => ({
+    setPluginConfigs((prev: any) => ({
       ...prev,
       [key]: { ...prev[key], enabled },
     }));
@@ -599,7 +588,7 @@ export const SettingPage: FC<{}> = () => {
                             value={(app as any).options.brandColor}
                             aria-label="选择品牌颜色"
                             onChange={(e) => {
-                              setLocalPluginConfigs((prev: any) => ({
+                              setPluginConfigs((prev: any) => ({
                                 ...prev,
                                 [key]: {
                                   ...prev[key],

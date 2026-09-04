@@ -37,13 +37,16 @@ export const useDomainManager = () => {
     try {
       if (!chrome.storage) {
         console.warn("local storage not available, use test data");
-        const testConfigs = contentDomains.reduce((acc: DomainConfigs, domain: string) => {
-          acc[domain] = {
-            enabled: true,
-            domains: "",
-          };
-          return acc;
-        }, {} as DomainConfigs);
+        const testConfigs = contentDomains.reduce(
+          (acc: DomainConfigs, domain: string) => {
+            acc[domain] = {
+              enabled: true,
+              domains: "",
+            };
+            return acc;
+          },
+          {} as DomainConfigs,
+        );
         setDomainConfigs(testConfigs);
         return;
       }
@@ -51,17 +54,32 @@ export const useDomainManager = () => {
 
       // 当没有存储配置时，使用默认配置
       if (!configs || Object.keys(configs).length === 0) {
-        configs = contentDomains.reduce((acc: DomainConfigs, domain: string) => {
-          acc[domain] = {
-            enabled: true,
-            domains: "",
-          };
-          return acc;
-        }, {} as DomainConfigs);
+        configs = contentDomains.reduce(
+          (acc: DomainConfigs, domain: string) => {
+            acc[domain] = {
+              enabled: true,
+              domains: "",
+            };
+            return acc;
+          },
+          {} as DomainConfigs,
+        );
         configs["Eve"] = { enabled: true, domains: "*:*" };
         await storage.ext.local.set(domainConfigsKey, configs);
       }
-      setDomainConfigs(configs);
+      const allowedConfigKeys = contentDomains.filter(Boolean);
+      setDomainConfigs(
+        allowedConfigKeys.reduce(
+          (acc: DomainConfigs, key: string) => ({
+            ...acc,
+            [key]: configs[key] || {
+              enabled: true,
+              domains: "",
+            },
+          }),
+          {} as DomainConfigs,
+        ),
+      );
     } catch (error) {
       maLogger.error("加载域名配置失败:", error);
     }

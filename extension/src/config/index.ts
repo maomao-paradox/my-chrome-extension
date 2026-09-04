@@ -7,6 +7,7 @@
  * @date 2026-02-05T02:38:01.693Z
  */
 
+import { defaultPluginConfigs } from "@/apps";
 import { getAssetsAbstractPath } from "@/utils/common";
 import { ModuleOption } from "@/utils/esm-module-loader";
 
@@ -34,13 +35,8 @@ export const contentModules: Map<string, ModuleOption> = contentDomains.reduce(
   new Map(),
 );
 
-const appDomains = import.meta.env.VITE_APP_DOMAIN?.split(",") || [
-  "sidebar",
-  "floatingball",
-  "pianoEffect",
-  "textSelectionToolbar",
-  "componentCapture",
-  "menu",
+export const appDomains = import.meta.env.VITE_APP_DOMAIN?.split(",") || [
+  ...Object.keys(defaultPluginConfigs),
 ];
 
 export const appModules = appDomains.reduce(
