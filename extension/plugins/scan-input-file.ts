@@ -4,6 +4,7 @@ import fs from "fs";
 interface ScanFilesOptions {
   dirPath: string;
   prefix: string;
+  nameFilter?: string | string[];
   extFilter?: string | string[];
   exclude?: string[];
   useIndexFile?: boolean;
@@ -14,6 +15,7 @@ function scanFiles(options: ScanFilesOptions): Record<string, string> {
   const {
     dirPath,
     prefix,
+    nameFilter = [],
     extFilter = [".js", ".ts", ".jsx", ".tsx"],
     exclude = [],
     useIndexFile = false,
@@ -31,6 +33,11 @@ function scanFiles(options: ScanFilesOptions): Record<string, string> {
 
       if (item.isFile()) {
         const ext = path.extname(item.name);
+        const name = path.basename(item.name, ext);
+        // console.log(name);
+        if (nameFilter.length > 0 && !nameFilter.includes(name)) {
+          return;
+        }
         const isValidExt = Array.isArray(extFilter)
           ? extFilter.includes(ext)
           : ext === extFilter;
@@ -40,6 +47,10 @@ function scanFiles(options: ScanFilesOptions): Record<string, string> {
           inputConfig[`${prefix}/${fileName}`] = fullPath;
         }
       } else if (item.isDirectory() && (useIndexFile || recursive)) {
+        // console.log(item.name);
+        if (nameFilter.length > 0 && !nameFilter.includes(item.name)) {
+          return;
+        }
         const indexFilePath = path.resolve(fullPath, "index.ts");
         if (useIndexFile && fs.existsSync(indexFilePath)) {
           inputConfig[`${prefix}/${item.name}`] = indexFilePath;

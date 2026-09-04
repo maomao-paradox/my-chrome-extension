@@ -22,7 +22,8 @@ export default ({
   isPreview: boolean;
 }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  // console.log(env);
+  console.log("启用的内容脚本:", env.VITE_CONTENT_DOMAIN);
+  console.log("启用的模组:", env.VITE_APP_DOMAIN);
   const isEnvEnabled = (key: string, defaultValue = true): boolean =>
     env[key] === undefined ? defaultValue : env[key].toLowerCase() !== "false";
   const pages: ManifestPageFlags = {
@@ -108,33 +109,6 @@ export default ({
           warn(warning);
         },
         input: {
-          ...(pages.popup
-            ? { "pages/popup": path.resolve(__dirname, "src/pages/popup.html") }
-            : {}),
-          ...(pages.options
-            ? {
-                "pages/options": path.resolve(
-                  __dirname,
-                  "src/pages/options.html",
-                ),
-              }
-            : {}),
-          ...(pages.sidepanel
-            ? {
-                "pages/sidepanel": path.resolve(
-                  __dirname,
-                  "src/pages/sidepanel.html",
-                ),
-              }
-            : {}),
-          ...(pages.devtools
-            ? {
-                "pages/devtools-page": path.resolve(
-                  __dirname,
-                  "src/pages/devtools.html",
-                ),
-              }
-            : {}),
           ...(pages.devtools
             ? scanFiles({
                 dirPath: "src/pages/devtools",
@@ -142,27 +116,29 @@ export default ({
                 extFilter: ".html",
               })
             : {}),
-          ...(isProduction
-            ? {
-                ...scanFiles({
-                  dirPath: "src/apps",
-                  prefix: "apps",
-                  useIndexFile: true,
-                  recursive: true,
-                }),
-                ...scanFiles({
-                  dirPath: "src/content",
-                  prefix: "content",
-                  exclude: ["main.ts"],
-                }),
-                ...scanFiles({
-                  dirPath: "src/sfs",
-                  prefix: "sfs",
-                  useIndexFile: true,
-                  recursive: true,
-                }),
-              }
-            : {}),
+          ...scanFiles({
+            dirPath: "src/apps",
+            prefix: "apps",
+            useIndexFile: true,
+            recursive: true,
+            nameFilter: [...env.VITE_APP_DOMAIN.split(",")],
+          }),
+          ...scanFiles({
+            dirPath: "src/content",
+            prefix: "content",
+            exclude: ["main.ts"],
+            nameFilter: [
+              ...env.VITE_CONTENT_DOMAIN.toLowerCase()
+                .split(",")
+                .map((item) => "content-" + item.trim()),
+            ],
+          }),
+          ...scanFiles({
+            dirPath: "src/sfs",
+            prefix: "sfs",
+            useIndexFile: true,
+            recursive: true,
+          }),
         },
         output: {
           manualChunks: isProduction
