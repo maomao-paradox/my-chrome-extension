@@ -237,20 +237,20 @@ export const createMessageHandlers = (
   },
 
   TRIGGER_COMPONENT_CAPTURE: async (_data, sendResponse) => {
-    maLogger.log("=====触发组件捕获=====");
+    maLogger.log("=====触发广告拦截选择=====");
     try {
-      const module = await moduleManager.getOrLoadModule("componentCapture");
-      if (module && typeof module.triggerComponentCapture === "function") {
-        module.triggerComponentCapture();
-        sendResponse({ success: true, msg: "组件捕获已启动" });
+      const module = await moduleManager.getOrLoadModule("adBlocker");
+      if (module && typeof module.triggerAdBlocker === "function") {
+        module.triggerAdBlocker();
+        sendResponse({ success: true, msg: "广告拦截选择已启动" });
       } else {
         sendResponse({ success: false, msg: "模块未正确加载或缺少触发方法" });
       }
     } catch (error) {
-      maLogger.error("触发组件捕获失败:", error);
+      maLogger.error("启动广告拦截失败:", error);
       sendResponse({
         success: false,
-        msg: "触发组件捕获失败: " + (error as Error).message,
+        msg: "启动广告拦截失败: " + (error as Error).message,
       });
     }
     return true;

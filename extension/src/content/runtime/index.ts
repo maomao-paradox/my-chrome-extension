@@ -216,6 +216,9 @@ export const initializeContent = async (ctx: AppContext): Promise<void> => {
     initializeShadowMessage(ctx);
     await initializeWebpageMouseTrail();
     await loadAppOptions(moduleManager.applyConfig);
+    // 广告规则属于页面级能力，始终加载以便在刷新后立即应用 localStorage 规则。
+    const adBlocker = await moduleManager.getOrLoadModule("adBlocker");
+    adBlocker?.enable?.();
     await moduleManager.loadContentScripts();
   });
 

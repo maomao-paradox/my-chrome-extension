@@ -35,9 +35,14 @@ export const contentModules: Map<string, ModuleOption> = contentDomains.reduce(
   new Map(),
 );
 
-export const appDomains = import.meta.env.VITE_APP_DOMAIN?.split(",") || [
+const configuredAppDomains = import.meta.env.VITE_APP_DOMAIN?.split(",") || [
   ...Object.keys(defaultPluginConfigs),
 ];
+
+// 广告拦截器需要在页面初始化时加载，不能因自定义 VITE_APP_DOMAIN 而漏打包。
+export const appDomains = Array.from(
+  new Set([...configuredAppDomains, "adBlocker"]),
+);
 
 export const appModules = appDomains.reduce(
   (acc: Map<string, ModuleOption>, domain: string) =>

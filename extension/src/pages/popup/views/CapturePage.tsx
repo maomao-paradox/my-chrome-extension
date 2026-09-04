@@ -3,7 +3,7 @@
  * @version v2.0.0
  * @license MIT
  * @file src/pages/popup/views/CapturePage.tsx
- * @description React 版组件捕获页面 - 从当前页面拾取组件
+ * @description 广告拦截入口 - 从当前页面点选并保存广告元素规则
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { CameraOutlined } from '@ant-design/icons';
@@ -13,19 +13,19 @@ import type { ExtMessage } from '@/types';
 import './capture-page.scss';
 
 /**
- * 组件捕获状态枚举
+ * 广告拦截状态枚举
  */
 type CaptureStatus = 'on' | 'pending' | 'off';
 
 /**
- * 组件捕获页面组件
+ * 广告拦截页面组件
  */
 export const CapturePage: React.FC = () => {
   const { isDomainDisabled, checkDomainStatus } = useDomainState();
   const [isCheckingSiteReadiness, setIsCheckingSiteReadiness] = useState(false);
   const [isContentScriptReady, setIsContentScriptReady] = useState<boolean | null>(null);
 
-  /** 捕获状态文本 */
+  /** 拦截状态文本 */
   const captureStatusText = useMemo(() => {
     if (isDomainDisabled) return '已禁止';
     if (isCheckingSiteReadiness) return '连接中';
@@ -33,14 +33,14 @@ export const CapturePage: React.FC = () => {
     return '未就绪';
   }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady]);
 
-  /** 捕获状态样式类 */
+  /** 拦截状态样式类 */
   const captureStatusClass = useMemo(() => {
     if (isDomainDisabled) return 'capture-status--off';
     if (isCheckingSiteReadiness) return 'capture-status--pending';
     return isContentScriptReady ? 'capture-status--on' : 'capture-status--off';
   }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady]);
 
-  /** 是否禁用捕获按钮 */
+  /** 是否禁用拦截按钮 */
   const isCaptureDisabled = useMemo(() => {
     return (
       isDomainDisabled ||
@@ -100,19 +100,19 @@ export const CapturePage: React.FC = () => {
     }
   }, [checkDomainStatus, checkContentScriptReady]);
 
-  /** 触发组件捕获 */
+  /** 触发广告拦截选择 */
   const triggerComponentCapture = useCallback(async (): Promise<void> => {
     if (isCaptureDisabled) return;
 
     try {
-      maLogger.log('从popup触发组件捕获...');
+      maLogger.log('从 popup 触发广告拦截选择...');
       const res = await sendMessageToActiveContentScript({
         type: 'TRIGGER_COMPONENT_CAPTURE',
       });
-      maLogger.log('组件捕获响应:', res);
+      maLogger.log('广告拦截响应:', res);
       window.close();
     } catch (error) {
-      maLogger.error('触发组件捕获失败:', error);
+      maLogger.error('启动广告拦截失败:', error);
     }
   }, [isCaptureDisabled, sendMessageToActiveContentScript]);
 
@@ -126,9 +126,9 @@ export const CapturePage: React.FC = () => {
       headLeft={
         <>
           <p className="section-kicker">Visual Inspector</p>
-          <h2 className="section-title">组件捕获</h2>
+          <h2 className="section-title">广告拦截</h2>
           <p className="section-subtitle">
-            从当前页面拾取任意组件，结构信息会同步显示到开发者工具。
+            在页面中点击广告元素，调整到合适的父级区域后确认拦截。
           </p>
         </>
       }
@@ -148,8 +148,8 @@ export const CapturePage: React.FC = () => {
           <CameraOutlined />
         </span>
         <span className="capture-copy">
-          <strong>开始捕获</strong>
-          <small>点击后 popup 会自动关闭，随后在页面中点选目标组件。</small>
+          <strong>开始拦截</strong>
+          <small>点击后 popup 会自动关闭，随后在页面中点选广告元素。</small>
         </span>
       </button>
 
@@ -160,11 +160,11 @@ export const CapturePage: React.FC = () => {
         </div>
         <div className="step-card">
           <span className="step-index">02</span>
-          <p>点击上方按钮进入捕获状态。</p>
+          <p>点击上方按钮进入拦截选择状态。</p>
         </div>
         <div className="step-card">
           <span className="step-index">03</span>
-          <p>在页面中选择目标组件查看结果。</p>
+          <p>点击广告并用滑块选择父级区域。</p>
         </div>
       </div>
     </TableContainer>

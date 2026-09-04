@@ -45,13 +45,13 @@ const TABS: TabConfig[] = [
     icon: <PushpinOutlined />,
     component: BookmarkPage,
   },
-  // {
-  //   key: "capture",
-  //   label: "捕获",
-  //   hint: "从当前页面拾取组件，结果同步到开发者工具。",
-  //   icon: <CameraOutlined />,
-  //   component: CapturePage,
-  // },
+  {
+    key: "capture",
+    label: "拦截",
+    hint: "点击页面广告后调整层级，确认后立即隐藏并保存规则。",
+    icon: <CameraOutlined />,
+    component: CapturePage,
+  },
   {
     key: "tokens",
     label: "令牌",
@@ -145,7 +145,10 @@ const App: React.FC = () => {
               title={tab.label}
               onClick={() => setActiveTab(tab.key)}
             >
-              <span className="tab-icon">{tab.icon}</span>
+              <span className="tab-icon" data-hover={tab.label}>
+                {tab.icon}
+              </span>
+
               <span className="tab-label">{tab.label}</span>
             </button>
           ))}

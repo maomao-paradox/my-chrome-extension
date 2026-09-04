@@ -17,6 +17,13 @@ export const defaultPluginConfigs: PluginConfigMap = {
   //   enabled: false,
   // },
 
+  adBlocker: {
+    id: "adBlocker",
+    name: "广告拦截器",
+    type: "effect",
+    enabled: false,
+  },
+
   pianoEffect: {
     id: "pianoEffect",
     name: "钢琴音效",
