@@ -4,6 +4,7 @@ import type { PageTools } from "./page-tools";
 import { calculatePOW } from "./pow-service";
 import { applyWebpageMouseTrail } from "./mouse-trail";
 import { getAssetsAbstractPathSync } from "@/utils";
+import { stopEarlyAdBlocker } from "@/apps/adBlocker/early";
 
 export type ContentMessageHandler = (
   data: any,
@@ -81,6 +82,9 @@ export const createMessageHandlers = (
 
   CONFIG_UPDATE: (data, sendResponse) => {
     moduleManager.applyConfig(data);
+    if (data?.adBlocker?.enabled !== true) {
+      stopEarlyAdBlocker();
+    }
     sendResponse({ success: true, msg: "CONFIG_UPDATE success!" });
     return true;
   },

@@ -8,6 +8,8 @@
  */
 
 import { installGlobalLogger } from '@/utils/logger';
+import { installEarlyAdBlocker } from '@/apps/adBlocker/early';
+import { appConfigKey } from '@/config';
 
 type DomainConfig = {
   enabled?: boolean;
@@ -23,6 +25,9 @@ const ROOT_PERMISSION_KEY = 'Eve';
 const LOGGER_TITLE = 'ZERO DEBUG';
 
 installGlobalLogger({ title: LOGGER_TITLE, enabled: false });
+
+// 是否启用广告拦截由 popup 设置页的 appConfig.adBlocker.enabled 控制。
+// 早期规则应用器仍在 document_start 启动，但只有开关打开时才读取和应用规则。
 
 const parseDomains = (domainsString: string): [string, string][] => {
   if (!domainsString) {
@@ -120,12 +125,14 @@ const loadRuntime = async (): Promise<void> => {
     const snapshot = await chrome.storage.local.get([
       DISABLED_DOMAINS_KEY,
       DOMAIN_CONFIGS_KEY,
-      EXTENSION_CONFIGS_KEY
+      EXTENSION_CONFIGS_KEY,
+      appConfigKey,
     ]);
     const disabledDomains = snapshot[DISABLED_DOMAINS_KEY] || [];
     const domainConfigs = (snapshot[DOMAIN_CONFIGS_KEY] || {}) as DomainConfigs;
     const extensionSettings: Record<string, any> =
       snapshot[EXTENSION_CONFIGS_KEY] || {};
+    const appConfig = (snapshot.appConfig || {}) as Record<string, { enabled?: boolean }>;
 
     maLogger.setTitle(LOGGER_TITLE);
     maLogger.setEnabled(extensionSettings.debugMode === true);
@@ -140,6 +147,10 @@ const loadRuntime = async (): Promise<void> => {
 
     if (!isDomainAllowed(domainConfigs, ROOT_PERMISSION_KEY)) {
       return;
+    }
+
+    if (appConfig.adBlocker?.enabled === true) {
+      installEarlyAdBlocker();
     }
   } catch (error) {
     console.error('content bootstrap 检查失败，继续加载 runtime:', error);

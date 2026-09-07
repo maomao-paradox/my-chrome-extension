@@ -15,6 +15,7 @@ import { installTopFrameEventBridge } from "./iframe-event-bridge";
 import { initializeShadowMessage } from "./shadow-message";
 import { initializeWebpageMouseTrail } from "./mouse-trail";
 import { ModuleOption } from "@/utils";
+import { stopEarlyAdBlocker } from "@/apps/adBlocker/early";
 
 const getCurrentPort = (): string => {
   const { port, protocol } = new URL(window.location.origin);
@@ -217,8 +218,13 @@ export const initializeContent = async (ctx: AppContext): Promise<void> => {
     await initializeWebpageMouseTrail();
     await loadAppOptions(moduleManager.applyConfig);
     // 广告规则属于页面级能力，始终加载以便在刷新后立即应用 localStorage 规则。
-    const adBlocker = await moduleManager.getOrLoadModule("adBlocker");
-    adBlocker?.enable?.();
+    const appConfig = await storage.ext.local.get(appConfigKey, {} as any);
+    if ((appConfig as any)?.adBlocker?.enabled === true) {
+      const adBlocker = await moduleManager.getOrLoadModule("adBlocker");
+      adBlocker?.enable?.();
+    } else {
+      stopEarlyAdBlocker();
+    }
     await moduleManager.loadContentScripts();
   });
 

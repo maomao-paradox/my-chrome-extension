@@ -10,6 +10,7 @@ import { CameraOutlined } from '@ant-design/icons';
 import TableContainer from '../components/TableContainer';
 import { useDomainState } from '../composables/useDomainState';
 import type { ExtMessage } from '@/types';
+import { appConfigKey } from '@/config';
 import './capture-page.scss';
 
 /**
@@ -24,6 +25,7 @@ export const CapturePage: React.FC = () => {
   const { isDomainDisabled, checkDomainStatus } = useDomainState();
   const [isCheckingSiteReadiness, setIsCheckingSiteReadiness] = useState(false);
   const [isContentScriptReady, setIsContentScriptReady] = useState<boolean | null>(null);
+  const [isAdBlockerEnabled, setIsAdBlockerEnabled] = useState(false);
 
   /** 拦截状态文本 */
   const captureStatusText = useMemo(() => {
@@ -35,19 +37,20 @@ export const CapturePage: React.FC = () => {
 
   /** 拦截状态样式类 */
   const captureStatusClass = useMemo(() => {
-    if (isDomainDisabled) return 'capture-status--off';
+    if (isDomainDisabled || !isAdBlockerEnabled) return 'capture-status--off';
     if (isCheckingSiteReadiness) return 'capture-status--pending';
     return isContentScriptReady ? 'capture-status--on' : 'capture-status--off';
-  }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady]);
+  }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady, isAdBlockerEnabled]);
 
   /** 是否禁用拦截按钮 */
   const isCaptureDisabled = useMemo(() => {
     return (
       isDomainDisabled ||
       isCheckingSiteReadiness ||
-      isContentScriptReady !== true
+      isContentScriptReady !== true ||
+      !isAdBlockerEnabled
     );
-  }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady]);
+  }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady, isAdBlockerEnabled]);
 
   /** 向活动内容脚本发送消息 */
   const sendMessageToActiveContentScript = useCallback(async (
@@ -94,6 +97,8 @@ export const CapturePage: React.FC = () => {
     setIsContentScriptReady(null);
 
     try {
+      const config = await chrome.storage.local.get(appConfigKey);
+      setIsAdBlockerEnabled(config?.[appConfigKey]?.adBlocker?.enabled === true);
       await Promise.allSettled([checkDomainStatus(), checkContentScriptReady()]);
     } finally {
       setIsCheckingSiteReadiness(false);
@@ -135,7 +140,7 @@ export const CapturePage: React.FC = () => {
       headRight={
         <div className={`capture-status ${captureStatusClass}`}>
           <span className="status-dot"></span>
-          <span>{captureStatusText}</span>
+          <span>{!isAdBlockerEnabled ? '未启用' : captureStatusText}</span>
         </div>
       }
     >
