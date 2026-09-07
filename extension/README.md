@@ -90,6 +90,7 @@ npx vitest run test/BookmarkPage.spec.ts
 - 页面刷新或动态插入广告后，内容脚本会自动读取规则并重新隐藏匹配元素。
 - 内容脚本在 `document_start` 阶段先运行轻量规则应用器，再加载完整交互模块，减少页面首屏闪现。
 - 广告拦截器默认关闭，只有在 Popup“设置 → 功能设置”中开启后，规则应用和“拦截”页按钮才会生效。
+- 广告拦截的页面点选、层级调整和确认弹窗集中在 `src/apps/adBlocker/App.tsx`；`adBlocker.ts` 只处理规则生成、持久化、定位与生效。
 
 ### 内容脚本功能配置
 - `Radius`、`MRIA`、`QA Pro`、`Teach`、`蓝湖`、`Portainer` 和 `禅道` 内容脚本支持网页内功能注册和独立开关。

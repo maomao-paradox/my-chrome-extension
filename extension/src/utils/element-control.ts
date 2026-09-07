@@ -718,75 +718,38 @@ export function saveToLocal(blob: Blob, fileName: string): void {
   }
 }
 
-// export const showSuccessMessage = (message: string) => {
-//   const successContainer = document.createElement("div");
-//   successContainer.style.cssText = `
-//         background: rgba(255, 255, 255, 0.96);
-//         backdrop-filter: blur(12px);
-//         border: 1px solid rgba(13, 148, 136, 0.22);
-//         border-radius: 12px;
-//         padding: 14px 18px;
-//         font-size: 14px;
-//         line-height: 1.5;
-//         max-width: 280px;
-//         position: fixed;
-//         z-index: 9999999;
-//         right: 20px;
-//         top: 20px;
-//         box-shadow:
-//             0 18px 42px rgba(15, 23, 42, 0.18),
-//             0 4px 12px rgba(13, 148, 136, 0.12),
-//             inset 0 1px 0 rgba(255, 255, 255, 0.84);
-//         animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-//     `;
+export function getCSSSelector(element: HTMLElement): string {
+  if (!element || element === document.documentElement) {
+    return "html";
+  }
 
-//   successContainer.innerHTML = `
-//         <div style="display: flex; align-items: center; gap: 10px;">
-//             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-//                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-//             </svg>
-//             <span style="color: #134e4a; font-weight: 700;">${message}</span>
-//         </div>
-//     `;
+  // 优先使用 id
+  if (element.id) {
+    const id = CSS.escape(element.id);
+    return `#${id}`;
+  }
 
-//   const style = document.createElement("style");
-//   style.textContent = `
-//         @keyframes slideIn {
-//             from {
-//                 transform: translateX(100%) scale(0.95);
-//                 opacity: 0;
-//             }
-//             to {
-//                 transform: translateX(0) scale(1);
-//                 opacity: 1;
-//             }
-//         }
+  // 获取父元素的选择器
+  const parentSelector = getCSSSelector(element.parentElement!);
 
-//         @keyframes slideOut {
-//             from {
-//                 transform: translateX(0) scale(1);
-//                 opacity: 1;
-//             }
-//             to {
-//                 transform: translateX(100%) scale(0.95);
-//                 opacity: 0;
-//             }
-//         }
-//     `;
-//   document.head.appendChild(style);
+  // 获取当前元素的标签名
+  const tagName = element.tagName.toLowerCase();
 
-//   document.body.appendChild(successContainer);
+  // 获取当前元素的类名
+  const className = element.className.trim();
 
-//   setTimeout(() => {
-//     successContainer.style.animation =
-//       "slideOut 0.3s cubic-bezier(0.55, 0, 1, 1) forwards";
-//     setTimeout(() => {
-//       try {
-//         document.body.removeChild(successContainer);
-//         document.head.removeChild(style);
-//       } catch (error) {
-//         // 元素可能已经被移除
-//       }
-//     }, 500);
-//   }, 1500);
-// };
+  // 获取同级元素中的索引
+  const siblings = Array.from(element.parentElement!.children).filter(
+    (el) => el.tagName === element.tagName && el.className.trim() === className,
+  );
+
+  if (siblings.length === 1) {
+    // 如果是唯一的同标签元素，使用标签名+类名
+    return `${parentSelector} > ${tagName}.${className.replace(/\s+/g, ".")}`;
+  } else {
+    // 否则使用 nth-child
+    const index =
+      Array.from(element.parentElement!.children).indexOf(element) + 1;
+    return `${parentSelector} > ${tagName}:nth-child(${index})`;
+  }
+}

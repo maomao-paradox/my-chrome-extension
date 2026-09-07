@@ -4,7 +4,8 @@
  */
 
 export interface EarlyAdBlockRule {
-  xpath: string;
+  selector?: string;
+  xpath?: string;
   id?: string;
   effect?: "hide" | "image" | "gif" | "text" | "html";
   value?: string;
@@ -30,22 +31,26 @@ export const writeEarlyRules = (rules: EarlyAdBlockRule[]): void => {
   );
 };
 
-const resolveRuleElement = (rule: EarlyAdBlockRule): HTMLElement | null => {
+export const resolveRuleElement = (rule: EarlyAdBlockRule): HTMLElement | null => {
   if (rule.id) {
     const byId = document.getElementById(rule.id);
     if (byId) return byId;
   }
-  try {
-    return document.evaluate(
+  if (rule.selector) {
+    const bySelector = document.querySelector<HTMLElement>(rule.selector);
+    if (bySelector) return bySelector;
+  }
+  if (rule.xpath) {
+    const byXPath = document.evaluate(
       rule.xpath,
       document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
       null,
     ).singleNodeValue as HTMLElement | null;
-  } catch {
-    return null;
+    if (byXPath) return byXPath;
   }
+  return null;
 };
 
 const sanitizeHtml = (value: string): string => {
@@ -75,7 +80,8 @@ export const applyEarlyRule = (
   if (
     element === document.body ||
     element === document.documentElement ||
-    element.dataset.kriaAdBlockedEffect === `${rule.effect || "hide"}:${rule.value || ""}`
+    element.dataset.kriaAdBlockedEffect ===
+      `${rule.effect || "hide"}:${rule.value || ""}`
   ) {
     return;
   }
@@ -95,7 +101,11 @@ export const applyEarlyRule = (
   if (effect === "text") {
     const text = document.createElement("span");
     text.textContent = value || "广告已拦截";
-    Object.assign(text.style, { display: "block", padding: "12px", textAlign: "center" });
+    Object.assign(text.style, {
+      display: "block",
+      padding: "12px",
+      textAlign: "center",
+    });
     element.appendChild(text);
   } else if (effect === "html") {
     element.innerHTML = sanitizeHtml(value || "<span>广告已拦截</span>");
@@ -103,7 +113,12 @@ export const applyEarlyRule = (
     const image = document.createElement("img");
     image.src = value;
     image.alt = "广告替换内容";
-    Object.assign(image.style, { display: "block", width: "100%", height: "auto", objectFit: "contain" });
+    Object.assign(image.style, {
+      display: "block",
+      width: "100%",
+      height: "auto",
+      objectFit: "contain",
+    });
     element.appendChild(image);
   } else {
     element.textContent = effect === "gif" ? "GIF 地址无效" : "图片地址无效";
@@ -125,7 +140,10 @@ export const installEarlyAdBlocker = (): void => {
     applyEarlyRules();
     if (!earlyObserver && document.documentElement) {
       earlyObserver = new MutationObserver(() => applyEarlyRules());
-      earlyObserver.observe(document.documentElement, { childList: true, subtree: true });
+      earlyObserver.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
     }
   };
   if (document.documentElement) start();
@@ -136,4 +154,3 @@ export const stopEarlyAdBlocker = (): void => {
   earlyObserver?.disconnect();
   earlyObserver = null;
 };
-
