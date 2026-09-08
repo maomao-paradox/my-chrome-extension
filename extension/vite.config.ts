@@ -41,8 +41,9 @@ export default ({
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "@components": path.resolve(__dirname, "./src/assets/components"),
+        "@components": path.resolve(__dirname, "./src/components"),
         "@icons": path.resolve(__dirname, "./src/assets/icons"),
+        "@styles": path.resolve(__dirname, "./src/assets/styles"),
         "@types": path.resolve(__dirname, "./src/types"),
       },
     },
@@ -75,7 +76,7 @@ export default ({
           // 例如：
           // execSync('npm run zip');
           // 或执行你之前的打包逻辑
-          console.log("📦 开始执行打包压缩...");
+          // console.log("📦 开始执行打包压缩...");
           // ... 你的打包逻辑
         },
       },
@@ -118,8 +119,8 @@ export default ({
                   })
                 : {}),
               ...scanFiles({
-                dirPath: "src/apps",
-                prefix: "apps",
+                dirPath: "src/modules",
+                prefix: "modules",
                 useIndexFile: true,
                 recursive: true,
                 nameFilter: [...env.VITE_APP_DOMAIN.split(",")],
@@ -155,7 +156,7 @@ export default ({
                 "content-runtime": ["@/content/runtime"],
               }
             : undefined,
-          chunkFileNames: `assets/js/chunks/chunk-${isProduction ? "" : "[name]-"}[hash].js`,
+          chunkFileNames: `js/chunks/chunk-${isProduction ? "" : "[name]-"}[hash].js`,
           assetFileNames: (assetInfo) => {
             const fileExtname = path.extname(assetInfo.names?.[0] || "");
 
@@ -181,22 +182,22 @@ export default ({
               return `static/[hash].[ext]`;
             }
             if (fileExtname === ".css") {
-              return `assets/css/[hash].[ext]`;
+              return `css/[hash].[ext]`;
             }
-            return `assets/[hash].[ext]`;
+            return `[hash].[ext]`;
           },
           entryFileNames: (chunkInfo) => {
             const chunkName = chunkInfo.name || "";
             if (chunkName.startsWith("content/")) {
-              return `assets/js/content/[hash].js`;
+              return `js/content/[hash].js`;
             } else if (chunkName.startsWith("sfs/")) {
-              return `assets/js/sfs/[hash].js`;
-            } else if (chunkName.startsWith("apps/")) {
-              return `assets/js/apps/[hash].js`;
+              return `js/sfs/[hash].js`;
+            } else if (chunkName.startsWith("modules/")) {
+              return `js/modules/[hash].js`;
             } else if (chunkName.startsWith("devtools/")) {
               return `pages/devtools/[hash].js`;
             } else {
-              return `assets/js/[hash].js`;
+              return `js/[hash].js`;
             }
           },
         },

@@ -214,7 +214,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
 import { MASwitch } from "@components/index";
-import TableContainer from "../components/TableContainer.vue";
+import TableContainer from "../layout/TableContainer.vue";
 import { appConfigKey, domainConfigsKey } from "@/config";
 import {
   IconConfirm,
@@ -230,7 +230,7 @@ import {
   type PopupThemeKey,
 } from "../composables/usePopupTheme.js";
 import { usePopupMouseTrail } from "../composables/usePopupMouseTrail.js";
-import { mouseTrailPresetOptions } from "@/assets/composables/mouse/mouseTrailPreference";
+import { mouseTrailPresetOptions } from "@/composables/mouse/mouseTrailPreference.js";
 import {
   useDomainManager,
   type DomainConfigItem,

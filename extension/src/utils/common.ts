@@ -245,5 +245,5 @@ export const getSingleFileScript = (scriptName: string) => {
 };
 
 export const getStaticAbstractPath = (path: string) => {
-  return chrome.runtime.getURL(`static/${path}`);
+  return chrome.runtime.getURL(`${path}`);
 };

@@ -20,7 +20,7 @@ function generateFileMap() {
                         if (dynImports.length > 0) {
                             const appNames = new Set<string>();
                             dynImports.forEach((imp: string) => {
-                                const match = imp.match(/^apps\/([^/]+)/);
+                                const match = imp.match(/^modules\/([^/]+)/);
                                 if (match) appNames.add(match[1]);
                             });
                             if (appNames.size === 1) {
@@ -42,7 +42,7 @@ function generateFileMap() {
                     fileMap[originalFilePath] = entryData.file;
                 }
 
-                else if (originalPath.includes('apps/') || originalPath.includes('content/')) {
+                else if (originalPath.includes('modules/') || originalPath.includes('content/')) {
                     const originalFilePath = `js/${entryData.name}`;
                     fileMap[originalFilePath] = entryData.file;
 
@@ -63,7 +63,7 @@ function generateFileMap() {
                         let originalFileName = path.basename(cssFile);
                         let originalFilePath = `css/${originalFileName}`;
 
-                        if (originalPath.includes('apps/')) {
+                        if (originalPath.includes('modules/')) {
                             const parts = originalPath.split('/');
                             const appName = parts[parts.length - 2];
                             originalFileName = `${appName}`;

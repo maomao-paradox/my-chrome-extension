@@ -60,7 +60,7 @@ import type {
 } from "@/types";
 import QuickLogin, {
   QuickLoginProps,
-} from "@/assets/components/quick-login/main";
+} from "@/components/quick-login/main";
 import { storage } from "@/stores";
 import { getSingleFileScript } from "@/utils";
 import { whenDomReady } from "@/utils/element-control";
@@ -554,11 +554,12 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
   /**
    * 自定义导航链接列表配置
    */
-  const getCustomNavLinks = (): Array<[string, string]> => [
+  const getCustomNavLinks = (): [string, string][] => [
     [" 自助报道机 ", ctx.origin + "/#/selfCheckin"],
     [" 叫号大屏 ", ctx.origin + "/#/queueScreen"],
     [" 数据大屏 ", ctx.origin + "/#/es-big-screen"],
     [" 服务监视 ", "http://" + ctx.location.hostname + ":9001"],
+    [" 接口编排 ", ctx.origin + "/#/example"],
   ];
 
   /**

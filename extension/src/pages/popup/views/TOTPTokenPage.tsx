@@ -13,7 +13,7 @@ import React, {
   useMemo,
 } from "react";
 import jsQR from "jsqr";
-import TableContainer from "../components/TableContainer";
+import TableContainer from "../layout/TableContainer";
 import {
   createTOTPAccount,
   deleteTOTPAccount,

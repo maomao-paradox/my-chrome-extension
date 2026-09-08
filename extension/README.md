@@ -123,7 +123,7 @@ npx vitest run test/BookmarkPage.spec.ts
 ### 菜单自动点击工具
 - 菜单工具支持打开 `AutoClick` 连点器，录制页面点击坐标后按统一间隔循环播放
 - 录制期间会在当前光标位置显示十字线和 `clientX` / `clientY`，悬停按钮时显示按钮轮廓并让十字线避开按钮内部
-- `src/apps/menu/tools/AutoClick.vue` 已压缩为约 50% 尺寸，更适合悬浮在页面上辅助操作
+- `src/modules/menu/tools/AutoClick.vue` 已压缩为约 50% 尺寸，更适合悬浮在页面上辅助操作
 
 ### Popup 锚点管理
 - Popup 顶部导航改为紧凑分段样式，保留原有图标并增加文字标签、选中态和键盘焦点反馈，便于在小窗口内快速识别功能入口

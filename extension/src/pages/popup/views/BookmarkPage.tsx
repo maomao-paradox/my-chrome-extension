@@ -15,7 +15,7 @@ import {
   LinkOutlined,
   PushpinOutlined,
 } from '@ant-design/icons';
-import TableContainer from '../components/TableContainer';
+import TableContainer from '../layout/TableContainer';
 import { Bookmark } from '@/types/components';
 import { BookmarkStorage } from '@/services/bookmarkStorage';
 import './bookmark-page.scss';

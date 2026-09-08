@@ -28,18 +28,18 @@ export const createManifest = (pages: ManifestPageFlags) =>
     // key: "ZXh0ZW5zaW9uX2RlZmF1bHRfcHVibGljX2tleQ==",
 
     icons: {
-      16: "static/icons/favicon16.ico" as never,
-      48: "static/icons/favicon48.ico" as never,
-      128: "static/icons/favicon128.ico" as never,
+      16: "icons/favicon16.ico" as never,
+      48: "icons/favicon48.ico" as never,
+      128: "icons/favicon128.ico" as never,
     },
 
     action: {
       default_title: "配置项",
       ...(pages.popup ? { default_popup: "pages/popup.html" as never } : {}),
       default_icon: {
-        16: "static/icons/favicon16.ico" as never,
-        48: "static/icons/favicon48.ico" as never,
-        128: "static/icons/favicon128.ico" as never,
+        16: "icons/favicon16.ico" as never,
+        48: "icons/favicon48.ico" as never,
+        128: "icons/favicon128.ico" as never,
       },
     },
     commands: {
@@ -77,17 +77,16 @@ export const createManifest = (pages: ManifestPageFlags) =>
     web_accessible_resources: [
       {
         resources: [
-          "assets/js/sfs/*.js",
-          "assets/js/*.js",
-          "assets/css/*.css",
-          "static/wasm/*.js",
-          "static/wasm/*.wasm",
-          "static/icons/*.ico",
-          "static/icons/*.png",
-          "static/imgs/*.png",
-          "static/keytone/Piano/*.wav",
-          "static/fonts/*",
-          "static/css/*.css",
+          "js/sfs/*.js",
+          "js/*.js",
+          "css/*.css",
+          "wasm/*.js",
+          "wasm/*.wasm",
+          "icons/*.ico",
+          "icons/*.png",
+          "imgs/*.png",
+          "keytone/Piano/*.wav",
+          "fonts/*",
           "pages/devtools/*.html",
           "pages/devtools/*.js",
           "*.json",

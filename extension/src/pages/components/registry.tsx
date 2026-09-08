@@ -10,11 +10,11 @@ import {
   Type,
   Waves,
 } from "lucide-react";
-import Draggable from "@/assets/components/Draggable";
-import QuickLogin from "@/assets/components/quick-login/main";
-import ScrollingTimeline from "@/assets/components/ScrollingTimeline";
-import Static404 from "@/assets/components/Static404";
-import WavesEffect from "@/assets/components/Waves";
+import Draggable from "@/components/Draggable";
+import QuickLogin from "@/components/quick-login/main";
+import ScrollingTimeline from "@/components/ScrollingTimeline";
+import Static404 from "@/components/Static404";
+import WavesEffect from "@/components/Waves";
 
 export type ShowcaseKind = "React" | "Vue" | "样式" | "复合";
 

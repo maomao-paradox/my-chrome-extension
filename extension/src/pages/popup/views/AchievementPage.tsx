@@ -4,7 +4,7 @@ import {
   LockOutlined,
   TrophyOutlined,
 } from "@ant-design/icons";
-import TableContainer from "../components/TableContainer";
+import TableContainer from "../layout/TableContainer";
 import {
   achievements,
   type AchievementSnapshot,

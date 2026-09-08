@@ -142,9 +142,9 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import SubRule from '../../../assets/components/SubRule.vue';
-import MRDialog from '../../../assets/components/MRDialog.vue';
-import HandlerSection from '../../../assets/components/HandlerSection.vue';
+import SubRule from '../../../components/SubRule.vue';
+import MRDialog from '../../../components/MRDialog.vue';
+import HandlerSection from '../../../components/HandlerSection.vue';
 import type { XhrRulesArray, XhrRule, RuleInstruction } from '@/types/index.js';
 
 // 响应式数据

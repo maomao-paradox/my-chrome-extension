@@ -14,15 +14,15 @@ import React, {
   ChangeEvent,
   useMemo,
 } from "react";
-import MASwitch from "@/assets/components/switch/main";
-import "@/assets/components/switch/style.scss";
+import MASwitch from "@components/switch/main";
+import "@components/switch/style.scss";
 import {
   SettingOutlined,
   FileTextOutlined,
   ToolOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
-import TableContainer from "../components/TableContainer";
+import TableContainer from "../layout/TableContainer";
 import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
 import { appConfigKey, domainConfigsKey } from "@/config";
@@ -33,13 +33,13 @@ import {
   type PopupThemeKey,
 } from "../composables/usePopupTheme";
 import { usePopupMouseTrail } from "../composables/usePopupMouseTrail";
-import { mouseTrailPresetOptions } from "@/assets/composables/mouse/mouseTrailPreference";
+import { mouseTrailPresetOptions } from "@/composables/mouse/mouseTrailPreference";
 import {
   useDomainManager,
   type DomainConfigItem,
 } from "../composables/useDomainManager";
 import { usePluginManager } from "../composables/usePluginManager";
-import JungleKnotButton from "@/assets/components/Jungle-knot/Button";
+import JungleKnotButton from "@/components/Jungle-knot/Button";
 import "./setting-page.scss";
 import { ConfigItem } from "@/types";
 

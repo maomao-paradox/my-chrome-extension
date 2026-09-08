@@ -60,11 +60,11 @@ interface ToolbarPluginConfig extends BasePluginConfig {
 }
 
 // 4. 联合类型
-export type PluginConfig = ToolbarPluginConfig | BasePluginConfig; // 默认配置
+export type ModuleConfig = ToolbarPluginConfig | BasePluginConfig; // 默认配置
 
 // 5. 配置映射
-export type PluginConfigMap = {
-  [key: string]: PluginConfig;
+export type ModuleConfigMap = {
+  [key: string]: ModuleConfig;
 };
 
 export interface BookmarkComment {

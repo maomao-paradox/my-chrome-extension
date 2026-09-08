@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.693Z
  */
 
-import { defaultPluginConfigs } from "@/apps";
+import { defaultModuleConfigs } from "@/modules";
 import { getAssetsAbstractPath } from "@/utils/common";
 import { ModuleOption } from "@/utils/esm-module-loader";
 
@@ -19,7 +19,7 @@ export const domainConfigsKey = "domainConfigs";
 const getContentScriptUrl = async (domain: string) =>
   await getAssetsAbstractPath(`js/content/content-${domain}`);
 const getAppEntryUrl = async (appName: string) =>
-  await getAssetsAbstractPath(`js/apps/${appName}`);
+  await getAssetsAbstractPath(`js/modules/${appName}`);
 
 export const contentDomains = import.meta.env.VITE_CONTENT_DOMAIN?.split(
   ",",
@@ -36,7 +36,7 @@ export const contentModules: Map<string, ModuleOption> = contentDomains.reduce(
 );
 
 const configuredAppDomains = import.meta.env.VITE_APP_DOMAIN?.split(",") || [
-  ...Object.keys(defaultPluginConfigs),
+  ...Object.keys(defaultModuleConfigs),
 ];
 
 // 广告拦截器需要在页面初始化时加载，不能因自定义 VITE_APP_DOMAIN 而漏打包。

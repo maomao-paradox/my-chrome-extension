@@ -1,4 +1,4 @@
-import type { PluginConfigMap } from "@/types";
+import type { ModuleConfigMap } from "@/types";
 import { contentModules, appModules } from "@/config";
 import { ESMModuleLoader } from "@/utils/esm-module-loader";
 
@@ -8,7 +8,7 @@ type RuntimeModule = Record<string, any>;
 export interface ContentModuleManager {
   loadContentScripts: () => Promise<void>;
   toggleApp: (moduleName: string, open: boolean) => Promise<void>;
-  applyConfig: (config: PluginConfigMap | null | undefined) => Promise<void>;
+  applyConfig: (config: ModuleConfigMap | null | undefined) => Promise<void>;
   getOrLoadModule: (moduleName: string) => Promise<RuntimeModule | null>;
   updateModuleTools: (moduleName: string, tools: any) => Promise<boolean>;
 }
@@ -99,7 +99,7 @@ export const createModuleManager = (
   };
 
   const applyConfig = async (
-    config: PluginConfigMap | null | undefined,
+    config: ModuleConfigMap | null | undefined,
   ): Promise<void> => {
     if (ctx !== ctx.top || !config) {
       return;

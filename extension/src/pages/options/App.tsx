@@ -14,15 +14,15 @@ import React, {
   Suspense,
   LazyExoticComponent,
 } from "react";
-import GlassCursor from "@components/cursors/GlassCursor";
+import GlassCursor from "@/components/cursors/GlassCursor";
 import PanelNav, {
   DIRECTION_OFFSETS,
   Panel,
   PanelBase,
   PanelNavs,
-} from "@/assets/layout/PanelNav";
+} from "@/layout/PanelNav";
 import { STARSHIP_MODULES, StarshipPanelId } from "./views/starshipModules";
-import Static404 from "@/assets/components/Static404";
+import Static404 from "@/components/Static404";
 import ContentScriptDomainConfig from "./views/ContentScriptDomainConfig";
 import ExtensionSettings from "./views/ExtensionSettings";
 import ErrorMonitorConfig from "./views/ErrorMonitorConfig";

@@ -8,7 +8,7 @@
  */
 
 import { installGlobalLogger } from '@/utils/logger';
-import { installEarlyAdBlocker } from '@/apps/adBlocker/early';
+import { installEarlyAdBlocker } from '@/modules/adBlocker/early';
 import { appConfigKey } from '@/config';
 
 type DomainConfig = {

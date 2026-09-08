@@ -2,8 +2,8 @@ import { storage } from "@/stores";
 import { equalDomain, parseDomains, getChunkFileMap } from "@/utils/common";
 import { whenDomReady } from "@/utils/element-control";
 import messenger from "@/message";
-import type { ExtMessage, PluginConfigMap } from "@/types";
-import { defaultPluginConfigs } from "@/apps/index";
+import type { ExtMessage, ModuleConfigMap } from "@/types";
+import { defaultModuleConfigs } from "@/modules/index";
 import { appConfigKey, contentModules, domainConfigsKey } from "@/config";
 import { createModuleManager } from "./module-manager";
 import {
@@ -15,7 +15,7 @@ import { installTopFrameEventBridge } from "./iframe-event-bridge";
 import { initializeShadowMessage } from "./shadow-message";
 import { initializeWebpageMouseTrail } from "./mouse-trail";
 import { ModuleOption } from "@/utils";
-import { stopEarlyAdBlocker } from "@/apps/adBlocker/early";
+import { stopEarlyAdBlocker } from "@/modules/adBlocker/early";
 
 const getCurrentPort = (): string => {
   const { port, protocol } = new URL(window.location.origin);
@@ -138,22 +138,22 @@ const installMessageListener = (
 };
 
 const loadAppOptions = async (
-  applyConfig: (config: PluginConfigMap | null | undefined) => Promise<void>,
+  applyConfig: (config: ModuleConfigMap | null | undefined) => Promise<void>,
 ): Promise<void> => {
   try {
     const result = await storage.ext.local.get(appConfigKey, null);
     if (!checkValid(result)) {
-      maLogger.info("初始化应用配置", defaultPluginConfigs);
-      if (checkValid(defaultPluginConfigs)) {
-        await storage.ext.local.set(appConfigKey, defaultPluginConfigs || {});
-        await applyConfig(defaultPluginConfigs);
+      maLogger.info("初始化应用配置", defaultModuleConfigs);
+      if (checkValid(defaultModuleConfigs)) {
+        await storage.ext.local.set(appConfigKey, defaultModuleConfigs || {});
+        await applyConfig(defaultModuleConfigs);
       } else {
-        maLogger.error("初始化应用配置失败", defaultPluginConfigs);
+        maLogger.error("初始化应用配置失败", defaultModuleConfigs);
       }
       return;
     }
 
-    await applyConfig(result as PluginConfigMap);
+    await applyConfig(result as ModuleConfigMap);
   } catch (error: any) {
     maLogger.error("初始化配置失败:", error.message);
   }

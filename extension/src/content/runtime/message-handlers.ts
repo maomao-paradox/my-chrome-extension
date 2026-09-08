@@ -4,7 +4,7 @@ import type { PageTools } from "./page-tools";
 import { calculatePOW } from "./pow-service";
 import { applyWebpageMouseTrail } from "./mouse-trail";
 import { getAssetsAbstractPathSync } from "@/utils";
-import { stopEarlyAdBlocker } from "@/apps/adBlocker/early";
+import { stopEarlyAdBlocker } from "@/modules/adBlocker/early";
 
 export type ContentMessageHandler = (
   data: any,

@@ -7,7 +7,7 @@
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { CameraOutlined } from '@ant-design/icons';
-import TableContainer from '../components/TableContainer';
+import TableContainer from '../layout/TableContainer';
 import { useDomainState } from '../composables/useDomainState';
 import type { ExtMessage } from '@/types';
 import { appConfigKey } from '@/config';

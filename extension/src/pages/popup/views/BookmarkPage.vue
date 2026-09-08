@@ -178,7 +178,7 @@ import {
   IconSearch,
   IconClose,
 } from "@icons/index";
-import TableContainer from "../components/TableContainer.vue";
+import TableContainer from "../layout/TableContainer.vue";
 
 const bookmarks = ref<Bookmark[]>([]);
 const showDeleteConfirm = ref(false);

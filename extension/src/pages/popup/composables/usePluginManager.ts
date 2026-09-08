@@ -8,8 +8,8 @@
 import { useState } from "react";
 import { appConfigKey } from "@/config";
 import { storage } from "@/stores";
-import { type PluginConfigMap } from "@/types";
-import { defaultPluginConfigs } from "@/apps";
+import { type ModuleConfigMap } from "@/types";
+import { defaultModuleConfigs } from "@/modules";
 import { appDomains } from "@/config";
 
 /**
@@ -17,7 +17,7 @@ import { appDomains } from "@/config";
  */
 export const usePluginManager = () => {
   const [pluginConfigs, setPluginConfigs] =
-    useState<PluginConfigMap>(defaultPluginConfigs);
+    useState<ModuleConfigMap>(defaultModuleConfigs);
 
   /**
    * 加载插件配置
@@ -26,14 +26,14 @@ export const usePluginManager = () => {
     try {
       if (!chrome.storage) {
         console.warn("local storage not available, use test data");
-        setPluginConfigs(defaultPluginConfigs);
+        setPluginConfigs(defaultModuleConfigs);
         return;
       }
       const configs = await storage.ext.local.get(appConfigKey, null);
       // 当没有存储配置时（返回 null 或空对象），使用默认配置
       if (!configs || Object.keys(configs).length === 0) {
-        await storage.ext.local.set(appConfigKey, defaultPluginConfigs);
-        setPluginConfigs(defaultPluginConfigs);
+        await storage.ext.local.set(appConfigKey, defaultModuleConfigs);
+        setPluginConfigs(defaultModuleConfigs);
       } else {
         // 比较本地存储的配置和最新配置，更新默认配置
         // 新增的配置要补充到里面
@@ -41,22 +41,22 @@ export const usePluginManager = () => {
         const allowedConfigKeys = appDomains.filter(Boolean);
         setPluginConfigs(
           allowedConfigKeys.reduce(
-            (acc: PluginConfigMap, key: string) => ({
+            (acc: ModuleConfigMap, key: string) => ({
               ...acc,
-              [key]: configs[key] || defaultPluginConfigs[key],
+              [key]: configs[key] || defaultModuleConfigs[key],
             }),
-            {} as PluginConfigMap,
+            {} as ModuleConfigMap,
           ),
         );
       }
     } catch (error) {
       maLogger.error("加载插件配置失败:", error);
-      setPluginConfigs(defaultPluginConfigs);
+      setPluginConfigs(defaultModuleConfigs);
     }
   };
 
   const savePluginConfigs = async (
-    pluginConfigs: PluginConfigMap,
+    pluginConfigs: ModuleConfigMap,
   ): Promise<void> => {
     try {
       await storage.ext.local.set(appConfigKey, pluginConfigs);

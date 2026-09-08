@@ -1,11 +1,11 @@
-import { useMusicNoteTrails } from '@/assets/composables/mouse/useStarTrails';
+import { useMusicNoteTrails } from '@/composables/mouse/useStarTrails';
 import {
   mouseTrailStorageKey,
   normalizeMouseTrailPreference,
   readStoredMouseTrailPreference,
   type MouseTrailPreference,
   type MouseTrailPreset
-} from '@/assets/composables/mouse/mouseTrailPreference';
+} from '@/composables/mouse/mouseTrailPreference';
 
 let trailControls: ReturnType<typeof useMusicNoteTrails> | null = null;
 let storageListenerInstalled = false;
