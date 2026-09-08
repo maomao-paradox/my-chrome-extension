@@ -14,7 +14,7 @@ import {
   createEl,
   PositionStrategy,
 } from "@/utils/index";
-// import { QuickLogin } from '@components/index';
+// import { QuickLogin } from '@/components/index';
 import messenger from "@/message";
 import { ExtMessage, MessageHandler } from "@/types";
 import { storage } from "@/stores";

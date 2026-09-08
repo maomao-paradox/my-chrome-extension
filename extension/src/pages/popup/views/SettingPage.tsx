@@ -14,8 +14,8 @@ import React, {
   ChangeEvent,
   useMemo,
 } from "react";
-import MASwitch from "@components/switch/main";
-import "@components/switch/style.scss";
+import MASwitch from "@/components/switch/main";
+import "@/components/switch/style.scss";
 import {
   SettingOutlined,
   FileTextOutlined,

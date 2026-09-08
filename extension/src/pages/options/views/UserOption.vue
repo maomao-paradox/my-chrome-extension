@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
-import { UserCard } from "@components/index";
+import { UserCard } from "@/components/index";
 
 interface UserInfo {
   realname: string;

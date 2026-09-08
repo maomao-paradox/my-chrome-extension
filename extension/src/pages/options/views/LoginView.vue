@@ -27,7 +27,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import CryptoJS from 'crypto-js';
-import Push from '@components/particles/push.vue';
+import Push from '@/components/particles/push.vue';
 import { saveLoginState, verifyLoginState } from '@/utils/auth';
 
 

@@ -41,10 +41,8 @@ export default ({
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "@components": path.resolve(__dirname, "./src/components"),
         "@icons": path.resolve(__dirname, "./src/assets/icons"),
         "@styles": path.resolve(__dirname, "./src/assets/styles"),
-        "@types": path.resolve(__dirname, "./src/types"),
       },
     },
     root: "src/",
@@ -159,8 +157,9 @@ export default ({
           chunkFileNames: `js/chunks/chunk-${isProduction ? "" : "[name]-"}[hash].js`,
           assetFileNames: (assetInfo) => {
             const fileExtname = path.extname(assetInfo.names?.[0] || "");
-
-            if (
+            if ([".ttf", ".woff", ".woff2"].includes(fileExtname)) {
+              return `fonts/[hash].[ext]`;
+            } else if (
               [
                 ".png",
                 ".jpg",
@@ -173,15 +172,11 @@ export default ({
                 ".ogg",
                 ".mp4",
                 ".webm",
-                ".ttf",
-                ".woff",
-                ".woff2",
                 ".eot",
               ].includes(fileExtname)
             ) {
               return `static/[hash].[ext]`;
-            }
-            if (fileExtname === ".css") {
+            } else if (fileExtname === ".css") {
               return `css/[hash].[ext]`;
             }
             return `[hash].[ext]`;

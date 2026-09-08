@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { MASwitch } from '@components/index';
+import { MASwitch } from '@/components/index';
 
 interface UserInfo {
     realname: string;

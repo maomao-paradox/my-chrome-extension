@@ -17,7 +17,7 @@ import {
 
 import { Requester, get_token } from "@/services/api/mria-api";
 import type { Response, ExtMessage, MessageHandler, Tool } from "@/types";
-// import { QuickLogin } from '@components/index';
+// import { QuickLogin } from '@/components/index';
 import { storage } from "@/stores";
 import messenger from "@/message";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";

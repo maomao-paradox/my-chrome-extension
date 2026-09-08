@@ -181,7 +181,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { MaMarkdown } from '@components/index';
+import { MaMarkdown } from '@/components/index';
 import { storage } from '@/stores';
 import { STARSHIP_STATUS_TEXT, type StarshipStatus } from './starshipModules';
 import { loadAIConfig, saveAIConfig } from '@/utils/ai-config';

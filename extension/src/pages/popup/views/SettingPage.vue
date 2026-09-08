@@ -213,7 +213,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
-import { MASwitch } from "@components/index";
+import { MASwitch } from "@/components/index";
 import TableContainer from "../layout/TableContainer.vue";
 import { appConfigKey, domainConfigsKey } from "@/config";
 import {

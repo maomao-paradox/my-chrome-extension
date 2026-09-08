@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { storage } from '@/stores';
-import { DomainConfigItem } from '@components/index';
+import { DomainConfigItem } from '@/components/index';
 import { ElMessage } from 'element-plus';
 import { useDomainManager } from '@/assets/composables/useDomainManager';
 

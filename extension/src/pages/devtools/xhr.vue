@@ -145,7 +145,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { SubRule, MRDialog, HandlerSection } from '@components/index';
+import { SubRule, MRDialog, HandlerSection } from '@/components/index';
 import type { XhrRulesArray, XhrRule, RuleInstruction } from '@/types';
 
 // 响应式数据

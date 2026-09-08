@@ -104,7 +104,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import messenger from '@/message';
-import {MaMarkdown} from '@components/index';
+import {MaMarkdown} from '@/components/index';
 
 const aiModels = [
   { value: 'deepseek', label: 'DeepSeek' }

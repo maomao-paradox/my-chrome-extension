@@ -7,7 +7,7 @@
  * - defineEmits('close') → props.onClose
  * - ref → useState
  * - computed → useMemo
- * - Draggable 从 Vue 版 @components/index → React 版 @/assets/components/react-index
+ * - Draggable 从 Vue 版 @/components/index → React 版 @/assets/components/react-index
  * - IconPreviousMusic/IconPlay/IconPause/IconNextMusic (?component svg)
  *   → Ant Design 图标（StepBackwardOutlined / CaretRightOutlined / PauseOutlined / StepForwardOutlined）
  * - AIConversation (Vue 组件, 1474 行) → AIConversationPlaceholder 占位组件
