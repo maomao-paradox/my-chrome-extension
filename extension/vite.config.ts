@@ -60,6 +60,8 @@ export default ({
       removeConsole({
         // 保留指定的 console 方法
         external: ["error", "warn"], // 保留 console.error 和 console.warn
+        // 保留包含指定值的 console.log 语句
+        externalValue: ["IMPORTANT"],
       }),
       generateFileMapPlugin(),
       isEncryptEnabled
@@ -154,8 +156,12 @@ export default ({
                 "content-runtime": ["@/content/runtime"],
               }
             : undefined,
-          chunkFileNames: `js/chunks/chunk-${isProduction ? "" : "[name]-"}[hash].js`,
+          chunkFileNames: (chunkInfo) => {
+            // console.log(chunkInfo.name);
+            return `js/chunks/chunk-${isProduction ? "" : "[name]-"}[hash].js`;
+          },
           assetFileNames: (assetInfo) => {
+            // console.log(assetInfo.names);
             const fileExtname = path.extname(assetInfo.names?.[0] || "");
             if ([".ttf", ".woff", ".woff2"].includes(fileExtname)) {
               return `fonts/[hash].[ext]`;
@@ -178,11 +184,14 @@ export default ({
               return `static/[hash].[ext]`;
             } else if (fileExtname === ".css") {
               return `css/[hash].[ext]`;
+            } else if (fileExtname === ".js") {
+              return `js/[hash].[ext]`;
             }
             return `[hash].[ext]`;
           },
-          entryFileNames: (chunkInfo) => {
-            const chunkName = chunkInfo.name || "";
+          entryFileNames: (entryInfo) => {
+            // console.log(entryInfo.name);
+            const chunkName = entryInfo.name || "";
             if (chunkName.startsWith("content/")) {
               return `js/content/[hash].js`;
             } else if (chunkName.startsWith("sfs/")) {
@@ -190,7 +199,7 @@ export default ({
             } else if (chunkName.startsWith("modules/")) {
               return `js/modules/[hash].js`;
             } else if (chunkName.startsWith("devtools/")) {
-              return `pages/devtools/[hash].js`;
+              return `js/devtools/[hash].js`;
             } else {
               return `js/[hash].js`;
             }

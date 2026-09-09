@@ -12,8 +12,8 @@ import {
 } from '@/shared/deepseek-core';
 import { powWasmModule } from './wasm-utils';
 
-const POW_WORKER_SCRIPT_PATH = 'static/js/workers/pow-worker.min.js';
-const POW_WORKER_WASM_PATH = 'static/wasm/sha3_wasm_bg.7b9ca65ddd.wasm';
+const POW_WORKER_SCRIPT_PATH = 'js/workers/pow-worker.min.js';
+const POW_WORKER_WASM_PATH = 'js/wasm/sha3_wasm_bg.7b9ca65ddd.wasm';
 const OPENAI_COMPATIBLE_ENDPOINT = '/chat/completions';
 const ANTHROPIC_ENDPOINT = '/messages';
 

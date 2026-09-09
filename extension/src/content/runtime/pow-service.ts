@@ -7,7 +7,7 @@ const initPowWorker = (): void => {
       return;
     }
 
-    const workerUrl = chrome.runtime.getURL('static/js/workers/pow-worker.min.js');
+    const workerUrl = chrome.runtime.getURL('js/workers/pow-worker.min.js');
     maLogger.log('Creating POW Worker with URL:', workerUrl);
     fetch(workerUrl)
       .then((response) => response.text())
@@ -81,7 +81,7 @@ const doCalculatePOW = (
 
     powWorker.postMessage({
       type: 'pow-challenge',
-      wasmUrl: chrome.runtime.getURL('static/js/sha3_wasm_bg.7b9ca65ddd.wasm'),
+      wasmUrl: chrome.runtime.getURL('js/sha3_wasm_bg.7b9ca65ddd.wasm'),
       challenge: {
         ...challenge,
         expireAt: challenge.expire_at

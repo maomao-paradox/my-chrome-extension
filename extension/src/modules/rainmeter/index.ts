@@ -160,11 +160,11 @@ class WzyTool {
 	font-family: 'Source Sans Pro';
 	font-style: normal;
 	font-weight: 400;
-	src: url('${chrome.runtime.getURL('static/fonts/font-kit=6xK3dSBYKcSV-LCoeQqfX1RYOo3qOK7h&skey=1e026b1c27170b9b&v=v22')}');
+	src: url('${chrome.runtime.getURL('fonts/font-kit=6xK3dSBYKcSV-LCoeQqfX1RYOo3qOK7h&skey=1e026b1c27170b9b&v=v22')}');
 }
     @font-face {
 	font-family: 'FontAwesome';
-	src: url('${chrome.runtime.getURL('static/fonts/fontawesome-webfont.woff2-v=4.4.0')}');
+	src: url('${chrome.runtime.getURL('fonts/fontawesome-webfont.woff2-v=4.4.0')}');
 	font-weight: normal;
 	font-style: normal
 }
@@ -172,8 +172,8 @@ class WzyTool {
     injectStyles(this.shadowRoot, fontCSS);
 
     const cssFiles = [
-      'static/css/main.css-v=0.0.2.css',
-      'static/css/font-awesome.min.css'
+      'css/main.css-v=0.0.2.css',
+      'css/font-awesome.min.css'
     ];
 
     for (const file of cssFiles) {

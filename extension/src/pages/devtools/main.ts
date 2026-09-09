@@ -6,7 +6,7 @@ void syncGlobalLoggerFromStorage();
 
 chrome.devtools.panels.create(
   'AI助手',      // 面板名称
-  'static/icons/favicon16.ico',     // 图标
+  'icons/favicon16.ico',     // 图标
   'pages/devtools/panel.html',   // 面板内容页面
   function(panel) {
     maLogger.log('AI助手面板创建成功');
@@ -27,7 +27,7 @@ chrome.devtools.panels.create(
 
 chrome.devtools.panels.create(
   'XHR助手',      // 面板名称
-  'static/icons/favicon16.ico',     // 图标
+  'icons/favicon16.ico',     // 图标
   'pages/devtools/xhr.html',   // 面板内容页面
   function(panel) {
     maLogger.log('XHR助手面板创建成功');

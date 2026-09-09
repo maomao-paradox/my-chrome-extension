@@ -37,7 +37,7 @@ class WasmFileMapDecryptor {
     }
 
     try {
-      const wasmUrl = chrome.runtime.getURL('static/wasm/aes_wasm_bg.js');
+      const wasmUrl = chrome.runtime.getURL('js/wasm/aes_wasm_bg.js');
       const { default: initWasm, decrypt_file_map } = await import(
         /* @vite-ignore */ wasmUrl
       );

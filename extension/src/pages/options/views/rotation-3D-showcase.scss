@@ -70,7 +70,7 @@
   height: 516px;
   margin: auto;
   pointer-events: none;
-  background: url("/static/imgs/baseMap.png") center / contain no-repeat;
+  background: url("/imgs/baseMap.png") center / contain no-repeat;
 
   &::before {
     position: absolute;
@@ -82,7 +82,7 @@
     height: 318px;
     margin: auto;
     content: "";
-    background: url("/static/imgs/baseLogo.png") center / contain no-repeat;
+    background: url("/imgs/baseLogo.png") center / contain no-repeat;
     animation: rotation3d-bounce-up-down 10s ease-in-out infinite;
   }
 }
@@ -172,7 +172,7 @@
     color: #01e9fc;
 
     .baseImg {
-      background: url("/static/imgs/蓝底.png");
+      background: url("/imgs/蓝底.png");
     }
   }
 
@@ -180,7 +180,7 @@
     color: #02e943;
 
     .baseImg {
-      background: url("/static/imgs/绿底.png");
+      background: url("/imgs/绿底.png");
     }
   }
 
@@ -188,7 +188,7 @@
     color: #ffd200;
 
     .baseImg {
-      background: url("/static/imgs/黄底.png");
+      background: url("/imgs/黄底.png");
     }
   }
 

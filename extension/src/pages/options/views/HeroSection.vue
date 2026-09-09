@@ -340,7 +340,7 @@
 
               <g class="ship-projection">
                 <image
-                  href="/static/imgs/starship.png"
+                  href="/imgs/starship.png"
                   x="160"
                   y="134"
                   width="700"
@@ -349,7 +349,7 @@
                   preserveAspectRatio="xMidYMid meet"
                 />
                 <image
-                  href="/static/imgs/starship.png"
+                  href="/imgs/starship.png"
                   x="160"
                   y="134"
                   width="700"

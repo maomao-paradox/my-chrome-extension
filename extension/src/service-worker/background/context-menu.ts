@@ -43,7 +43,7 @@ const menuHandlers: ContextMenuHandler = {
       try {
         chrome.notifications.create({
           type: "basic",
-          iconUrl: "static/icons/favicon48.ico",
+          iconUrl: "icons/favicon48.ico",
           title: "扩展已禁用",
           message: `已在 ${domain} 上禁用扩展，页面即将刷新...`,
         });

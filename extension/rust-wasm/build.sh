@@ -12,8 +12,8 @@ wasm-bindgen --target web --out-name "aes_wasm_bg" --out-dir ./pkg ./target/wasm
 
 # // 3. 复制文件到扩展目录
 echo '📁 Copying files to public...'
-mkdir -p ../public/static/wasm
-cp ./pkg/*.{js,wasm} ../public/static/wasm/
+mkdir -p ../public/js/wasm
+cp ./pkg/*.{js,wasm} ../public/js/wasm/
 
 # // 4. 编译 TypeScript
 # echo '📝 Compiling TypeScript...'

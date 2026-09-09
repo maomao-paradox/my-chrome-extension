@@ -81,7 +81,7 @@ const HoverMenu: React.FC<HoverMenuProps> = ({
   const dockRef = useRef<HTMLDivElement>(null);
 
   // Miku 图片资源
-  const mikuSrc = chrome.runtime.getURL("static/imgs/miku.png");
+  const mikuSrc = chrome.runtime.getURL("imgs/miku.png");
 
   // 显示整个菜单
   const show = useCallback(() => {

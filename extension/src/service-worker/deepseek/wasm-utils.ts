@@ -40,7 +40,7 @@ class PowWasmModule {
     if (this.wasmLoaded) {return;}
 
     try {
-      const wasmUrl = chrome.runtime.getURL('static/wasm/sha3_wasm_bg.7b9ca65ddd.wasm');
+      const wasmUrl = chrome.runtime.getURL('js/wasm/sha3_wasm_bg.7b9ca65ddd.wasm');
       let response: Response;
             
       try {

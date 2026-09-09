@@ -188,7 +188,7 @@ html {
 <style scoped>
 @font-face {
     font-family: 'Comfortaa';
-    src: url('/static/front/Comfortaa-VariableFont_wght.ttf') format('truetype');
+    src: url('/fonts/Comfortaa-VariableFont_wght.ttf') format('truetype');
     font-weight: 300;
     font-style: normal;
     font-display: swap;
