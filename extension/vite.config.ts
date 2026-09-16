@@ -9,6 +9,7 @@ import encryptFileMapPlugin from "./plugins/encrypt-file-map";
 import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
+import checkSwSafe from "./plugins/vite-plugin-check-sw-safe";
 
 export default ({
   mode,
@@ -63,6 +64,11 @@ export default ({
         external: ["error", "warn"], // 保留 console.error 和 console.warn
         // 保留包含指定值的 console.log 语句
         externalValue: ["IMPORTANT"],
+      }),
+      checkSwSafe({
+        entryPattern: /service-worker\/background\.(ts|js)$/,
+        failOnError: true,
+        reportInsideFunction: true,
       }),
       generateFileMapPlugin(),
       isEncryptEnabled
