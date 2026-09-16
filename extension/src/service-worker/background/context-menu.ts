@@ -1,5 +1,6 @@
 import type { ContextMenuHandler } from "@/types";
 import { toggleDisabledDomain, extractDomain } from "./domain-state";
+// import { SiteFavoriteStorage } from "@/services/siteFavoriteStorage";
 
 interface MenuItem extends chrome.contextMenus.CreateProperties {
   children?: MenuItem[];
@@ -17,6 +18,11 @@ const menuList: MenuItem[] = [
     id: "DISABLE_ON_THIS_DOMAIN",
     title: "在此站点禁用/启用扩展",
     contexts: ["all"],
+  },
+  {
+    id: "SAVE_CURRENT_SITE",
+    title: "收藏当前站点",
+    contexts: ["page", "frame"],
   },
 ];
 
@@ -60,6 +66,34 @@ const menuHandlers: ContextMenuHandler = {
       console.error("禁用域名失败:", error);
     }
   },
+  // SAVE_CURRENT_SITE: async (tab) => {
+  //   try {
+  //     const url = tab.url?.trim();
+  //     if (!url || !/^https?:\/\//i.test(url)) {
+  //       console.warn("当前页面不支持收藏:", url);
+  //       return;
+  //     }
+
+  //     await SiteFavoriteStorage.saveSite({
+  //       url,
+  //       title: tab.title?.trim() || new URL(url).hostname,
+  //       faviconUrl: tab.favIconUrl,
+  //     });
+
+  //     try {
+  //       chrome.notifications.create({
+  //         type: "basic",
+  //         iconUrl: "icons/favicon48.ico",
+  //         title: "站点已收藏",
+  //         message: "可在侧边栏的“收藏站点”中打开",
+  //       });
+  //     } catch (notifyError) {
+  //       console.warn("创建收藏通知失败:", notifyError);
+  //     }
+  //   } catch (error) {
+  //     console.error("收藏当前站点失败:", error);
+  //   }
+  // },
 };
 
 function createMenu(menu: MenuItem): void {

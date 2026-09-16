@@ -1,7 +1,7 @@
 /**
  * @description AI 助手 DevTools 面板入口（React 版本）
  */
-import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/logger';
+import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils';
 
 installGlobalLogger({ title: 'MRIA DEVTOOLS PANEL', enabled: false });
 void syncGlobalLoggerFromStorage();

@@ -38,12 +38,12 @@ export const defaultModuleConfigs: ModuleConfigMap = {
     enabled: false,
   },
 
-  // sidebar: {
-  //   id: "sidebar",
-  //   name: "侧边工具栏",
-  //   type: "sidebar",
-  //   enabled: false,
-  // },
+  sidebar: {
+    id: "sidebar",
+    name: "侧边工具栏",
+    type: "sidebar",
+    enabled: false,
+  },
 
   textSelectionToolbar: {
     id: "textSelectionToolbar",

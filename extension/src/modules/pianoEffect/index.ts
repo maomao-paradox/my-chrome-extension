@@ -9,7 +9,7 @@
 
 // pianoEffect.ts - 钢琴音效模块
 import { storage } from "@/stores";
-import { getStaticAbstractPath } from "@/utils/common";
+import { getStaticAbstractPath } from "@/utils";
 import { type AppModule } from "@/types";
 
 const fetchAndDecodeAudioBuffer = async (

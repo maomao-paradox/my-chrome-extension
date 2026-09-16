@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import MASwitch from "@/components/switch/main";
 
 import { shadowHostId } from "@/config";
-import { createShadowHost, injectStyles } from "@/utils/shadow-dom";
+import { getShadowContext, injectStyles } from "@/dom-api";
 import panelStyles from "./style.scss?inline";
 import switchStyles from "../switch/style.scss?inline";
 import { createRoot } from "react-dom/client";
@@ -259,7 +259,8 @@ export const createContentFeaturePanel = (
   const existingHost = document.getElementById(shadowHostId);
   const { shadowHost, shadowRoot } = existingHost?.shadowRoot
     ? { shadowHost: existingHost, shadowRoot: existingHost.shadowRoot }
-    : createShadowHost(shadowHostId, "open");
+    : getShadowContext(shadowHostId, "open");
+  if (!shadowRoot) return;
 
   const existingMount = shadowRoot.getElementById(PANEL_MOUNT_ID);
   existingMount?.remove();

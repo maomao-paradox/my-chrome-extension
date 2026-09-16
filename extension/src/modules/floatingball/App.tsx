@@ -24,8 +24,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { getStaticAbstractPath } from "@/utils/common";
-import type { Tool, ModuleConfig, ModuleConfigMap } from "@/types";
+import { getStaticAbstractPath } from "@/utils";
+import type { Tool, ModuleConfigMap } from "@/types";
 import { appConfigKey } from "@/config";
 import { useFloatingballStore } from "@/stores/floatingball";
 import FloatingBall from "./FloatingBall";

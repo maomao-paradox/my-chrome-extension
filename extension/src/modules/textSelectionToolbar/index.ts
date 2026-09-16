@@ -18,13 +18,16 @@ import {
   ElementPositionInfo,
   addElementToDom,
   PositionStrategy,
+  toast,
+} from "@/dom-api";
+
+import {
   getAssetsAbstractPathSync,
   generateId,
   componentManager,
 } from "@/utils";
-import toast from "@/utils/toast";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
-import { loadAIConfig } from "@/utils/ai-config";
+import { loadAIConfig } from "@/dom-api/ai-config";
 import { fillTextareaElementByAI } from "./textarea-ai";
 
 const appName = "textSelectionToolbar";
@@ -956,6 +959,10 @@ class TextSelectionToolbarModule implements AppModule {
 
       // 如果已经注入，则不重复注入
       if (this.isInjected && this._container && this._root && shadowRoot) {
+        return;
+      }
+      if (!shadowRoot) {
+        maLogger.error("创建 shadow root 失败");
         return;
       }
 

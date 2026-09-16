@@ -7,8 +7,8 @@
  * @date 2026-02-05T02:38:01.687Z
  */
 
-import { randomSelect, getQueryParams, getFirstClipboard } from "@/utils/base";
-import { saveToLocal } from "@/utils/element-control";
+import { randomSelect, getQueryParams, getFirstClipboard } from "@/utils";
+import { saveToLocal } from "@/dom-api";
 import { storage } from "@/stores";
 import { SessionInfo, RequestHeaders, RequestBody, UserInfo } from "@/types";
 
@@ -731,16 +731,16 @@ export async function createTreatflow(
   }
 }
 
+interface LoginOptions {
+  username?: string;
+  account_no?: string;
+  password: string;
+}
+
 // 用户登录
-export async function userLogin(
-  username: string,
-  password: string,
-): Promise<any> {
+export async function userLogin(options: LoginOptions): Promise<any> {
   //@ts-ignore
-  return await (this || new Requester()).mpost("/api/login", {
-    username: username,
-    password: btoa(password || username === "mpadmin" ? "admin123" : "123456"),
-  });
+  return await (this || new Requester()).mpost("/api/login", { ...options });
 }
 
 // 确保函数名称正确

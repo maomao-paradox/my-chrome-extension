@@ -1,7 +1,7 @@
 import "./AutomationPanel.scss";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { sendMessageToBackground } from "@/utils/message";
+import { sendMessageToBackground } from "@/message/message";
 import type {
   AutomationMessageResponse,
   AutomationPageSnapshot,

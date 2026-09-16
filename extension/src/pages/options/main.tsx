@@ -7,7 +7,7 @@ import { createRoot, type Root } from "react-dom/client";
 import {
   installGlobalLogger,
   syncGlobalLoggerFromStorage,
-} from "@/utils/logger";
+} from "@/utils";
 import App from "./App";
 import "./styles/app.scss";
 import "@/assets/styles/element-message-box.scss";

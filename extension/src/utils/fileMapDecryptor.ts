@@ -83,4 +83,4 @@ class FileMapDecryptor {
   }
 }
 
-export default FileMapDecryptor;
+export { FileMapDecryptor };

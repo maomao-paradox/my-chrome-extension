@@ -24,7 +24,7 @@ import {
   CheckCircleOutlined,
   DesktopOutlined,
 } from "@ant-design/icons";
-import { injectScriptToActivateTab } from "@/utils/element-control";
+import { injectScriptToActivateTab } from "@/dom-api";
 import message from "@/message/index.js";
 import "./styles/script-runner.scss";
 

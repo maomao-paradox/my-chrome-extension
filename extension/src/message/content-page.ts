@@ -1,12 +1,11 @@
 /**
  * SidePanel ⇄ (Chrome Messages) ⇄ Content Script ⇄ (postMessage) ⇄ Page Script
- * 
+ *
  * 提供Content Script和Page Script之间的安全通信机制
  */
 
-import { generateId } from '@/utils/base';
-import type { PatientRegistrationData, Response, ExtMessage,MessageHandler } from '@/types';
-
+import { generateId } from "@/utils";
+import type { ExtMessage } from "@/types";
 
 // 定义回调函数类型
 type MessageCallback = (response: any) => void;
@@ -20,7 +19,11 @@ const pendingCallbacks: Map<string, MessageCallback> = new Map();
  * @param callback 可选的回调函数，用于处理响应
  * @param timeout 可选的超时时间（毫秒），默认5000ms
  */
-export function sendMessageToPage(message: { type: string; payload?: any }, callback?: MessageCallback, timeout = 5000): void {
+export function sendMessageToPage(
+  message: { type: string; payload?: any },
+  callback?: MessageCallback,
+  timeout = 5000,
+): void {
   try {
     // 生成唯一消息ID
     const messageId = generateId();
@@ -39,14 +42,16 @@ export function sendMessageToPage(message: { type: string; payload?: any }, call
     }
 
     // 发送消息到页面
-    window.postMessage({
-      ...message,
-      id: messageId,
-      target: 'page' // 标记目标为页面脚本
-    }, window.origin);
-
+    window.postMessage(
+      {
+        ...message,
+        id: messageId,
+        target: "page", // 标记目标为页面脚本
+      },
+      window.origin,
+    );
   } catch (error) {
-    maLogger.error('MRIA: 发送消息到页面失败:', error);
+    maLogger.error("MRIA: 发送消息到页面失败:", error);
     callback?.(null); // 确保回调被调用，即使发生错误
   }
 }
@@ -58,12 +63,14 @@ export function sendMessageToPage(message: { type: string; payload?: any }, call
  */
 export function listenForPageMessages(handler?: (message: any) => void): void {
   // 添加事件监听器
-  window.addEventListener('message', (event: MessageEvent) => {
+  window.addEventListener("message", (event: MessageEvent) => {
     try {
       const { id, source, payload } = event.data;
       maLogger.log(id, source, payload);
       // 验证消息格式和目标
-      if (!(id && source === 'page')) {return;}
+      if (!(id && source === "page")) {
+        return;
+      }
 
       // 处理响应消息
       if (pendingCallbacks.has(id)) {
@@ -73,9 +80,8 @@ export function listenForPageMessages(handler?: (message: any) => void): void {
         callback?.(payload); // 安全调用回调，避免潜在的undefined问题
         return;
       }
-
     } catch (error) {
-      maLogger.error('MRIA: 处理页面消息失败:', error);
+      maLogger.error("MRIA: 处理页面消息失败:", error);
     }
   });
 }
@@ -85,21 +91,27 @@ export function listenForPageMessages(handler?: (message: any) => void): void {
  * @param requestMessage 接收到的请求消息
  * @param responseData 要发送的响应数据
  */
-export function respondToPage(requestMessage: ExtMessage, responseData: any): void {
+export function respondToPage(
+  requestMessage: ExtMessage,
+  responseData: any,
+): void {
   if (!requestMessage.id) {
-    maLogger.warn('MRIA: 无法响应没有ID的消息');
+    maLogger.warn("MRIA: 无法响应没有ID的消息");
     return;
   }
 
   try {
-    window.postMessage({
-      type: 'response',
-      id: requestMessage.id,
-      payload: responseData,
-      target: 'page'
-    }, '*');
+    window.postMessage(
+      {
+        type: "response",
+        id: requestMessage.id,
+        payload: responseData,
+        target: "page",
+      },
+      "*",
+    );
   } catch (error) {
-    maLogger.error('MRIA: 响应页面消息失败:', error);
+    maLogger.error("MRIA: 响应页面消息失败:", error);
   }
 }
 

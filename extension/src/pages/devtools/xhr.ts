@@ -1,7 +1,7 @@
 /**
  * @description XHR 补丁管理入口（React 版本）
  */
-import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/logger';
+import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils';
 
 installGlobalLogger({ title: 'MRIA XHR', enabled: false });
 void syncGlobalLoggerFromStorage();

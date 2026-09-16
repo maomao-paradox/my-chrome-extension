@@ -1,11 +1,9 @@
-import { createRoot } from "react-dom/client";
 import { shadowHostId } from "@/config";
-import { createShadowHost } from "@/utils/shadow-dom";
-import toast from "@/utils/toast";
+import { getShadowContext, toast } from "@/dom-api";
 import { ToastType } from "@/components/toast/main";
 
 export const initializeShadowMessage = (ctx: AppContext): ShadowRoot | null => {
-  const { shadowRoot } = createShadowHost(shadowHostId, "open");
+  const { shadowRoot } = getShadowContext(shadowHostId, "open");
 
   if (shadowRoot) {
     const mountPoint = document.createElement("div");

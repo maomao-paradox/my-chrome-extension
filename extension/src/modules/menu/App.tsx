@@ -12,7 +12,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { AppstoreOutlined } from "@ant-design/icons";
 import type { Tool } from "@/types";
-import toast from "@/utils/toast";
+import toast from "@/dom-api/toast";
 import AutoClick from "./tools/AutoClick";
 import "./styles/app.scss";
 

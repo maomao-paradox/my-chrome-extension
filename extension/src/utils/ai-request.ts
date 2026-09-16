@@ -18,7 +18,7 @@
  * ```
  */
 
-import { loadAIConfig } from './ai-config';
+import { loadAIConfig } from '../dom-api/ai-config';
 
 /**
  * AI请求配置选项

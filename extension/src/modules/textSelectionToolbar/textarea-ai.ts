@@ -7,7 +7,7 @@
  * @date 2026-07-07T00:00:00.000Z
  */
 
-import { loadAIConfig } from "@/utils/ai-config";
+import { loadAIConfig } from "@/dom-api/ai-config";
 
 type TextareaAIState =
   | "pending"

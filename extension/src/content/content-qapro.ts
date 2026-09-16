@@ -13,15 +13,14 @@ import {
   getElementAbsolutePosition,
   createEl,
   PositionStrategy,
-} from "@/utils/index";
+} from "@/dom-api";
 // import { QuickLogin } from '@/components/index';
 import messenger from "@/message";
 import { ExtMessage, MessageHandler } from "@/types";
 import { storage } from "@/stores";
-import { getQueryParams } from "@/utils/base";
+import { getQueryParams } from "@/utils";
 import { injectXhrPatch } from "@/sfs/xhr-patch/xhr_message_handler";
 import xhrRules from "@/sfs/xhr-patch/rules";
-import { createApp } from "vue";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 
 const _ADMIN = "admin";

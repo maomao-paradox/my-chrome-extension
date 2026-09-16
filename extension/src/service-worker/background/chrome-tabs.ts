@@ -40,7 +40,7 @@ export async function unregisterAllDynamicContentScripts(): Promise<void> {
       'An unexpected error occurred while',
       'unregistering dynamic content scripts.'
     ].join(' ');
-    throw new Error(message, { cause: error });
+    throw new Error(message);
   }
 }
 

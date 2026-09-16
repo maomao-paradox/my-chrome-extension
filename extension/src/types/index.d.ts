@@ -8,7 +8,7 @@
  */
 
 import { type Requester } from "@/services/api/mria-api";
-import { type Logger } from "@/utils/logger";
+import { type Logger } from "@/utils";
 import "react";
 
 declare module "react" {

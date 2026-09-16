@@ -98,6 +98,7 @@ export const createManifest = (pages: ManifestPageFlags) =>
       "downloads",
       "storage",
       "contextMenus",
+      "notifications",
       "cookies",
       "sidePanel",
       "webNavigation",

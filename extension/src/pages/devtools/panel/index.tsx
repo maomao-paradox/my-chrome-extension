@@ -5,7 +5,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { ConfigProvider, theme } from 'antd';
 import PanelApp from './App';
-import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/logger';
+import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils';
 
 installGlobalLogger({ title: 'MRIA DEVTOOLS PANEL', enabled: false });
 void syncGlobalLoggerFromStorage();

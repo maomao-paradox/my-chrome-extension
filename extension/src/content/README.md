@@ -85,7 +85,7 @@ src/content/
 
 #### 2.2 导入语句
 ```typescript
-import { addElementToDom, injectScriptToActivateTab, waitForSelector } from '@/utils/element-control'
+import { addElementToDom, injectScriptToActivateTab, waitForSelector } from '@/dom-api'
 import messenger from "@/message"
 import { ExtMessage, Tool, TextTool } from "@/types"
 ```
@@ -207,7 +207,7 @@ const scripts: ScriptConfig[] = [
  * @date YYYY-MM-DDTHH:MM:SS.sssZ
  */
 
-import { addElementToDom, injectScriptToActivateTab, waitForSelector } from '@/utils/element-control'
+import { addElementToDom, injectScriptToActivateTab, waitForSelector } from '@/dom-api'
 import messenger from "@/message"
 import { ExtMessage, Tool, TextTool } from "@/types"
 

@@ -1,5 +1,5 @@
 import storage from '@/stores/chromestorge';
-import { generateId } from '@/utils/base';
+import { generateId } from '@/utils';
 
 export interface Comment {
   id: string;

@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.694Z
  */
 
-import { installGlobalLogger } from '@/utils/logger';
+import { installGlobalLogger } from '@/utils';
 import { installEarlyAdBlocker } from '@/modules/adBlocker/early';
 import { appConfigKey } from '@/config';
 

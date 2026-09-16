@@ -7,14 +7,11 @@
  * @date 2026-02-05T02:38:01.694Z
  */
 
-import {
-  addElementToDom,
-  injectScriptToActivateTab,
-  waitForSelector,
-} from "@/utils/element-control";
+import { injectScriptToActivateTab, waitForSelector } from "@/dom-api";
 import messenger from "@/message";
-import { ExtMessage, Tool, TextTool } from "@/types";
-import { getSingleFileScript, sendMessageToBackground } from "@/utils";
+import { ExtMessage, Tool } from "@/types";
+import { getSingleFileScript } from "@/utils";
+import { sendMessageToBackground } from "@/message/message";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 
 const convertToCSV = (data: any[]): string => {

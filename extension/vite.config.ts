@@ -35,6 +35,7 @@ export default ({
 
   const isEncryptEnabled = isEnvEnabled("ENCRYPT_FILE_MAP");
   const isGenerateSourceMaps = isEnvEnabled("GENERATE_SOURCE_MAPS");
+  const isChunkAnonymous = isEnvEnabled("CHUNK_ANONYMOUS");
   const isProduction = env.NODE_ENV === "production";
 
   return defineConfig({
@@ -68,6 +69,27 @@ export default ({
         ? encryptFileMapPlugin(env.VITE_FILE_MAP_KEY)
         : undefined,
       // 自定义插件，用于执行构建后的操作
+      // {
+      //   name: "trace-dom-importers",
+      //   generateBundle(options, bundle) {
+      //     const targets = [
+      //       "utils/dom-utils",
+      //       "element-control",
+      //       "shadow-dom",
+      //     ];
+      //     for (const [fileName, chunk] of Object.entries(bundle)) {
+      //       if (chunk.type !== "chunk") continue;
+      //       for (const [moduleId, mod] of Object.entries(chunk.modules)) {
+      //         if (targets.some((t) => moduleId.includes(t))) {
+      //           console.log(`\n==== ${moduleId} ====`);
+      //           console.log("chunk:", fileName);
+      //           console.log("importers:", mod.importers);
+      //           console.log("dynamicImporters:", mod.dynamicImporters);
+      //         }
+      //       }
+      //     }
+      //   },
+      // },
       {
         name: "post-build-actions", // 插件名称
         closeBundle: () => {
@@ -149,16 +171,16 @@ export default ({
                 react: ["react", "react-dom/client"],
                 antd: ["antd", "@ant-design/icons"],
                 // 基础设施 - 纯函数工具，可在 Service Worker 中使用
-                "infrastructure-pure": ["@/utils/pure-utils"],
+                "infrastructure-utils": ["@/utils"],
                 // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
-                "infrastructure-dom": ["@/utils/dom-utils"],
+                "infrastructure-dom": ["@/dom-api"],
                 message: ["@/message"],
                 "content-runtime": ["@/content/runtime"],
               }
             : undefined,
           chunkFileNames: (chunkInfo) => {
             // console.log(chunkInfo.name);
-            return `js/chunks/chunk-${isProduction ? "" : "[name]-"}[hash].js`;
+            return `js/chunks/chunk-${isChunkAnonymous ? "" : "[name]-"}[hash].js`;
           },
           assetFileNames: (assetInfo) => {
             // console.log(assetInfo.names);

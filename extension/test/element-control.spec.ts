@@ -73,7 +73,7 @@ import {
   getElementAbsolutePosition,
   getActualZIndex,
   showSuccessMessage,
-} from "@/utils/element-control";
+} from "@/dom-api";
 
 /* ================================================================ *
  * 1. DOM 查询：$id / $query

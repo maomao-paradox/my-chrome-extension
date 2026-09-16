@@ -9,7 +9,7 @@
 
 // MCP浏览器操作执行引擎，用于执行解析后的指令
 
-import { waitForSelector } from '@/utils/element-control';
+import { waitForSelector } from '@/dom-api';
 import type { MCPCommand } from './mcp-parser';
 
 // 执行结果类型

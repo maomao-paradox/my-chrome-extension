@@ -16,10 +16,26 @@ import type {
   AddElemOpts,
   WaitForSelectorOptions,
 } from "@/types";
-import { getSingleFileScript } from "@/utils/common";
+import { getSingleFileScript } from "@/utils";
 
-export const $id = document.getElementById.bind(document);
-export const $query = document.querySelectorAll.bind(document);
+function getDoc(): Document {
+  if (typeof document === "undefined") {
+    const err = new Error("当前环境没有 document，$id / $query 被调用");
+    console.error(err.stack);
+    throw err;
+  }
+  return document;
+}
+
+export function $id<T extends HTMLElement = HTMLElement>(id: string): T | null {
+  return getDoc().getElementById(id) as T | null;
+}
+
+export function $query<T extends Element = Element>(
+  selector: string,
+): NodeListOf<T> {
+  return getDoc().querySelectorAll<T>(selector);
+}
 
 export function whenDomReady(callback: () => void) {
   if (document?.body) {
@@ -215,9 +231,7 @@ const createDomElement = (opts: AddElemOpts): HTMLElement => {
  * @param opts 元素添加选项
  * @returns 一个函数，用于将元素添加到指定的 DOM 元素中，通常配合waitForElement使用
  */
-export function addElementToDom(
-  opts: AddElemOpts,
-): (referElement?: Element | ShadowRoot, position?: string) => HTMLElement {
+export function addElementToDom(opts: AddElemOpts) {
   if (typeof document === "undefined") {
     maLogger.warn("Document object is not available in current context");
     return () => {
@@ -246,7 +260,7 @@ export function addElementToDom(
   }
 
   return (
-    referElement?: Element | ShadowRoot,
+    referElement?: Element | HTMLElement | ShadowRoot,
     position?: string,
   ): HTMLElement => {
     const refEl = referElement || document.body;

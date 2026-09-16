@@ -11,7 +11,7 @@ interface ToastOptions {
   onClose?: () => void;
 }
 
-const toast = {
+export const toast = {
   show: ({
     message,
     type = ToastType.Success,
@@ -71,4 +71,3 @@ const toast = {
   },
 };
 
-export default toast;

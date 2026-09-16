@@ -14,7 +14,7 @@
 import React, { useCallback, useRef } from "react";
 import { Draggable } from "@/components/react-index";
 import type { DraggableHandle } from "@/components/react-index";
-import { getStaticAbstractPath } from "@/utils/common";
+import { getStaticAbstractPath } from "@/utils";
 import {
   trackFloatingBallDrag,
   trackFloatingBallOpen,

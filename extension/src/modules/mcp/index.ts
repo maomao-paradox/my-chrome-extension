@@ -10,8 +10,8 @@
 import React from "react";
 import MCPDialog from "./MCPDialog";
 import { createRoot, type Root } from "react-dom/client";
-import { $id, addElementToDom } from "@/utils/element-control";
-import { createShadowHost } from "@/utils/shadow-dom";
+import { $id, addElementToDom } from "@/dom-api";
+import { getShadowContext } from "@/dom-api/shadow-dom";
 import { AppModule } from "@/types/utils/index.js";
 
 /**
@@ -95,7 +95,7 @@ class MCP implements AppModule {
       }
 
       if (!this.shadowRoot) {
-        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
+        const { shadowRoot } = getShadowContext(this.shadowHostId, "open");
         this.shadowRoot = shadowRoot;
       }
 

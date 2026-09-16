@@ -291,7 +291,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { AI_ASSISTANT_CONFIG_KEY, loadAIConfigSync, saveAIConfig as persistAIConfig } from '@/utils/ai-config';
+import { AI_ASSISTANT_CONFIG_KEY, loadAIConfigSync, saveAIConfig as persistAIConfig } from '@/dom-api/ai-config';
 
 type ActiveTab = 'chat' | 'code' | 'history' | 'settings' | 'help';
 type ChatRole = 'user' | 'assistant';

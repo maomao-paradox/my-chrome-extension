@@ -1,6 +1,6 @@
-import { injectScriptToActivateTab } from '@/utils/element-control';
+import { injectScriptToActivateTab } from '@/dom-api';
 import { storage } from '@/stores';
-import { getSingleFileScript } from '@/utils/common';
+import { getSingleFileScript } from '@/utils';
 
 export interface PageTools {
     batchReplaceText: (oldText: string, newText: string) => { success: boolean; msg: string };

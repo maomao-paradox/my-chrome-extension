@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { createShadowHost, injectStyles } from "@/utils/shadow-dom";
+import { getShadowContext, injectStyles } from "@/dom-api";
 import { applyRules } from "./adBlocker";
 import AdBlockerApp from "./App";
 import { stopEarlyAdBlocker } from "./early";
@@ -20,11 +20,16 @@ class AdBlockerModule {
     this.mountUi();
     if (!this.observer) {
       this.observer = new MutationObserver(() => applyRules());
-      this.observer.observe(document.documentElement, { childList: true, subtree: true });
+      this.observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
     }
   }
 
-  enable(): void { void this.inject(); }
+  enable(): void {
+    void this.inject();
+  }
 
   disable(): void {
     stopEarlyAdBlocker();
@@ -43,7 +48,12 @@ class AdBlockerModule {
 
   private mountUi(): void {
     if (this.root) return;
-    const { shadowRoot } = createShadowHost(HOST_ID, "open");
+    const { shadowRoot } = getShadowContext(HOST_ID, "open");
+    if (!shadowRoot) {
+      maLogger.error("获取阴影根失败");
+      return;
+    }
+
     injectStyles(shadowRoot, styles);
     const container = document.createElement("div");
     container.className = "ad-blocker-ui-root";
@@ -53,7 +63,9 @@ class AdBlockerModule {
   }
 
   private renderUi(): void {
-    this.root?.render(React.createElement(AdBlockerApp, { startRequest: this.startRequest }));
+    this.root?.render(
+      React.createElement(AdBlockerApp, { startRequest: this.startRequest }),
+    );
   }
 }
 
@@ -64,4 +76,6 @@ export default (_context: AppContext): AdBlockerModule => {
   return moduleInstance;
 };
 
-export const triggerAdBlocker = (): void => { void moduleInstance?.triggerAdBlocker(); };
+export const triggerAdBlocker = (): void => {
+  void moduleInstance?.triggerAdBlocker();
+};

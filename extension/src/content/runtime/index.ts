@@ -1,6 +1,6 @@
 import { storage } from "@/stores";
-import { equalDomain, parseDomains, getChunkFileMap } from "@/utils/common";
-import { whenDomReady } from "@/utils/element-control";
+import { equalDomain, parseDomains, getChunkFileMap } from "@/utils";
+import { whenDomReady } from "@/dom-api";
 import messenger from "@/message";
 import type { ExtMessage, ModuleConfigMap } from "@/types";
 import { defaultModuleConfigs } from "@/modules/index";
@@ -14,7 +14,6 @@ import { createPageTools } from "./page-tools";
 import { installTopFrameEventBridge } from "./iframe-event-bridge";
 import { initializeShadowMessage } from "./shadow-message";
 import { initializeWebpageMouseTrail } from "./mouse-trail";
-import { ModuleOption } from "@/utils";
 import { stopEarlyAdBlocker } from "@/modules/adBlocker/early";
 
 const getCurrentPort = (): string => {

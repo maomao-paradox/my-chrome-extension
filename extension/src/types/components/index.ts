@@ -85,3 +85,12 @@ export interface Bookmark {
   title?: string;
   comments?: BookmarkComment[];
 }
+
+/** 收藏的站点信息 */
+export interface FavoriteSite {
+  id: string;
+  url: string;
+  title: string;
+  faviconUrl?: string;
+  timestamp: number;
+}

@@ -153,7 +153,14 @@ export class RouteWatcher {
 /**
  * 创建路由监听器实例
  */
-export const routeWatcher = new RouteWatcher();
+
+let routeWatcher: RouteWatcher | null = null;
+
+if (typeof window !== "undefined") {
+  routeWatcher = new RouteWatcher();
+}
+
+export { routeWatcher };
 
 /**
  * 监听路由变化的工具函数
@@ -161,6 +168,9 @@ export const routeWatcher = new RouteWatcher();
  * @returns 取消订阅的函数
  */
 export function useRouteWatcher(callback: RouteChangeCallback): () => void {
+  if (!routeWatcher) {
+    return () => {};
+  }
   return routeWatcher.subscribe(callback);
 }
 

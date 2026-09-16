@@ -10,9 +10,9 @@
 import type { XhrRulesMap, ExtMessage } from '@/types';
 import { storage } from '@/stores';
 import  messenger  from '@/message';
-import { injectScriptToActivateTab } from '@/utils/element-control';
+import { injectScriptToActivateTab } from '@/dom-api';
 import { sendMessageToPage, listenForPageMessages } from '@/message/content-page';
-import { getSingleFileScript } from '@/utils/common';
+import { getSingleFileScript } from '@/utils';
 
 /**
  * XHR 消息中转站 - 用于 处理 sidepanel和页面的通信

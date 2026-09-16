@@ -1,5 +1,5 @@
 import { shadowHostId } from "@/config";
-import { createShadowHost } from "@/utils/shadow-dom";
+import { getShadowContext } from "@/dom-api/shadow-dom";
 import type { MouseTrailPreset } from "./mouseTrailPreference";
 
 interface MusicNoteTrailOptions {
@@ -236,8 +236,8 @@ export function useMusicNoteTrails(
   }
 
   const hostId = options.hostId ?? shadowHostId;
-  const { shadowHost, shadowRoot } = createShadowHost(hostId, "open");
-  if (!shadowRoot) {
+  const { shadowHost, shadowRoot } = getShadowContext(hostId, "open");
+  if (!shadowRoot || !shadowHost) {
     return createNoopControls();
   }
 

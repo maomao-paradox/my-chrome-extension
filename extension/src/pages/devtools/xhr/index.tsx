@@ -4,7 +4,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import XhrApp from './App';
-import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/logger';
+import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils';
 
 installGlobalLogger({ title: 'MRIA XHR', enabled: false });
 void syncGlobalLoggerFromStorage();

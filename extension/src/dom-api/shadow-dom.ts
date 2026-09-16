@@ -10,50 +10,59 @@
 import { $id } from "./element-control";
 import shadowThemeCss from "@/assets/styles/shadow-theme.css?raw";
 import { shadowHostId } from "@/config";
-import { useState } from "react";
 
-export function createShadowHost(
+type ShadowContext = {
+  shadowHost: HTMLElement | null;
+  shadowRoot: ShadowRoot | null;
+};
+
+export function getShadowContext(
   id: string,
   mode: ShadowRootMode,
-): { shadowHost: HTMLElement; shadowRoot: ShadowRoot } {
-  // 检查是否已存在
-  const existingHost = $id(id);
-  if (existingHost) {
-    // maLogger.log("已存在Shadow Host:", existingHost);
-    return {
-      shadowHost: existingHost,
-      shadowRoot: existingHost?.shadowRoot as ShadowRoot,
-    };
-  }
+): ShadowContext {
+  try {
+    // 检查是否已存在
+    const existingHost = $id(id);
+    if (existingHost) {
+      // maLogger.log("已存在Shadow Host:", existingHost);
+      return {
+        shadowHost: existingHost,
+        shadowRoot: existingHost?.shadowRoot as ShadowRoot,
+      };
+    }
 
-  // 创建新的宿主元素（使用普通 div 元素）
-  const shadowHost = document.createElement("div");
-  shadowHost.id = id;
-  Object.assign(shadowHost.style, {
-    overflow: "visible",
-    position: "absolute",
-    top: "0px",
-    left: "0px",
-    display: "block",
-  });
-
-  // 添加到文档体的开头
-  if (document.body) {
-    document.body.insertBefore(shadowHost, document.body.firstChild);
-  } else {
-    document.addEventListener("DOMContentLoaded", () => {
-      document.body.insertBefore(shadowHost, document.body.firstChild);
+    // 创建新的宿主元素（使用普通 div 元素）
+    const shadowHost = document.createElement("div");
+    shadowHost.id = id;
+    Object.assign(shadowHost.style, {
+      overflow: "visible",
+      position: "absolute",
+      top: "0px",
+      left: "0px",
+      display: "block",
     });
+
+    // 添加到文档体的开头
+    if (document.body) {
+      document.body.insertBefore(shadowHost, document.body.firstChild);
+    } else {
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.insertBefore(shadowHost, document.body.firstChild);
+      });
+    }
+
+    // 创建 Shadow Root
+    const shadowRoot = shadowHost.attachShadow({ mode });
+    // // 注入 Element Plus 样式
+    // injectStyles(shadowRoot, elementPlusCss, true);
+    // 注入主题CSS，覆盖 Element Plus 样式
+    injectStyles(shadowRoot, shadowThemeCss);
+
+    return { shadowHost, shadowRoot };
+  } catch (error) {
+    console.error("创建ShadowHost失败:", error);
+    return { shadowHost: null, shadowRoot: null };
   }
-
-  // 创建 Shadow Root
-  const shadowRoot = shadowHost.attachShadow({ mode });
-  // // 注入 Element Plus 样式
-  // injectStyles(shadowRoot, elementPlusCss, true);
-  // 注入主题CSS，覆盖 Element Plus 样式
-  injectStyles(shadowRoot, shadowThemeCss);
-
-  return { shadowHost, shadowRoot };
 }
 
 /**
@@ -111,7 +120,7 @@ export function injectStyleLink(shadowRoot: ShadowRoot, href: string) {
   shadowRoot.appendChild(link);
 }
 
-export const { shadowHost, shadowRoot } = createShadowHost(
+export const { shadowHost, shadowRoot } = getShadowContext(
   shadowHostId,
   "open",
 );

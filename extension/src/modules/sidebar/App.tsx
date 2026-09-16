@@ -27,6 +27,7 @@ import type { Tool } from "@/types";
 import { bus } from "@/event/bus";
 import HoverMenu from "./HoverMenu";
 import SimpleCarousel from "./components/SimpleCarousel";
+import FavoriteSitesPanel from "./components/FavoriteSitesPanel";
 import "./styles/index.scss";
 
 /** SidebarApp Props */
@@ -77,6 +78,7 @@ const SidebarApp: React.FC<SidebarAppProps> = ({
   const [currentTool, setCurrentTool] = useState<Tool | null>(null);
   // carousel 轮播项
   const [carouselItems, setCarouselItems] = useState<Tool[]>([]);
+  const [favoriteSitesVisible, setFavoriteSitesVisible] = useState(false);
 
   // 本地 tools 副本（可通过事件总线更新）
   const [localTools, setLocalTools] = useState<Tool[]>(() => [
@@ -118,6 +120,10 @@ const SidebarApp: React.FC<SidebarAppProps> = ({
   // 一级菜单点击处理：优先调用 onClick，否则展开 carousel
   const handleClick = useCallback((it: Tool) => {
     maLogger.log("点击工具项:", it);
+    if (it.id === "favorite-sites") {
+      setFavoriteSitesVisible(true);
+      return;
+    }
     if (it.onClick && typeof it.onClick === "function") {
       it.onClick();
     } else {
@@ -139,6 +145,11 @@ const SidebarApp: React.FC<SidebarAppProps> = ({
         tools={carouselItems}
         onVisibleChange={setContextMenuVisible}
         onClickTool={handleContextMenuClick}
+      />
+      <FavoriteSitesPanel
+        visible={favoriteSitesVisible}
+        tools={localTools.find((tool) => tool.id === "favorite-sites")?.children || []}
+        onClose={() => setFavoriteSitesVisible(false)}
       />
     </>
   );

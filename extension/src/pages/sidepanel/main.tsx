@@ -10,7 +10,7 @@
 import {
   installGlobalLogger,
   syncGlobalLoggerFromStorage,
-} from "@/utils/logger";
+} from "@/utils";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { useFloatingballStore } from "@/stores/floatingball";

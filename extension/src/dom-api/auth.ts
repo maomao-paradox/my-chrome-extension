@@ -8,7 +8,7 @@
  */
 
 import CryptoJS from 'crypto-js';
-import { getHash } from './base';
+import { getHash } from '@/utils';
 
 // 动态生成密钥
 const generateKey = () => {

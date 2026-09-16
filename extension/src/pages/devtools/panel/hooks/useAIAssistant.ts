@@ -19,7 +19,7 @@ import {
   STANDARD_PROVIDERS,
   DEFAULT_BUILTIN_MODEL_ID,
 } from '../types';
-import { loadAIConfigSync, saveAIConfig } from '@/utils/ai-config';
+import { loadAIConfigSync, saveAIConfig } from '@/dom-api/ai-config';
 
 interface UseAIAssistantReturn {
   activeTab: ActiveTab;

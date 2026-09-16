@@ -8,8 +8,8 @@
  */
 
 import { defaultModuleConfigs } from "@/modules";
-import { getAssetsAbstractPath } from "@/utils/common";
-import { ModuleOption } from "@/utils/esm-module-loader";
+import { getAssetsAbstractPath } from "@/utils";
+import { ModuleOption } from "@/dom-api/esm-module-loader";
 
 export const appConfigKey = "appConfig";
 export const shadowHostId = "ma-extension-shadow-host";
@@ -23,7 +23,16 @@ const getAppEntryUrl = async (appName: string) =>
 
 export const contentDomains = import.meta.env.VITE_CONTENT_DOMAIN?.split(
   ",",
-) || ["Radius", "Zentao", "Mria", "Qapro", "Teach", "Lanhuapp", "Portainer"];
+) || [
+  "Radius",
+  "Zentao",
+  "Mria",
+  "Qapro",
+  "Teach",
+  "Lanhuapp",
+  "Portainer",
+  "Alweb",
+];
 
 export const contentModules: Map<string, ModuleOption> = contentDomains.reduce(
   (acc: Map<string, ModuleOption>, domain: string) =>

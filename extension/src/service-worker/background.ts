@@ -7,16 +7,16 @@
  * @date 2026-02-05T02:38:01.693Z
  */
 
-import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/pure-utils';
-import { DevToolsPortManager } from './background/devtools-port-manager';
-import { StreamManager } from './background/stream-manager';
-import { initClearAiSessionListener } from './background/ai-session-listener';
-import { initMenuListener } from './background/context-menu';
-import { initMessageListener } from './background/message-listener';
-import { createBackgroundMessageHandlers } from './background/message-handlers';
-import { initRuntimeConnectionListener } from './background/runtime-connections';
+import { installGlobalLogger, syncGlobalLoggerFromStorage } from "@/utils";
+import { DevToolsPortManager } from "./background/devtools-port-manager";
+import { StreamManager } from "./background/stream-manager";
+import { initClearAiSessionListener } from "./background/ai-session-listener";
+import { initMenuListener } from "./background/context-menu";
+import { initMessageListener } from "./background/message-listener";
+import { createBackgroundMessageHandlers } from "./background/message-handlers";
+import { initRuntimeConnectionListener } from "./background/runtime-connections";
 
-installGlobalLogger({ title: 'MRIA BACKGROUND', enabled: false });
+installGlobalLogger({ title: "MRIA BACKGROUND", enabled: false });
 void syncGlobalLoggerFromStorage();
 
 const streamManager = new StreamManager();
@@ -24,7 +24,7 @@ const devToolsPortManager = new DevToolsPortManager();
 
 initRuntimeConnectionListener({
   streamManager,
-  devToolsPortManager
+  devToolsPortManager,
 });
 initClearAiSessionListener();
 initMenuListener();

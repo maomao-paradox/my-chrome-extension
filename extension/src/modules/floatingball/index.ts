@@ -21,9 +21,9 @@ import React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import App from "./App";
 import type { Tool } from "@/types/index.js";
-import { $id, addElementToDom } from "@/utils/element-control";
-import { createShadowHost, injectStyles } from "@/utils/shadow-dom";
-import { getStaticAbstractPath } from "@/utils/common";
+import { $id, addElementToDom } from "@/dom-api";
+import { getShadowContext, injectStyles } from "@/dom-api/shadow-dom";
+import { getStaticAbstractPath } from "@/utils";
 import { storage } from "@/stores";
 import { appConfigKey } from "@/config";
 import { shadowHostId } from "@/config";
@@ -178,7 +178,7 @@ class FloatingBall implements AppModule {
 
       // 创建 shadow root
       if (!this.shadowRoot) {
-        const { shadowRoot } = createShadowHost(this.shadowHostId, "open");
+        const { shadowRoot } = getShadowContext(this.shadowHostId, "open");
         this.shadowRoot = shadowRoot;
       }
 

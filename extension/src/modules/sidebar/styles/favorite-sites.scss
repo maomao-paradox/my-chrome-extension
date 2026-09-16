@@ -1,0 +1,51 @@
+.favorite-sites-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 24px 72px 24px 24px;
+  box-sizing: border-box;
+}
+
+.favorite-sites-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(9, 14, 31, 0.34);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.favorite-sites-panel {
+  position: relative;
+  width: min(380px, calc(100vw - 48px));
+  max-height: min(720px, calc(100vh - 48px));
+  padding: 22px 18px 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(24, 31, 58, 0.96), rgba(12, 17, 38, 0.95));
+  box-shadow: 0 24px 80px rgba(3, 7, 18, 0.45), inset 0 1px rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.favorite-sites-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.favorite-sites-eyebrow { color: #a5b4fc; font-size: 10px; letter-spacing: .18em; }
+.favorite-sites-header h2 { margin: 4px 0 0; font-size: 24px; font-weight: 650; }
+.favorite-sites-close { border: 0; background: transparent; color: #cbd5e1; font-size: 28px; line-height: 1; cursor: pointer; }
+.favorite-sites-viewport { max-height: min(600px, calc(100vh - 170px)); overflow: hidden; mask-image: linear-gradient(transparent, #000 7%, #000 93%, transparent); }
+.favorite-sites-track { display: flex; flex-direction: column; gap: 10px; }
+.favorite-sites-track.is-looping { animation: favorite-sites-scroll 32s linear infinite; }
+.favorite-sites-viewport:hover .favorite-sites-track { animation-play-state: paused; }
+.favorite-site-card { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 10px 12px; border: 1px solid rgba(148, 163, 184, .2); border-radius: 15px; background: rgba(255, 255, 255, .08); color: inherit; text-align: left; cursor: pointer; transition: transform .2s ease, background .2s ease, border-color .2s ease; }
+.favorite-site-card:hover { transform: translateX(-4px); border-color: rgba(165, 180, 252, .65); background: rgba(129, 140, 248, .2); }
+.favorite-site-favicon { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 11px; background: rgba(255, 255, 255, .92); overflow: hidden; }
+.favorite-site-favicon img { width: 24px; height: 24px; object-fit: contain; }
+.favorite-site-title { min-width: 0; overflow: hidden; font-size: 14px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+.favorite-site-arrow { margin-left: auto; color: #a5b4fc; font-size: 18px; }
+.favorite-sites-empty { padding: 48px 12px; color: #cbd5e1; font-size: 13px; line-height: 1.7; text-align: center; }
+
+@keyframes favorite-sites-scroll { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@media (prefers-reduced-motion: reduce) { .favorite-sites-track.is-looping { animation: none; } .favorite-site-card { transition: none; } }

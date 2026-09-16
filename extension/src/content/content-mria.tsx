@@ -6,8 +6,8 @@
  * @file src/content/content-mria.ts
  * @date 2026-02-05T02:38:01.694Z
  */
-
 import {
+  getSingleFileScript,
   getQueryParams,
   parseCSV,
   base64ToBlob,
@@ -16,21 +16,19 @@ import {
   randomSelect,
   generateRandomIDCard,
   generateRandomPhoneNumber,
-} from "@/utils/base";
+} from "@/utils";
 import {
+  whenDomReady,
   cloneEl,
   saveToLocal,
   addElementToDom,
   injectScriptToActivateTab,
   addFileInput,
   waitForSelector,
-  createEl,
-} from "@/utils/element-control";
-
-import {
   getElementAbsolutePosition,
   PositionStrategy,
-} from "@/utils/elementPosition";
+  createEl,
+} from "@/dom-api";
 import {
   Requester,
   getFormCodeByName,
@@ -58,12 +56,9 @@ import type {
   MessageHandler,
   Tool,
 } from "@/types";
-import QuickLogin, {
-  QuickLoginProps,
-} from "@/components/quick-login/main";
+import QuickLogin from "@/components/quick-login/main";
 import { storage } from "@/stores";
-import { getSingleFileScript } from "@/utils";
-import { whenDomReady } from "@/utils/element-control";
+
 import messenger from "@/message";
 import xhrRules from "@/sfs/xhr-patch/rules";
 import { injectXhrPatch } from "@/sfs/xhr-patch/xhr_message_handler";
@@ -479,9 +474,12 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     }
     try {
       await handleRequest(userLogout);
-      const userInfo = await handleRequest(userLogin, username, password).then(
-        (res) => handleResponse(res as Response<any>),
-      );
+      const userInfo = await handleRequest(userLogin, {
+        username,
+        password: btoa(
+          password || username === "mpadmin" ? "admin123" : "123456",
+        ),
+      }).then((res) => handleResponse(res as Response<any>));
       storage.page.local.set("Manteia-UserInfo", JSON.stringify(userInfo));
       document.cookie = "Manteia-token=" + userInfo["access_token"];
       ctx?.requester?.restruct?.();

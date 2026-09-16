@@ -21,8 +21,8 @@ import { createRoot, type Root } from "react-dom/client";
 import ComponentCaptureApp from "./App";
 import { AppModule } from "@/types/index";
 import { shadowHostId } from "@/config";
-import { createShadowHost, injectStyles } from "@/utils/shadow-dom";
-import { $id, addElementToDom } from "@/utils/element-control";
+import { getShadowContext, injectStyles } from "@/dom-api/shadow-dom";
+import { $id, addElementToDom } from "@/dom-api";
 import { bus } from "@/event/bus";
 
 // 通过 ?inline 导入聚合 SCSS 为字符串
@@ -80,7 +80,12 @@ class ComponentCaptureModule implements AppModule {
       }
 
       // 创建 shadow root
-      const { shadowRoot } = createShadowHost(shadowHostId, "open");
+      const { shadowRoot } = getShadowContext(shadowHostId, "open");
+
+      if (!shadowRoot) {
+        maLogger.error("创建 shadow root 失败");
+        return;
+      }
 
       // 注入聚合 SCSS（?raw 导入的字符串）
       if (!this.stylesInjected && shadowRoot) {

@@ -1,5 +1,5 @@
 // AI助手DevTools面板 - 面板注册逻辑
-import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils/logger';
+import { installGlobalLogger, syncGlobalLoggerFromStorage } from '@/utils';
 
 installGlobalLogger({ title: 'MRIA DEVTOOLS', enabled: false });
 void syncGlobalLoggerFromStorage();

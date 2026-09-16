@@ -28,7 +28,7 @@ import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import CryptoJS from 'crypto-js';
 import Push from '@/components/particles/push.vue';
-import { saveLoginState, verifyLoginState } from '@/utils/auth';
+import { saveLoginState, verifyLoginState } from '@/dom-api/auth';
 
 
 // 路由实例

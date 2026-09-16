@@ -22,7 +22,7 @@ _______License |GPLv3 2016 sumbioun.com
 
 */
 
-import { addElementToDom } from '@/utils/element-control';
+import { addElementToDom } from '@/dom-api';
 
 export class Gui {
   private master: any;

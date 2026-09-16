@@ -7,10 +7,9 @@
  * @date 2026-02-05T02:38:01.691Z
  */
 
-import { addElementToDom } from "@/utils/element-control";
-import { shadowRoot } from "@/utils/shadow-dom";
+import { addElementToDom,shadowRoot } from "@/dom-api";
 import { AppModule } from "@/types";
-import { useSingletonEffect } from "@/utils/singleton";
+import { useSingletonEffect } from "@/utils";
 import { storage } from "@/stores";
 import { Rain } from "./rain";
 

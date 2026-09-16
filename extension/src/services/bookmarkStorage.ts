@@ -1,6 +1,6 @@
 import storage from "@/stores/chromestorge";
 import { Bookmark, BookmarkComment } from "@/types/components";
-import { generateId } from "@/utils/base";
+import { generateId } from "@/utils";
 import { trackAchievement } from "@/services/achievements";
 
 const BOOKMARKS_STORAGE_KEY = "textSelectionToolbookmarks";

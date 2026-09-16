@@ -12,7 +12,7 @@ import {
   injectScriptToActivateTab,
   waitForSelector,
   whenDomReady,
-} from "@/utils/element-control";
+} from "@/dom-api";
 import { Tool } from "@/types";
 import messenger from "@/message";
 import { requestAI } from "@/utils/ai-request";

@@ -8,7 +8,7 @@
 import {
   installGlobalLogger,
   syncGlobalLoggerFromStorage,
-} from "@/utils/logger";
+} from "@/utils";
 import { createRoot, type Root } from "react-dom/client";
 import { ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";

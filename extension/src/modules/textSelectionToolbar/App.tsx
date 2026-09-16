@@ -11,10 +11,10 @@ import React, {
   useRef,
 } from "react";
 import type { TextTool } from "@/types";
-import { componentManager } from "@/utils/componentManager";
+import { componentManager } from "@/utils";
 import { trackTextAction } from "@/services/achievements";
 import { eventManager } from "@/event";
-import toast from "@/utils/toast";
+import { toast } from "@/dom-api";
 import type { Comment } from "@/services/commentStorage";
 import TextToolbar from "./views/TextToolbar";
 import type { ReplaceOptions } from "./views/ReplaceModal";
@@ -708,7 +708,9 @@ const App: React.FC<AppProps> = ({
    */
   const handleToolClick = useCallback((tool: TextTool) => {
     maLogger.log("工具栏工具点击(回调通知):", tool.id);
-    if (["copy", "search", "translate", "bookmark", "replace"].includes(tool.id)) {
+    if (
+      ["copy", "search", "translate", "bookmark", "replace"].includes(tool.id)
+    ) {
       void trackTextAction(tool.id).then((unlocked) => {
         unlocked.forEach((achievement) => {
           toast.success(`成就解锁：${achievement.name}`);

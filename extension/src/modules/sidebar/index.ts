@@ -14,19 +14,17 @@
 import React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import SidebarApp from "./App";
-import type { Tool, AppModule, Bookmark } from "@/types";
-import {
-  $id,
-  addElementToDom,
-  shadowHost,
-  shadowRoot,
-  injectStyles,
-} from "@/utils";
+import type { Tool, AppModule, Bookmark, FavoriteSite } from "@/types";
+import { addElementToDom, shadowRoot, injectStyles } from "@/dom-api";
 import { bus } from "@/event/bus";
 import { storage } from "@/stores";
-import { appConfigKey, shadowHostId } from "@/config";
+import { appConfigKey } from "@/config";
 import { IconDocument, IconBookmark } from "@/assets/icons";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
+import {
+  SiteFavoriteStorage,
+  FAVORITE_SITES_STORAGE_KEY,
+} from "@/services/siteFavoriteStorage";
 
 // 通过 ?inline 导入聚合 SCSS 为字符串
 import sidebarStyles from "./styles/index.scss?inline";
@@ -163,7 +161,7 @@ class SideBar implements AppModule {
 
       // 更新工具列表，保留原有工具并添加书签
       const updatedTools = [
-        ...this.customTools.filter((tool) => !tool.id.startsWith("bookmark-")),
+        ...this.customTools.filter((tool) => tool.id !== "bookmarks"),
         {
           id: "bookmarks",
           label: "书签",
@@ -176,6 +174,34 @@ class SideBar implements AppModule {
       this.updateTools(updatedTools);
     } catch (error) {
       maLogger.error("加载书签工具失败:", error);
+    }
+  }
+
+  /** 将收藏站点转换为侧边栏卡片数据。 */
+  private async loadFavoriteSiteTools(): Promise<void> {
+    try {
+      const sites = await SiteFavoriteStorage.getSites();
+      const favoriteTools: Tool[] = sites.map((site: FavoriteSite) => ({
+        id: `favorite-site-${site.id}`,
+        label: site.title,
+        details: site.url,
+        image: site.faviconUrl || chrome.runtime.getURL("icons/favicon16.ico"),
+        color: "#818cf8",
+      }));
+
+      const updatedTools = [
+        ...this.customTools.filter((tool) => tool.id !== "favorite-sites"),
+        {
+          id: "favorite-sites",
+          label: "收藏站点",
+          icon: IconBookmark,
+          color: "#818cf8",
+          children: favoriteTools,
+        },
+      ];
+      this.updateTools(updatedTools);
+    } catch (error) {
+      maLogger.error("加载收藏站点失败:", error);
     }
   }
 
@@ -235,7 +261,7 @@ class SideBar implements AppModule {
           tag: "div",
           attrs: { id: `shadow-app-${this._name}` },
           style: "position: fixed; z-index: var(--z-index);",
-        })(shadowRoot);
+        })(shadowRoot!);
       }
 
       // 设置事件监听器
@@ -327,6 +353,7 @@ class SideBar implements AppModule {
 
       // 加载书签工具
       await this.loadBookmarkTools();
+      await this.loadFavoriteSiteTools();
 
       // 可以从存储中加载配置
       const config = await storage.ext.local.get(appConfigKey);
@@ -349,9 +376,15 @@ class SideBar implements AppModule {
   private setupBookmarkListeners(): void {
     // 监听存储变化，当书签数据更新时重新加载
     chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === "local" && changes.bookmarks) {
-        maLogger.log("书签数据已更新，重新加载");
-        this.loadBookmarkTools();
+      if (areaName === "local") {
+        if (changes.textSelectionToolbookmarks) {
+          maLogger.log("书签数据已更新，重新加载");
+          this.loadBookmarkTools();
+        }
+        if (changes[FAVORITE_SITES_STORAGE_KEY]) {
+          maLogger.log("收藏站点已更新，重新加载");
+          this.loadFavoriteSiteTools();
+        }
       }
     });
   }

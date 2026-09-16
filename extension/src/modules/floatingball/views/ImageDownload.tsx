@@ -8,7 +8,13 @@
  * @version v1.0.0
  * @license MIT
  */
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { Input, Checkbox, Tooltip, Modal } from "antd";
 import {
   DownloadOutlined,
@@ -19,11 +25,7 @@ import {
   FileTextOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
-import {
-  scanImages,
-  downloadAllImages,
-  downloadSingleImage,
-} from "@/utils/image-zip-download";
+import { scanImages, downloadAllImages, downloadSingleImage } from "@/dom-api";
 import { trackImageBatchDownload } from "@/services/achievements";
 import type { ImageInfo } from "@/types/utils";
 import "./styles/image-download.scss";
@@ -80,7 +82,7 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
       dialogCallbackRef.current = confirmCallback;
       setDialogVisible(true);
     },
-    []
+    [],
   );
 
   const handleDialogConfirm = useCallback(() => {
@@ -101,9 +103,7 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
    */
   const onScan = useCallback(() => {
     const scannedImages = scanImages(document) as ImageInfo[];
-    setImages(
-      scannedImages.map((img) => ({ ...img, loaded: false }))
-    );
+    setImages(scannedImages.map((img) => ({ ...img, loaded: false })));
     setScanned(true);
 
     if (scannedImages.length > 0) {
@@ -162,7 +162,7 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
         maLogger.error("下载错误:", error);
       }
     },
-    [onAddMessage]
+    [onAddMessage],
   );
 
   /**
@@ -175,7 +175,7 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
         onAddMessage?.({ message: "图片已删除", type: "success" });
       });
     },
-    [showConfirm, onAddMessage]
+    [showConfirm, onAddMessage],
   );
 
   /**
@@ -194,7 +194,7 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
    */
   const handleImageLoad = useCallback((idx: number) => {
     setImages((prev) =>
-      prev.map((img, i) => (i === idx ? { ...img, loaded: true } : img))
+      prev.map((img, i) => (i === idx ? { ...img, loaded: true } : img)),
     );
   }, []);
 
@@ -206,7 +206,7 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
       if (url.length <= maxLength) return url;
       return url.substring(0, maxLength) + "...";
     },
-    []
+    [],
   );
 
   // 过滤后的图片列表（原 computed）
@@ -220,7 +220,7 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
       result = result.filter(
         (img) =>
           img.src.toLowerCase().includes(keyword) ||
-          (img.alt && img.alt.toLowerCase().includes(keyword))
+          (img.alt && img.alt.toLowerCase().includes(keyword)),
       );
     }
     return result;
