@@ -8,7 +8,7 @@
  * @description Docker Portainer 文本替换工具 - 可爱粉色风格喵~
  */
 
-import { waitForSelector, injectScriptToActivateTab } from '@/dom-api';
+import { waitForSelector, injectScriptToActivateTab } from '@/chrome-api';
 import { Tool } from '@/types';
 import messenger from '@/message';
 import { getSingleFileScript } from '@/utils';

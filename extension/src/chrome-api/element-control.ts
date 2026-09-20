@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.698Z
  */
 
-import type {
+import {
   StyleObject,
   AttributeObject,
   EventListenerObject,
@@ -15,6 +15,7 @@ import type {
   CloneElemOpts,
   AddElemOpts,
   WaitForSelectorOptions,
+  InsertDomPosition,
 } from "@/types";
 import { getSingleFileScript } from "@/utils";
 
@@ -133,15 +134,15 @@ export function setElEventListeners(
 }
 
 export function createEl(options: CreateElemOpts): HTMLElement {
-  const { tag, attrs, style, eventlistener, children } = options;
+  const { el, tag, attrs, style, eventlistener, children } = options;
 
-  let el: HTMLElement | undefined;
+  let newEl: HTMLElement | undefined;
   if (typeof tag === "string") {
-    el = document.createElement(tag) as HTMLElement;
-  } else if (tag instanceof HTMLElement) {
-    el = tag as HTMLElement;
+    newEl = document.createElement(tag) as HTMLElement;
+  } else if (el instanceof HTMLElement) {
+    newEl = el as HTMLElement;
   }
-  if (!el) {
+  if (!newEl) {
     throw new Error("createEl error: tag is not a string or HTMLElement");
   }
 
@@ -149,27 +150,27 @@ export function createEl(options: CreateElemOpts): HTMLElement {
     (el as HTMLButtonElement).type = "button";
   }
   if (attrs) {
-    setElAttributes(el, attrs);
+    setElAttributes(newEl, attrs);
   }
   if (style) {
-    setElStyle(el, style);
+    setElStyle(newEl, style);
   }
   if (eventlistener) {
-    setElEventListeners(el, eventlistener);
+    setElEventListeners(newEl, eventlistener);
   }
   if (children && Array.isArray(children) && children.length > 0) {
     children.forEach((child) => {
-      el.appendChild(child instanceof HTMLElement ? child : createEl(child));
+      newEl.appendChild(child instanceof HTMLElement ? child : createEl(child));
     });
   }
 
-  return el;
+  return newEl;
 }
 
-export function cloneEl(options: CloneElemOpts): HTMLElement {
-  const { deep, el, attrs, style, eventlistener, children } = options;
+export function cloneEl(el: HTMLElement, options: CloneElemOpts): HTMLElement {
+  const { deep, attrs, style, eventlistener, children } = options;
   const cloned = el.cloneNode(deep) as HTMLElement;
-  return createEl({ tag: cloned, attrs, style, eventlistener, children });
+  return createEl({ el: cloned, attrs, style, eventlistener, children });
 }
 
 const setupAutoRemove = ($el: HTMLElement, delay: number): void => {
@@ -186,20 +187,20 @@ const setupAutoRemove = ($el: HTMLElement, delay: number): void => {
 const insertElementIntoDom = (
   $el: HTMLElement,
   refEl: Element | ShadowRoot,
-  position?: string,
+  position?: InsertPosition,
 ): void => {
   if ("insertAdjacentElement" in refEl) {
-    const positions: InsertPosition[] = [
-      "beforebegin",
-      "afterbegin",
-      "beforeend",
-      "afterend",
+    const positions = [
+      InsertDomPosition.BB,
+      InsertDomPosition.AB,
+      InsertDomPosition.BE,
+      InsertDomPosition.AE,
     ];
     const pos =
-      position && positions.includes(position as InsertPosition)
+      position && positions.includes(position)
         ? position
-        : "beforeend";
-    refEl.insertAdjacentElement(pos as InsertPosition, $el);
+        : InsertDomPosition.BE;
+    refEl.insertAdjacentElement(pos, $el);
   } else if (["start", "begin", "first"].includes(position || "")) {
     refEl.prepend($el);
   } else {
@@ -208,22 +209,17 @@ const insertElementIntoDom = (
 };
 
 const createDomElement = (opts: AddElemOpts): HTMLElement => {
-  const { tag, attrs, style, eventlistener, children } = opts;
-  if (
-    typeof tag === "object" &&
-    "nodeType" in tag &&
-    (tag as HTMLElement).nodeType === 1
-  ) {
-    return cloneEl({
+  const { el, tag, attrs, style, eventlistener, children } = opts;
+  if (typeof el === "object" && "nodeType" in el && el.nodeType === 1) {
+    return cloneEl(el as HTMLElement, {
       deep: true,
-      el: tag as HTMLElement,
       attrs,
       style,
       eventlistener,
       children,
     });
   }
-  return createEl({ tag, attrs, style, eventlistener, children });
+  return createEl({ el, tag, attrs, style, eventlistener, children });
 };
 
 /**
@@ -261,7 +257,7 @@ export function addElementToDom(opts: AddElemOpts) {
 
   return (
     referElement?: Element | HTMLElement | ShadowRoot,
-    position?: string,
+    position?: InsertPosition,
   ): HTMLElement => {
     const refEl = referElement || document.body;
     if (!refEl || typeof refEl !== "object" || !("nodeType" in refEl)) {

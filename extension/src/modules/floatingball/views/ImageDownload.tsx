@@ -25,7 +25,7 @@ import {
   FileTextOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
-import { scanImages, downloadAllImages, downloadSingleImage } from "@/dom-api";
+import { scanImages, downloadAllImages, downloadSingleImage } from "@/chrome-api";
 import { trackImageBatchDownload } from "@/services/achievements";
 import type { ImageInfo } from "@/types/utils";
 import "./styles/image-download.scss";

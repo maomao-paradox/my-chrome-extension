@@ -9,16 +9,15 @@
 import {
   whenDomReady,
   waitForSelector,
-  createEl,
   getElementAbsolutePosition,
   PositionStrategy,
-} from "@/dom-api";
-import type { Tool } from "@/types";
-import QuickLogin from "@/components/quick-login/main";
+  cloneEl,
+  addElementToDom,
+} from "@/chrome-api";
+import { InsertDomPosition, type Tool } from "@/types";
 import { storage } from "@/stores";
 
 import messenger from "@/message";
-import { createRoot } from "react-dom/client";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 import { request } from "@/utils";
 
@@ -70,8 +69,6 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
       return;
     }
 
-    maLogger.log(byElement);
-
     const shadowRoot = ctx.gmod("__SHADOW_DOM");
     if (!shadowRoot) {
       maLogger.error("Shadow DOM 不存在");
@@ -79,35 +76,44 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     }
 
     const positionInfo = getElementAbsolutePosition(byElement);
-    maLogger.log("positionInfo:", positionInfo);
-    const loginContainer = createEl({
-      tag: "div",
-      style: "width: 180px; height: 20px;",
-      attrs: { className: "quick-login-shadow-container" },
+    // maLogger.log("positionInfo:", positionInfo);
+
+    const adminButton = cloneEl(byElement, {
+      deep: true,
+      attrs: {
+        type: "submit",
+        textContent: "管理员登录",
+        className: "quick-login-shadow-container",
+      },
+      eventlistener: {
+        click: () => {
+          quickLogin("mp" + ADMIN, ADMIN + "123");
+        },
+      },
     });
 
-    shadowRoot.appendChild(loginContainer);
+    shadowRoot.appendChild(adminButton);
 
-    const root = createRoot(loginContainer);
-    root.render(
-      <QuickLogin
-        userList={{
-          ["mp" + ADMIN]: {
-            realname: "超级管理员",
-            password: ADMIN + "123",
-            enabled: true,
-            role: "管理员",
-          },
-          ...ctx.userInfo,
-        }}
-        onLogin={quickLogin}
-      />,
-    );
+    // const root = createRoot(loginContainer);
+    // root.render(
+    //   <QuickLogin
+    //     userList={{
+    //       ["mp" + ADMIN]: {
+    //         realname: "超级管理员",
+    //         password: ADMIN + "123",
+    //         enabled: true,
+    //         role: "管理员",
+    //       },
+    //       ...ctx.userInfo,
+    //     }}
+    //     onLogin={quickLogin}
+    //   />,
+    // );
 
-    const { strategy = PositionStrategy.Right, offset } = position;
+    const { strategy = PositionStrategy.Down, offset } = position;
 
     positionInfo.positionElement({
-      targetElement: loginContainer,
+      targetElement: adminButton,
       strategy,
       alignment: "center",
       offset,
@@ -120,12 +126,24 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     // 监听 quickLogin 事件
     if (location.hash.match("#/login")) {
       waitForSelector({
-        selector:
-          "#app > div > div.auth-page__main > div > form > div.login-title",
-        callback: enrichQuickLogin,
-        callbackArgs: [
-          { strategy: PositionStrategy.Down, offset: { x: -180, y: 0 } },
-        ],
+        selector: "#app > div > div.auth-page__main > div > form > button",
+        filter: (el) => el.textContent === "登录",
+        callback: (el) =>
+          addElementToDom({
+            el,
+            attrs: {
+              textContent: "管理员登录",
+              className: [
+                "quick-login-shadow-container",
+                ...el!.classList,
+              ].join(" "),
+            },
+            eventlistener: {
+              click: () => {
+                quickLogin("mp" + ADMIN, ADMIN + "123");
+              },
+            },
+          })(el, InsertDomPosition.AE),
         maxWaitTimes: 10,
         useMutationObserver: true,
         timeout: 5000,
@@ -172,7 +190,7 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     // updateSidebar(tools);
   });
 
-  ctx.message.success("MRIA脚本初始化完成！");
+  ctx.message.success("ALWEB 脚本初始化完成！");
 
   void featureRegistry.initialize();
   return {};

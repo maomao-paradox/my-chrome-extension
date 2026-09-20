@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, useTemplateRef } from 'vue';
-import { useMouseTracker } from '@/composables/mouse/mouseTracker';
+import { useMouseTracker } from '@/hooks/mouse/mouseTracker';
 
 export interface PointerProps {
     color?: string

@@ -1,4 +1,12 @@
-// toast.ts
+/**
+ * @author Zero
+ * @version v1.0.0
+ * @license MIT
+ * @sequence X
+ * @file src/dom-api/toast.ts
+ * @date 2026-02-05T02:38:01.698Z
+ */
+
 import { createRoot } from "react-dom/client";
 import Toast, { ToastType } from "@/components/toast/main";
 
@@ -70,4 +78,3 @@ export const toast = {
     toast.show({ message, type: ToastType.Info, options });
   },
 };
-

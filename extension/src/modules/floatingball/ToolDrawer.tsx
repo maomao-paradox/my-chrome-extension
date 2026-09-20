@@ -35,7 +35,7 @@ import {
 } from "@ant-design/icons";
 import toolMap from "./views";
 import { Static404 } from "@/components/react-index";
-import type { Tool } from "@/types/index.js";
+import type { Tool } from "@/types";
 import { achievements } from "@/services/achievements";
 import "./styles/tool-drawer.scss";
 

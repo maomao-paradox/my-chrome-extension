@@ -30,8 +30,20 @@ export interface EventListenerObject {
   [key: string]: EventListenerOrEventListenerObject;
 }
 
+export const InsertDomPosition = {
+  BB: "beforebegin",
+  AB: "afterbegin",
+  BE: "beforeend",
+  AE: "afterend",
+} as const satisfies Record<string, InsertPosition>;
+
+// 类型：{ readonly BB: "beforebegin"; ... }
+type InsertDomPosition =
+  (typeof InsertDomPosition)[keyof typeof InsertDomPosition];
+
 export interface ElemOpts {
-  tag?: string | HTMLElement;
+  el?: HTMLElement;
+  tag?: string;
   attrs?: AttributeObject;
   style?: string | StyleObject;
   eventlistener?: EventListenerObject;
@@ -41,9 +53,8 @@ export interface ElemOpts {
 
 export interface CreateElemOpts extends ElemOpts {}
 
-export interface CloneElemOpts extends ElemOpts {
+export interface CloneElemOpts extends Omit<ElemOpts, "tag"> {
   deep: boolean;
-  el: HTMLElement;
 }
 
 export interface AddElemOpts extends ElemOpts {

@@ -1,4 +1,4 @@
-import { injectScriptToActivateTab } from '@/dom-api';
+import { injectScriptToActivateTab } from '@/chrome-api';
 import { storage } from '@/stores';
 import { getSingleFileScript } from '@/utils';
 

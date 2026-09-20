@@ -19,7 +19,7 @@ import {
   addElementToDom,
   PositionStrategy,
   toast,
-} from "@/dom-api";
+} from "@/chrome-api";
 
 import {
   getAssetsAbstractPathSync,
@@ -27,7 +27,7 @@ import {
   componentManager,
 } from "@/utils";
 import { BookmarkStorage } from "@/services/bookmarkStorage";
-import { loadAIConfig } from "@/dom-api/ai-config";
+import { loadAIConfig } from "@/chrome-api/ai-config";
 import { fillTextareaElementByAI } from "./textarea-ai";
 
 const appName = "textSelectionToolbar";

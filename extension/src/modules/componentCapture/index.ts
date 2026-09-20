@@ -19,10 +19,10 @@
 import React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import ComponentCaptureApp from "./App";
-import { AppModule } from "@/types/index";
+import { AppModule } from "@/types";
 import { shadowHostId } from "@/config";
-import { getShadowContext, injectStyles } from "@/dom-api/shadow-dom";
-import { $id, addElementToDom } from "@/dom-api";
+import { getShadowContext, injectStyles } from "@/chrome-api/shadow-dom";
+import { $id, addElementToDom } from "@/chrome-api";
 import { bus } from "@/event/bus";
 
 // 通过 ?inline 导入聚合 SCSS 为字符串

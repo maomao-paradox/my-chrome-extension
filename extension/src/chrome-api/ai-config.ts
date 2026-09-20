@@ -1,3 +1,12 @@
+/**
+ * @author Zero
+ * @version v1.0.0
+ * @license MIT
+ * @sequence X
+ * @file src/dom-api/ai-config.ts
+ * @date 2026-02-05T02:38:01.698Z
+ */
+
 export const AI_ASSISTANT_CONFIG_KEY = 'ai_assistant_config';
 export const DEFAULT_AI_MODEL_ID = 'deepseek-chat';
 

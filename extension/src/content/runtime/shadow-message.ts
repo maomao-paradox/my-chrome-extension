@@ -1,5 +1,5 @@
 import { shadowHostId } from "@/config";
-import { getShadowContext, toast } from "@/dom-api";
+import { getShadowContext, toast } from "@/chrome-api";
 import { ToastType } from "@/components/toast/main";
 
 export const initializeShadowMessage = (ctx: AppContext): ShadowRoot | null => {

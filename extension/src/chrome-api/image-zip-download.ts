@@ -1,7 +1,12 @@
 /**
- * 与框架无关的图片扫描 + ZIP 打包库
- * 依赖：jszip、file-saver（需在外部引入，或打包时 external）
+ * @author Zero
+ * @version v1.0.0
+ * @license MIT
+ * @sequence X
+ * @file src/dom-api/image-zip-download.ts
+ * @date 2026-02-05T02:38:01.698Z
  */
+
 import JSZip from "jszip";
 //@ts-ignore
 import { saveAs } from "file-saver";

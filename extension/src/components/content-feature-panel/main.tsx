@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import MASwitch from "@/components/switch/main";
 
 import { shadowHostId } from "@/config";
-import { getShadowContext, injectStyles } from "@/dom-api";
+import { getShadowContext, injectStyles } from "@/chrome-api";
 import panelStyles from "./style.scss?inline";
 import switchStyles from "../switch/style.scss?inline";
 import { createRoot } from "react-dom/client";

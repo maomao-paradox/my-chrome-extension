@@ -10,7 +10,7 @@
 import type { XhrRulesMap, ExtMessage } from '@/types';
 import { storage } from '@/stores';
 import  messenger  from '@/message';
-import { injectScriptToActivateTab } from '@/dom-api';
+import { injectScriptToActivateTab } from '@/chrome-api';
 import { sendMessageToPage, listenForPageMessages } from '@/message/content-page';
 import { getSingleFileScript } from '@/utils';
 

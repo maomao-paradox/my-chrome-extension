@@ -230,7 +230,7 @@ import {
   type PopupThemeKey,
 } from "../composables/usePopupTheme.js";
 import { usePopupMouseTrail } from "../composables/usePopupMouseTrail.js";
-import { mouseTrailPresetOptions } from "@/composables/mouse/mouseTrailPreference.js";
+import { mouseTrailPresetOptions } from "@/hooks/mouse/mouseTrailPreference.js";
 import {
   useDomainManager,
   type DomainConfigItem,

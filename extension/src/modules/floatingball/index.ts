@@ -20,9 +20,9 @@
 import React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import App from "./App";
-import type { Tool } from "@/types/index.js";
-import { $id, addElementToDom } from "@/dom-api";
-import { getShadowContext, injectStyles } from "@/dom-api/shadow-dom";
+import type { Tool } from "@/types";
+import { $id, addElementToDom } from "@/chrome-api";
+import { getShadowContext, injectStyles } from "@/chrome-api/shadow-dom";
 import { getStaticAbstractPath } from "@/utils";
 import { storage } from "@/stores";
 import { appConfigKey } from "@/config";

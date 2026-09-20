@@ -1,4 +1,4 @@
-import { getCSSSelector } from "@/dom-api";
+import { getCSSSelector } from "@/chrome-api";
 
 export interface AdBlockRule {
   selector?: string;

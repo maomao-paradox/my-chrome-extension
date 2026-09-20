@@ -1,6 +1,10 @@
 /**
- * 元素位置信息类
- * 封装元素的绝对位置信息和相关操作方法
+ * @author Zero
+ * @version v1.0.0
+ * @license MIT
+ * @sequence X
+ * @file src/dom-api/elementPosition.ts
+ * @date 2026-02-05T02:38:01.698Z
  */
 
 export enum PositionStrategy {

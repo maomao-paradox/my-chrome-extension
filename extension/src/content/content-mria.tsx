@@ -28,7 +28,7 @@ import {
   getElementAbsolutePosition,
   PositionStrategy,
   createEl,
-} from "@/dom-api";
+} from "@/chrome-api";
 import {
   Requester,
   getFormCodeByName,

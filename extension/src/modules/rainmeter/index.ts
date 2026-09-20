@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.691Z
  */
 
-import { addElementToDom, getShadowContext, injectStyles } from "@/dom-api";
+import { addElementToDom, getShadowContext, injectStyles } from "@/chrome-api";
 import { Drops } from "./js/Drops";
 import { DropWords } from "./js/DropWords";
 import { Environment } from "./js/Environment";

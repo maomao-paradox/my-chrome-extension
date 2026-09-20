@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useEventListener } from '@/event';
-import { useMouseTracker } from '@/composables/mouse/mouseTracker';
+import { useMouseTracker } from '@/hooks/mouse/mouseTracker';
 
 // 光标位置状态
 const glassPosition = ref({ x: 0, y: 0 });

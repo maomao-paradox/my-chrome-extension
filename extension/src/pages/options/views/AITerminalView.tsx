@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { loadAIConfig, saveAIConfig } from "@/dom-api/ai-config";
+import { loadAIConfig, saveAIConfig } from "@/chrome-api/ai-config";
 
 const AITerminalView = () => {
   const [config, setConfig] = useState<any>({ provider: "deepseek", modelId: "deepseek-chat", apiKey: "", apiBaseUrl: "", systemPrompt: "你是一个简洁、准确的工程助手。" });

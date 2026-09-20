@@ -33,7 +33,7 @@ import {
   type PopupThemeKey,
 } from "../composables/usePopupTheme";
 import { usePopupMouseTrail } from "../composables/usePopupMouseTrail";
-import { mouseTrailPresetOptions } from "@/composables/mouse/mouseTrailPreference";
+import { mouseTrailPresetOptions } from "@/hooks/mouse/mouseTrailPreference";
 import {
   useDomainManager,
   type DomainConfigItem,

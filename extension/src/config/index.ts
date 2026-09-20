@@ -9,7 +9,7 @@
 
 import { defaultModuleConfigs } from "@/modules";
 import { getAssetsAbstractPath } from "@/utils";
-import { ModuleOption } from "@/dom-api/esm-module-loader";
+import { ModuleOption } from "@/chrome-api/esm-module-loader";
 
 export const appConfigKey = "appConfig";
 export const shadowHostId = "ma-extension-shadow-host";

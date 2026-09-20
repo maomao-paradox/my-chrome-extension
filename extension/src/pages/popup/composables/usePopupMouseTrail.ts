@@ -13,7 +13,7 @@ import {
   readStoredMouseTrailPreference,
   type MouseTrailPreference,
   type MouseTrailPreset,
-} from "@/composables/mouse/mouseTrailPreference";
+} from "@/hooks/mouse/mouseTrailPreference";
 
 export const popupMouseTrailStorageKey = "mouseTrail";
 

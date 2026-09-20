@@ -1,3 +1,12 @@
+/**
+ * @author Zero
+ * @version v1.0.0
+ * @license MIT
+ * @sequence X
+ * @file src/utils/request.ts
+ * @date 2026-02-05T02:38:01.698Z
+ */
+
 import axios, {
   AxiosInstance,
   AxiosRequestConfig,

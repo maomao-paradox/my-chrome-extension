@@ -27,7 +27,7 @@ import {
 } from "@ant-design/icons";
 import { Draggable } from "@/components/react-index";
 import type { DraggableHandle } from "@/components/react-index";
-import type { Tool } from "@/types/index.js";
+import type { Tool } from "@/types";
 import "./styles/control-panel.scss";
 
 interface ControlPanelProps {

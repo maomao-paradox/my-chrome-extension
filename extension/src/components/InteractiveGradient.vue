@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useMouseTracker } from '@/composables/mouse/mouseTracker';
+import { useMouseTracker } from '@/hooks/mouse/mouseTracker';
 
 const curX = ref(0);
 const curY = ref(0);

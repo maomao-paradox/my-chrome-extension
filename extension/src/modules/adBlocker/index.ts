@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { getShadowContext, injectStyles } from "@/dom-api";
+import { getShadowContext, injectStyles } from "@/chrome-api";
 import { applyRules } from "./adBlocker";
 import AdBlockerApp from "./App";
 import { stopEarlyAdBlocker } from "./early";

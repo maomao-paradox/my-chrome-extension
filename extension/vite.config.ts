@@ -174,21 +174,21 @@ export default ({
         output: {
           manualChunks: isProduction
             ? {
-                react: ["react", "react-dom/client"],
+                // react: ["react", "react-dom/client"],
                 antd: ["antd", "@ant-design/icons"],
                 // 基础设施 - 纯函数工具，可在 Service Worker 中使用
                 "infrastructure-utils": ["@/utils"],
                 // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
-                "infrastructure-dom": ["@/dom-api"],
+                "infrastructure-chrome": ["@/chrome-api"],
                 message: ["@/message"],
                 "content-runtime": ["@/content/runtime"],
               }
             : undefined,
-          chunkFileNames: (chunkInfo) => {
+          chunkFileNames: (chunkInfo: any) => {
             // console.log(chunkInfo.name);
             return `js/chunks/chunk-${isChunkAnonymous ? "" : "[name]-"}[hash].js`;
           },
-          assetFileNames: (assetInfo) => {
+          assetFileNames: (assetInfo: any) => {
             // console.log(assetInfo.names);
             const fileExtname = path.extname(assetInfo.names?.[0] || "");
             if ([".ttf", ".woff", ".woff2"].includes(fileExtname)) {
@@ -217,7 +217,7 @@ export default ({
             }
             return `[hash].[ext]`;
           },
-          entryFileNames: (entryInfo) => {
+          entryFileNames: (entryInfo: any) => {
             // console.log(entryInfo.name);
             const chunkName = entryInfo.name || "";
             if (chunkName.startsWith("content/")) {

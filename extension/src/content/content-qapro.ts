@@ -13,7 +13,7 @@ import {
   getElementAbsolutePosition,
   createEl,
   PositionStrategy,
-} from "@/dom-api";
+} from "@/chrome-api";
 // import { QuickLogin } from '@/components/index';
 import messenger from "@/message";
 import { ExtMessage, MessageHandler } from "@/types";

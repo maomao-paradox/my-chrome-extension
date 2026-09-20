@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import SubRule from './SubRule.vue';
-import type { RuleInstruction } from '@/types/index.js';
+import type { RuleInstruction } from '@/types/min.js';
 
 // Props
 interface Props {
