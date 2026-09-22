@@ -9,7 +9,10 @@
 
 import {
   addElementToDom,
+  createEl,
+  getElementAbsolutePosition,
   injectScriptToActivateTab,
+  PositionStrategy,
   waitForSelector,
   whenDomReady,
 } from "@/chrome-api";
@@ -18,6 +21,11 @@ import messenger from "@/message";
 import { requestAI } from "@/utils/ai-request";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 import lmaskStyles from "@/assets/styles/lmask.scss?inline";
+import { request } from "@/utils";
+import { storage } from "@/stores";
+import { createRoot } from "react-dom/client";
+import JungleKnotButton from "@/components/Jungle-knot/Button";
+import JungleKnotButtonStyle from "@/components/Jungle-knot/styles/button.scss?inline";
 
 function addLoadingMask(el: HTMLElement, loadingText: string = "填写中...") {
   if (!el) {
@@ -93,6 +101,49 @@ function removeLoadingMask(el: HTMLElement): number {
 }
 
 export default (ctx: AppContext, config = {}) => {
+  const quickLogin = async (username: string, password: string) => {
+    if (!username || !password) {
+      ctx.message.error("用户名或密码不能为空");
+      return;
+    }
+    try {
+      // await request.post("/v1/identity/auth/logout");
+      const loginRes = await request.post("/v1/identity/auth/login", {
+        username,
+        password,
+      });
+      if (loginRes.base_resp.code === 0) {
+        ctx.message.success("登录成功");
+      } else {
+        ctx.message.error(loginRes.msg);
+      }
+      storage.page.local.set("auth-has-login", true);
+      storage.page.local.set(
+        "auth-memberships",
+        JSON.stringify(loginRes.memberships),
+      );
+      storage.page.local.set(
+        "auth-menu-info",
+        JSON.stringify(loginRes.menu_tree),
+      );
+      storage.page.local.set(
+        "auth-role-ids",
+        JSON.stringify(loginRes.role_ids),
+      );
+      storage.page.local.set("auth-token", loginRes.token_info.access_token);
+      storage.page.local.set(
+        "auth-user-info",
+        JSON.stringify(loginRes.user_profile),
+      );
+      // document.cookie = "Portal-token=" + loginRes.data["access_token"];
+      // 使用接口响应标头的set-Cookie设置cookie
+      // 重新构建requester
+      location.reload();
+    } catch (err) {
+      maLogger.error(err);
+    }
+  };
+
   const featureRegistry = createContentFeatureRegistry({
     scriptId: "radius",
     scriptName: "Radius",
@@ -107,6 +158,80 @@ export default (ctx: AppContext, config = {}) => {
       label: "批量导出患者数据",
     },
   ];
+
+  /**
+   * 在指定元素旁挂载 QuickLogin Vue 组件到 Shadow DOM
+   */
+  const enrichQuickLogin = (
+    byElement: HTMLElement,
+    position: {
+      strategy?: PositionStrategy;
+      offset?: { x?: number; y?: number };
+    },
+  ): void => {
+    if (!byElement) {
+      return;
+    }
+
+    const shadowRoot = ctx.gmod("__SHADOW_DOM");
+    if (!shadowRoot) {
+      maLogger.error("Shadow DOM 不存在");
+      return;
+    }
+
+    const positionInfo = getElementAbsolutePosition(byElement);
+    // maLogger.log("positionInfo:", positionInfo);
+
+    const adminButtonWrapper = createEl({
+      tag: "div",
+      attrs: {
+        className: "quick-login-shadow-container",
+      },
+    });
+
+    shadowRoot.appendChild(adminButtonWrapper);
+
+    const root = createRoot(adminButtonWrapper);
+    root.render(
+      <>
+        <style>
+          {JungleKnotButtonStyle +
+            ".operation-button__content span { font-size: 16px; }"}
+        </style>
+        <JungleKnotButton
+          onClick={() => quickLogin("superadmin", "password123")}
+          mainTitle="管理员登录"
+        />
+      </>,
+    );
+
+    const { strategy = PositionStrategy.Down, offset } = position;
+
+    positionInfo.positionElement({
+      targetElement: adminButtonWrapper,
+      strategy,
+      alignment: "center",
+      offset,
+      pinned: true,
+      observeReference: true,
+    });
+  };
+
+  featureRegistry.register("radius.enrichQuickLogin", "管理员一键登录", () => {
+    // 监听 quickLogin 事件
+    if (location.hash.match("#/login")) {
+      waitForSelector({
+        selector: "#app > div > div > div.login-card > button",
+        filter: (el) => el.dataset.testid === "auth-login-submit-button",
+        callback: (el) =>
+          enrichQuickLogin(el!, { strategy: PositionStrategy.Down }),
+        maxWaitTimes: 10,
+        useMutationObserver: true,
+        timeout: 5000,
+        iframeSelector: "#app > div > div > div > wujie-app",
+      });
+    }
+  });
 
   const updateSidebar = async (tools: Tool[]) => {
     // 侧边栏配置
@@ -297,7 +422,7 @@ export default (ctx: AppContext, config = {}) => {
           return;
         }
         const added = addElementToDom({
-          tag: buttonEl,
+          el: buttonEl,
           attrs: {
             innerText: "填充表单",
           },

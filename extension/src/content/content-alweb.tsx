@@ -13,6 +13,7 @@ import {
   PositionStrategy,
   cloneEl,
   addElementToDom,
+  createEl,
 } from "@/chrome-api";
 import { InsertDomPosition, type Tool } from "@/types";
 import { storage } from "@/stores";
@@ -20,6 +21,9 @@ import { storage } from "@/stores";
 import messenger from "@/message";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 import { request } from "@/utils";
+import JungleKnotButton from "@/components/Jungle-knot/Button";
+import JungleKnotButtonStyle from "@/components/Jungle-knot/styles/button.scss?inline";
+import { createRoot } from "react-dom/client";
 
 const ADMIN = "admin";
 
@@ -78,42 +82,33 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     const positionInfo = getElementAbsolutePosition(byElement);
     // maLogger.log("positionInfo:", positionInfo);
 
-    const adminButton = cloneEl(byElement, {
-      deep: true,
+    const adminButtonWrapper = createEl({
+      tag: "div",
       attrs: {
-        type: "submit",
-        textContent: "管理员登录",
         className: "quick-login-shadow-container",
-      },
-      eventlistener: {
-        click: () => {
-          quickLogin("mp" + ADMIN, ADMIN + "123");
-        },
       },
     });
 
-    shadowRoot.appendChild(adminButton);
+    shadowRoot.appendChild(adminButtonWrapper);
 
-    // const root = createRoot(loginContainer);
-    // root.render(
-    //   <QuickLogin
-    //     userList={{
-    //       ["mp" + ADMIN]: {
-    //         realname: "超级管理员",
-    //         password: ADMIN + "123",
-    //         enabled: true,
-    //         role: "管理员",
-    //       },
-    //       ...ctx.userInfo,
-    //     }}
-    //     onLogin={quickLogin}
-    //   />,
-    // );
+    const root = createRoot(adminButtonWrapper);
+    root.render(
+      <>
+        <style>
+          {JungleKnotButtonStyle +
+            ".operation-button__content span { font-size: 16px; }"}
+        </style>
+        <JungleKnotButton
+          onClick={() => quickLogin("mp" + ADMIN, ADMIN + "123")}
+          mainTitle="管理员登录"
+        />
+      </>,
+    );
 
     const { strategy = PositionStrategy.Down, offset } = position;
 
     positionInfo.positionElement({
-      targetElement: adminButton,
+      targetElement: adminButtonWrapper,
       strategy,
       alignment: "center",
       offset,
@@ -122,31 +117,33 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     });
   };
 
-  featureRegistry.register("mria.enrichQuickLogin", "管理员一键登录", () => {
+  featureRegistry.register("alweb.enrichQuickLogin", "管理员一键登录", () => {
     // 监听 quickLogin 事件
     if (location.hash.match("#/login")) {
       waitForSelector({
         selector: "#app > div > div.auth-page__main > div > form > button",
         filter: (el) => el.textContent === "登录",
         callback: (el) =>
-          addElementToDom({
-            el,
-            attrs: {
-              textContent: "管理员登录",
-              className: [
-                "quick-login-shadow-container",
-                ...el!.classList,
-              ].join(" "),
-            },
-            eventlistener: {
-              click: () => {
-                quickLogin("mp" + ADMIN, ADMIN + "123");
-              },
-            },
-          })(el, InsertDomPosition.AE),
+          enrichQuickLogin(el!, { strategy: PositionStrategy.Down }),
+        // addElementToDom({
+        //   el,
+        //   attrs: {
+        //     textContent: "管理员登录",
+        //     className: [
+        //       "quick-login-shadow-container",
+        //       ...el!.classList,
+        //     ].join(" "),
+        //   },
+        //   eventlistener: {
+        //     click: () => {
+        //       quickLogin("mp" + ADMIN, ADMIN + "123");
+        //     },
+        //   },
+        // })(el, InsertDomPosition.AE),
         maxWaitTimes: 10,
         useMutationObserver: true,
         timeout: 5000,
+        once: true,
       });
     }
   });

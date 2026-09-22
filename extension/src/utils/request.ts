@@ -243,7 +243,7 @@ class RequestService {
         }
 
         // 根据业务状态码处理
-        if (data.code === 10000) {
+        if ((data.code && data.code === 10000) || data.base_resp.code === 0) {
           return response;
         } else {
           return await this.handleBusinessError(data, config);

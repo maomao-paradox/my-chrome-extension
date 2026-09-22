@@ -41,9 +41,10 @@
     justify-content: center;
   }
 
-  &__label {
+  &__header {
     content: "OPERATION";
     position: absolute;
+    user-select: none; // 阻止选中文本
 
     top: 0;
     left: 0;

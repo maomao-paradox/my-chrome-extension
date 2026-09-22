@@ -64,7 +64,7 @@ export interface AddElemOpts extends ElemOpts {
 /**
  * 过滤函数类型定义
  */
-export type ElementFilter = (element: Element) => boolean;
+export type ElementFilter = (element: HTMLElement) => boolean;
 
 /**
  * 优化后的等待元素选项接口

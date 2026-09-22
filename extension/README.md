@@ -149,6 +149,24 @@ npx vitest run test/BookmarkPage.spec.ts
 
 ### DOM 结构提取
 - `src/runtime/dom-structure-extractor.ts` 可注入当前网页，提取 title、url、语义区块、标题层级、表单字段、图片 alt/id/title 以及裁剪后的 DOM 树，输出适合 AI 理解的 Markdown 和 JSON
+
+### 等待动态元素
+
+内容脚本可使用 `waitForSelector` 等待异步渲染的元素：
+
+```ts
+const [elements, cleanup] = await waitForSelector({
+  selector: ".target",
+  once: true,
+  timeout: 10_000,
+  callback: (element) => element.classList.add("ready"),
+});
+
+// 不再需要监听时可手动清理 observer、定时器和 iframe load 监听。
+cleanup();
+```
+
+该函数默认使用 `MutationObserver`，并在需要时按 `interval` 合并检查；设置 `useMutationObserver: false` 会退回轮询。`maxWaitTimes` 会限制检查次数，`timeout` 会限制总等待时间，`signal` 可用于取消等待。选择器数组会合并去重，非法选择器会直接 reject。
 - 注入后会把 Markdown 摘要打印到控制台并尝试复制到剪贴板，同时暴露 `window.extractDomStructure(options)` 和最近一次结果 `window.lastDomStructureSummary`
 - 常用参数：`rootSelector` 指定根节点，`maxDepth` 控制层级深度，`maxChildrenPerNode` 控制每层子节点数量，`includeHidden` 控制是否包含隐藏元素
 
