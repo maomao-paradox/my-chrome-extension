@@ -61,29 +61,7 @@ export interface AddElemOpts extends ElemOpts {
   autoRemoveDelay?: number;
 }
 
-/**
- * 过滤函数类型定义
- */
-export type ElementFilter = (element: HTMLElement) => boolean;
 
-/**
- * 优化后的等待元素选项接口
- */
-export interface WaitForSelectorOptions {
-  selector: string | string[];
-  callback?: AddElementFunc | Function;
-  callbackArgs?: any[];
-  iframeSelector?: string;
-  maxWaitTimes?: number;
-  timeout?: number;
-  interval?: number;
-  filter?: ElementFilter | Function;
-  once?: boolean; // 当设置为true时，找到第一个匹配元素后立即停止搜索
-  useMutationObserver?: boolean;
-  observerOptions?: MutationObserverInit;
-  signal?: AbortSignal;
-  initCallback?: AddElementFunc | Function;
-}
 
 // 定义XHR规则接口
 export interface RuleInstruction {

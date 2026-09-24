@@ -1,0 +1,103 @@
+.poster {
+  position: relative;
+  background: transparent;
+  overflow: hidden;
+}
+
+.bg-contour {
+  position: absolute;
+  inset: 0;
+  background-image: url("./contour-lines.svg");
+  background-size: cover;
+  opacity: 0.4;
+}
+
+.text {
+  color: #000;
+  filter: drop-shadow(-3px 0 0 #ff0044) drop-shadow(3px 0 0 #0044ff);
+  position: relative;
+  font-family: "Didot", "Bodoni MT", serif;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+.chromatic {
+  position: relative;
+  font-family: "Didot", serif;
+  font-size: 220px;
+  font-weight: 900;
+}
+
+/* 主层：纹理填充 */
+.chromatic {
+  background-image: url("./mountain.jpg");
+  background-size: cover;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.chromatic::before,
+.chromatic::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transition:
+    transform 0.5s ease,
+    filter 0.5s ease;
+  filter: blur(4px);
+}
+
+/* 红色层 */
+.chromatic::before {
+  background: #ff0044;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transform: translate(-50px, -30px);
+  mix-blend-mode: multiply;
+}
+
+/* 蓝色层 */
+.chromatic::after {
+  background: #0044ff;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transform: translate(50px, 30px);
+  mix-blend-mode: multiply;
+}
+
+.chromatic:hover::before {
+  transform: translate(-5px, -3px);
+  filter: blur(0px);
+}
+
+.chromatic:hover::after {
+  transform: translate(5px, 3px);
+  filter: blur(0px);
+}
+
+.text-base {
+  background-image: url("./mountain.jpg");
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+.text-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("./noise.png");
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  mix-blend-mode: overlay;
+  z-index: 3;
+  pointer-events: none;
+}

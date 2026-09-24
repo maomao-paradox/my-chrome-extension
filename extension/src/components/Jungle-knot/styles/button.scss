@@ -1,6 +1,22 @@
 * {
-  --button-border-color: #ffffff7e;
-  --shadow-color: #4cafaa7e;
+  --button-border-color: rgba(255, 255, 255, 0.4);
+  --shadow-color: rgba(0, 229, 255, 0.35); // 升级为明日方舟经典青色发光
+  --cyan-accent: #00e5ff;
+}
+
+@font-face {
+  font-family: "Casa";
+  src: url("@/assets/fonts/Casa-Regular-2.otf");
+}
+
+// 顶部 Header 扫光动画
+@keyframes scan-glimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .operation-button {
@@ -11,69 +27,145 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.3s;
   text-align: center;
   box-sizing: border-box;
-  border-right: 1px solid var(--button-border-color);
-  border-bottom: none;
-  border-top: none;
-  border-left: none;
-  box-shadow: 0px 1px 1px var(--shadow-color);
+  padding: 12px 12px;
+  color: #fff;
+  background: #111;
+  user-select: none;
+  overflow: hidden;
 
+  // 默认边框与阴影
+  border-right: 1px solid var(--button-border-color);
+  box-shadow: 0px 1px 2px var(--shadow-color);
+
+  // 平滑过渡（控制点击缩放、阴影与边框发光）
+  transition:
+    transform 0.12s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+
+  // --------------------------------------------------
+  // 1. 悬浮交互 (Hover)
+  // --------------------------------------------------
+  &:hover {
+    border-right-color: var(--cyan-accent);
+    box-shadow:
+      0px 2px 10px var(--shadow-color),
+      inset 0 0 4px var(--shadow-color);
+
+    // 悬浮时 Header 渐变的流动与光亮增强
+    .operation-button__header {
+      background: linear-gradient(
+        70deg,
+        #000 0%,
+        #000 15%,
+        var(--cyan-accent) 35%,
+        #fff 100%
+      );
+
+      // 触发扫光光点
+      &::after {
+        opacity: 1;
+        animation: scan-glimmer 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+    }
+
+    // 背景与文字微平移
+    .operation-button__content {
+      text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+      // transform: translateY(-1px);
+    }
+  }
+
+  // --------------------------------------------------
+  // 2. 点击按压交互 (Active)
+  // --------------------------------------------------
+  &:active {
+    transform: scale(0.96); // 机械按压缩放
+    box-shadow: 0px 1px 4px var(--shadow-color);
+
+    .operation-button__bg {
+      filter: brightness(1.2); // 瞬时高亮闪烁
+    }
+  }
+
+  // --------------------------------------------------
+  // 背景图层 (由 JS 内联样式控制渐变)
+  // --------------------------------------------------
   &__bg {
     width: 100%;
     height: 100%;
     position: absolute;
-    display: inline-block;
-
-    background: linear-gradient(70deg, #fff 0%, #fff 20%, #000 35%, #000 100%);
-
-    font-family: Arial, sans-serif;
-    font-weight: bold;
-
-    /* 预留顶部空间，并增加内边距 */
-    padding: 10% 10% 5%;
-    min-width: 50%;
-    min-height: 80%;
-
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(70deg, #fff 0%, #fff 20%, #000 35%, #000 100%);
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    padding: 10% 10% 5%;
+    min-width: 50%;
+    min-height: 80%;
+    transition: filter 0.15s ease;
   }
 
+  // --------------------------------------------------
+  // 顶部 Header 标签条
+  // --------------------------------------------------
   &__header {
     content: "OPERATION";
     position: absolute;
-    user-select: none; // 阻止选中文本
-
+    user-select: none;
     top: 0;
     left: 0;
     right: 0;
     height: 100%;
     clip-path: inset(0% 0% 75% 0%); /* 裁剪标签条高度 */
-
     background: linear-gradient(70deg, #000 0%, #000 20%, #fff 35%, #fff 100%);
-
-    /* ✨ 核心改动：背景色采用反向颜色渐变 */
-    // color: #fff;
-    // background-color: #000;
-    // mix-blend-mode: difference;
-    // filter: invert(1);
-
     font-family: "Times New Roman", Times, serif;
-    font-weight: normal;
+    font-weight: 600;
     font-size: 11px;
     line-height: 12px;
     letter-spacing: 1px;
     z-index: 1;
+    overflow: hidden;
+    transition: background 0.3s ease;
+
+    // 光束扫过的高光层
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.8) 50%,
+        transparent 100%
+      );
+      opacity: 0;
+      pointer-events: none;
+    }
   }
 
+  // --------------------------------------------------
+  // 内容区域
+  // --------------------------------------------------
   &__content {
+    width: 100%;
     position: relative;
     padding-top: 10px;
-    font-size: 28px;
+    font-size: 20px;
+    line-height: 32px;
     letter-spacing: 2px;
     text-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
-    user-select: none; // 阻止选中文本
+    user-select: none;
+    z-index: 2;
+    transition:
+      text-shadow 0.3s ease,
+      transform 0.15s ease;
   }
 }

@@ -26,6 +26,7 @@ import { storage } from "@/stores";
 import { createRoot } from "react-dom/client";
 import JungleKnotButton from "@/components/Jungle-knot/Button";
 import JungleKnotButtonStyle from "@/components/Jungle-knot/styles/button.scss?inline";
+import { flushSync } from "react-dom";
 
 function addLoadingMask(el: HTMLElement, loadingText: string = "填写中...") {
   if (!el) {
@@ -162,55 +163,70 @@ export default (ctx: AppContext, config = {}) => {
   /**
    * 在指定元素旁挂载 QuickLogin Vue 组件到 Shadow DOM
    */
+
   const enrichQuickLogin = (
-    byElement: HTMLElement,
+    byElement: HTMLElement | null | undefined,
     position: {
       strategy?: PositionStrategy;
+      alignment?: "start" | "center" | "end";
+      containment?: "inside" | "outside";
       offset?: { x?: number; y?: number };
-    },
+    } = {},
   ): void => {
-    if (!byElement) {
-      return;
-    }
+    if (!byElement) return;
 
     const shadowRoot = ctx.gmod("__SHADOW_DOM");
-    if (!shadowRoot) {
-      maLogger.error("Shadow DOM 不存在");
+    if (!(shadowRoot instanceof ShadowRoot)) {
+      maLogger.error("Shadow DOM 不存在或类型错误");
       return;
     }
 
-    const positionInfo = getElementAbsolutePosition(byElement);
-    // maLogger.log("positionInfo:", positionInfo);
-
+    // 1. 创建 wrapper，一开始就设好 fixed，避免布局上下文突变
     const adminButtonWrapper = createEl({
       tag: "div",
-      attrs: {
-        className: "quick-login-shadow-container",
+      attrs: { class: "quick-login-shadow-container" },
+      style: {
+        position: "fixed",
+        top: "0",
+        left: "0",
+        zIndex: "9999",
       },
     });
 
     shadowRoot.appendChild(adminButtonWrapper);
 
+    // 2. 同步渲染，确保 DOM 已挂载、尺寸可用
     const root = createRoot(adminButtonWrapper);
-    root.render(
-      <>
-        <style>
-          {JungleKnotButtonStyle +
-            ".operation-button__content span { font-size: 16px; }"}
-        </style>
-        <JungleKnotButton
-          onClick={() => quickLogin("superadmin", "password123")}
-          mainTitle="管理员登录"
-        />
-      </>,
-    );
+    flushSync(() => {
+      root.render(
+        <>
+          <style>
+            {JungleKnotButtonStyle +
+              ".operation-button__content span { font-size: 16px; }"}
+          </style>
+          <JungleKnotButton
+            onClick={() => quickLogin("superadmin", "password123")}
+            mainTitle="管理员登录"
+          />
+        </>,
+      );
+    });
 
-    const { strategy = PositionStrategy.Down, offset } = position;
+    // 3. 渲染后再取快照，确保 byElement 位置是最新的
+    const positionInfo = getElementAbsolutePosition(byElement);
+
+    const {
+      strategy = PositionStrategy.Down,
+      alignment = "center",
+      containment = "outside",
+      offset,
+    } = position;
 
     positionInfo.positionElement({
       targetElement: adminButtonWrapper,
       strategy,
-      alignment: "center",
+      alignment,
+      containment,
       offset,
       pinned: true,
       observeReference: true,
@@ -224,7 +240,10 @@ export default (ctx: AppContext, config = {}) => {
         selector: "#app > div > div > div.login-card > button",
         filter: (el) => el.dataset.testid === "auth-login-submit-button",
         callback: (el) =>
-          enrichQuickLogin(el!, { strategy: PositionStrategy.Down }),
+          enrichQuickLogin(el!, {
+            strategy: PositionStrategy.Down,
+            offset: { y: 10 },
+          }),
         maxWaitTimes: 10,
         useMutationObserver: true,
         timeout: 5000,
@@ -399,13 +418,18 @@ export default (ctx: AppContext, config = {}) => {
   featureRegistry.register("radius.fill-form", "AI 填充表单", async () => {
     const controller = new AbortController();
     const inserted: HTMLElement[] = [];
+    const parentSelector =
+      "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div";
     void waitForSelector({
       selector: [
-        "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div",
-        "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div > div.el-overlay.el-modal-dialog > div > div > div.el-dialog__body",
+        parentSelector,
+        parentSelector +
+          " > div.el-overlay.el-modal-dialog > div > div > div.el-dialog__body",
+        parentSelector +
+          " > div:nth-child(4) > div > div > div.el-dialog__body",
       ],
       signal: controller.signal,
-      timeout: 10000,
+      timeout: -1, //设为-1表示无限等待
       callback: (el: HTMLElement) => {
         const buttonEl =
           el.querySelector<HTMLButtonElement>(

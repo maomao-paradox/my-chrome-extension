@@ -1,7 +1,8 @@
 export const DEFAULT_DEEPSEEK_API_BASE_URL = 'https://chat.deepseek.com';
 export const DEFAULT_DEEPSEEK_AUTH_TOKEN = 'Bearer P70I3ehnpWiWHB5JZN/QZ0YxnDeBe+V9Fqo7BJvC9aGF7toyccrJ3GvKJsP30ff+';
 export const DEFAULT_DEEPSEEK_COOKIES = 'HWWAFSESID=6ea6a784e4e664a3641; HWWAFSESTIME=1768275107500';
-export const DEFAULT_DEEPSEEK_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36';
+export const DEFAULT_DEEPSEEK_USER_AGENT =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36';
 export const DEFAULT_DEEPSEEK_SESSION_COOKIE = 'ds_session_id=0d6cc1e66b6b48cc9aed13824ce482b3';
 
 export interface SessionData {
@@ -63,541 +64,577 @@ interface DeepSeekRequestOptions {
 }
 
 function createEmptyStreamError(source: string, rawSample: string): Error {
-  const normalizedSample = rawSample.trim().replace(/\s+/g, ' ').slice(0, 800);
-  let detail = normalizedSample || 'empty response body';
+    const normalizedSample = rawSample.trim().replace(/\s+/g, ' ').slice(0, 800);
+    let detail = normalizedSample || 'empty response body';
 
-  try {
-    const parsed = JSON.parse(rawSample) as Record<string, unknown>;
-    const message = parsed.message || parsed.msg || parsed.error || parsed.code;
-    if (message) {
-      detail = String(message);
+    try {
+        const parsed = JSON.parse(rawSample) as Record<string, unknown>;
+        const message = parsed.message || parsed.msg || parsed.error || parsed.code;
+        if (message) {
+            detail = String(message);
+        }
+    } catch {
+        // Keep the raw sample when the body is not JSON.
     }
-  } catch {
-    // Keep the raw sample when the body is not JSON.
-  }
 
-  return new Error(`${source} stream completed without content: ${detail}`);
+    return new Error(`${source} stream completed without content: ${detail}`);
 }
 
 function normalizeRole(role: string): string {
-  return role || 'default_ai_assistant';
+    return role || 'default_ai_assistant';
 }
 
 function isInvalidChatSessionError(error: unknown): boolean {
-  return error instanceof Error
-        && error.message.toLowerCase().includes('invalid chat session id');
+    return error instanceof Error && error.message.toLowerCase().includes('invalid chat session id');
 }
 
 function extractActualContent(content: string): string {
-  let processedContent = content;
+    let processedContent = content;
 
-  for (const marker of ['FINISHED']) {
-    if (processedContent.endsWith(marker)) {
-      processedContent = processedContent.slice(0, -marker.length).trim();
+    for (const marker of ['FINISHED']) {
+        if (processedContent.endsWith(marker)) {
+            processedContent = processedContent.slice(0, -marker.length).trim();
+        }
     }
-  }
 
-  return processedContent;
+    return processedContent;
 }
 
 function extractResponseSnapshotContent(payload: Record<string, unknown>): string {
-  const snapshotContainer = payload.v;
-  if (!snapshotContainer || typeof snapshotContainer !== 'object') {
-    return '';
-  }
+    const snapshotContainer = payload.v;
+    if (!snapshotContainer || typeof snapshotContainer !== 'object') {
+        return '';
+    }
 
-  const response = (snapshotContainer as Record<string, unknown>).response;
-  if (!response || typeof response !== 'object') {
-    return '';
-  }
+    const response = (snapshotContainer as Record<string, unknown>).response;
+    if (!response || typeof response !== 'object') {
+        return '';
+    }
 
-  const content = (response as Record<string, unknown>).content;
-  return typeof content === 'string' ? extractActualContent(content) : '';
+    const responseRecord = response as Record<string, unknown>;
+    const content = responseRecord.content;
+    if (typeof content === 'string' && content.length > 0) {
+        return extractActualContent(content);
+    }
+
+    // DeepSeek 首个快照使用 fragments 承载已生成内容，例如：
+    // { v: { response: { fragments: [{ type: "RESPONSE", content: "[\\n" }] } } }
+    // 后续增量包才通过 p=response/fragments/-1/content + APPEND 发送。
+    const fragments = responseRecord.fragments;
+    if (!Array.isArray(fragments)) {
+        return '';
+    }
+
+    return fragments
+        .map((fragment) => {
+            if (!fragment || typeof fragment !== 'object') {
+                return '';
+            }
+            const fragmentRecord = fragment as Record<string, unknown>;
+            if (typeof fragmentRecord.type === 'string' && fragmentRecord.type !== 'RESPONSE') {
+                return '';
+            }
+            return typeof fragmentRecord.content === 'string' ? extractActualContent(fragmentRecord.content) : '';
+        })
+        .join('');
 }
 
 function extractDeepSeekTextValue(value: unknown): string {
-  if (typeof value === 'string') {
-    return extractActualContent(value);
-  }
+    if (typeof value === 'string') {
+        return extractActualContent(value);
+    }
 
-  if (Array.isArray(value)) {
-    return value.map(extractDeepSeekTextValue).join('');
-  }
+    if (Array.isArray(value)) {
+        return value.map(extractDeepSeekTextValue).join('');
+    }
 
-  if (!value || typeof value !== 'object') {
-    return '';
-  }
+    if (!value || typeof value !== 'object') {
+        return '';
+    }
 
-  const record = value as Record<string, unknown>;
-  return extractDeepSeekTextValue(record.content)
-        || extractDeepSeekTextValue(record.text)
-        || extractDeepSeekTextValue(record.answer)
-        || extractDeepSeekTextValue(record.output_text)
-        || extractDeepSeekTextValue(record.delta)
-        || extractDeepSeekTextValue(record.message);
+    const record = value as Record<string, unknown>;
+    return (
+        extractDeepSeekTextValue(record.content) ||
+        extractDeepSeekTextValue(record.text) ||
+        extractDeepSeekTextValue(record.answer) ||
+        extractDeepSeekTextValue(record.output_text) ||
+        extractDeepSeekTextValue(record.delta) ||
+        extractDeepSeekTextValue(record.message)
+    );
 }
 
-function parseDeepSeekDataPayload(payload: unknown): { content: string; isComplete: boolean } {
-  let content = '';
-  let isComplete = false;
+function parseDeepSeekDataPayload(payload: unknown): {
+    content: string;
+    isComplete: boolean;
+} {
+    let content = '';
+    let isComplete = false;
 
-  if (!payload || typeof payload !== 'object') {
-    return { content, isComplete };
-  }
-
-  const json = payload as Record<string, unknown>;
-
-  if (typeof json.v === 'string') {
-    content += extractActualContent(json.v);
-    return { content, isComplete };
-  }
-
-  if (typeof json.p === 'string' && json.p.includes('content')) {
-    content += extractDeepSeekTextValue(json.v);
-    return { content, isComplete };
-  }
-
-  const snapshotContent = extractResponseSnapshotContent(json);
-  if (snapshotContent) {
-    content += snapshotContent;
-    return { content, isComplete };
-  }
-
-  if (json.p === 'response' && json.o === 'BATCH' && Array.isArray(json.v)) {
-    for (const batchItem of json.v) {
-      const parsedBatchItem = parseDeepSeekDataPayload(batchItem);
-      content += parsedBatchItem.content;
-      isComplete = isComplete || parsedBatchItem.isComplete;
-
-      if (
-        batchItem
-                && typeof batchItem === 'object'
-                && (batchItem as Record<string, unknown>).p === 'status'
-                && (batchItem as Record<string, unknown>).v === 'FINISHED'
-      ) {
-        isComplete = true;
-        break;
-      }
+    if (!payload || typeof payload !== 'object') {
+        return { content, isComplete };
     }
-  }
 
-  content += extractDeepSeekTextValue(json);
+    const json = payload as Record<string, unknown>;
 
-  return { content, isComplete };
+    if (typeof json.v === 'string') {
+        content += extractActualContent(json.v);
+        return { content, isComplete };
+    }
+
+    if (typeof json.p === 'string' && json.p.includes('content')) {
+        content += extractDeepSeekTextValue(json.v);
+        return { content, isComplete };
+    }
+
+    const snapshotContent = extractResponseSnapshotContent(json);
+    if (snapshotContent) {
+        content += snapshotContent;
+        return { content, isComplete };
+    }
+
+    if (json.p === 'response' && json.o === 'BATCH' && Array.isArray(json.v)) {
+        for (const batchItem of json.v) {
+            const parsedBatchItem = parseDeepSeekDataPayload(batchItem);
+            content += parsedBatchItem.content;
+            isComplete = isComplete || parsedBatchItem.isComplete;
+
+            if (
+                batchItem &&
+                typeof batchItem === 'object' &&
+                (batchItem as Record<string, unknown>).p === 'status' &&
+                (batchItem as Record<string, unknown>).v === 'FINISHED'
+            ) {
+                isComplete = true;
+                break;
+            }
+        }
+    }
+
+    content += extractDeepSeekTextValue(json);
+
+    return { content, isComplete };
 }
 
-export function parseDeepSeekStreamLines(lines: string[]): { content: string; isComplete: boolean } {
-  let content = '';
-  let isComplete = false;
+export function parseDeepSeekStreamLines(lines: string[]): {
+    content: string;
+    isComplete: boolean;
+} {
+    let content = '';
+    let isComplete = false;
 
-  for (const line of lines) {
-    const trimmedLine = line.trim();
+    for (const line of lines) {
+        const trimmedLine = line.trim();
 
-    if (!trimmedLine) {
-      continue;
+        if (!trimmedLine) {
+            continue;
+        }
+
+        if (trimmedLine.startsWith('event: ')) {
+            if (trimmedLine.slice(7) === 'finish') {
+                isComplete = true;
+            }
+            continue;
+        }
+
+        if (!trimmedLine.startsWith('data: ')) {
+            continue;
+        }
+
+        const jsonStr = trimmedLine.slice(6);
+
+        try {
+            const parsedPayload = parseDeepSeekDataPayload(JSON.parse(jsonStr));
+            content += parsedPayload.content;
+            isComplete = isComplete || parsedPayload.isComplete;
+        } catch {
+            // Ignore incomplete or malformed SSE frames.
+        }
     }
 
-    if (trimmedLine.startsWith('event: ')) {
-      if (trimmedLine.slice(7) === 'finish') {
-        isComplete = true;
-      }
-      continue;
-    }
-
-    if (!trimmedLine.startsWith('data: ')) {
-      continue;
-    }
-
-    const jsonStr = trimmedLine.slice(6);
-
-    try {
-      const parsedPayload = parseDeepSeekDataPayload(JSON.parse(jsonStr));
-      content += parsedPayload.content;
-      isComplete = isComplete || parsedPayload.isComplete;
-    } catch {
-      // Ignore incomplete or malformed SSE frames.
-    }
-  }
-
-  return { content, isComplete };
+    return { content, isComplete };
 }
 
 export function normalizeSystemPrompt(systemPrompt?: string): string {
-  return typeof systemPrompt === 'string' ? systemPrompt.trim() : '';
+    return typeof systemPrompt === 'string' ? systemPrompt.trim() : '';
 }
 
 export function buildPromptWithSystemPrompt(prompt: string, systemPrompt?: string): string {
-  const normalizedSystemPrompt = normalizeSystemPrompt(systemPrompt);
-  if (!normalizedSystemPrompt) {
-    return prompt;
-  }
+    const normalizedSystemPrompt = normalizeSystemPrompt(systemPrompt);
+    if (!normalizedSystemPrompt) {
+        return prompt;
+    }
 
-  return [
-    '[SYSTEM PROTOCOL]',
-    normalizedSystemPrompt,
-    '',
-    '[USER REQUEST]',
-    prompt
-  ].join('\n');
+    return ['[SYSTEM PROTOCOL]', normalizedSystemPrompt, '', '[USER REQUEST]', prompt].join('\n');
 }
 
 function generateStreamId(): string {
-  const now = new Date();
-  const year = String(now.getFullYear());
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+    const now = new Date();
+    const year = String(now.getFullYear());
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
 
-  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
-    const randomValue = Math.random() * 16 | 0;
-    const nextValue = char === 'x' ? randomValue : ((randomValue & 0x3) | 0x8);
-    return nextValue.toString(16);
-  });
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+        const randomValue = (Math.random() * 16) | 0;
+        const nextValue = char === 'x' ? randomValue : (randomValue & 0x3) | 0x8;
+        return nextValue.toString(16);
+    });
 
-  return `${year}${month}${day}-${uuid.replace(/-/g, '').slice(0, 16)}`;
+    return `${year}${month}${day}-${uuid.replace(/-/g, '').slice(0, 16)}`;
 }
 
 function nextParentMessageId(currentParentMessageId: number | null): number {
-  return currentParentMessageId === null ? 2 : currentParentMessageId + 2;
+    return currentParentMessageId === null ? 2 : currentParentMessageId + 2;
 }
 
 export class DeepSeekClient {
-  private readonly sessionStore: DeepSeekSessionStore;
-  private readonly powSolver: DeepSeekPowSolver;
-  private readonly apiBaseUrl: string;
-  private readonly authToken: string;
-  private readonly cookies: string;
-  private readonly userAgent: string;
-  private readonly createSessionCookie: string;
-  private readonly fetchImpl: typeof fetch;
+    private readonly sessionStore: DeepSeekSessionStore;
+    private readonly powSolver: DeepSeekPowSolver;
+    private readonly apiBaseUrl: string;
+    private readonly authToken: string;
+    private readonly cookies: string;
+    private readonly userAgent: string;
+    private readonly createSessionCookie: string;
+    private readonly fetchImpl: typeof fetch;
 
-  constructor(options: DeepSeekClientOptions) {
-    this.sessionStore = options.sessionStore;
-    this.powSolver = options.powSolver;
-    this.apiBaseUrl = options.apiBaseUrl || DEFAULT_DEEPSEEK_API_BASE_URL;
-    this.authToken = options.authToken || DEFAULT_DEEPSEEK_AUTH_TOKEN;
-    this.cookies = options.cookies || DEFAULT_DEEPSEEK_COOKIES;
-    this.userAgent = options.userAgent || DEFAULT_DEEPSEEK_USER_AGENT;
-    this.createSessionCookie = options.createSessionCookie || DEFAULT_DEEPSEEK_SESSION_COOKIE;
-    const resolvedFetch = options.fetchImpl || globalThis.fetch;
-    this.fetchImpl = resolvedFetch.bind(globalThis) as typeof fetch;
-  }
-
-  async clearSessionData(role: string): Promise<void> {
-    await this.sessionStore.clear(normalizeRole(role));
-  }
-
-  async createSession(): Promise<unknown> {
-    return this.sendRequest('/api/v0/chat_session/create', {
-      headers: {
-        Cookie: `${this.cookies}; ${this.createSessionCookie}`
-      }
-    });
-  }
-
-  async createPowChallenge(): Promise<unknown> {
-    return this.sendRequest('/api/v0/chat/create_pow_challenge', {
-      body: JSON.stringify({ target_path: '/api/v0/chat/completion' })
-    });
-  }
-
-  async completion(
-    options: DeepSeekCompletionOptions,
-    powResponse: string,
-    callbacks?: DeepSeekStreamCallbacks
-  ): Promise<unknown> {
-    const body = JSON.stringify({
-      ...options,
-      ref_file_ids: [],
-      thinking_enabled: false,
-      search_enabled: false,
-      client_stream_id: generateStreamId()
-    });
-
-    if (callbacks?.onData) {
-      await this.sendStreamingRequest('/api/v0/chat/completion', {
-        headers: { 'x-ds-pow-response': powResponse },
-        body
-      }, callbacks);
-      return null;
+    constructor(options: DeepSeekClientOptions) {
+        this.sessionStore = options.sessionStore;
+        this.powSolver = options.powSolver;
+        this.apiBaseUrl = options.apiBaseUrl || DEFAULT_DEEPSEEK_API_BASE_URL;
+        this.authToken = options.authToken || DEFAULT_DEEPSEEK_AUTH_TOKEN;
+        this.cookies = options.cookies || DEFAULT_DEEPSEEK_COOKIES;
+        this.userAgent = options.userAgent || DEFAULT_DEEPSEEK_USER_AGENT;
+        this.createSessionCookie = options.createSessionCookie || DEFAULT_DEEPSEEK_SESSION_COOKIE;
+        const resolvedFetch = options.fetchImpl || globalThis.fetch;
+        this.fetchImpl = resolvedFetch.bind(globalThis) as typeof fetch;
     }
 
-    return this.sendRequest('/api/v0/chat/completion', {
-      headers: { 'x-ds-pow-response': powResponse },
-      body
-    });
-  }
+    async clearSessionData(role: string): Promise<void> {
+        await this.sessionStore.clear(normalizeRole(role));
+    }
 
-  async completeChatFlow(
-    prompt: string,
-    role: string,
-    callbacks?: DeepSeekStreamCallbacks,
-    systemPrompt?: string,
-    context?: DeepSeekExecutionContext
-  ): Promise<unknown> {
-    const flowStart = performance.now();
-    const normalizedRole = normalizeRole(role);
-    const preparedPrompt = buildPromptWithSystemPrompt(prompt, systemPrompt);
-    let stageTimings: Record<string, number> = {};
+    async createSession(): Promise<unknown> {
+        return this.sendRequest('/api/v0/chat_session/create', {
+            headers: {
+                Cookie: `${this.cookies}; ${this.createSessionCookie}`,
+            },
+        });
+    }
 
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      const attemptStart = performance.now();
-      try {
-        // 阶段1: 获取会话数据
-        const sessionStart = performance.now();
-        let sessionData = await this.getSessionData(normalizedRole);
-        stageTimings['getSession'] = Math.round(performance.now() - sessionStart);
+    async createPowChallenge(): Promise<unknown> {
+        return this.sendRequest('/api/v0/chat/create_pow_challenge', {
+            body: JSON.stringify({ target_path: '/api/v0/chat/completion' }),
+        });
+    }
 
-        // 阶段2: 创建会话（如果需要）
-        if (!sessionData.sessionId) {
-          const createSessionStart = performance.now();
-          const createSessionResult = await this.createSession() as {
+    async completion(
+        options: DeepSeekCompletionOptions,
+        powResponse: string,
+        callbacks?: DeepSeekStreamCallbacks,
+    ): Promise<unknown> {
+        const body = JSON.stringify({
+            ...options,
+            ref_file_ids: [],
+            thinking_enabled: false,
+            search_enabled: false,
+            client_stream_id: generateStreamId(),
+        });
+
+        if (callbacks?.onData) {
+            await this.sendStreamingRequest(
+                '/api/v0/chat/completion',
+                {
+                    headers: { 'x-ds-pow-response': powResponse },
+                    body,
+                },
+                callbacks,
+            );
+            return null;
+        }
+
+        return this.sendRequest('/api/v0/chat/completion', {
+            headers: { 'x-ds-pow-response': powResponse },
+            body,
+        });
+    }
+
+    async completeChatFlow(
+        prompt: string,
+        role: string,
+        callbacks?: DeepSeekStreamCallbacks,
+        systemPrompt?: string,
+        context?: DeepSeekExecutionContext,
+    ): Promise<unknown> {
+        const flowStart = performance.now();
+        const normalizedRole = normalizeRole(role);
+        const preparedPrompt = buildPromptWithSystemPrompt(prompt, systemPrompt);
+        let stageTimings: Record<string, number> = {};
+
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+            const attemptStart = performance.now();
+            try {
+                // 阶段1: 获取会话数据
+                const sessionStart = performance.now();
+                let sessionData = await this.getSessionData(normalizedRole);
+                stageTimings['getSession'] = Math.round(performance.now() - sessionStart);
+
+                // 阶段2: 创建会话（如果需要）
+                if (!sessionData.sessionId) {
+                    const createSessionStart = performance.now();
+                    const createSessionResult = (await this.createSession()) as {
                         data?: { biz_data?: { id?: string } };
                     };
-          const newSessionId = createSessionResult?.data?.biz_data?.id;
-          if (!newSessionId) {
-            throw new Error('Failed to create session');
-          }
-          stageTimings['createSession'] = Math.round(performance.now() - createSessionStart);
+                    const newSessionId = createSessionResult?.data?.biz_data?.id;
+                    if (!newSessionId) {
+                        throw new Error('Failed to create session');
+                    }
+                    stageTimings['createSession'] = Math.round(performance.now() - createSessionStart);
 
-          sessionData = await this.updateSessionData(normalizedRole, { sessionId: newSessionId });
-        }
+                    sessionData = await this.updateSessionData(normalizedRole, {
+                        sessionId: newSessionId,
+                    });
+                }
 
-        // 阶段3: 创建POW挑战
-        const powChallengeStart = performance.now();
-        const challengeResponse = await this.createPowChallenge() as {
+                // 阶段3: 创建POW挑战
+                const powChallengeStart = performance.now();
+                const challengeResponse = (await this.createPowChallenge()) as {
                     data?: { biz_data?: { challenge?: DeepSeekPowChallenge } };
                 };
-        const challenge = challengeResponse?.data?.biz_data?.challenge;
-        if (!challenge) {
-          throw new Error('Failed to create POW challenge');
+                const challenge = challengeResponse?.data?.biz_data?.challenge;
+                if (!challenge) {
+                    throw new Error('Failed to create POW challenge');
+                }
+                stageTimings['createPowChallenge'] = Math.round(performance.now() - powChallengeStart);
+
+                // 阶段4: 解决POW挑战（计算耗时）
+                const powSolveStart = performance.now();
+                const powResponse = await this.powSolver.solve(challenge, context);
+                if (!powResponse) {
+                    throw new Error('Failed to generate POW response');
+                }
+                stageTimings['powSolve'] = Math.round(performance.now() - powSolveStart);
+
+                const currentParentMessageId = sessionData.parentMessageId;
+                const sessionId = sessionData.sessionId;
+                if (!sessionId) {
+                    throw new Error('DeepSeek session is missing after initialization');
+                }
+
+                // 阶段5: 发送完成请求（AI模型调用）
+                const completionStart = performance.now();
+                const response = await this.completion(
+                    {
+                        prompt: preparedPrompt,
+                        chat_session_id: sessionId,
+                        parent_message_id: currentParentMessageId,
+                    },
+                    powResponse,
+                    callbacks,
+                );
+                stageTimings['completion'] = Math.round(performance.now() - completionStart);
+
+                // 阶段6: 更新会话数据
+                const updateStart = performance.now();
+                await this.updateSessionData(normalizedRole, {
+                    parentMessageId: nextParentMessageId(currentParentMessageId),
+                });
+                stageTimings['updateSession'] = Math.round(performance.now() - updateStart);
+
+                // 打印完整的分阶段耗时分析
+                const totalTime = Math.round(performance.now() - flowStart);
+                console.log(`[DeepSeek Flow] ${role} 完成 (attempt ${attempt + 1}):`, {
+                    totalTime: `${totalTime}ms`,
+                    stages: {
+                        getSession: `${stageTimings['getSession'] || 0}ms`,
+                        createSession: `${stageTimings['createSession'] || 'skipped'}`,
+                        createPowChallenge: `${stageTimings['createPowChallenge'] || 0}ms`,
+                        powSolve: `${stageTimings['powSolve'] || 0}ms`,
+                        completion: `${stageTimings['completion'] || 0}ms`,
+                        updateSession: `${stageTimings['updateSession'] || 0}ms`,
+                    },
+                    // 瓶颈分析
+                    bottleneck: this.analyzeBottleneck(stageTimings),
+                    timestamp: new Date().toISOString(),
+                });
+
+                callbacks?.onComplete?.();
+                return response;
+            } catch (error) {
+                const attemptTime = Math.round(performance.now() - attemptStart);
+                console.error(`[DeepSeek Flow] ${role} 失败 (attempt ${attempt + 1}, ${attemptTime}ms):`, error);
+
+                if (attempt === 0 && isInvalidChatSessionError(error)) {
+                    console.log(`[DeepSeek Flow] ${role} 会话无效，清除后重试...`);
+                    await this.clearSessionData(normalizedRole);
+                    continue;
+                }
+
+                callbacks?.onError?.(error);
+                throw error;
+            }
         }
-        stageTimings['createPowChallenge'] = Math.round(performance.now() - powChallengeStart);
 
-        // 阶段4: 解决POW挑战（计算耗时）
-        const powSolveStart = performance.now();
-        const powResponse = await this.powSolver.solve(challenge, context);
-        if (!powResponse) {
-          throw new Error('Failed to generate POW response');
+        throw new Error('DeepSeek chat flow failed after retry');
+    }
+
+    /**
+     * 分析各阶段耗时，找出可能的瓶颈
+     */
+    private analyzeBottleneck(timings: Record<string, number>): string {
+        const entries = Object.entries(timings)
+            .filter(([_, v]) => typeof v === 'number')
+            .sort((a, b) => b[1] - a[1]);
+
+        if (entries.length === 0) {
+            return 'unknown';
         }
-        stageTimings['powSolve'] = Math.round(performance.now() - powSolveStart);
 
-        const currentParentMessageId = sessionData.parentMessageId;
-        const sessionId = sessionData.sessionId;
-        if (!sessionId) {
-          throw new Error('DeepSeek session is missing after initialization');
+        const [slowestStage, slowestTime] = entries[0];
+        const totalTime = entries.reduce((sum, [_, v]) => sum + v, 0);
+        const percentage = totalTime > 0 ? Math.round((slowestTime / totalTime) * 100) : 0;
+
+        if (percentage > 50) {
+            return `bottleneck: ${slowestStage} (${slowestTime}ms, ${percentage}%)`;
         }
 
-        // 阶段5: 发送完成请求（AI模型调用）
-        const completionStart = performance.now();
-        const response = await this.completion(
-          {
-            prompt: preparedPrompt,
-            chat_session_id: sessionId,
-            parent_message_id: currentParentMessageId
-          },
-          powResponse,
-          callbacks
-        );
-        stageTimings['completion'] = Math.round(performance.now() - completionStart);
+        return `slowest: ${slowestStage} (${slowestTime}ms, ${percentage}%)`;
+    }
 
-        // 阶段6: 更新会话数据
-        const updateStart = performance.now();
-        await this.updateSessionData(normalizedRole, {
-          parentMessageId: nextParentMessageId(currentParentMessageId)
+    async sendStreamingRequest(
+        endpoint: string,
+        options: DeepSeekRequestOptions,
+        callbacks: DeepSeekStreamCallbacks,
+    ): Promise<void> {
+        const url = `${this.apiBaseUrl}${endpoint}`;
+        const headers = this.createRequestHeaders(options.headers || {});
+        const body = options.body || JSON.stringify({});
+
+        const response = await this.fetchImpl(url, {
+            method: 'POST',
+            headers,
+            body,
+            redirect: 'follow',
         });
-        stageTimings['updateSession'] = Math.round(performance.now() - updateStart);
 
-        // 打印完整的分阶段耗时分析
-        const totalTime = Math.round(performance.now() - flowStart);
-        console.log(`[DeepSeek Flow] ${role} 完成 (attempt ${attempt + 1}):`, {
-          totalTime: `${totalTime}ms`,
-          stages: {
-            getSession: `${stageTimings['getSession'] || 0}ms`,
-            createSession: `${stageTimings['createSession'] || 'skipped'}`,
-            createPowChallenge: `${stageTimings['createPowChallenge'] || 0}ms`,
-            powSolve: `${stageTimings['powSolve'] || 0}ms`,
-            completion: `${stageTimings['completion'] || 0}ms`,
-            updateSession: `${stageTimings['updateSession'] || 0}ms`
-          },
-          // 瓶颈分析
-          bottleneck: this.analyzeBottleneck(stageTimings),
-          timestamp: new Date().toISOString()
-        });
-
-        callbacks?.onComplete?.();
-        return response;
-      } catch (error) {
-        const attemptTime = Math.round(performance.now() - attemptStart);
-        console.error(`[DeepSeek Flow] ${role} 失败 (attempt ${attempt + 1}, ${attemptTime}ms):`, error);
-        
-        if (attempt === 0 && isInvalidChatSessionError(error)) {
-          console.log(`[DeepSeek Flow] ${role} 会话无效，清除后重试...`);
-          await this.clearSessionData(normalizedRole);
-          continue;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        callbacks?.onError?.(error);
-        throw error;
-      }
-    }
-
-    throw new Error('DeepSeek chat flow failed after retry');
-  }
-
-  /**
-   * 分析各阶段耗时，找出可能的瓶颈
-   */
-  private analyzeBottleneck(timings: Record<string, number>): string {
-    const entries = Object.entries(timings)
-      .filter(([_, v]) => typeof v === 'number')
-      .sort((a, b) => b[1] - a[1]);
-    
-    if (entries.length === 0) {
-      return 'unknown';
-    }
-
-    const [slowestStage, slowestTime] = entries[0];
-    const totalTime = entries.reduce((sum, [_, v]) => sum + v, 0);
-    const percentage = totalTime > 0 ? Math.round((slowestTime / totalTime) * 100) : 0;
-
-    if (percentage > 50) {
-      return `bottleneck: ${slowestStage} (${slowestTime}ms, ${percentage}%)`;
-    }
-    
-    return `slowest: ${slowestStage} (${slowestTime}ms, ${percentage}%)`;
-  }
-
-  async sendStreamingRequest(
-    endpoint: string,
-    options: DeepSeekRequestOptions,
-    callbacks: DeepSeekStreamCallbacks
-  ): Promise<void> {
-    const url = `${this.apiBaseUrl}${endpoint}`;
-    const headers = this.createRequestHeaders(options.headers || {});
-    const body = options.body || JSON.stringify({});
-
-    const response = await this.fetchImpl(url, {
-      method: 'POST',
-      headers,
-      body,
-      redirect: 'follow'
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error('No response body');
-    }
-
-    const decoder = new TextDecoder();
-    let pendingBuffer = '';
-    let isCompleted = false;
-    let hasContent = false;
-    let rawSample = '';
-
-    while (true) {
-      const { value, done } = await reader.read();
-
-      if (value) {
-        const decodedChunk = decoder.decode(value, { stream: !done });
-        rawSample = (rawSample + decodedChunk).slice(0, 4000);
-        pendingBuffer += decodedChunk;
-        const segments = pendingBuffer.split('\n');
-        pendingBuffer = segments.pop() || '';
-
-        const parsed = parseDeepSeekStreamLines(segments);
-        if (parsed.content) {
-          hasContent = true;
-          callbacks.onData?.(parsed.content);
+        const reader = response.body?.getReader();
+        if (!reader) {
+            throw new Error('No response body');
         }
-        if (parsed.isComplete) {
-          isCompleted = true;
-        }
-      }
 
-      if (done) {
-        if (pendingBuffer.trim()) {
-          const finalParsed = parseDeepSeekStreamLines([pendingBuffer]);
-          if (finalParsed.content) {
-            hasContent = true;
-            callbacks.onData?.(finalParsed.content);
-          }
-          if (finalParsed.isComplete) {
+        const decoder = new TextDecoder();
+        let pendingBuffer = '';
+        let isCompleted = false;
+        let hasContent = false;
+        let rawSample = '';
+
+        while (true) {
+            const { value, done } = await reader.read();
+
+            if (value) {
+                const decodedChunk = decoder.decode(value, { stream: !done });
+                rawSample = (rawSample + decodedChunk).slice(0, 4000);
+                pendingBuffer += decodedChunk;
+                const segments = pendingBuffer.split('\n');
+                pendingBuffer = segments.pop() || '';
+
+                const parsed = parseDeepSeekStreamLines(segments);
+                if (parsed.content) {
+                    hasContent = true;
+                    callbacks.onData?.(parsed.content);
+                }
+                if (parsed.isComplete) {
+                    isCompleted = true;
+                }
+            }
+
+            if (done) {
+                if (pendingBuffer.trim()) {
+                    const finalParsed = parseDeepSeekStreamLines([pendingBuffer]);
+                    if (finalParsed.content) {
+                        hasContent = true;
+                        callbacks.onData?.(finalParsed.content);
+                    }
+                    if (finalParsed.isComplete) {
+                        isCompleted = true;
+                    }
+                }
+                break;
+            }
+        }
+
+        if (!isCompleted) {
+            // Some DeepSeek responses end by closing the stream without a finish event.
             isCompleted = true;
-          }
         }
-        break;
-      }
+
+        if (!hasContent) {
+            throw createEmptyStreamError('DeepSeek', rawSample);
+        }
     }
 
-    if (!isCompleted) {
-      // Some DeepSeek responses end by closing the stream without a finish event.
-      isCompleted = true;
+    private async getSessionData(role: string): Promise<SessionData> {
+        return (
+            (await this.sessionStore.get(role)) || {
+                sessionId: '',
+                parentMessageId: null,
+            }
+        );
     }
 
-    if (!hasContent) {
-      throw createEmptyStreamError('DeepSeek', rawSample);
-    }
-  }
+    private async updateSessionData(role: string, updates: Partial<SessionData>): Promise<SessionData> {
+        const currentSessionData = await this.getSessionData(role);
+        const nextSessionData: SessionData = {
+            ...currentSessionData,
+            ...updates,
+        };
 
-  private async getSessionData(role: string): Promise<SessionData> {
-    return (await this.sessionStore.get(role)) || { sessionId: '', parentMessageId: null };
-  }
-
-  private async updateSessionData(role: string, updates: Partial<SessionData>): Promise<SessionData> {
-    const currentSessionData = await this.getSessionData(role);
-    const nextSessionData: SessionData = {
-      ...currentSessionData,
-      ...updates
-    };
-
-    await this.sessionStore.set(role, nextSessionData);
-    return nextSessionData;
-  }
-
-  private createRequestHeaders(customHeaders: Record<string, string> = {}): Headers {
-    const headers = new Headers();
-    const apiHost = this.resolveApiHost();
-    headers.set('Authorization', this.authToken);
-    headers.set('User-Agent', this.userAgent);
-    headers.set('Accept', '*/*');
-    headers.set('Host', apiHost);
-    headers.set('Connection', 'keep-alive');
-    headers.set('Cookie', this.cookies);
-    headers.set('Content-Type', 'application/json');
-
-    for (const [header, value] of Object.entries(customHeaders)) {
-      headers.set(header, value);
+        await this.sessionStore.set(role, nextSessionData);
+        return nextSessionData;
     }
 
-    return headers;
-  }
+    private createRequestHeaders(customHeaders: Record<string, string> = {}): Headers {
+        const headers = new Headers();
+        const apiHost = this.resolveApiHost();
+        headers.set('Authorization', this.authToken);
+        headers.set('User-Agent', this.userAgent);
+        headers.set('Accept', '*/*');
+        headers.set('Host', apiHost);
+        headers.set('Connection', 'keep-alive');
+        headers.set('Cookie', this.cookies);
+        headers.set('Content-Type', 'application/json');
 
-  private resolveApiHost(): string {
-    try {
-      return new URL(this.apiBaseUrl).host;
-    } catch {
-      return 'chat.deepseek.com';
-    }
-  }
+        for (const [header, value] of Object.entries(customHeaders)) {
+            headers.set(header, value);
+        }
 
-  private async sendRequest(endpoint: string, options: DeepSeekRequestOptions = {}): Promise<unknown> {
-    const url = `${this.apiBaseUrl}${endpoint}`;
-    const response = await this.fetchImpl(url, {
-      method: 'POST',
-      headers: this.createRequestHeaders(options.headers || {}),
-      redirect: 'follow',
-      body: options.body || JSON.stringify({})
-    });
-
-    const responseText = await response.text();
-    if (!response.ok) {
-      throw new Error(`DeepSeek request failed with status ${response.status}: ${responseText}`);
+        return headers;
     }
 
-    return responseText ? JSON.parse(responseText) : null;
-  }
+    private resolveApiHost(): string {
+        try {
+            return new URL(this.apiBaseUrl).host;
+        } catch {
+            return 'chat.deepseek.com';
+        }
+    }
+
+    private async sendRequest(endpoint: string, options: DeepSeekRequestOptions = {}): Promise<unknown> {
+        const url = `${this.apiBaseUrl}${endpoint}`;
+        const response = await this.fetchImpl(url, {
+            method: 'POST',
+            headers: this.createRequestHeaders(options.headers || {}),
+            redirect: 'follow',
+            body: options.body || JSON.stringify({}),
+        });
+
+        const responseText = await response.text();
+        if (!response.ok) {
+            throw new Error(`DeepSeek request failed with status ${response.status}: ${responseText}`);
+        }
+
+        return responseText ? JSON.parse(responseText) : null;
+    }
 }

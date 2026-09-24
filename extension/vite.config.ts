@@ -10,6 +10,7 @@ import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import checkSwSafe from "./plugins/vite-plugin-check-sw-safe";
+import tailwindcss from '@tailwindcss/vite' // 导入插件
 
 export default ({
   mode,
@@ -53,6 +54,7 @@ export default ({
     cacheDir: "../node_modules/.vite",
     plugins: [
       react(),
+      tailwindcss(), // 添加插件
       crx({
         manifest: createManifest(pages),
         contentScripts: {

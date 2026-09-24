@@ -15,6 +15,7 @@ export * from "./ai-config";
 export * from "./auth";
 export * from "./elementPosition";
 export * from "./toast";
+export * from "./waitForElement";
 
 // 命名空间导出，便于统一导入
 import * as ShadowDomExports from "./shadow-dom";
@@ -27,6 +28,7 @@ import * as AiConfigExports from "./ai-config";
 import * as AuthExports from "./auth";
 import * as ElementPositionExports from "./elementPosition";
 import * as ToastExports from "./toast";
+import * as WaitForElementExports from "./waitForElement";
 
 export const domUtils = {
   ...ShadowDomExports,
@@ -39,6 +41,7 @@ export const domUtils = {
   ...AuthExports,
   ...ElementPositionExports,
   ...ToastExports,
+  ...WaitForElementExports,
 };
 
 export type DomUtils = typeof domUtils;
