@@ -1,4 +1,4 @@
-import { loadAIConfig } from "../chrome-api";
+import { ensureDeepSeekCredentials } from "../background/deepseek-credentials";
 import {
   DeepSeekClient,
   normalizeSystemPrompt,
@@ -128,15 +128,12 @@ class DirectPowSolver implements DeepSeekPowSolver {
 
 const deepSeekPowSolver = new DirectPowSolver();
 
-const deepSeekClient = new DeepSeekClient({
-  sessionStore: new ChromeSessionStore(),
-  powSolver: deepSeekPowSolver,
-});
+const deepSeekSessionStore = new ChromeSessionStore();
 
 async function getConfiguredDeepSeekClient(): Promise<DeepSeekClient> {
-  const config = await loadAIConfig();
+  const config = await ensureDeepSeekCredentials();
   return new DeepSeekClient({
-    sessionStore: new ChromeSessionStore(),
+    sessionStore: deepSeekSessionStore,
     powSolver: deepSeekPowSolver,
     authToken: config.deepseekAuthToken,
     cookies: config.deepseekCookies,
@@ -144,7 +141,7 @@ async function getConfiguredDeepSeekClient(): Promise<DeepSeekClient> {
 }
 
 export async function clearSessionData(role: string): Promise<void> {
-  await deepSeekClient.clearSessionData(role);
+  await deepSeekSessionStore.clear(role);
 }
 
 export async function testPOW(
@@ -161,7 +158,9 @@ export async function sendStreamingRequest(
   onComplete: () => void,
 ): Promise<void> {
   try {
-    await deepSeekClient.sendStreamingRequest(endpoint, options, { onData });
+    await (
+      await getConfiguredDeepSeekClient()
+    ).sendStreamingRequest(endpoint, options, { onData });
     onComplete();
   } catch (error) {
     onError(error);
@@ -169,11 +168,11 @@ export async function sendStreamingRequest(
 }
 
 export async function createSession(): Promise<unknown> {
-  return deepSeekClient.createSession();
+  return (await getConfiguredDeepSeekClient()).createSession();
 }
 
 export async function createPowChallenge(): Promise<unknown> {
-  return deepSeekClient.createPowChallenge();
+  return (await getConfiguredDeepSeekClient()).createPowChallenge();
 }
 
 export async function completion(
@@ -184,9 +183,9 @@ export async function completion(
   onComplete?: () => void,
 ): Promise<unknown> {
   try {
-    const result = await deepSeekClient.completion(options, powResponse, {
-      onData,
-    });
+    const result = await (
+      await getConfiguredDeepSeekClient()
+    ).completion(options, powResponse, { onData });
     onComplete?.();
     return result;
   } catch (error) {

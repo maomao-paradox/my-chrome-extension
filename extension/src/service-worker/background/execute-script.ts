@@ -1,4 +1,4 @@
-import { getFileMap } from './message-handlers';
+import { getFileMap } from './script-injection';
 
 export async function executeBookmarkScript(tabId: number) {
   const scriptPath = getFileMap()?.get('js/sfs/bookmark-highlight');

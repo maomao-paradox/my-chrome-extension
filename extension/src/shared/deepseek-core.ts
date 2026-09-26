@@ -1,9 +1,6 @@
 export const DEFAULT_DEEPSEEK_API_BASE_URL = 'https://chat.deepseek.com';
-export const DEFAULT_DEEPSEEK_AUTH_TOKEN = 'Bearer P70I3ehnpWiWHB5JZN/QZ0YxnDeBe+V9Fqo7BJvC9aGF7toyccrJ3GvKJsP30ff+';
-export const DEFAULT_DEEPSEEK_COOKIES = 'HWWAFSESID=6ea6a784e4e664a3641; HWWAFSESTIME=1768275107500';
 export const DEFAULT_DEEPSEEK_USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36';
-export const DEFAULT_DEEPSEEK_SESSION_COOKIE = 'ds_session_id=0d6cc1e66b6b48cc9aed13824ce482b3';
 
 export interface SessionData {
     sessionId: string | null;
@@ -41,10 +38,9 @@ export interface DeepSeekClientOptions {
     sessionStore: DeepSeekSessionStore;
     powSolver: DeepSeekPowSolver;
     apiBaseUrl?: string;
-    authToken?: string;
-    cookies?: string;
+    authToken: string;
+    cookies: string;
     userAgent?: string;
-    createSessionCookie?: string;
     fetchImpl?: typeof fetch;
 }
 
@@ -289,17 +285,15 @@ export class DeepSeekClient {
     private readonly authToken: string;
     private readonly cookies: string;
     private readonly userAgent: string;
-    private readonly createSessionCookie: string;
     private readonly fetchImpl: typeof fetch;
 
     constructor(options: DeepSeekClientOptions) {
         this.sessionStore = options.sessionStore;
         this.powSolver = options.powSolver;
         this.apiBaseUrl = options.apiBaseUrl || DEFAULT_DEEPSEEK_API_BASE_URL;
-        this.authToken = options.authToken || DEFAULT_DEEPSEEK_AUTH_TOKEN;
-        this.cookies = options.cookies || DEFAULT_DEEPSEEK_COOKIES;
+        this.authToken = options.authToken;
+        this.cookies = options.cookies;
         this.userAgent = options.userAgent || DEFAULT_DEEPSEEK_USER_AGENT;
-        this.createSessionCookie = options.createSessionCookie || DEFAULT_DEEPSEEK_SESSION_COOKIE;
         const resolvedFetch = options.fetchImpl || globalThis.fetch;
         this.fetchImpl = resolvedFetch.bind(globalThis) as typeof fetch;
     }
@@ -311,7 +305,7 @@ export class DeepSeekClient {
     async createSession(): Promise<unknown> {
         return this.sendRequest('/api/v0/chat_session/create', {
             headers: {
-                Cookie: `${this.cookies}; ${this.createSessionCookie}`,
+                Cookie: this.cookies,
             },
         });
     }

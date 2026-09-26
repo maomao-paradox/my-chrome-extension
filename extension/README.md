@@ -7,7 +7,6 @@
 [![Vue 3](https://img.shields.io/badge/Vue-3-42b883?style=flat-square)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square)](https://www.typescriptlang.org/)
 
-
 ## 技术栈
 
 - **框架**: Vue 3 + TypeScript + Vite
@@ -25,9 +24,6 @@ npm install
 
 # 构建扩展
 npm run build
-
-# 构建扩展(file_map加密可选)
-npm run build:enc
 ```
 
 构建时可以通过 `.env` 控制扩展页面是否打包。页面开关同时控制 Rollup 入口和 Manifest 声明，避免生成无效页面引用；默认值均为 `true`：
@@ -73,16 +69,17 @@ npx vitest run test/BookmarkPage.spec.ts
 
 ### 已覆盖模块
 
-| 模块 | 测试文件 | 类型 | 用例数 |
-| --- | --- | --- | --- |
-| `src/utils/element-control.ts` | `test/element-control.spec.ts` | 单元测试 | 91 |
-| `src/pages/popup/composables/useDomainState.ts` | `test/useDomainState.spec.ts` | 单元测试 | 15 |
-| `src/pages/popup/views/BookmarkPage.vue` | `test/BookmarkPage.spec.ts` | 组件测试 | 36 |
-| `src/message/index.ts` | `test/message.spec.ts` | 单元测试 | 32 |
+| 模块                                            | 测试文件                       | 类型     | 用例数 |
+| ----------------------------------------------- | ------------------------------ | -------- | ------ |
+| `src/utils/element-control.ts`                  | `test/element-control.spec.ts` | 单元测试 | 91     |
+| `src/pages/popup/composables/useDomainState.ts` | `test/useDomainState.spec.ts`  | 单元测试 | 15     |
+| `src/pages/popup/views/BookmarkPage.vue`        | `test/BookmarkPage.spec.ts`    | 组件测试 | 36     |
+| `src/message/index.ts`                          | `test/message.spec.ts`         | 单元测试 | 32     |
 
 ## 核心功能
 
 ### 广告拦截
+
 - Popup 的“拦截”页会启动页面点选模式；点击广告元素后，使用滑块在当前元素到父元素之间调整拦截区域。
 - 选中区域使用外边框和阴影实时高亮，并显示区域尺寸；点击“确定拦截”后立即隐藏元素。
 - 支持隐藏元素，或替换为图片/GIF、文字和经过安全过滤的自定义 HTML；图片/GIF 可直接上传不超过 2MB 的本地文件，文字/HTML 填写替换内容。
@@ -93,51 +90,61 @@ npx vitest run test/BookmarkPage.spec.ts
 - 广告拦截的页面点选、层级调整和确认弹窗集中在 `src/apps/adBlocker/App.tsx`；`adBlocker.ts` 只处理规则生成、持久化、定位与生效。
 
 ### 内容脚本功能配置
+
 - `Radius`、`MRIA`、`QA Pro`、`Teach`、`蓝湖`、`Portainer` 和 `禅道` 内容脚本支持网页内功能注册和独立开关。
 - 首次进入未保存过配置的内容脚本页面时，面板默认关闭全部功能并引导用户配置。
 - 使用 `Ctrl+Shift+K`（macOS 使用 `Command+Shift+K`）打开当前页面的配置面板。
 - 配置保存在当前网页的 `localStorage`，键名为 `kria-nove:content-script-config:{contentScriptId}`；保存配置后重新启用功能需要刷新页面。
 
 ### 自定义组件展示页
+
 - 新增独立组件展示页，可在浏览器中浏览 `src/assets/components` 下的自研组件
 - 页面采用左侧目录、中间预览、右侧信息面板的结构，风格参考组件库文档站
 - 入口为 `src/pages/components.html`，开发模式下可直接访问 `/pages/components.html`
 
 ### AI 智能助手
+
 - 集成 DeepSeek 对话能力，基于当前页面上下文提供智能建议
 - 支持流式响应，会话持久化
-- 选项页 AI 终端支持手动填写 DeepSeek Auth Token 和 Cookies；留空时使用扩展内置默认值，配置保存在浏览器本地存储中。
-- `src/sfs/deepseek-cookie-capture.js` 可在 DeepSeek 聊天页读取 `document.cookie` 并返回给扩展脚本调用方；HttpOnly Cookie 不能通过页面 JavaScript 读取。
+- 首次发起 DeepSeek 请求且本地没有凭证时，扩展会打开 `chat.deepseek.com` 等待用户登录；登录成功后读取页面令牌及包含 HttpOnly 项的 Cookies，并保存到 `chrome.storage.local` 的 `ai_assistant_config` 中供后续请求使用。
+- DeepSeek 登录初始化最长等待 5 分钟；凭证获取成功后授权标签页会自动关闭，不再回退到扩展内置的默认令牌或 Cookies。
 
 ### 隐藏成就
+
 - 成就状态保存在扩展本地，不上传网页内容、AI 会话、Cookie、密码或完整 URL。
 - MVP 覆盖浮动球拖拽、光谱效果、文本工具、书签和图片 ZIP 下载五类探索行为。
 - Popup 新增“成就”入口；未解锁成就只展示模糊提示和范围进度，解锁后显示成就说明。
 - 成就事件由 `src/services/achievements/` 统一处理，支持跨组件去重、持久化和低动效环境。
 
 ### 文本选择增强
+
 - 选中文字弹出工具栏：复制、搜索、翻译、书签、AI 分析、留言
 - 工具栏、翻译面板、替换弹窗和留言浮层采用统一的轻量浮层样式，支持键盘焦点与低动效偏好
 
 ### 收藏当前站点
+
 - 网页右键菜单提供“收藏当前站点”，保存当前页面 URL、标题和 favicon；同一 URL 重复收藏时会更新信息而不会产生重复卡片。
 - 侧边悬浮菜单中的“收藏站点”打开纵向循环滚动卡片列表，悬停时暂停滚动，点击卡片即可在新标签页打开站点。
 - 收藏数据保存在扩展 `chrome.storage.local` 的 `favoriteSites` 键中。
 
 ### 鼠标拖尾
+
 - Popup 设置页可开启页面鼠标拖尾，移动时生成随机音符，点击时触发少量音符爆发效果
 
 ### 菜单自动点击工具
+
 - 菜单工具支持打开 `AutoClick` 连点器，录制页面点击坐标后按统一间隔循环播放
 - 录制期间会在当前光标位置显示十字线和 `clientX` / `clientY`，悬停按钮时显示按钮轮廓并让十字线避开按钮内部
 - `src/modules/menu/tools/AutoClick.vue` 已压缩为约 50% 尺寸，更适合悬浮在页面上辅助操作
 
 ### Popup 锚点管理
+
 - Popup 顶部导航改为紧凑分段样式，保留原有图标并增加文字标签、选中态和键盘焦点反馈，便于在小窗口内快速识别功能入口
 - 锚点页使用紧凑布局，搜索、导入、导出和列表操作都适配浏览器扩展的小窗口宽度
 - `src/pages/popup/views/TableContainer.vue` 支持 `density`、`sectionGap`、`contentGap`、`heroGap`、`rightMaxWidth` 等公共布局参数，页面可按需要复用同一头部/内容容器
 
 ### Popup 动态令牌
+
 - Popup 新增“令牌”标签页，在扩展本地生成 TOTP 动态码，不依赖后端服务
 - 令牌数据保存到 `chrome.storage.local`；新增表单提交后会清空输入框
 - 支持粘贴 `otpauth://totp/...` 链接，也支持手动填写发行方、账户和 Base32 secret
@@ -145,11 +152,13 @@ npx vitest run test/BookmarkPage.spec.ts
 - 倒计时每秒刷新，到达周期边界后自动生成新动态码
 
 ### 后台页签脚本执行
+
 - 后台脚本监听 `CREATE_TAB_WITH_SCRIPT` 消息，可新建页签并在目标页面开始加载后立即注入扩展内脚本
 - `payload.url` 仅支持 `http` / `https` 页面，`payload.scriptPath` 建议使用 `file-map` key，例如 `js/runtime/bookmark-highlight`
 - 后台会自动解析构建后的真实脚本路径；如果 `file-map` 尚未由内容脚本同步，会懒加载 `file-map.json`
 
 ### DOM 结构提取
+
 - `src/runtime/dom-structure-extractor.ts` 可注入当前网页，提取 title、url、语义区块、标题层级、表单字段、图片 alt/id/title 以及裁剪后的 DOM 树，输出适合 AI 理解的 Markdown 和 JSON
 
 ### 等待动态元素
@@ -169,23 +178,25 @@ cleanup();
 ```
 
 该函数默认使用 `MutationObserver`，并在需要时按 `interval` 合并检查；设置 `useMutationObserver: false` 会退回轮询。`maxWaitTimes` 会限制检查次数，`timeout` 会限制总等待时间，`signal` 可用于取消等待。选择器数组会合并去重，非法选择器会直接 reject。
+
 - 注入后会把 Markdown 摘要打印到控制台并尝试复制到剪贴板，同时暴露 `window.extractDomStructure(options)` 和最近一次结果 `window.lastDomStructureSummary`
 - 常用参数：`rootSelector` 指定根节点，`maxDepth` 控制层级深度，`maxChildrenPerNode` 控制每层子节点数量，`includeHidden` 控制是否包含隐藏元素
 
 ```typescript
 await chrome.runtime.sendMessage({
-  type: 'CREATE_TAB_WITH_SCRIPT',
-  target: 'background',
+  type: "CREATE_TAB_WITH_SCRIPT",
+  target: "background",
   payload: {
-    url: 'https://example.com',
-    scriptPath: 'js/runtime/bookmark-highlight'
-  }
+    url: "https://example.com",
+    scriptPath: "js/runtime/bookmark-highlight",
+  },
 });
 ```
 
 可选参数：`active` 控制新页签是否激活，默认 `true`；`world` 支持 `ISOLATED` 或 `MAIN`，默认 `ISOLATED`；`allFrames` 默认 `false`；`waitUntil` 支持 `loading` 或 `complete`，默认 `loading`；`timeoutMs` 默认 `30000`。
 
 ### 真实标签页自动化
+
 - Side Panel 新增“自动化”页，可连接当前真实 Chrome 标签页，读取 title/url，执行截图，录制用户操作并生成结构化步骤
 - 支持结构化步骤：`goto`、`click`、`fill`、`press`、`wait`、`extract`、`screenshot`、`verifyText`
 - 后台通过 `chrome.scripting.executeScript` 在当前页执行步骤，优先使用 `role`、`label`、`placeholder`、`text`、`testid` 定位，`css` 作为 fallback
@@ -207,22 +218,26 @@ await chrome.runtime.sendMessage({
 ```
 
 ### 个人主页
+
 - 提供独立创意个人主页，包含动漫赛博主视觉、幻想展柜、技法展示、丰富动画交互与静态模式切换
 - 开发模式可访问 `http://127.0.0.1:5173/pages/profile.html`
 - 浏览器插件环境下访问插件的 options 页面；当前已将 `PanelNav`、星舰总览弹层 `TacticalOverview`、玻璃星轨光标 `GlassCursor`、浏览器变量查看器以及 7 个星舰配置视图迁移为 React 组件
 
 ### 战役选择页
+
 - 新增 React + Tailwind CSS 战役选择 UI，入口为 `src/pages/campaign.html`
 - 页面采用三栏战术面板布局：左侧战役档案列表、中间战区全息投影、右侧任务状态与难度选择
 - 中间主视图使用 `@react-three/fiber`、`@react-three/drei` 和 Three.js 渲染线框全息地球，包含星点背景、地表点阵、陆地海岸线、国家边界线、区域环线、自转与鼠标拖拽旋转；点击地球任务点可在右侧面板查看任务信息
 - 开发模式可访问 `http://127.0.0.1:5173/pages/campaign.html`
 
 ### 双手异色空间 Demo
+
 - 新增全屏摄像头互动页 `src/pages/hand-portals.html`，使用 MediaPipe Tasks Vision 在浏览器端识别双手。
 - 页面取左右手的拇指、食指、中指和小指指尖，相邻指尖连接出红、蓝、绿三片四边形空间；每片空间通过 Canvas 四边形蒙版裁切一套不同滤镜风格的实时摄像头画面。
 - 指尖位置使用指数平滑跟随，降低手部检测抖动；开发模式可访问 `http://127.0.0.1:5173/pages/hand-portals.html`。
 
 ### 3D 旋转展示页
+
 - `src/pages/index.html` 已封装为 Vue 3 入口，页面逻辑集中在 `src/pages/index/App.vue`
 - 保留旧版 `rotation3D` 插件的底座、节点、连线、点击和拖拽旋转行为，并改为加载本地脚本资源
 - Options 主页仍使用星舰指挥中心布局，中间全息投影区域保留原 2D 星舰投影，并复用 3D 旋转组件替代中心模块面板
@@ -232,10 +247,12 @@ await chrome.runtime.sendMessage({
 - Options 主页顶部标题区改为动态舰桥信号解析条，展示链路、坐标、AI 状态和波形信号
 
 ### 悬浮球光谱效应
+
 - 悬浮球工具箱新增“光谱效应”，内置棱镜折射、极光幕布、光谱环和衍射薄膜四种视觉组件
 - 支持在抽屉内切换预览、调节光谱强度、暂停动效，并复制当前效果的 CSS 片段用于开发参考
 
 ### 滚动时间轴组件
+
 - 新增可复用 React 组件 `src/assets/components/ScrollingTimeline.tsx`
 - 样式位于 `src/assets/components/ScrollingTimeline.scss`，使用项目已有的 `lucide-react` 图标
 - 支持横向滚动、左右导航、节点/卡片点击、键盘方向键与 Home/End 导航
