@@ -106,6 +106,8 @@ npx vitest run test/BookmarkPage.spec.ts
 ### AI 智能助手
 - 集成 DeepSeek 对话能力，基于当前页面上下文提供智能建议
 - 支持流式响应，会话持久化
+- 选项页 AI 终端支持手动填写 DeepSeek Auth Token 和 Cookies；留空时使用扩展内置默认值，配置保存在浏览器本地存储中。
+- `src/sfs/deepseek-cookie-capture.js` 可在 DeepSeek 聊天页读取 `document.cookie` 并返回给扩展脚本调用方；HttpOnly Cookie 不能通过页面 JavaScript 读取。
 
 ### 隐藏成就
 - 成就状态保存在扩展本地，不上传网页内容、AI 会话、Cookie、密码或完整 URL。

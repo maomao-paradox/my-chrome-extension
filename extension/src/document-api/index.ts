@@ -11,7 +11,6 @@ export * from "./route-watcher";
 export * from "./llm-code-executor";
 export * from "./esm-module-loader";
 export * from "./image-zip-download";
-export * from "./ai-config";
 export * from "./auth";
 export * from "./elementPosition";
 export * from "./toast";
@@ -24,24 +23,22 @@ import * as RouteWatcherExports from "./route-watcher";
 import * as LlmCodeExecutorExports from "./llm-code-executor";
 import * as EsmModuleLoaderExports from "./esm-module-loader";
 import * as ImageZipDownloadExports from "./image-zip-download";
-import * as AiConfigExports from "./ai-config";
 import * as AuthExports from "./auth";
 import * as ElementPositionExports from "./elementPosition";
 import * as ToastExports from "./toast";
 import * as WaitForElementExports from "./waitForElement";
 
-export const domUtils = {
+export const domApis = {
   ...ShadowDomExports,
   ...ElementControlExports,
   ...RouteWatcherExports,
   ...LlmCodeExecutorExports,
   ...EsmModuleLoaderExports,
   ...ImageZipDownloadExports,
-  ...AiConfigExports,
   ...AuthExports,
   ...ElementPositionExports,
   ...ToastExports,
   ...WaitForElementExports,
 };
 
-export type DomUtils = typeof domUtils;
+export type DomApis = typeof domApis;

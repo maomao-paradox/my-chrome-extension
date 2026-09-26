@@ -1,5 +1,5 @@
 import { shadowHostId } from "@/config";
-import { getShadowContext } from "@/chrome-api/shadow-dom";
+import { getShadowContext } from "@/document-api/shadow-dom";
 import type { MouseTrailPreset } from "./mouseTrailPreference";
 
 interface MusicNoteTrailOptions {

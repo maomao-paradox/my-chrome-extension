@@ -7,7 +7,7 @@
  * @date 2026-07-07T00:00:00.000Z
  */
 
-import { loadAIConfig } from "@/chrome-api/ai-config";
+import { loadAIConfig } from "@/service-worker/chrome-api";
 
 type TextareaAIState =
   | "pending"

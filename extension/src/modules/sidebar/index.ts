@@ -15,7 +15,7 @@ import React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import SidebarApp from "./App";
 import type { Tool, AppModule, Bookmark, FavoriteSite } from "@/types";
-import { addElementToDom, shadowRoot, injectStyles } from "@/chrome-api";
+import { addElementToDom, shadowRoot, injectStyles } from "@/document-api";
 import { bus } from "@/event/bus";
 import { storage } from "@/stores";
 import { appConfigKey } from "@/config";

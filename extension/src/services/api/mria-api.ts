@@ -8,7 +8,7 @@
  */
 
 import { randomSelect, getQueryParams, getFirstClipboard } from "@/utils";
-import { saveToLocal } from "@/chrome-api";
+import { saveToLocal } from "@/document-api";
 import { storage } from "@/stores";
 import { SessionInfo, RequestHeaders, RequestBody, UserInfo } from "@/types";
 

@@ -1,6 +1,6 @@
 import { storage } from "@/stores";
 import { equalDomain, parseDomains, getChunkFileMap } from "@/utils";
-import { whenDomReady } from "@/chrome-api";
+import { whenDomReady } from "@/document-api";
 import messenger from "@/message";
 import type { ExtMessage, ModuleConfigMap } from "@/types";
 import { defaultModuleConfigs } from "@/modules/index";

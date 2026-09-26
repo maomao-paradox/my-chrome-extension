@@ -14,7 +14,7 @@ import {
   cloneEl,
   addElementToDom,
   createEl,
-} from "@/chrome-api";
+} from "@/document-api";
 import { InsertDomPosition, type Tool } from "@/types";
 import { storage } from "@/stores";
 

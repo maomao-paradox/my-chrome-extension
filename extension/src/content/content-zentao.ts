@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.694Z
  */
 
-import { injectScriptToActivateTab, waitForSelector } from "@/chrome-api";
+import { injectScriptToActivateTab, waitForSelector } from "@/document-api";
 import messenger from "@/message";
 import { ExtMessage, Tool } from "@/types";
 import { getSingleFileScript } from "@/utils";

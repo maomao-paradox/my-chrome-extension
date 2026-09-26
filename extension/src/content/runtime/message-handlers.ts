@@ -1,7 +1,6 @@
 import { storage } from "@/stores";
 import type { ContentModuleManager } from "./module-manager";
 import type { PageTools } from "./page-tools";
-import { calculatePOW } from "./pow-service";
 import { applyWebpageMouseTrail } from "./mouse-trail";
 import { getAssetsAbstractPathSync } from "@/utils";
 import { stopEarlyAdBlocker } from "@/modules/adBlocker/early";
@@ -211,27 +210,6 @@ export const createMessageHandlers = (
     pageTools.setPageVariable(path, value).then((result) => {
       sendResponse(result);
     });
-    return true;
-  },
-
-  CALCULATE_POW: async (data, sendResponse) => {
-    maLogger.log("=====计算 POW=====", data);
-    try {
-      const { challenge } = data;
-      if (!challenge) {
-        sendResponse({ success: false, msg: "缺少 challenge 参数" });
-        return true;
-      }
-
-      const powResponse = await calculatePOW(challenge);
-      sendResponse({ success: true, powResponse });
-    } catch (error) {
-      maLogger.error("计算 POW 失败:", error);
-      sendResponse({
-        success: false,
-        msg: "计算 POW 失败: " + (error as Error).message,
-      });
-    }
     return true;
   },
 

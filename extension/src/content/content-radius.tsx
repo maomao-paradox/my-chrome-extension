@@ -15,7 +15,7 @@ import {
   PositionStrategy,
   waitForSelector,
   whenDomReady,
-} from "@/chrome-api";
+} from "@/document-api";
 import { Tool } from "@/types";
 import messenger from "@/message";
 import { requestAI } from "@/utils/ai-request";
@@ -349,24 +349,29 @@ export default (ctx: AppContext, config = {}) => {
     if (!tableEl) {
       return () => Promise.resolve(null);
     }
-    const header = tableEl.querySelector(EL_TABLE_HEADER);
-    const body = tableEl.querySelector(EL_TABLE_BODY);
-    if (!header || !body) {
-      return () => Promise.resolve(null);
-    }
 
-    const headerTitle = Array.from(
-      header.querySelectorAll("thead > tr:last-child > th"),
-    );
-    maLogger.log(
-      "表头:",
-      headerTitle.map((item) => item.textContent),
-    );
-    const bodyRows = Array.from(body.querySelectorAll("tbody > tr"));
-    maLogger.log("表体:", bodyRows.length);
-
+    // 注意：表头/表体/行数必须在点击时实时获取，
+    // 否则会捕获到 DOM 刚渲染时的快照（默认10行），
+    // 后续用户新增的行不会被纳入，导致 AI 永远只生成10行数据。
     return async () => {
       try {
+        // 点击时实时查询，确保拿到最新的行数与表头
+        const header = tableEl.querySelector(EL_TABLE_HEADER);
+        const body = tableEl.querySelector(EL_TABLE_BODY);
+        if (!header || !body) {
+          return;
+        }
+
+        const headerTitle = Array.from(
+          header.querySelectorAll("thead > tr:last-child > th"),
+        );
+        const bodyRows = Array.from(body.querySelectorAll("tbody > tr"));
+        maLogger.log(
+          "表头:",
+          headerTitle.map((item) => item.textContent),
+        );
+        maLogger.log("表体行数:", bodyRows.length);
+
         addLoadingMask(tableEl);
         // 调用AI生成JSON数据
         const result = await requestAI(

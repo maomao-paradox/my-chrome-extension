@@ -5,7 +5,10 @@ class PowWasmModule {
   private stackPointer = 0;
 
   private getMemory(): ArrayBuffer {
-    if (!this.wasmInstance) {throw new Error('WASM not initialized');}
+    if (!this.wasmInstance) {
+      throw new Error("WASM not initialized");
+    }
+    // @ts-ignore
     return this.wasmInstance.exports.memory.buffer;
   }
 
@@ -18,8 +21,17 @@ class PowWasmModule {
   }
 
   private allocate(len: number, align: number): number {
-    if (!this.wasmInstance) {throw new Error('WASM not initialized');}
-    return (this.wasmInstance.exports.__wbindgen_export_0 as (len: number, align: number) => number)(len, align) >>> 0;
+    if (!this.wasmInstance) {
+      throw new Error("WASM not initialized");
+    }
+    return (
+      (
+        this.wasmInstance.exports.__wbindgen_export_0 as (
+          len: number,
+          align: number,
+        ) => number
+      )(len, align) >>> 0
+    );
   }
 
   private encodeString(str: string): { ptr: number; len: number } {
@@ -31,31 +43,50 @@ class PowWasmModule {
   }
 
   private addStackPointer(delta: number): number {
-    if (!this.wasmInstance) {throw new Error('WASM not initialized');}
-    this.stackPointer = (this.wasmInstance.exports.__wbindgen_add_to_stack_pointer as (delta: number) => number)(delta);
+    if (!this.wasmInstance) {
+      throw new Error("WASM not initialized");
+    }
+    this.stackPointer = (
+      this.wasmInstance.exports.__wbindgen_add_to_stack_pointer as (
+        delta: number,
+      ) => number
+    )(delta);
     return this.stackPointer;
   }
 
   async load(): Promise<void> {
-    if (this.wasmLoaded) {return;}
+    if (this.wasmLoaded) {
+      return;
+    }
 
     try {
-      const wasmUrl = chrome.runtime.getURL('js/wasm/sha3_wasm_bg.7b9ca65ddd.wasm');
+      const wasmUrl = chrome.runtime.getURL("js/wasm/sha3_wasm_bg.wasm");
       let response: Response;
-            
+
       try {
         response = await fetch(wasmUrl);
       } catch (error) {
-        throw new Error('Failed to fetch WASM file: ' + (error as Error).message);
+        throw new Error(
+          "Failed to fetch WASM file: " + (error as Error).message,
+        );
       }
 
-      let result: WebAssembly.InstantiatedSource | undefined;
+      let result:
+        | { instance: WebAssembly.Instance; module: WebAssembly.Module }
+        | undefined;
 
-      if (typeof WebAssembly.instantiateStreaming === 'function') {
+      if (typeof WebAssembly.instantiateStreaming === "function") {
         try {
-          result = await WebAssembly.instantiateStreaming(response, { wbg: {} });
+          result = await WebAssembly.instantiateStreaming(response, {
+            wbg: {},
+          });
         } catch (e) {
-          if (!(response.headers && response.headers.get('Content-Type') !== 'application/wasm')) {
+          if (
+            !(
+              response.headers &&
+              response.headers.get("Content-Type") !== "application/wasm"
+            )
+          ) {
             throw e;
           }
         }
@@ -69,21 +100,29 @@ class PowWasmModule {
       this.wasmInstance = result.instance;
       this.wasmLoaded = true;
     } catch (error) {
-      console.error('Failed to load PoW WASM module:', error);
-      throw new Error('PoW WASM initialization failed: ' + (error as Error).message);
+      console.error("Failed to load PoW WASM module:", error);
+      throw new Error(
+        "PoW WASM initialization failed: " + (error as Error).message,
+      );
     }
   }
 
-  solve(algorithm: string, challenge: string, salt: string, difficulty: number, expireAt: number): number | undefined {
+  solve(
+    algorithm: string,
+    challenge: string,
+    salt: string,
+    difficulty: number,
+    expireAt: number,
+  ): number | undefined {
     if (!this.wasmLoaded || !this.wasmInstance) {
-      throw new Error('WASM module not loaded');
+      throw new Error("WASM module not loaded");
     }
 
-    if (algorithm !== 'DeepSeekHashV1') {
-      throw new Error('Unsupported algorithm: ' + algorithm);
+    if (algorithm !== "DeepSeekHashV1") {
+      throw new Error("Unsupported algorithm: " + algorithm);
     }
 
-    const prefix = salt + '_' + expireAt + '_';
+    const prefix = salt + "_" + expireAt + "_";
 
     try {
       this.addStackPointer(-16);
@@ -91,13 +130,14 @@ class PowWasmModule {
       const challengeEncoded = this.encodeString(challenge);
       const prefixEncoded = this.encodeString(prefix);
 
+      // @ts-ignore
       this.wasmInstance.exports.wasm_solve(
         this.stackPointer,
         challengeEncoded.ptr,
         challengeEncoded.len,
         prefixEncoded.ptr,
         prefixEncoded.len,
-        difficulty
+        difficulty,
       );
 
       const view = this.getMemoryView();

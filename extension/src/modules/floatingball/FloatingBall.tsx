@@ -141,10 +141,8 @@ const FloatingBall: React.FC<FloatingBallProps> = ({
         onMove={handleMove}
       >
         {/* 悬浮球图标 */}
-        <div className="icon" draggable={false}>
-          {iconSlot ?? (
-            <img src={iconSrc} alt="floating ball" onClick={handleIconClick} />
-          )}
+        <div className="icon" draggable={false} onClick={handleIconClick}>
+          {iconSlot ?? <img src={iconSrc} alt="floating ball" />}
         </div>
         {contentSlot ?? children}
       </Draggable>

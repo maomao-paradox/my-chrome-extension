@@ -20,7 +20,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import "./Draggable.scss";
+import "./draggable.scss";
 
 /** 预设初始位置类型 */
 export type InitialPosition =

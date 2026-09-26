@@ -10,12 +10,12 @@
 import { ModuleConfigMap } from "@/types";
 
 export const defaultModuleConfigs: ModuleConfigMap = {
-  // floatingball: {
-  //   id: "floatingball",
-  //   name: "悬浮球",
-  //   type: "floating",
-  //   enabled: false,
-  // },
+  floatingball: {
+    id: "floatingball",
+    name: "悬浮球",
+    type: "floating",
+    enabled: false,
+  },
 
   adBlocker: {
     id: "adBlocker",
@@ -55,10 +55,10 @@ export const defaultModuleConfigs: ModuleConfigMap = {
     },
   },
 
-  // menu: {
-  //   id: "menu",
-  //   name: "菜单",
-  //   type: "menu",
-  //   enabled: true,
-  // },
+  menu: {
+    id: "menu",
+    name: "菜单",
+    type: "menu",
+    enabled: true,
+  },
 };

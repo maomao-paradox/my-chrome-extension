@@ -21,8 +21,8 @@ import { createRoot, type Root } from "react-dom/client";
 import ComponentCaptureApp from "./App";
 import { AppModule } from "@/types";
 import { shadowHostId } from "@/config";
-import { getShadowContext, injectStyles } from "@/chrome-api/shadow-dom";
-import { $id, addElementToDom } from "@/chrome-api";
+import { getShadowContext, injectStyles } from "@/document-api/shadow-dom";
+import { $id, addElementToDom } from "@/document-api";
 import { bus } from "@/event/bus";
 
 // 通过 ?inline 导入聚合 SCSS 为字符串

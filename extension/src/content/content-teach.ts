@@ -13,7 +13,7 @@ import {
   createEl,
   PositionStrategy,
   whenDomReady,
-} from "@/chrome-api";
+} from "@/document-api";
 
 import { Requester, get_token } from "@/services/api/mria-api";
 import type { Response, ExtMessage, MessageHandler, Tool } from "@/types";

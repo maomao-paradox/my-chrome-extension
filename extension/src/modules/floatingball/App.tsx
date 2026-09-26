@@ -94,6 +94,8 @@ const App: React.FC<AppProps> = ({
 
   /** 悬浮球点击处理 */
   const handleFloatingBallClick = useCallback(() => {
+    // manifest.json 需声明: "permissions": ["cookies"], "host_permissions": ["<all_urls>"]
+
     const store = storeActionsRef.current;
     if (!store.isEnabled) return;
     try {

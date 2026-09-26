@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.691Z
  */
 
-import { addElementToDom,shadowRoot } from "@/chrome-api";
+import { addElementToDom,shadowRoot } from "@/document-api";
 import { AppModule } from "@/types";
 import { useSingletonEffect } from "@/utils";
 import { storage } from "@/stores";

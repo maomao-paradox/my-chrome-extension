@@ -34,7 +34,7 @@ export interface DeepSeekSessionStore {
 }
 
 export interface DeepSeekPowSolver {
-    solve(challenge: DeepSeekPowChallenge, context?: DeepSeekExecutionContext): Promise<string>;
+    solve(challenge: DeepSeekPowChallenge): Promise<string>;
 }
 
 export interface DeepSeekClientOptions {
@@ -46,10 +46,6 @@ export interface DeepSeekClientOptions {
     userAgent?: string;
     createSessionCookie?: string;
     fetchImpl?: typeof fetch;
-}
-
-export interface DeepSeekExecutionContext {
-    targetTabId?: number;
 }
 
 export interface DeepSeekCompletionOptions {
@@ -361,8 +357,7 @@ export class DeepSeekClient {
         prompt: string,
         role: string,
         callbacks?: DeepSeekStreamCallbacks,
-        systemPrompt?: string,
-        context?: DeepSeekExecutionContext,
+        systemPrompt?: string
     ): Promise<unknown> {
         const flowStart = performance.now();
         const normalizedRole = normalizeRole(role);
@@ -407,7 +402,7 @@ export class DeepSeekClient {
 
                 // 阶段4: 解决POW挑战（计算耗时）
                 const powSolveStart = performance.now();
-                const powResponse = await this.powSolver.solve(challenge, context);
+                const powResponse = await this.powSolver.solve(challenge);
                 if (!powResponse) {
                     throw new Error('Failed to generate POW response');
                 }

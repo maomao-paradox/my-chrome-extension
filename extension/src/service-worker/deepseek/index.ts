@@ -1,21 +1,18 @@
-import { sendMessageToContentScript } from '@/message';
+import { loadAIConfig } from "../chrome-api";
 import {
   DeepSeekClient,
-  type DeepSeekExecutionContext,
   normalizeSystemPrompt,
   type DeepSeekCompletionOptions,
   type DeepSeekPowChallenge,
   type DeepSeekPowSolver,
   type DeepSeekSessionStore,
   type DeepSeekStreamCallbacks,
-  type SessionData
-} from '@/shared/deepseek-core';
-import { powWasmModule } from './wasm-utils';
+  type SessionData,
+} from "@/shared/deepseek-core";
+import { powWasmModule } from "./pow";
 
-const POW_WORKER_SCRIPT_PATH = 'js/workers/pow-worker.min.js';
-const POW_WORKER_WASM_PATH = 'js/wasm/sha3_wasm_bg.7b9ca65ddd.wasm';
-const OPENAI_COMPATIBLE_ENDPOINT = '/chat/completions';
-const ANTHROPIC_ENDPOINT = '/messages';
+const OPENAI_COMPATIBLE_ENDPOINT = "/chat/completions";
+const ANTHROPIC_ENDPOINT = "/messages";
 
 class ChromeSessionStore implements DeepSeekSessionStore {
   private readonly roleSessionMap = new Map<string, SessionData>();
@@ -32,15 +29,21 @@ class ChromeSessionStore implements DeepSeekSessionStore {
       const parentIdKey = `deepseek_parent_message_id_${roleKey}`;
       const result = await chrome.storage.local.get([sessionKey, parentIdKey]);
       const sessionData: SessionData = {
-        sessionId: result[sessionKey] as string || '',
-        parentMessageId: result[parentIdKey] !== undefined ? result[parentIdKey] as number : null
+        sessionId: (result[sessionKey] as string) || "",
+        parentMessageId:
+          result[parentIdKey] !== undefined
+            ? (result[parentIdKey] as number)
+            : null,
       };
 
       this.roleSessionMap.set(roleKey, sessionData);
       return sessionData;
     } catch (error) {
-      console.error('Error loading persisted data:', error);
-      const defaultSessionData: SessionData = { sessionId: '', parentMessageId: null };
+      console.error("Error loading persisted data:", error);
+      const defaultSessionData: SessionData = {
+        sessionId: "",
+        parentMessageId: null,
+      };
       this.roleSessionMap.set(roleKey, defaultSessionData);
       return defaultSessionData;
     }
@@ -55,10 +58,10 @@ class ChromeSessionStore implements DeepSeekSessionStore {
       const parentIdKey = `deepseek_parent_message_id_${roleKey}`;
       await chrome.storage.local.set({
         [sessionKey]: sessionData.sessionId,
-        [parentIdKey]: sessionData.parentMessageId
+        [parentIdKey]: sessionData.parentMessageId,
       });
     } catch (error) {
-      console.error('Error saving persisted data:', error);
+      console.error("Error saving persisted data:", error);
     }
   }
 
@@ -72,18 +75,25 @@ class ChromeSessionStore implements DeepSeekSessionStore {
       await chrome.storage.local.remove([sessionKey, parentIdKey]);
       console.log(`Session data cleared for role: ${roleKey}`);
     } catch (error) {
-      console.error('Error clearing session data:', error);
+      console.error("Error clearing session data:", error);
     }
   }
 
   private normalizeRole(role: string): string {
-    return role || 'default_ai_assistant';
+    return role || "default_ai_assistant";
   }
 }
 
 class DirectPowSolver implements DeepSeekPowSolver {
-  async solve(challenge: DeepSeekPowChallenge, _context?: DeepSeekExecutionContext): Promise<string> {
-    const { algorithm, challenge: challengeData, salt, difficulty, expireAt, signature } = challenge;
+  async solve(challenge: DeepSeekPowChallenge): Promise<string> {
+    const {
+      algorithm,
+      challenge: challengeData,
+      salt,
+      difficulty,
+      expireAt,
+      signature,
+    } = challenge;
 
     await powWasmModule.load();
 
@@ -92,208 +102,54 @@ class DirectPowSolver implements DeepSeekPowSolver {
       challengeData,
       salt,
       difficulty,
-      expireAt ?? challenge.expire_at ?? Date.now()
+      expireAt ?? challenge.expire_at ?? Date.now(),
     );
 
-    if (typeof answer !== 'number') {
-      throw new Error('No solution found');
+    if (typeof answer !== "number") {
+      throw new Error("No solution found");
     }
 
-    return btoa(unescape(encodeURIComponent(JSON.stringify({
-      algorithm,
-      challenge: challengeData,
-      salt,
-      answer,
-      signature,
-      target_path: '/api/v0/chat/completion'
-    }))));
+    return btoa(
+      unescape(
+        encodeURIComponent(
+          JSON.stringify({
+            algorithm,
+            challenge: challengeData,
+            salt,
+            answer,
+            signature,
+            target_path: "/api/v0/chat/completion",
+          }),
+        ),
+      ),
+    );
   }
 }
 
-class BackgroundPowSolver implements DeepSeekPowSolver {
-  private workerSourcePromise: Promise<string> | null = null;
-
-  async solve(challenge: DeepSeekPowChallenge): Promise<string> {
-    if (typeof Worker !== 'function' || typeof Blob !== 'function' || typeof URL.createObjectURL !== 'function') {
-      throw new Error('Background POW worker is unavailable');
-    }
-
-    const workerSource = await this.getWorkerSource();
-    const blobUrl = URL.createObjectURL(new Blob([workerSource], { type: 'application/javascript' }));
-
-    return new Promise((resolve, reject) => {
-      const worker = new Worker(blobUrl);
-      let settled = false;
-
-      const settle = (result: Error | string) => {
-        if (settled) {
-          return;
-        }
-
-        settled = true;
-        clearTimeout(timeoutId);
-        URL.revokeObjectURL(blobUrl);
-        worker.terminate();
-
-        if (result instanceof Error) {
-          reject(result);
-          return;
-        }
-
-        resolve(result);
-      };
-
-      const timeoutId = setTimeout(() => {
-        settle(new Error('POW calculation timeout'));
-      }, 30000);
-
-      worker.onmessage = (event: MessageEvent) => {
-        const payload = event.data as Record<string, unknown> | null;
-        if (!payload || typeof payload !== 'object') {
-          return;
-        }
-
-        if (payload.type === 'pow-answer') {
-          const answerPayload = payload.answer as Record<string, unknown> | undefined;
-          if (!answerPayload) {
-            settle(new Error('POW worker returned an empty answer'));
-            return;
-          }
-
-          settle(
-            btoa(unescape(encodeURIComponent(JSON.stringify({
-              ...answerPayload,
-              target_path: '/api/v0/chat/completion'
-            }))))
-          );
-          return;
-        }
-
-        if (payload.type === 'pow-error') {
-          const message = typeof payload.error === 'string'
-            ? payload.error
-            : 'POW calculation failed';
-          settle(new Error(message));
-        }
-      };
-
-      worker.onerror = (event) => {
-        settle(new Error(event.message || 'POW worker failed'));
-      };
-
-      worker.postMessage({
-        type: 'pow-challenge',
-        wasmUrl: chrome.runtime.getURL(POW_WORKER_WASM_PATH),
-        challenge: {
-          ...challenge,
-          expireAt: challenge.expireAt ?? challenge.expire_at
-        }
-      });
-    });
-  }
-
-  private async getWorkerSource(): Promise<string> {
-    if (!this.workerSourcePromise) {
-      this.workerSourcePromise = fetch(chrome.runtime.getURL(POW_WORKER_SCRIPT_PATH))
-        .then(async (response) => {
-          if (!response.ok) {
-            throw new Error(`Failed to load POW worker: ${response.status}`);
-          }
-
-          return response.text();
-        });
-    }
-
-    return this.workerSourcePromise;
-  }
-}
-
-class ContentScriptPowSolver implements DeepSeekPowSolver {
-  async solve(challenge: DeepSeekPowChallenge, context?: DeepSeekExecutionContext): Promise<string> {
-    return new Promise((resolve, reject) => {
-      let settled = false;
-
-      const finish = (handler: () => void) => {
-        if (settled) {
-          return;
-        }
-
-        settled = true;
-        handler();
-      };
-
-      try {
-        sendMessageToContentScript({
-          type: 'CALCULATE_POW',
-          payload: { challenge },
-          target: 'content'
-        }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.error('Error sending message to content script:', chrome.runtime.lastError);
-            finish(() => reject(new Error(`POW calculation transport failed: ${chrome.runtime.lastError?.message || 'unknown error'}`)));
-            return;
-          }
-
-          if (response?.success) {
-            finish(() => resolve(response.powResponse));
-            return;
-          }
-
-          finish(() => reject(new Error(`POW calculation failed: ${response?.msg || 'unknown error'}`)));
-        }, {
-          preferredTabId: context?.targetTabId
-        }).catch((error) => {
-          finish(() => reject(error));
-        });
-
-        setTimeout(() => {
-          finish(() => reject(new Error('POW calculation timeout')));
-        }, 30000);
-      } catch (error) {
-        console.error('Error in testPOW:', error);
-        finish(() => reject(error));
-      }
-    });
-  }
-}
-
-class FallbackPowSolver implements DeepSeekPowSolver {
-  private readonly solvers: Array<{ name: string; solver: DeepSeekPowSolver }> = [
-    { name: 'direct', solver: new DirectPowSolver() },
-    { name: 'background', solver: new BackgroundPowSolver() },
-    { name: 'content-script', solver: new ContentScriptPowSolver() }
-  ];
-
-  async solve(challenge: DeepSeekPowChallenge, context?: DeepSeekExecutionContext): Promise<string> {
-    let lastError: unknown;
-
-    for (const entry of this.solvers) {
-      try {
-        return await entry.solver.solve(challenge, context);
-      } catch (error) {
-        lastError = error;
-        console.warn(`[DeepSeek] ${entry.name} POW solver failed:`, error);
-      }
-    }
-
-    throw lastError instanceof Error
-      ? lastError
-      : new Error('POW calculation failed');
-  }
-}
-
-const deepSeekPowSolver = new FallbackPowSolver();
+const deepSeekPowSolver = new DirectPowSolver();
 
 const deepSeekClient = new DeepSeekClient({
   sessionStore: new ChromeSessionStore(),
-  powSolver: deepSeekPowSolver
+  powSolver: deepSeekPowSolver,
 });
+
+async function getConfiguredDeepSeekClient(): Promise<DeepSeekClient> {
+  const config = await loadAIConfig();
+  return new DeepSeekClient({
+    sessionStore: new ChromeSessionStore(),
+    powSolver: deepSeekPowSolver,
+    authToken: config.deepseekAuthToken,
+    cookies: config.deepseekCookies,
+  });
+}
 
 export async function clearSessionData(role: string): Promise<void> {
   await deepSeekClient.clearSessionData(role);
 }
 
-export async function testPOW(challenge: DeepSeekPowChallenge): Promise<string> {
+export async function testPOW(
+  challenge: DeepSeekPowChallenge,
+): Promise<string> {
   return deepSeekPowSolver.solve(challenge);
 }
 
@@ -302,7 +158,7 @@ export async function sendStreamingRequest(
   options: { headers?: Record<string, string>; body?: string },
   onData: (data: string) => void,
   onError: (error: unknown) => void,
-  onComplete: () => void
+  onComplete: () => void,
 ): Promise<void> {
   try {
     await deepSeekClient.sendStreamingRequest(endpoint, options, { onData });
@@ -325,10 +181,12 @@ export async function completion(
   powResponse: string,
   onData?: (data: string) => void,
   onError?: (error: unknown) => void,
-  onComplete?: () => void
+  onComplete?: () => void,
 ): Promise<unknown> {
   try {
-    const result = await deepSeekClient.completion(options, powResponse, { onData });
+    const result = await deepSeekClient.completion(options, powResponse, {
+      onData,
+    });
     onComplete?.();
     return result;
   } catch (error) {
@@ -346,24 +204,42 @@ export async function completeChatFlow(
   apiKey?: string,
   apiBaseUrl?: string,
   systemPrompt?: string,
-  targetTabId?: number
+  targetTabId?: number,
 ): Promise<unknown> {
-  const standardProviders = ['openai', 'anthropic', 'google', 'deepseek'];
-  const effectiveProvider = provider || 'deepseek';
+  const standardProviders = ["openai", "anthropic", "google", "deepseek"];
+  const effectiveProvider = provider || "deepseek";
 
   if (standardProviders.includes(effectiveProvider)) {
     switch (effectiveProvider) {
-      case 'openai':
-      case 'anthropic':
-      case 'google':
-        return await callGenericAIAPI(prompt, effectiveProvider, model, apiKey, apiBaseUrl, callbacks, systemPrompt);
-      case 'deepseek':
+      case "openai":
+      case "anthropic":
+      case "google":
+        return await callGenericAIAPI(
+          prompt,
+          effectiveProvider,
+          model,
+          apiKey,
+          apiBaseUrl,
+          callbacks,
+          systemPrompt,
+        );
+      case "deepseek":
       default:
-        return await deepSeekClient.completeChatFlow(prompt, role, callbacks, systemPrompt, { targetTabId });
+        return await (
+          await getConfiguredDeepSeekClient()
+        ).completeChatFlow(prompt, role, callbacks, systemPrompt);
     }
   }
 
-  return await callGenericAIAPI(prompt, 'custom', model, apiKey, apiBaseUrl, callbacks, systemPrompt);
+  return await callGenericAIAPI(
+    prompt,
+    "custom",
+    model,
+    apiKey,
+    apiBaseUrl,
+    callbacks,
+    systemPrompt,
+  );
 }
 
 async function callGenericAIAPI(
@@ -373,7 +249,7 @@ async function callGenericAIAPI(
   apiKey: string | undefined,
   apiBaseUrl: string | undefined,
   callbacks?: DeepSeekStreamCallbacks,
-  systemPrompt?: string
+  systemPrompt?: string,
 ): Promise<null> {
   try {
     if (!model) {
@@ -382,7 +258,7 @@ async function callGenericAIAPI(
 
     const normalizedSystemPrompt = normalizeSystemPrompt(systemPrompt);
 
-    const requiresApiKey = provider !== 'custom';
+    const requiresApiKey = provider !== "custom";
     if (requiresApiKey && !apiKey) {
       throw new Error(`API key is required for ${provider}`);
     }
@@ -390,96 +266,104 @@ async function callGenericAIAPI(
     let baseUrl = normalizeApiBaseUrl(apiBaseUrl);
     if (!baseUrl) {
       switch (provider) {
-        case 'openai':
-          baseUrl = 'https://api.openai.com/v1';
+        case "openai":
+          baseUrl = "https://api.openai.com/v1";
           break;
-        case 'anthropic':
-          baseUrl = 'https://api.anthropic.com/v1';
+        case "anthropic":
+          baseUrl = "https://api.anthropic.com/v1";
           break;
-        case 'google':
-          baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+        case "google":
+          baseUrl = "https://generativelanguage.googleapis.com/v1beta";
           break;
         default:
-          throw new Error('API base URL is required for custom providers');
+          throw new Error("API base URL is required for custom providers");
       }
     }
 
-    let endpoint = '';
+    let endpoint = "";
     let requestBody: Record<string, unknown> = {};
     const headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    headers.append('Accept', 'text/event-stream, application/json');
+    headers.append("Content-Type", "application/json");
+    headers.append("Accept", "text/event-stream, application/json");
 
     switch (provider) {
-      case 'openai':
+      case "openai":
         endpoint = OPENAI_COMPATIBLE_ENDPOINT;
-        headers.append('Authorization', `Bearer ${apiKey}`);
+        headers.append("Authorization", `Bearer ${apiKey}`);
         requestBody = {
           model,
           messages: normalizedSystemPrompt
-            ? [{ role: 'system', content: normalizedSystemPrompt }, { role: 'user', content: prompt }]
-            : [{ role: 'user', content: prompt }],
-          stream: true
+            ? [
+                { role: "system", content: normalizedSystemPrompt },
+                { role: "user", content: prompt },
+              ]
+            : [{ role: "user", content: prompt }],
+          stream: true,
         };
         break;
-      case 'anthropic':
+      case "anthropic":
         endpoint = ANTHROPIC_ENDPOINT;
-        headers.append('x-api-key', apiKey!);
-        headers.append('anthropic-version', '2023-06-01');
+        headers.append("x-api-key", apiKey!);
+        headers.append("anthropic-version", "2023-06-01");
         requestBody = {
           model,
           system: normalizedSystemPrompt || undefined,
-          messages: [{ role: 'user', content: prompt }],
+          messages: [{ role: "user", content: prompt }],
           stream: true,
-          max_tokens: 1024
+          max_tokens: 1024,
         };
         break;
-      case 'google':
+      case "google":
         endpoint = `/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
         requestBody = {
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
           systemInstruction: normalizedSystemPrompt
             ? { parts: [{ text: normalizedSystemPrompt }] }
-            : undefined
+            : undefined,
         };
         break;
-      case 'custom':
+      case "custom":
       default:
         endpoint = OPENAI_COMPATIBLE_ENDPOINT;
         if (apiKey) {
-          headers.append('Authorization', `Bearer ${apiKey}`);
+          headers.append("Authorization", `Bearer ${apiKey}`);
         }
         requestBody = {
           model,
           messages: normalizedSystemPrompt
-            ? [{ role: 'system', content: normalizedSystemPrompt }, { role: 'user', content: prompt }]
-            : [{ role: 'user', content: prompt }],
-          stream: true
+            ? [
+                { role: "system", content: normalizedSystemPrompt },
+                { role: "user", content: prompt },
+              ]
+            : [{ role: "user", content: prompt }],
+          stream: true,
         };
         break;
     }
 
     const response = await fetch(buildRequestUrl(baseUrl, endpoint, provider), {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify(requestBody),
-      redirect: 'follow'
+      redirect: "follow",
     });
 
     if (!response.ok) {
-      const errorText = await response.text().catch(() => '');
-      throw new Error(`HTTP error ${response.status}${errorText ? `: ${errorText}` : ''}`);
+      const errorText = await response.text().catch(() => "");
+      throw new Error(
+        `HTTP error ${response.status}${errorText ? `: ${errorText}` : ""}`,
+      );
     }
 
     const reader = response.body?.getReader();
     if (!reader) {
-      throw new Error('No response body');
+      throw new Error("No response body");
     }
 
     const decoder = new TextDecoder();
-    let pendingBuffer = '';
+    let pendingBuffer = "";
     let hasContent = false;
-    let rawSample = '';
+    let rawSample = "";
 
     while (true) {
       const { value, done } = await reader.read();
@@ -488,10 +372,10 @@ async function callGenericAIAPI(
         const decodedChunk = decoder.decode(value, { stream: !done });
         rawSample = (rawSample + decodedChunk).slice(0, 4000);
         pendingBuffer += decodedChunk;
-        const segments = pendingBuffer.split('\n');
-        pendingBuffer = segments.pop() || '';
+        const segments = pendingBuffer.split("\n");
+        pendingBuffer = segments.pop() || "";
 
-        const parsedContent = parseGenericStream(segments.join('\n'), provider);
+        const parsedContent = parseGenericStream(segments.join("\n"), provider);
         if (parsedContent) {
           hasContent = true;
           callbacks?.onData?.(parsedContent);
@@ -522,9 +406,12 @@ async function callGenericAIAPI(
   }
 }
 
-function createEmptyGenericStreamError(provider: string, rawSample: string): Error {
-  const normalizedSample = rawSample.trim().replace(/\s+/g, ' ').slice(0, 800);
-  let detail = normalizedSample || 'empty response body';
+function createEmptyGenericStreamError(
+  provider: string,
+  rawSample: string,
+): Error {
+  const normalizedSample = rawSample.trim().replace(/\s+/g, " ").slice(0, 800);
+  let detail = normalizedSample || "empty response body";
 
   try {
     const parsed = JSON.parse(rawSample) as Record<string, unknown>;
@@ -540,9 +427,9 @@ function createEmptyGenericStreamError(provider: string, rawSample: string): Err
 }
 
 function parseGenericStream(data: string, provider: string): string {
-  let content = '';
+  let content = "";
 
-  for (const line of data.split('\n')) {
+  for (const line of data.split("\n")) {
     const payload = extractStreamPayload(line);
     if (!payload) {
       continue;
@@ -560,17 +447,19 @@ function parseGenericStream(data: string, provider: string): string {
 }
 
 function normalizeApiBaseUrl(apiBaseUrl?: string): string {
-  return (apiBaseUrl || '').trim().replace(/\/+$/, '');
+  return (apiBaseUrl || "").trim().replace(/\/+$/, "");
 }
 
-function buildRequestUrl(baseUrl: string, endpoint: string, provider: string): string {
-  if (provider === 'google') {
+function buildRequestUrl(
+  baseUrl: string,
+  endpoint: string,
+  provider: string,
+): string {
+  if (provider === "google") {
     return `${baseUrl}${endpoint}`;
   }
 
-  return matchesEndpoint(baseUrl, endpoint)
-    ? baseUrl
-    : `${baseUrl}${endpoint}`;
+  return matchesEndpoint(baseUrl, endpoint) ? baseUrl : `${baseUrl}${endpoint}`;
 }
 
 function matchesEndpoint(baseUrl: string, endpoint: string): boolean {
@@ -584,53 +473,66 @@ function matchesEndpoint(baseUrl: string, endpoint: string): boolean {
 function extractStreamPayload(line: string): string | null {
   const trimmedLine = line.trim();
 
-  if (!trimmedLine || trimmedLine === 'data: [DONE]' || trimmedLine === '[DONE]') {
+  if (
+    !trimmedLine ||
+    trimmedLine === "data: [DONE]" ||
+    trimmedLine === "[DONE]"
+  ) {
     return null;
   }
 
-  if (trimmedLine.startsWith('event: ') || trimmedLine.startsWith(':')) {
+  if (trimmedLine.startsWith("event: ") || trimmedLine.startsWith(":")) {
     return null;
   }
 
-  if (trimmedLine.startsWith('data: ')) {
+  if (trimmedLine.startsWith("data: ")) {
     return trimmedLine.slice(6);
   }
 
   return trimmedLine;
 }
 
-function extractResponseText(payload: Record<string, unknown>, provider: string): string {
+function extractResponseText(
+  payload: Record<string, unknown>,
+  provider: string,
+): string {
   switch (provider) {
-    case 'anthropic':
+    case "anthropic":
       return extractAnthropicText(payload);
-    case 'google':
+    case "google":
       return extractGoogleText(payload);
-    case 'openai':
-    case 'custom':
+    case "openai":
+    case "custom":
     default:
       return extractOpenAICompatibleText(payload);
   }
 }
 
 function extractOpenAICompatibleText(payload: Record<string, unknown>): string {
-  const firstChoice = Array.isArray(payload.choices) ? payload.choices[0] as Record<string, unknown> | undefined : undefined;
+  const firstChoice = Array.isArray(payload.choices)
+    ? (payload.choices[0] as Record<string, unknown> | undefined)
+    : undefined;
   if (firstChoice) {
-    return extractTextValue(firstChoice.delta)
-            || extractTextValue(firstChoice.message)
-            || extractTextValue(firstChoice.text);
+    return (
+      extractTextValue(firstChoice.delta) ||
+      extractTextValue(firstChoice.message) ||
+      extractTextValue(firstChoice.text)
+    );
   }
 
-  return extractTextValue(payload.output)
-        || extractTextValue(payload.output_text)
-        || extractTextValue(payload.content);
+  return (
+    extractTextValue(payload.output) ||
+    extractTextValue(payload.output_text) ||
+    extractTextValue(payload.content)
+  );
 }
 
 function extractAnthropicText(payload: Record<string, unknown>): string {
-  if (payload.type === 'content_block_delta') {
+  if (payload.type === "content_block_delta") {
     return extractTextValue(payload.delta);
   }
 
-  if (payload.type === 'content_block_start') {
+  if (payload.type === "content_block_start") {
     return extractTextValue(payload.content_block);
   }
 
@@ -639,31 +541,35 @@ function extractAnthropicText(payload: Record<string, unknown>): string {
 
 function extractGoogleText(payload: Record<string, unknown>): string {
   const firstCandidate = Array.isArray(payload.candidates)
-    ? payload.candidates[0] as Record<string, unknown> | undefined
+    ? (payload.candidates[0] as Record<string, unknown> | undefined)
     : undefined;
 
-  return extractTextValue(firstCandidate?.content)
-        || extractTextValue(firstCandidate)
-        || extractTextValue(payload.promptFeedback);
+  return (
+    extractTextValue(firstCandidate?.content) ||
+    extractTextValue(firstCandidate) ||
+    extractTextValue(payload.promptFeedback)
+  );
 }
 
 function extractTextValue(value: unknown): string {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return value;
   }
 
   if (Array.isArray(value)) {
-    return value.map(extractTextValue).join('');
+    return value.map(extractTextValue).join("");
   }
 
-  if (!value || typeof value !== 'object') {
-    return '';
+  if (!value || typeof value !== "object") {
+    return "";
   }
 
   const record = value as Record<string, unknown>;
-  return extractTextValue(record.text)
-        || extractTextValue(record.content)
-        || extractTextValue(record.output_text)
-        || extractTextValue(record.parts)
-        || extractTextValue(record.delta);
+  return (
+    extractTextValue(record.text) ||
+    extractTextValue(record.content) ||
+    extractTextValue(record.output_text) ||
+    extractTextValue(record.parts) ||
+    extractTextValue(record.delta)
+  );
 }

@@ -10,8 +10,8 @@
 import React from "react";
 import MCPDialog from "./MCPDialog";
 import { createRoot, type Root } from "react-dom/client";
-import { $id, addElementToDom } from "@/chrome-api";
-import { getShadowContext } from "@/chrome-api/shadow-dom";
+import { $id, addElementToDom } from "@/document-api";
+import { getShadowContext } from "@/document-api/shadow-dom";
 import { AppModule } from "@/types/utils/index.js";
 
 /**

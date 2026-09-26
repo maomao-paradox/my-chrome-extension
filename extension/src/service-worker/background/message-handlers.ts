@@ -912,5 +912,21 @@ export function createBackgroundMessageHandlers(
       const { version, name } = payload;
       console.log("切换版本:", name, version);
     },
+
+    GET_DEEPSEEK_COOKIES: async (_payload, _sender, sendResponse) => {
+      try {
+        const cookies = await chrome.cookies.getAll({
+          domain: "chat.deepseek.com",
+        });
+        sendResponse?.({ success: true, cookies });
+      } catch (error) {
+        console.error("获取 DeepSeek Cookies 失败:", error);
+        sendResponse?.({
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+      return true;
+    },
   };
 }

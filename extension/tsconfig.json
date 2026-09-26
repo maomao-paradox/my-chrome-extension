@@ -44,7 +44,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/types/*"
-, "src/pages/study-table.tsx"  ],
+, "src/pages/study-table.tsx", "src/service-worker/chrome-api"  ],
   "exclude": [
     "node_modules",
     "dist",

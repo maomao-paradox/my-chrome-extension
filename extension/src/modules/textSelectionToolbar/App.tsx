@@ -14,7 +14,7 @@ import type { TextTool } from "@/types";
 import { componentManager } from "@/utils";
 import { trackTextAction } from "@/services/achievements";
 import { eventManager } from "@/event";
-import { toast } from "@/chrome-api";
+import { toast } from "@/document-api";
 import type { Comment } from "@/services/commentStorage";
 import TextToolbar from "./views/TextToolbar";
 import type { ReplaceOptions } from "./views/ReplaceModal";

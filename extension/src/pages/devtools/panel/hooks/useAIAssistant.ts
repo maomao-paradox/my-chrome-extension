@@ -1,7 +1,7 @@
 /**
  * @description AI 助手主业务逻辑 Hook
  */
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from "react";
 import type {
   ActiveTab,
   ChatHistoryItem,
@@ -13,13 +13,13 @@ import type {
   ExecutionSettings,
   ProviderSelectValue,
   StreamAIConversationOptions,
-} from '../types';
+} from "../types";
 import {
   STORAGE_KEYS,
   STANDARD_PROVIDERS,
   DEFAULT_BUILTIN_MODEL_ID,
-} from '../types';
-import { loadAIConfigSync, saveAIConfig } from '@/chrome-api/ai-config';
+} from "../types";
+import { loadAIConfigSync, saveAIConfig } from "@/service-worker/chrome-api";
 
 interface UseAIAssistantReturn {
   activeTab: ActiveTab;
@@ -45,7 +45,12 @@ interface UseAIAssistantReturn {
   presetName: string;
   setPresetName: (name: string) => void;
   executionSettings: ExecutionSettings;
-  pushNotification: (title: string, message: string, type?: NotificationType) => void;
+  setExecutionSettings: React.Dispatch<React.SetStateAction<ExecutionSettings>>;
+  pushNotification: (
+    title: string,
+    message: string,
+    type?: NotificationType,
+  ) => void;
   handleInstructionKeydown: (event: React.KeyboardEvent) => void;
   executeNaturalLanguageCommand: () => Promise<void>;
   clearInstruction: () => void;
@@ -68,18 +73,18 @@ interface UseAIAssistantReturn {
  * 获取默认 AI 配置
  */
 const getDefaultAIConfig = (): AIModelConfig => ({
-  provider: 'deepseek',
-  customProvider: '',
+  provider: "deepseek",
+  customProvider: "",
   modelId: DEFAULT_BUILTIN_MODEL_ID,
-  apiBaseUrl: '',
-  apiKey: '',
+  apiBaseUrl: "",
+  apiKey: "",
 });
 
 /**
  * 获取默认执行设置
  */
 const getDefaultExecutionSettings = (): ExecutionSettings => ({
-  executionMode: 'auto',
+  executionMode: "auto",
   showGeneratedCode: true,
   saveHistory: true,
 });
@@ -88,20 +93,23 @@ const getDefaultExecutionSettings = (): ExecutionSettings => ({
  * 根据配置构建表单数据
  */
 const buildFormFromConfig = (config: AIModelConfig): AIModelSettingsForm => {
-  if (config.provider === 'deepseek') {
+  if (config.provider === "deepseek") {
     return {
-      providerSelect: 'default',
-      customProvider: '',
+      providerSelect: "default",
+      customProvider: "",
       modelId: DEFAULT_BUILTIN_MODEL_ID,
-      apiBaseUrl: '',
-      apiKey: '',
+      apiBaseUrl: "",
+      apiKey: "",
     };
   }
 
   if (STANDARD_PROVIDERS.includes(config.provider as any)) {
     return {
-      providerSelect: config.provider as Exclude<ProviderSelectValue, 'default' | 'custom'>,
-      customProvider: '',
+      providerSelect: config.provider as Exclude<
+        ProviderSelectValue,
+        "default" | "custom"
+      >,
+      customProvider: "",
       modelId: config.modelId,
       apiBaseUrl: config.apiBaseUrl,
       apiKey: config.apiKey,
@@ -109,7 +117,7 @@ const buildFormFromConfig = (config: AIModelConfig): AIModelSettingsForm => {
   }
 
   return {
-    providerSelect: 'custom',
+    providerSelect: "custom",
     customProvider: config.customProvider || config.provider,
     modelId: config.modelId,
     apiBaseUrl: config.apiBaseUrl,
@@ -135,7 +143,7 @@ const loadChatHistoryFromStorage = (): ChatHistoryItem[] => {
     const parsed = JSON.parse(saved);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
-    maLogger.error('加载历史记录失败:', error);
+    maLogger.error("加载历史记录失败:", error);
     return [];
   }
 };
@@ -152,20 +160,28 @@ const loadModelPresetsFromStorage = (): AIModelPreset[] => {
     if (!Array.isArray(parsed)) return [];
 
     return parsed
-      .filter((preset) => preset && typeof preset === 'object')
+      .filter((preset) => preset && typeof preset === "object")
       .map((preset: any) => ({
-        id: typeof preset.id === 'string' ? preset.id : `preset-${Date.now()}`,
-        name: typeof preset.name === 'string' ? preset.name : '未命名预设',
-        provider: typeof preset.provider === 'string' ? preset.provider : 'deepseek',
-        customProvider: typeof preset.customProvider === 'string' ? preset.customProvider : '',
-        modelId: typeof preset.modelId === 'string' ? preset.modelId : DEFAULT_BUILTIN_MODEL_ID,
-        apiBaseUrl: typeof preset.apiBaseUrl === 'string' ? preset.apiBaseUrl : '',
-        apiKey: typeof preset.apiKey === 'string' ? preset.apiKey : '',
-        createdAt: typeof preset.createdAt === 'string' ? preset.createdAt : '',
-        updatedAt: typeof preset.updatedAt === 'string' ? preset.updatedAt : '',
+        id: typeof preset.id === "string" ? preset.id : `preset-${Date.now()}`,
+        name: typeof preset.name === "string" ? preset.name : "未命名预设",
+        provider:
+          typeof preset.provider === "string" ? preset.provider : "deepseek",
+        customProvider:
+          typeof preset.customProvider === "string"
+            ? preset.customProvider
+            : "",
+        modelId:
+          typeof preset.modelId === "string"
+            ? preset.modelId
+            : DEFAULT_BUILTIN_MODEL_ID,
+        apiBaseUrl:
+          typeof preset.apiBaseUrl === "string" ? preset.apiBaseUrl : "",
+        apiKey: typeof preset.apiKey === "string" ? preset.apiKey : "",
+        createdAt: typeof preset.createdAt === "string" ? preset.createdAt : "",
+        updatedAt: typeof preset.updatedAt === "string" ? preset.updatedAt : "",
       }));
   } catch (error) {
-    maLogger.error('加载模型预设失败:', error);
+    maLogger.error("加载模型预设失败:", error);
     return [];
   }
 };
@@ -181,7 +197,7 @@ const saveModelPresetsToStorage = (presets: AIModelPreset[]): void => {
  * 获取激活的预设 ID
  */
 const getActivePresetId = (): string => {
-  return localStorage.getItem(STORAGE_KEYS.ACTIVE_PRESET) || '';
+  return localStorage.getItem(STORAGE_KEYS.ACTIVE_PRESET) || "";
 };
 
 /**
@@ -207,38 +223,39 @@ const createPresetId = (): string => {
  */
 const getCurrentFormConfig = (
   settingsForm: AIModelSettingsForm,
-  notify = true
+  notify = true,
 ): AIModelConfig | null => {
-  const { providerSelect, customProvider, modelId, apiBaseUrl, apiKey } = settingsForm;
+  const { providerSelect, customProvider, modelId, apiBaseUrl, apiKey } =
+    settingsForm;
 
-  if (providerSelect === 'default') {
+  if (providerSelect === "default") {
     return {
-      provider: 'deepseek',
-      customProvider: '',
+      provider: "deepseek",
+      customProvider: "",
       modelId: DEFAULT_BUILTIN_MODEL_ID,
-      apiBaseUrl: '',
-      apiKey: '',
+      apiBaseUrl: "",
+      apiKey: "",
     };
   }
 
-  if (providerSelect === 'custom') {
+  if (providerSelect === "custom") {
     if (!customProvider) {
       if (notify) {
-        alert('请输入自定义提供商名称');
+        alert("请输入自定义提供商名称");
       }
       return null;
     }
 
     if (!modelId) {
       if (notify) {
-        alert('请输入模型ID');
+        alert("请输入模型ID");
       }
       return null;
     }
 
     if (!apiBaseUrl) {
       if (notify) {
-        alert('自定义提供商需要填写 API 基础URL');
+        alert("自定义提供商需要填写 API 基础URL");
       }
       return null;
     }
@@ -254,21 +271,21 @@ const getCurrentFormConfig = (
 
   if (!modelId) {
     if (notify) {
-      alert('请输入模型ID');
+      alert("请输入模型ID");
     }
     return null;
   }
 
   if (!apiKey) {
     if (notify) {
-      alert('当前提供商需要填写 API 密钥');
+      alert("当前提供商需要填写 API 密钥");
     }
     return null;
   }
 
   return {
     provider: providerSelect,
-    customProvider: '',
+    customProvider: "",
     modelId,
     apiBaseUrl,
     apiKey,
@@ -278,7 +295,10 @@ const getCurrentFormConfig = (
 /**
  * 判断模型配置是否相同
  */
-const isSameModelConfig = (left: AIModelConfig, right: AIModelConfig): boolean => {
+const isSameModelConfig = (
+  left: AIModelConfig,
+  right: AIModelConfig,
+): boolean => {
   return (
     left.provider === right.provider &&
     left.customProvider === right.customProvider &&
@@ -316,8 +336,8 @@ const isSafeCode = (code: string): boolean => {
  * 格式化执行结果
  */
 const formatExecutionResult = (result: unknown): string => {
-  if (typeof result === 'string') return result;
-  if (typeof result === 'undefined') return 'undefined';
+  if (typeof result === "string") return result;
+  if (typeof result === "undefined") return "undefined";
 
   try {
     return JSON.stringify(result, null, 2);
@@ -334,7 +354,7 @@ const executeInInspectedWindow = (code: string): Promise<unknown> => {
     try {
       chrome.devtools.inspectedWindow.eval(code, (result, exception) => {
         if (exception) {
-          reject(new Error(exception.description || '代码执行失败'));
+          reject(new Error(exception.description || "代码执行失败"));
           return;
         }
         resolve(result);
@@ -350,10 +370,10 @@ const executeInInspectedWindow = (code: string): Promise<unknown> => {
  */
 const extractGeneratedCode = (aiResponse: string): string => {
   const codeMatch = aiResponse.match(
-    /```javascript[\s\S]*?```|```[\s\S]*?```|\/\/ 示例代码[\s\S]*/
+    /```javascript[\s\S]*?```|```[\s\S]*?```|\/\/ 示例代码[\s\S]*/,
   );
-  if (!codeMatch) return '';
-  return codeMatch[0].replace(/```javascript|```|\/\/ 示例代码/g, '').trim();
+  if (!codeMatch) return "";
+  return codeMatch[0].replace(/```javascript|```|\/\/ 示例代码/g, "").trim();
 };
 
 /**
@@ -361,21 +381,23 @@ const extractGeneratedCode = (aiResponse: string): string => {
  */
 const streamAIConversation = ({
   prompt,
-  role = 'devtools_assistant',
-  systemPrompt = '',
+  role = "devtools_assistant",
+  systemPrompt = "",
   onChunk,
 }: StreamAIConversationOptions): Promise<string> => {
   const config = loadAIConfigSync();
   const targetTabId =
-    typeof chrome.devtools?.inspectedWindow?.tabId === 'number'
+    typeof chrome.devtools?.inspectedWindow?.tabId === "number"
       ? chrome.devtools.inspectedWindow.tabId
       : undefined;
 
   return new Promise((resolve, reject) => {
     let settled = false;
-    let accumulatedResponse = '';
+    let accumulatedResponse = "";
     const messageId = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-    const port = chrome.runtime.connect({ name: `ai-conversation-${messageId}` });
+    const port = chrome.runtime.connect({
+      name: `ai-conversation-${messageId}`,
+    });
 
     const cleanup = () => {
       try {
@@ -394,35 +416,35 @@ const streamAIConversation = ({
     };
 
     const timeoutId = window.setTimeout(() => {
-      finish(() => reject(new Error('AI响应超时')));
+      finish(() => reject(new Error("AI响应超时")));
     }, 60000);
 
     port.onMessage.addListener((message) => {
-      if (message.type === 'AI_CONVERSATION_STREAM_DATA') {
-        const chunk = message.payload?.content || '';
+      if (message.type === "AI_CONVERSATION_STREAM_DATA") {
+        const chunk = message.payload?.content || "";
         accumulatedResponse += chunk;
         onChunk?.(accumulatedResponse, chunk);
         return;
       }
 
-      if (message.type === 'AI_CONVERSATION_COMPLETE') {
+      if (message.type === "AI_CONVERSATION_COMPLETE") {
         finish(() => resolve(accumulatedResponse));
         return;
       }
 
-      if (message.type === 'AI_CONVERSATION_ERROR') {
-        finish(() => reject(new Error(message.payload?.error || 'AI调用失败')));
+      if (message.type === "AI_CONVERSATION_ERROR") {
+        finish(() => reject(new Error(message.payload?.error || "AI调用失败")));
       }
     });
 
     port.onDisconnect.addListener(() => {
       if (settled) return;
-      const errorMessage = chrome.runtime.lastError?.message || 'AI连接已断开';
+      const errorMessage = chrome.runtime.lastError?.message || "AI连接已断开";
       finish(() => reject(new Error(errorMessage)));
     });
 
     port.postMessage({
-      type: 'START_AI_CONVERSATION',
+      type: "START_AI_CONVERSATION",
       payload: {
         prompt,
         role,
@@ -438,26 +460,26 @@ const streamAIConversation = ({
 };
 
 export const useAIAssistant = (): UseAIAssistantReturn => {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('chat');
+  const [activeTab, setActiveTab] = useState<ActiveTab>("chat");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [instructionInput, setInstructionInput] = useState('');
-  const [executionResult, setExecutionResult] = useState('');
-  const [executionError, setExecutionError] = useState('');
+  const [instructionInput, setInstructionInput] = useState("");
+  const [executionResult, setExecutionResult] = useState("");
+  const [executionError, setExecutionError] = useState("");
   const [executionLoading, setExecutionLoading] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState('');
-  const [codeInput, setCodeInput] = useState('');
-  const [codeExecutionResult, setCodeExecutionResult] = useState('');
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [codeInput, setCodeInput] = useState("");
+  const [codeExecutionResult, setCodeExecutionResult] = useState("");
   const [codeExecutionLoading, setCodeExecutionLoading] = useState(false);
-  const [codeLoadingText, setCodeLoadingText] = useState('正在执行代码...');
+  const [codeLoadingText, setCodeLoadingText] = useState("正在执行代码...");
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
   const [settingsForm, setSettingsForm] = useState<AIModelSettingsForm>(
-    buildFormFromConfig(getDefaultAIConfig())
+    buildFormFromConfig(getDefaultAIConfig()),
   );
   const [modelPresets, setModelPresets] = useState<AIModelPreset[]>([]);
-  const [selectedPresetId, setSelectedPresetId] = useState('');
-  const [presetName, setPresetName] = useState('');
+  const [selectedPresetId, setSelectedPresetId] = useState("");
+  const [presetName, setPresetName] = useState("");
   const [executionSettings, setExecutionSettings] = useState<ExecutionSettings>(
-    getDefaultExecutionSettings()
+    getDefaultExecutionSettings(),
   );
 
   // refs for stable references
@@ -467,12 +489,12 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
   executionSettingsRef.current = executionSettings;
 
   // 计算属性
-  const isCustomProviderSelected = settingsForm.providerSelect === 'custom';
-  const isBuiltInProviderSelected = settingsForm.providerSelect === 'default';
+  const isCustomProviderSelected = settingsForm.providerSelect === "custom";
+  const isBuiltInProviderSelected = settingsForm.providerSelect === "default";
 
   /** 推送通知 */
   const pushNotification = useCallback(
-    (title: string, message: string, type: NotificationType = 'info'): void => {
+    (title: string, message: string, type: NotificationType = "info"): void => {
       const notification: NotificationItem = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         title,
@@ -482,57 +504,59 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
 
       setNotifications((prev) => [...prev, notification]);
       window.setTimeout(() => {
-        setNotifications((prev) => prev.filter((item) => item.id !== notification.id));
+        setNotifications((prev) =>
+          prev.filter((item) => item.id !== notification.id),
+        );
       }, 3000);
     },
-    []
+    [],
   );
 
   /** 键盘事件处理 */
   const handleInstructionKeydown = useCallback(
     (event: React.KeyboardEvent): void => {
-      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
         event.preventDefault();
         void executeNaturalLanguageCommand();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [],
   );
 
   /** 清空指令 */
   const clearInstruction = useCallback((): void => {
-    setInstructionInput('');
+    setInstructionInput("");
   }, []);
 
   /** 保存当前指令 */
   const saveCurrentInstruction = useCallback((): void => {
     const draft = instructionInput.trim();
     if (!draft) {
-      pushNotification('提示', '没有可保存的指令内容', 'info');
+      pushNotification("提示", "没有可保存的指令内容", "info");
       return;
     }
     localStorage.setItem(STORAGE_KEYS.INSTRUCTION_DRAFT, draft);
-    pushNotification('成功', '当前指令已保存为草稿', 'success');
+    pushNotification("成功", "当前指令已保存为草稿", "success");
   }, [instructionInput, pushNotification]);
 
   /** 执行自然语言命令 */
   const executeNaturalLanguageCommand = useCallback(async (): Promise<void> => {
     const command = instructionInput.trim();
     if (!command) {
-      pushNotification('提示', '请输入指令', 'info');
+      pushNotification("提示", "请输入指令", "info");
       return;
     }
 
     if (command.length > 1000) {
-      pushNotification('错误', '指令长度不能超过1000个字符', 'error');
+      pushNotification("错误", "指令长度不能超过1000个字符", "error");
       return;
     }
 
     setExecutionLoading(true);
-    setExecutionError('');
-    setExecutionResult('');
-    setGeneratedCode('');
+    setExecutionError("");
+    setExecutionResult("");
+    setGeneratedCode("");
 
     try {
       const aiResponse = await streamAIConversation({
@@ -542,14 +566,17 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
         },
       });
 
-      setExecutionResult(aiResponse || '未能获取响应');
+      setExecutionResult(aiResponse || "未能获取响应");
 
       if (executionSettingsRef.current.saveHistory) {
         setChatHistory((prev) => {
           const newHistory = [
             ...prev,
-            { role: 'user' as const, content: command },
-            { role: 'assistant' as const, content: aiResponse || '未能获取响应' },
+            { role: "user" as const, content: command },
+            {
+              role: "assistant" as const,
+              content: aiResponse || "未能获取响应",
+            },
           ];
           saveChatHistoryToStorage(newHistory);
           return newHistory;
@@ -564,24 +591,28 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
       if (extractedCode) {
         setCodeInput(extractedCode);
 
-        if (executionSettingsRef.current.executionMode === 'auto') {
-          await runCodeRef.current(null, extractedCode, '浏览器控制代码执行成功');
+        if (executionSettingsRef.current.executionMode === "auto") {
+          await runCodeRef.current(
+            null,
+            extractedCode,
+            "浏览器控制代码执行成功",
+          );
         } else {
-          setActiveTab('code');
+          setActiveTab("code");
           pushNotification(
-            '提示',
-            executionSettingsRef.current.executionMode === 'preview'
-              ? '已生成代码，请在代码模式中预览后执行'
-              : '已生成代码，请在代码模式中手动执行',
-            'info'
+            "提示",
+            executionSettingsRef.current.executionMode === "preview"
+              ? "已生成代码，请在代码模式中预览后执行"
+              : "已生成代码，请在代码模式中手动执行",
+            "info",
           );
         }
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : '执行失败';
+      const message = error instanceof Error ? error.message : "执行失败";
       setExecutionError(message);
-      setExecutionResult('');
-      pushNotification('错误', message, 'error');
+      setExecutionResult("");
+      pushNotification("错误", message, "error");
     } finally {
       setExecutionLoading(false);
     }
@@ -589,36 +620,40 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
 
   /** 运行代码 */
   const runCode = useCallback(
-    async (_event: any, codeOverride?: string, successMessage = '代码执行成功'): Promise<void> => {
+    async (
+      _event: any,
+      codeOverride?: string,
+      successMessage = "代码执行成功",
+    ): Promise<void> => {
       const code = (codeOverride ?? codeInput).trim();
       if (!code) {
-        pushNotification('提示', '请输入代码', 'info');
+        pushNotification("提示", "请输入代码", "info");
         return;
       }
 
       if (!isSafeCode(code)) {
-        const message = '代码包含不安全的操作';
+        const message = "代码包含不安全的操作";
         setCodeExecutionResult(`执行失败: ${message}`);
-        pushNotification('错误', message, 'error');
+        pushNotification("错误", message, "error");
         return;
       }
 
       setCodeExecutionLoading(true);
-      setCodeLoadingText('正在执行代码...');
+      setCodeLoadingText("正在执行代码...");
 
       try {
         const result = await executeInInspectedWindow(code);
         setCodeExecutionResult(`执行成功: ${formatExecutionResult(result)}`);
-        pushNotification('成功', successMessage, 'success');
+        pushNotification("成功", successMessage, "success");
       } catch (error) {
-        const message = error instanceof Error ? error.message : '代码执行失败';
+        const message = error instanceof Error ? error.message : "代码执行失败";
         setCodeExecutionResult(`执行失败: ${message}`);
-        pushNotification('错误', `代码执行失败: ${message}`, 'error');
+        pushNotification("错误", `代码执行失败: ${message}`, "error");
       } finally {
         setCodeExecutionLoading(false);
       }
     },
-    [codeInput, pushNotification]
+    [codeInput, pushNotification],
   );
 
   // ref for runCode to avoid circular dependency
@@ -629,13 +664,13 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
   const explainCode = useCallback(async (): Promise<void> => {
     const code = codeInput.trim();
     if (!code) {
-      pushNotification('提示', '请输入要解释的代码', 'info');
+      pushNotification("提示", "请输入要解释的代码", "info");
       return;
     }
 
     setCodeExecutionLoading(true);
-    setCodeLoadingText('正在生成代码解释...');
-    setCodeExecutionResult('');
+    setCodeLoadingText("正在生成代码解释...");
+    setCodeExecutionResult("");
 
     try {
       const explanation = await streamAIConversation({
@@ -645,11 +680,11 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
         },
       });
 
-      setCodeExecutionResult(explanation || '未能生成解释');
+      setCodeExecutionResult(explanation || "未能生成解释");
     } catch (error) {
-      const message = error instanceof Error ? error.message : '解释代码失败';
+      const message = error instanceof Error ? error.message : "解释代码失败";
       setCodeExecutionResult(`解释失败: ${message}`);
-      pushNotification('错误', `解释代码失败: ${message}`, 'error');
+      pushNotification("错误", `解释代码失败: ${message}`, "error");
     } finally {
       setCodeExecutionLoading(false);
     }
@@ -657,28 +692,29 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
 
   /** 清空代码输出 */
   const clearCodeOutput = useCallback((): void => {
-    setCodeInput('');
-    setCodeExecutionResult('');
+    setCodeInput("");
+    setCodeExecutionResult("");
   }, []);
 
   /** 清空聊天历史 */
   const clearChatHistory = useCallback((): void => {
-    if (!window.confirm('确定要清空所有历史记录吗？')) return;
+    if (!window.confirm("确定要清空所有历史记录吗？")) return;
     setChatHistory([]);
     saveChatHistoryToStorage([]);
-    pushNotification('成功', '历史记录已清空', 'success');
+    pushNotification("成功", "历史记录已清空", "success");
   }, [pushNotification]);
 
   /** 清除 DeepSeek 会话 */
   const clearDeepSeekSession = useCallback(async (): Promise<void> => {
-    if (!window.confirm('确定要清除DeepSeek会话吗？这将重置AI的上下文理解。')) return;
+    if (!window.confirm("确定要清除DeepSeek会话吗？这将重置AI的上下文理解。"))
+      return;
 
     try {
       await new Promise<void>((resolve, reject) => {
         chrome.runtime.sendMessage(
           {
-            type: 'CLEAR_AI_SESSION',
-            payload: { role: 'devtools_assistant' },
+            type: "CLEAR_AI_SESSION",
+            payload: { role: "devtools_assistant" },
           },
           (response) => {
             if (chrome.runtime.lastError) {
@@ -686,27 +722,27 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
               return;
             }
             resolve(response);
-          }
+          },
         );
       });
-      pushNotification('成功', 'DeepSeek会话已清除', 'success');
+      pushNotification("成功", "DeepSeek会话已清除", "success");
     } catch (error) {
-      const message = error instanceof Error ? error.message : '清除会话失败';
-      pushNotification('错误', message, 'error');
+      const message = error instanceof Error ? error.message : "清除会话失败";
+      pushNotification("错误", message, "error");
     }
   }, [pushNotification]);
 
   /** 导出聊天历史 */
   const exportChatHistory = useCallback((): void => {
     if (chatHistory.length === 0) {
-      pushNotification('提示', '没有历史记录可导出', 'info');
+      pushNotification("提示", "没有历史记录可导出", "info");
       return;
     }
 
     const historyJson = JSON.stringify(chatHistory, null, 2);
-    const blob = new Blob([historyJson], { type: 'application/json' });
+    const blob = new Blob([historyJson], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
 
     link.href = url;
     link.download = `ai-assistant-history-${new Date().toISOString().slice(0, 10)}.json`;
@@ -724,34 +760,36 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
     void saveAIConfig(config);
 
     // 同步预设选择
-    const matchedPreset = modelPresets.find((preset) => isSameModelConfig(preset, config));
+    const matchedPreset = modelPresets.find((preset) =>
+      isSameModelConfig(preset, config),
+    );
     if (matchedPreset) {
       setSelectedPresetId(matchedPreset.id);
       setPresetName(matchedPreset.name);
       setActivePresetId(matchedPreset.id);
     } else {
-      setSelectedPresetId('');
-      setPresetName('');
-      setActivePresetId('');
+      setSelectedPresetId("");
+      setPresetName("");
+      setActivePresetId("");
     }
 
-    pushNotification('成功', '设置已保存', 'success');
+    pushNotification("成功", "设置已保存", "success");
   }, [modelPresets, pushNotification]);
 
   /** 处理预设切换 */
   const handlePresetChange = useCallback((): void => {
     if (!selectedPresetId) {
-      setPresetName('');
-      setActivePresetId('');
+      setPresetName("");
+      setActivePresetId("");
       return;
     }
 
     const preset = modelPresets.find((item) => item.id === selectedPresetId);
     if (!preset) {
-      setSelectedPresetId('');
-      setPresetName('');
-      setActivePresetId('');
-      pushNotification('错误', '未找到所选预设', 'error');
+      setSelectedPresetId("");
+      setPresetName("");
+      setActivePresetId("");
+      pushNotification("错误", "未找到所选预设", "error");
       return;
     }
 
@@ -768,7 +806,7 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
       apiKey: preset.apiKey,
     });
 
-    pushNotification('成功', `已切换到预设：${preset.name}`, 'success');
+    pushNotification("成功", `已切换到预设：${preset.name}`, "success");
   }, [selectedPresetId, modelPresets, pushNotification]);
 
   /** 保存当前为预设 */
@@ -778,23 +816,30 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
 
     const name = presetName.trim();
     if (!name) {
-      pushNotification('错误', '请输入预设名称', 'error');
+      pushNotification("错误", "请输入预设名称", "error");
       return;
     }
 
     const currentPresets = [...modelPresets];
-    const selectedPreset = currentPresets.find((preset) => preset.id === selectedPresetId);
-    const duplicatedPreset = currentPresets.find((preset) => preset.name === name);
+    const selectedPreset = currentPresets.find(
+      (preset) => preset.id === selectedPresetId,
+    );
+    const duplicatedPreset = currentPresets.find(
+      (preset) => preset.name === name,
+    );
 
     if (duplicatedPreset && duplicatedPreset.id !== selectedPreset?.id) {
-      const shouldOverwrite = window.confirm(`已存在名为"${name}"的预设，是否覆盖？`);
+      const shouldOverwrite = window.confirm(
+        `已存在名为"${name}"的预设，是否覆盖？`,
+      );
       if (!shouldOverwrite) return;
     }
 
     const existingPresetIndex = selectedPreset
       ? currentPresets.findIndex((preset) => preset.id === selectedPreset.id)
       : currentPresets.findIndex((preset) => preset.name === name);
-    const existingPreset = existingPresetIndex >= 0 ? currentPresets[existingPresetIndex] : null;
+    const existingPreset =
+      existingPresetIndex >= 0 ? currentPresets[existingPresetIndex] : null;
     const now = new Date().toISOString();
 
     const nextPreset: AIModelPreset = {
@@ -817,22 +862,22 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
     setSelectedPresetId(nextPreset.id);
     setPresetName(nextPreset.name);
     setActivePresetId(nextPreset.id);
-    pushNotification('成功', `预设已保存：${nextPreset.name}`, 'success');
+    pushNotification("成功", `预设已保存：${nextPreset.name}`, "success");
   }, [presetName, modelPresets, selectedPresetId, pushNotification]);
 
   /** 删除选中的预设 */
   const deleteSelectedModelPreset = useCallback((): void => {
     if (!selectedPresetId) {
-      pushNotification('提示', '请先选择要删除的预设', 'info');
+      pushNotification("提示", "请先选择要删除的预设", "info");
       return;
     }
 
     const preset = modelPresets.find((item) => item.id === selectedPresetId);
     if (!preset) {
-      setSelectedPresetId('');
-      setPresetName('');
-      setActivePresetId('');
-      pushNotification('错误', '未找到要删除的预设', 'error');
+      setSelectedPresetId("");
+      setPresetName("");
+      setActivePresetId("");
+      pushNotification("错误", "未找到要删除的预设", "error");
       return;
     }
 
@@ -843,18 +888,21 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
     setModelPresets(newPresets);
 
     if (getActivePresetId() === preset.id) {
-      setActivePresetId('');
+      setActivePresetId("");
     }
 
-    setSelectedPresetId('');
-    setPresetName('');
-    pushNotification('成功', `预设已删除：${preset.name}`, 'success');
+    setSelectedPresetId("");
+    setPresetName("");
+    pushNotification("成功", `预设已删除：${preset.name}`, "success");
   }, [selectedPresetId, modelPresets, pushNotification]);
 
   // 监听 provider 变化
   useEffect(() => {
-    if (settingsForm.providerSelect === 'default') {
-      setSettingsForm((prev) => ({ ...prev, modelId: DEFAULT_BUILTIN_MODEL_ID }));
+    if (settingsForm.providerSelect === "default") {
+      setSettingsForm((prev) => ({
+        ...prev,
+        modelId: DEFAULT_BUILTIN_MODEL_ID,
+      }));
     }
   }, [settingsForm.providerSelect]);
 
@@ -862,7 +910,7 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEYS.EXECUTION_SETTINGS,
-      JSON.stringify(executionSettings)
+      JSON.stringify(executionSettings),
     );
   }, [executionSettings]);
 
@@ -872,7 +920,9 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
     setChatHistory(loadChatHistoryFromStorage());
 
     // 加载执行设置
-    const savedExecutionSettings = localStorage.getItem(STORAGE_KEYS.EXECUTION_SETTINGS);
+    const savedExecutionSettings = localStorage.getItem(
+      STORAGE_KEYS.EXECUTION_SETTINGS,
+    );
     if (savedExecutionSettings) {
       try {
         const parsed = JSON.parse(savedExecutionSettings);
@@ -881,7 +931,7 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
           ...parsed,
         });
       } catch (error) {
-        maLogger.error('加载执行设置失败:', error);
+        maLogger.error("加载执行设置失败:", error);
       }
     }
 
@@ -904,10 +954,10 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
     }
 
     // 加载指令草稿
-    const draft = localStorage.getItem(STORAGE_KEYS.INSTRUCTION_DRAFT_KEY) || '';
+    const draft = localStorage.getItem(STORAGE_KEYS.INSTRUCTION_DRAFT) || "";
     setInstructionInput(draft);
 
-    maLogger.log('AI助手面板初始化完成');
+    maLogger.log("AI助手面板初始化完成");
   }, []);
 
   return {
@@ -934,6 +984,7 @@ export const useAIAssistant = (): UseAIAssistantReturn => {
     presetName,
     setPresetName,
     executionSettings,
+    setExecutionSettings,
     pushNotification,
     handleInstructionKeydown,
     executeNaturalLanguageCommand,

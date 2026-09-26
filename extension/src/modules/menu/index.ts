@@ -19,8 +19,8 @@ import React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import MenuApp from "./App";
 import type { Tool, AppModule } from "@/types";
-import { $id, addElementToDom } from "@/chrome-api";
-import { getShadowContext, injectStyles } from "@/chrome-api/shadow-dom";
+import { $id, addElementToDom } from "@/document-api";
+import { getShadowContext, injectStyles } from "@/document-api/shadow-dom";
 import { storage } from "@/stores";
 import { appConfigKey, shadowHostId } from "@/config";
 

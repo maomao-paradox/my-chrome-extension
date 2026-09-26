@@ -10,7 +10,7 @@ import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import checkSwSafe from "./plugins/vite-plugin-check-sw-safe";
-import tailwindcss from '@tailwindcss/vite' // 导入插件
+import tailwindcss from "@tailwindcss/vite"; // 导入插件
 
 export default ({
   mode,
@@ -176,14 +176,16 @@ export default ({
         output: {
           manualChunks: isProduction
             ? {
+              // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
+                "infrastructure-chrome": ["@/service-worker/chrome-api"],
+                // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
+                "infrastructure-document": ["@/document-api"],
                 // react: ["react", "react-dom/client"],
                 antd: ["antd", "@ant-design/icons"],
-                // 基础设施 - 纯函数工具，可在 Service Worker 中使用
-                "infrastructure-utils": ["@/utils"],
-                // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
-                "infrastructure-chrome": ["@/chrome-api"],
                 message: ["@/message"],
                 "content-runtime": ["@/content/runtime"],
+                // 基础设施 - 纯函数工具，可在 Service Worker 中使用
+                "infrastructure-utils": ["@/utils"],
               }
             : undefined,
           chunkFileNames: (chunkInfo: any) => {

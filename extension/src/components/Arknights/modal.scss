@@ -1,0 +1,247 @@
+// modal.scss
+
+// 全局变量定义
+$ark-cyan: #00e5ff;
+$ark-yellow: #ffe600;
+$ark-bg: rgba(12, 14, 18, 0.92);
+$ark-border: rgba(255, 255, 255, 0.2);
+
+// 弹窗淡入动效
+@keyframes arkModalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// 蒙版遮罩
+.ark-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px); // 毛玻璃效果
+}
+
+// 弹窗主体容器
+.ark-modal {
+  position: relative;
+  width: 90%;
+  max-width: 480px;
+  background-color: $ark-bg;
+  border: 1px solid $ark-border;
+  color: #ffffff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 229, 255, 0.15);
+  // 方舟经典的右下切角
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 16px),
+    calc(100% - 16px) 100%,
+    0 100%
+  );
+  animation: arkModalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  user-select: none;
+
+  // --------------------------------------------------
+  // 1. 四角定位角标 (L-Corners)
+  // --------------------------------------------------
+  &__corner {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-color: $ark-cyan;
+    border-style: solid;
+    pointer-events: none;
+    z-index: 10;
+
+    &--tl {
+      top: -1px;
+      left: -1px;
+      border-width: 2px 0 0 2px;
+    }
+    &--tr {
+      top: -1px;
+      right: -1px;
+      border-width: 2px 2px 0 0;
+    }
+    &--bl {
+      bottom: -1px;
+      left: -1px;
+      border-width: 0 0 2px 2px;
+    }
+    &--br {
+      bottom: 12px;
+      right: -1px;
+      border-width: 0 2px 2px 0;
+    }
+  }
+
+  // --------------------------------------------------
+  // 2. 标题栏 Header
+  // --------------------------------------------------
+  &__header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(90deg, rgba(255, 230, 0, 0.15) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+
+    // 顶部黄色警示粗线条
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, $ark-yellow 0%, $ark-cyan 60%, transparent 100%);
+    }
+
+    &-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    &-dot {
+      width: 6px;
+      height: 6px;
+      background-color: $ark-yellow;
+      box-shadow: 0 0 6px $ark-yellow;
+    }
+
+    &-text {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    &-sub {
+      font-family: "Courier New", monospace;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.1em;
+    }
+  }
+
+  // --------------------------------------------------
+  // 3. 内容 Body
+  // --------------------------------------------------
+  &__body {
+    padding: 24px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85);
+    background: radial-gradient(
+      circle at center,
+      rgba(0, 229, 255, 0.03) 0%,
+      transparent 70%
+    );
+  }
+
+  // --------------------------------------------------
+  // 4. 操作按钮区 Footer
+  // --------------------------------------------------
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px 20px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  // 弹窗专门配备的方舟平行四边形切角按钮
+  &__btn {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 6px 20px;
+    min-width: 100px;
+    background: #181b20;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transform: skewX(-10deg); // 经典平行四边形倾斜
+    transition: all 0.15s ease;
+
+    // 内部文字正立
+    &-sub,
+    &-main {
+      transform: skewX(10deg);
+    }
+
+    &-sub {
+      font-family: monospace;
+      font-size: 8px;
+      opacity: 0.6;
+      letter-spacing: 0.15em;
+    }
+
+    &-main {
+      font-family: sans-serif;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+    }
+
+    // 取消按钮
+    &--cancel {
+      color: rgba(255, 255, 255, 0.7);
+
+      &:hover {
+        background: #282c34;
+        color: #ffffff;
+        border-color: #ffffff;
+      }
+    }
+
+    // 确认按钮 (高亮青)
+    &--confirm {
+      background: $ark-cyan;
+      color: #000000;
+      border-color: $ark-cyan;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+
+      &:hover {
+        background: lighten($ark-cyan, 10%);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+      }
+
+      &:active {
+        transform: skewX(-10deg) scale(0.96);
+      }
+    }
+  }
+
+  // 底部极简斜纹装饰条
+  &__stripe-decor {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    width: 40px;
+    height: 4px;
+    background: repeating-linear-gradient(
+      -45deg,
+      $ark-yellow,
+      $ark-yellow 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    opacity: 0.4;
+  }
+}

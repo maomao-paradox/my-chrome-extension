@@ -1,6 +1,6 @@
 import type { ModuleConfigMap } from "@/types";
 import { contentModules, appModules } from "@/config";
-import { ESMModuleLoader } from "@/chrome-api/esm-module-loader";
+import { ESMModuleLoader } from "@/document-api/esm-module-loader";
 
 type DomainPermissionChecker = (configKey: string) => boolean;
 type RuntimeModule = Record<string, any>;

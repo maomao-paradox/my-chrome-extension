@@ -18,7 +18,7 @@
  * ```
  */
 
-import { loadAIConfig } from '../chrome-api/ai-config';
+import { loadAIConfig } from '@/service-worker/chrome-api';
 
 /**
  * AI请求配置选项
