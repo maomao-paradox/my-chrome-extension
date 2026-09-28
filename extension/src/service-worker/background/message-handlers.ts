@@ -5,9 +5,7 @@ import type {
 } from "@/types";
 import type { DevToolsPortManager } from "./devtools-port-manager";
 import { openBookmark } from "./bookmarks";
-import {
-  sendRequestToActiveTab,
-} from "./chrome-tabs";
+import { sendRequestToActiveTab } from "./chrome-tabs";
 import { postJsonFromBackground } from "./http";
 import { fetchImageFromAPI } from "./image-api";
 import type { AutomationStep } from "@/types/automation";
@@ -20,7 +18,7 @@ import {
 import { runStep, runSteps } from "../automation/step-runner";
 import { startRecorder, stopRecorder } from "../automation/recorder";
 import { createTabWithScript } from "./script-injection";
-
+import { FileMapDecryptor } from "@/utils/fileMapDecryptor";
 type SidePanelWithClose = typeof chrome.sidePanel & {
   close?: (options: { tabId?: number }) => Promise<void>;
 };
@@ -51,6 +49,39 @@ const appendRecordedStep = async (
     type: "AUTOMATION_RECORDED_ACTION",
     payload: entry,
   });
+};
+
+let fileMap: Map<string, string> | null = null;
+let fileMapLoadPromise: Promise<Map<string, string>> | null = null;
+const viteEnv = (
+  import.meta as ImportMeta & { env?: Record<string, string | undefined> }
+).env;
+const FILE_MAP_KEY =
+  viteEnv?.VITE_FILE_MAP_KEY ||
+  "mria_extension_default_key_32bytes_1234567890abcdef";
+const backgroundFileMapDecryptor = new FileMapDecryptor(FILE_MAP_KEY);
+
+export const getFileMap = (): Map<string, string> | null => fileMap;
+
+const ensureBackgroundFileMap = async (): Promise<Map<string, string>> => {
+  if (fileMap) {
+    return fileMap;
+  }
+
+  if (!fileMapLoadPromise) {
+    fileMapLoadPromise = backgroundFileMapDecryptor
+      .decryptAndLoad(chrome.runtime.getURL("file-map.json"))
+      .then((map) => {
+        fileMap = new Map(Object.entries(map));
+        console.log("background 懒加载 file_map 成功，条目数:", fileMap.size);
+        return fileMap;
+      })
+      .finally(() => {
+        fileMapLoadPromise = null;
+      });
+  }
+
+  return fileMapLoadPromise;
 };
 
 export function createBackgroundMessageHandlers(
@@ -192,17 +223,17 @@ export function createBackgroundMessageHandlers(
       return true;
     },
 
-    INIT_FILE_MAP: (payload, _sender, sendResponse) => {
+    INIT_FILE_MAP: (_payload, _sender, sendResponse) => {
       try {
-        if (!payload || typeof payload !== "object") {
+        if (!_payload || typeof _payload !== "object") {
           sendResponse?.({ success: false, error: "无效的 file_map 数据" });
           return true;
         }
 
-        fileMap = new Map(Object.entries(payload));
+        fileMap = JSON.parse(JSON.stringify(_payload));
         fileMapLoadPromise = null;
         backgroundFileMapDecryptor.clearCache();
-        console.log("file_map 已初始化，条目数:", fileMap.size);
+        console.log("file_map 已初始化，条目数:", fileMap?.size);
         sendResponse?.({ success: true });
       } catch (error) {
         console.error("初始化 file_map 失败:", error);

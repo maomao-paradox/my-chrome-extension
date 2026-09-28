@@ -30,7 +30,7 @@ export const createModuleManager = (
 
     const module = appModules.get(moduleName);
     if (!module) {
-      maLogger.error(`未找到模块配置: ${moduleName}`);
+      maLogger.warn(`未找到模块配置: ${moduleName}`);
       return null;
     }
 
@@ -74,7 +74,7 @@ export const createModuleManager = (
   ): Promise<void> => {
     const moduleConfig = appModules.get(moduleName);
     if (!moduleConfig) {
-      maLogger.error(`未找到模块配置: ${moduleName}`);
+      maLogger.warn(`未找到模块配置: ${moduleName}`);
       return;
     }
 

@@ -25,7 +25,7 @@ export const ArknightsTag: React.FC<TagProps> = ({ type = 'info', children }) =>
     },
   };
 
-  const current = styles[type];
+  const current = styles[type] ?? styles.info;
 
   return (
     <span

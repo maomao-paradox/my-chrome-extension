@@ -1,0 +1,24 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #000; /* 黑色遮罩 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mix-blend-mode: multiply; /* 关键 */
+//   pointer-events: none; /* 让鼠标能穿透到网页（可选） */
+}
+
+.mask-text {
+  font-size: 10000000%;
+  font-weight: 900;
+  color: #fff; /* 白色文字 = 挖洞区域 */
+  user-select: none;
+  transition: font-size 1s ease; /* 平滑过渡效果 */
+}
+
+.overlay:hover {
+  .mask-text {
+    font-size: 15vw;
+  }
+}

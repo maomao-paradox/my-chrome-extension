@@ -1,103 +1,85 @@
-.poster {
-  position: relative;
-  background: transparent;
-  overflow: hidden;
-}
+.chromatic-text-preview {
+  width: 100%;
+  min-height: 230px;
 
-.bg-contour {
-  position: absolute;
-  inset: 0;
-  background-image: url("./contour-lines.svg");
-  background-size: cover;
-  opacity: 0.4;
-}
+  .poster {
+    position: relative;
+    display: grid;
+    min-height: 230px;
+    place-items: center;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 100%, #3b695e 0, #1c332f 40%, #101b1c 78%);
+  }
 
-.text {
-  color: #000;
-  filter: drop-shadow(-3px 0 0 #ff0044) drop-shadow(3px 0 0 #0044ff);
-  position: relative;
-  font-family: "Didot", "Bodoni MT", serif;
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-}
-.chromatic {
-  position: relative;
-  font-family: "Didot", serif;
-  font-size: 220px;
-  font-weight: 900;
-}
+  .bg-contour {
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-radial-gradient(ellipse at 55% 120%, transparent 0 11px, rgba(195, 224, 192, 0.16) 12px 13px, transparent 14px 24px);
+    opacity: 0.65;
+  }
 
-/* 主层：纹理填充 */
-.chromatic {
-  background-image: url("./mountain.jpg");
-  background-size: cover;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+  .text {
+    position: relative;
+    color: #000;
+    filter: drop-shadow(-3px 0 0 #ff315d) drop-shadow(3px 0 0 #36d8e8);
+    font-family: "Didot", "Bodoni MT", serif;
+    font-size: 16px;
+    font-weight: 900;
+  }
 
-.chromatic::before,
-.chromatic::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  transition:
-    transform 0.5s ease,
-    filter 0.5s ease;
-  filter: blur(4px);
-}
+  .poster .text .chromatic {
+    position: relative;
+    display: inline-grid;
+    isolation: isolate;
+    font-family: "Didot", "Bodoni MT", serif;
+    font-size: clamp(68px, 15vw, 180px);
+    font-weight: 900;
+    line-height: 1;
+  }
 
-/* 红色层 */
-.chromatic::before {
-  background: #ff0044;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  transform: translate(-50px, -30px);
-  mix-blend-mode: multiply;
-}
+  .poster .text .chromatic::before,
+  .poster .text .chromatic::after {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    content: attr(data-text);
+    pointer-events: none;
+    transition: transform 0.5s ease;
+  }
 
-/* 蓝色层 */
-.chromatic::after {
-  background: #0044ff;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  transform: translate(50px, 30px);
-  mix-blend-mode: multiply;
-}
+  .poster .text .chromatic::before {
+    -webkit-text-stroke: 1.5px #ff315d;
+    transform: translate(-28px, -18px);
+    mix-blend-mode: screen;
+  }
 
-.chromatic:hover::before {
-  transform: translate(-5px, -3px);
-  filter: blur(0px);
-}
+  .poster .text .chromatic::after {
+    -webkit-text-stroke: 1.5px #36d8e8;
+    transform: translate(28px, 18px);
+    mix-blend-mode: screen;
+  }
 
-.chromatic:hover::after {
-  transform: translate(5px, 3px);
-  filter: blur(0px);
-}
+  .poster .text .chromatic__base {
+    position: relative;
+    z-index: 1;
+    color: transparent;
+    background: linear-gradient(155deg, #f4e8b3 4%, #c7d7a6 38%, #769a84 68%, #244b4d 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
-.text-base {
-  background-image: url("./mountain.jpg");
-  background-size: cover;
-  background-position: center;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  position: relative;
-  z-index: 2;
-}
+  .poster .text .chromatic:hover::before { transform: translate(-5px, -3px); }
+  .poster .text .chromatic:hover::after { transform: translate(5px, 3px); }
 
-.text-noise {
-  position: absolute;
-  inset: 0;
-  background-image: url("./noise.png");
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  mix-blend-mode: overlay;
-  z-index: 3;
-  pointer-events: none;
+  .text-noise {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.035) 4px 5px);
+    mix-blend-mode: overlay;
+  }
 }

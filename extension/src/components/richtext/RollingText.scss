@@ -1,0 +1,45 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap");
+
+.rolling-text {
+  position: relative;
+  display: inline-block;
+  height: 72px;
+  overflow: hidden;
+  color: #1a1a1a;
+  font-family: "Playfair Display", serif;
+  font-size: 48px;
+  line-height: 72px;
+  letter-spacing: 24px;
+  text-decoration: none;
+}
+
+.block,
+.block-shadow {
+  display: flex;
+  align-items: center;
+  width: max-content;
+}
+
+.rolling-text:hover .letter,
+.rolling-text.play .letter {
+  transform: translateY(-100%);
+}
+
+.block-shadow .letter {
+  color: #4de21f;
+}
+
+.letter,
+.rolling-text__letter {
+  display: inline-block;
+  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+@media (max-width: 700px) {
+  .rolling-text {
+    font-size: 28px;
+    letter-spacing: 12px;
+    line-height: 42px;
+    height: 42px;
+  }
+}

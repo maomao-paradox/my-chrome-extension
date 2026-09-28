@@ -8,42 +8,48 @@ $bar-height: 5vw;
 $bar-width: 2vw;
 
 // 基础布局
-.container {
-  background: $bg-color;
-  margin: 0 auto;
-  height: 100%;
+.flower-loading-preview {
+  position: relative;
+  min-height: 240px;
   width: 100%;
   overflow: hidden;
-}
+  background: $bg-color;
 
-.item-container {
-  width: $container-size;
-  height: $container-size;
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  overflow: hidden;
-  animation: container 5s linear infinite;
-}
+  .container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+  }
 
-// 通用条状样式
-.common {
-  height: $bar-height;
-  max-height: 100%;
-  overflow: auto;
-  width: $bar-width;
-  margin: auto;
-  max-width: 100%;
-  position: absolute;
-  background-color: transparent;
-  border-radius: 0vw 10vw 0vw 10vw;
-  box-shadow:
-    inset 0vw 0vw 0vw 0.1vw $pink,
-    0vw 0vw 1.5vw 0vw $pink;
-}
+  .item-container {
+    width: $container-size;
+    height: $container-size;
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    overflow: hidden;
+    animation: flower-loading-container 5s linear infinite;
+  }
 
-// 位置和旋转 - 使用循环生成
-$positions: (
+  .common {
+    height: $bar-height;
+    max-height: 100%;
+    overflow: auto;
+    width: $bar-width;
+    margin: auto;
+    max-width: 100%;
+    position: absolute;
+    background-color: transparent;
+    border-radius: 0vw 10vw 0vw 10vw;
+    box-shadow:
+      inset 0vw 0vw 0vw 0.1vw $pink,
+      0vw 0vw 1.5vw 0vw $pink;
+  }
+
+  $positions: (
   1: (
     left: 0,
     right: 0,
@@ -92,81 +98,64 @@ $positions: (
     top: 0,
     bottom: 5.5vw,
   ),
-);
+  );
 
-// 生成每个条状元素的位置和动画
-@each $name, $props in $positions {
-  .item#{$name} {
-    transform: rotate(var(--rotate));
-    left: map.get($props, left);
-    right: map.get($props, right);
-    top: map.get($props, top);
-    bottom: map.get($props, bottom);
-    animation: animation#{$name} 5s var(--delay) ease infinite;
-  }
-
-  @keyframes animation#{$name} {
-    0%,
-    100% {
+  @each $name, $props in $positions {
+    .item#{$name} {
+      transform: rotate(var(--rotate));
+      left: map.get($props, left);
+      right: map.get($props, right);
+      top: map.get($props, top);
+      bottom: map.get($props, bottom);
+      animation: flower-loading-item-#{$name} 5s var(--delay) ease infinite;
     }
-    50% {
-      background: transparent;
-      box-shadow:
-        inset 0vw 0vw 0vw 0.1vw $cyan,
-        0vw 0vw 1.5vw 0vw $cyan;
+
+    @keyframes flower-loading-item-#{$name} {
+      0%, 100% { }
+      50% {
+        background: transparent;
+        box-shadow:
+          inset 0vw 0vw 0vw 0.1vw $cyan,
+          0vw 0vw 1.5vw 0vw $cyan;
+      }
     }
   }
-}
 
-// 进度条
-.bar {
-  width: 12vw;
-  height: 0.25vw;
-  position: absolute;
-  inset: 0;
-  top: 16vw;
-  margin: auto;
-  overflow: hidden;
-  background: $pink;
-}
-
-.progress {
-  width: 12vw;
-  height: 0.5vw;
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  overflow: hidden;
-  background: $cyan;
-  animation: progress var(--progress-delay, 2.5s) linear;
-}
-
-// 旋转容器动画
-@keyframes container {
-  from {
-    transform: rotate(0deg);
+  .bar {
+    width: 12vw;
+    height: 0.25vw;
+    position: absolute;
+    inset: 0;
+    top: 16vw;
+    margin: auto;
+    overflow: hidden;
+    background: $pink;
   }
-  to {
-    transform: rotate(-360deg);
-  }
-}
 
-// 进度条动画
-@keyframes progress {
-  0% {
-    left: -24vw;
+  .progress {
+    width: 12vw;
+    height: 0.5vw;
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    overflow: hidden;
+    background: $cyan;
+    animation: flower-loading-progress var(--progress-delay, 2.5s) linear;
   }
-  100% {
-    left: 0;
+
+  @keyframes flower-loading-container {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
   }
-}
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 2s ease;
-}
+  @keyframes flower-loading-progress {
+    0% { left: -24vw; }
+    100% { left: 0; }
+  }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+  .fade-enter-active,
+  .fade-leave-active { transition: all 2s ease; }
+
+  .fade-enter-from,
+  .fade-leave-to { opacity: 0; }
 }

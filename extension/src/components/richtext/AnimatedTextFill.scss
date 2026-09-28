@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Neuton:wght@400;700&family=Oswald:wght@400;700&display=swap");
+
+.animated-text-fill {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding: 1.5em 0;
+  border: 4px double rgba(255, 255, 255, 0.25);
+  border-width: 4px 0;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  background: #090d00;
+  color: rgba(255, 255, 255, 0.25);
+  text-align: center;
+  font: 400 1em/1.5 "Neuton", serif;
+}
+
+.animated-text-fill span {
+  display: block;
+  margin: 0 auto;
+  padding: 0.25em 0 0.325em;
+  font: 700 4em/1 "Oswald", sans-serif;
+  letter-spacing: 0;
+  text-shadow: 0 0 80px rgba(255, 255, 255, 0.5);
+  background: url("https://www.jq22.com/tp/6367654292305515361482753.png") repeat-y;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: animated-text-fill-aitf 80s linear infinite;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes animated-text-fill-aitf {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (max-width: 800px) {
+  .animated-text-fill {
+    letter-spacing: 0.2em;
+    padding: 1.2em 0;
+  }
+
+  .animated-text-fill span {
+    font-size: 2.5em;
+  }
+}

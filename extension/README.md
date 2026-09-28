@@ -98,8 +98,10 @@ npx vitest run test/BookmarkPage.spec.ts
 
 ### 自定义组件展示页
 
-- 新增独立组件展示页，可在浏览器中浏览 `src/assets/components` 下的自研组件
-- 页面采用左侧目录、中间预览、右侧信息面板的结构，风格参考组件库文档站
+- 独立组件展示页以四列照片墙浏览 React 组件，卡片高度随预览内容变化并支持纵向滚动
+- 展示基础组件、Jungle-knot、Loading、Text（含 Text Scramble）、Arknights、Special 和 Switch 系列，卡片内可直接体验交互与动画；Static404 使用响应式路径故障告示布局，Animate403 逐字输出终端错误信息，Interactive Gradient 展示鼠标驱动的多层渐变
+- Special 系列包含单行/多行动画搜索框和 3D 轮播；轮播支持方向键、滚轮及触控切换
+- 点击组件标题可查看组件介绍、源码位置和公开属性；属性详情按名称与描述、编辑控件、属性类型三列排列，输入框与用法模板会同步展示组件墙预览的初始值，编辑后同步为实时值；`Text Scramble` 的 `phrases` 可按每行一条在线编辑；事件回调（`onXXX`）不提供输入框，但会以空值占位保留在用法模板中；时间轴、3D 轮播等宽组件在详情弹窗中使用全宽预览
 - 入口为 `src/pages/components.html`，开发模式下可直接访问 `/pages/components.html`
 
 ### AI 智能助手
@@ -130,6 +132,14 @@ npx vitest run test/BookmarkPage.spec.ts
 ### 鼠标拖尾
 
 - Popup 设置页可开启页面鼠标拖尾，移动时生成随机音符，点击时触发少量音符爆发效果
+
+### 磁吸指针
+
+- `src/components/MagneticPointer.tsx` 提供 React 版磁吸指针，可通过 `color`、`size` 和 `cssSelector` 配置颜色、初始尺寸及悬停目标，也可通过 `children` 自定义展示内容
+
+### 环形导航
+
+- `src/components/NavigationCircle.tsx` 提供 React 版七节点环形导航，支持悬停预览、点击选择和进场动画
 
 ### 菜单自动点击工具
 

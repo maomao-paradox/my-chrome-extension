@@ -1,0 +1,163 @@
+.markdown-editor {
+  width: 100%;
+  height: 100%;
+}
+
+.editor-container,
+.markdown-editor__container {
+  display: flex;
+  gap: 20px;
+  height: 600px;
+}
+
+.editor-section,
+.preview-section,
+.markdown-editor__section {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.editor-textarea,
+.markdown-editor__textarea {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  border: none;
+  resize: none;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  background: #fff;
+}
+
+.preview-only,
+.preview-content,
+.markdown-editor__preview-only,
+.markdown-editor__preview-content {
+  width: 100%;
+  height: 100%;
+}
+
+.preview-content,
+.markdown-editor__preview-content {
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.markdown-editor__preview-content h1,
+.markdown-editor__preview-content h2,
+.markdown-editor__preview-content h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.preview-content p,
+.markdown-editor__preview-content p {
+  margin: 16px 0;
+}
+
+.preview-content code,
+.markdown-editor__preview-content code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+}
+
+.preview-content pre,
+.markdown-editor__preview-content pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 6px;
+}
+
+.preview-content blockquote,
+.markdown-editor__preview-content blockquote {
+  padding: 0 1em;
+  color: #6a737d;
+  border-left: 0.25em solid #dfe2e5;
+  margin: 0;
+}
+
+.preview-content table,
+.markdown-editor__preview-content table {
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.preview-content table th,
+.preview-content table td,
+.markdown-editor__preview-content table th,
+.markdown-editor__preview-content table td {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+}
+
+.preview-content img,
+.markdown-editor__preview-content img {
+  max-width: 100%;
+}
+
+.markdown-editor__preview-content h1,
+.markdown-editor__preview-content h2,
+.markdown-editor__preview-content h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-editor__preview-content p {
+  margin: 16px 0;
+}
+
+.markdown-editor__preview-content code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+}
+
+.markdown-editor__preview-content pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 6px;
+}
+
+.markdown-editor__preview-content blockquote {
+  padding: 0 1em;
+  color: #6a737d;
+  border-left: 0.25em solid #dfe2e5;
+  margin: 0;
+}
+
+.markdown-editor__preview-content table {
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.markdown-editor__preview-content table th,
+.markdown-editor__preview-content table td {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+}
+
+.markdown-editor__preview-content img {
+  max-width: 100%;
+}

@@ -36,4 +36,5 @@ Write so that a new developer to this codebase can understand your writing, donâ
 - If a service needs to be started for verification or manual testing, ask the user to start it instead of starting it yourself.
 - The Vue component uses the script-style TypeScript pattern, and the style part is done with Sass.
 - Use ui-ux-pro-max skills when designing styles.
+- Display the component in `src/page/component-wall` when you add a new component in `src/components/`.
 - After adding or modifying features, it is necessary to update the README file.

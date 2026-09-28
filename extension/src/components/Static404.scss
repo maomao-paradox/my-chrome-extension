@@ -1,100 +1,138 @@
-/**
- * Static404 组件样式
- * 从 Vue 版 response-code/Static404.vue 的 scoped 样式迁移而来
- */
-
 .static-404 {
+  --error-ink: #182b26;
+  --error-muted: #68736d;
+  --error-rule: rgba(24, 43, 38, 0.18);
+  --error-accent: #d6533c;
+
   position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 22px;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, sans-serif;
+  min-height: 360px;
+  padding: 28px;
+  overflow: hidden;
+  box-sizing: border-box;
+  color: var(--error-ink);
+  background-color: #f0eee5;
+  background-image:
+    linear-gradient(rgba(24, 43, 38, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 43, 38, 0.045) 1px, transparent 1px);
+  background-size: 24px 24px;
+  font-family: "Avenir Next", "PingFang SC", sans-serif;
 
-  .container {
-    text-align: center;
-    color: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  &__topline,
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--error-muted);
+    font: 9px/1.4 "SFMono-Regular", Consolas, monospace;
+    letter-spacing: 0;
   }
 
-  .error-code {
-    font-size: 10rem;
-    font-weight: 900;
+  &__topline { padding-bottom: 12px; border-bottom: 1px solid var(--error-rule); }
+
+  &__route { display: inline-flex; align-items: center; gap: 8px; color: var(--error-ink); }
+
+  &__signal {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--error-accent);
+    box-shadow: 0 0 0 4px rgba(214, 83, 60, 0.12);
+  }
+
+  &__status strong { margin-left: 7px; color: var(--error-accent); font-weight: 700; }
+
+  &__main {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: 28px;
+    min-height: 0;
+  }
+
+  &__visual {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    align-content: center;
+    min-width: 0;
+    padding-right: 24px;
+    border-right: 1px solid var(--error-rule);
+    animation: error-mark-in 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  &__index { color: var(--error-accent); font: 10px/1.4 "SFMono-Regular", Consolas, monospace; }
+
+  &__code {
+    margin: 4px 0 10px -7px;
+    color: var(--error-ink);
+    font: 700 132px/0.9 Georgia, "Noto Serif CJK SC", serif;
+    letter-spacing: 0;
+  }
+
+  &__visual-line { width: 54px; height: 4px; background: var(--error-accent); }
+
+  &__copy { animation: error-copy-in 500ms 90ms ease both; }
+
+  &__eyebrow { margin: 0 0 10px; color: var(--error-accent); font: 10px/1.4 "SFMono-Regular", Consolas, monospace; }
+
+  &__copy h1 {
     margin: 0;
-    line-height: 1;
-    background: linear-gradient(45deg, #ffffff, #f0f0f0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    color: var(--error-ink);
+    font: 600 30px/1.35 "Songti SC", "Noto Serif CJK SC", Georgia, serif;
   }
 
-  .error-message {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 1rem 0 0;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
+  &__copy h1 span { color: var(--error-accent); }
 
-  .error-description {
-    font-size: 1.2rem;
-    margin: 1rem 0 2.5rem;
-    opacity: 0.9;
-    max-width: 400px;
-    line-height: 1.5;
-  }
+  &__description { max-width: 330px; margin: 12px 0 20px; color: var(--error-muted); font-size: 13px; line-height: 1.8; }
 
-  .back-button {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #667eea;
-    background: white;
-    border: none;
-    border-radius: 0.5rem;
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 40px;
+    padding: 0 15px;
+    border: 1px solid var(--error-ink);
+    border-radius: 2px;
+    color: #f0eee5;
+    background: var(--error-ink);
+    font: 12px/1 "Avenir Next", "PingFang SC", sans-serif;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 180ms ease, background-color 180ms ease;
+  }
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    }
+  &__button:hover { background: #29443c; transform: translateX(-2px); }
+  &__button:focus-visible { outline: 2px solid var(--error-accent); outline-offset: 3px; }
 
-    &:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
+  &__footer { padding-top: 12px; border-top: 1px solid var(--error-rule); font-size: 8px; }
+}
+
+@keyframes error-mark-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes error-copy-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 620px) {
+  .static-404 {
+    grid-template-rows: auto auto auto;
+    gap: 16px;
+    min-height: 420px;
+    padding: 20px;
+
+    &__main { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+    &__visual { grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 14px; padding: 0 0 14px; border-right: 0; border-bottom: 1px solid var(--error-rule); }
+    &__index { grid-column: 1 / -1; }
+    &__code { grid-row: 2; margin: 2px 0 0; font-size: 82px; }
+    &__visual-line { align-self: center; width: 100%; }
+    &__copy h1 { font-size: 26px; }
+    &__footer { font-size: 7px; }
   }
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .static-404 {
-    .error-code {
-      font-size: 7rem;
-    }
-
-    .error-message {
-      font-size: 2rem;
-    }
-
-    .error-description {
-      font-size: 1rem;
-      padding: 0 1rem;
-    }
-
-    .back-button {
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-    }
-  }
+@media (prefers-reduced-motion: reduce) {
+  .static-404__visual,
+  .static-404__copy { animation: none; }
+  .static-404__button { transition: none; }
 }

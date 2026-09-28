@@ -12,7 +12,7 @@ const Loading: React.FC<{ progressDelay?: string }> = ({
   progressDelay = "2.5s",
 }) => {
   return (
-    <>
+    <div className="flower-loading-preview">
       <div className="container">
         <div className="item-container">
           {...Array.from({ length: 8 }).map((_, i) => (
@@ -31,7 +31,7 @@ const Loading: React.FC<{ progressDelay?: string }> = ({
           ></div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
