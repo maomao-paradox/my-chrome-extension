@@ -1,0 +1,66 @@
+.magnetic-button-gallery {
+  display: grid;
+  width: min(100%, 510px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  gap: 10px;
+  margin: 0 auto;
+  padding: 16px;
+  color: #fff;
+  background: #111;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .gravityButton {
+    display: grid;
+    width: min(100%, 150px);
+    aspect-ratio: 1;
+    place-items: center;
+    border-radius: 50%;
+
+    > button {
+      display: grid;
+      width: clamp(42px, 42%, 64px);
+      aspect-ratio: 1;
+      place-items: center;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      opacity: var(--opacity, 0.25);
+      transform: translate(var(--tx, 0), var(--ty, 0));
+      transition:
+        transform 200ms ease-out,
+        opacity 200ms ease-out;
+
+      &:hover,
+      &:focus-visible {
+        --_fill: var(--color, #fff);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--color, #fff);
+        outline-offset: 4px;
+        opacity: 1;
+      }
+    }
+  }
+
+  .buttonIcon {
+    width: 50%;
+    fill: var(--_fill, #fff);
+    transition: fill 300ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magnetic-button-gallery .gravityButton > button,
+  .magnetic-button-gallery .buttonIcon {
+    transition: none;
+  }
+}

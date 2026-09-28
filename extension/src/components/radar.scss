@@ -1,0 +1,203 @@
+.radar-component,
+.radar-component *,
+.radar-component *::before,
+.radar-component *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+.radar-component {
+  --g: #0f0;
+  --bg-dots: #010;
+  --bg-lines: #030;
+  --bg-screen: #000100;
+  --bg-light: #b3c7dd;
+  --bg-dark: #6c7a88;
+  --white-hi: #f1f1f1;
+  --white-low: #9d9e9f;
+  --base: #fff;
+  --dot-opacity: 0.5;
+  --line-opacity: 0.25;
+  --radial-opacity: 0.25;
+  --trail-length: 90deg;
+  --blend: color-dodge;
+  --speed: 10s;
+
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 330px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  overflow: hidden;
+  background-color: #1f1f1f;
+  transition: all 0.3s ease;
+
+  &:has(.radar-component__selector:checked) {
+    --g: #f00;
+    --bg-dots: #f00;
+    --bg-lines: #700;
+    --bg-screen: #100;
+    --blend: darken;
+    --trail-length: 210deg;
+    --speed: 3s;
+
+    .radar-component__radar::after {
+      content: "";
+      backdrop-filter: blur(0.5px);
+    }
+  }
+
+  &__radar {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    width: 75vmin;
+    max-width: calc(100% - 32px);
+    aspect-ratio: 1;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, var(--white-hi), var(--white-low));
+    box-shadow:
+      inset 0 -3px 10px rgba(0, 0, 0, 0.25),
+      0 15px 18px rgba(0, 0, 0, 0.5);
+
+    &::before,
+    &::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 90%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      content: "";
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+    }
+
+    &::before {
+      z-index: -1;
+      background-color: var(--bg-screen);
+      background-image:
+        linear-gradient(to bottom, transparent 50%, hsl(from var(--bg-lines) h s l / var(--line-opacity)), transparent calc(50% + 1px)),
+        linear-gradient(to right, transparent 50%, hsl(from var(--bg-lines) h s l / var(--line-opacity)), transparent calc(50% + 1px)),
+        linear-gradient(45deg, transparent 50%, hsl(from var(--bg-lines) h s l / var(--line-opacity)), transparent calc(50% + 1px)),
+        linear-gradient(-45deg, transparent 50%, hsl(from var(--bg-lines) h s l / var(--line-opacity)), transparent calc(50% + 1px)),
+        repeating-radial-gradient(hsl(from var(--bg-lines) h s l / var(--radial-opacity)) 0, transparent 1px 2.5vmin, hsl(from var(--bg-lines) h s l / var(--radial-opacity)) calc(2.5vmin + 1px));
+    }
+
+    &::after {
+      background-image: conic-gradient(#000 var(--trail-length), var(--g) 360deg);
+      mix-blend-mode: var(--blend);
+      animation: radar-rotate var(--speed) linear infinite;
+    }
+  }
+
+  &__targets {
+    position: relative;
+    width: 90%;
+    height: 90%;
+    overflow: hidden;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 65% 15%, var(--bg-dots), transparent 6px),
+      radial-gradient(circle at 67% 19%, var(--bg-dots), transparent 4px),
+      radial-gradient(circle at 68% 16%, var(--bg-dots), transparent 6px),
+      radial-gradient(circle at 59% 63%, var(--bg-dots), transparent 5px),
+      radial-gradient(circle at 55% 62%, var(--bg-dots), transparent 8px),
+      radial-gradient(circle at 15% 36%, var(--bg-dots), transparent 6px),
+      radial-gradient(circle at 19% 39%, var(--bg-dots), transparent 4px),
+      radial-gradient(circle at 32% 70%, var(--bg-dots), transparent 6px),
+      radial-gradient(circle at 28% 53%, var(--bg-dots), transparent 7px),
+      radial-gradient(circle at 45% 92%, var(--bg-dots), transparent 8px),
+      radial-gradient(circle at 85% 36%, var(--bg-dots), transparent 6px),
+      radial-gradient(circle at 89% 45%, var(--bg-dots) 3px, transparent 5px),
+      radial-gradient(circle at 78% 70%, var(--bg-dots) 4px, transparent 6px),
+      radial-gradient(circle at 33% 85%, var(--bg-dots) 8px, transparent 10px);
+    background-position: 0 0;
+    animation: radar-move 120s infinite linear;
+
+    &::after,
+    &::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+    }
+
+    &::after {
+      background:
+        radial-gradient(circle at 10% 50%, var(--bg-dots), transparent 5px),
+        radial-gradient(circle at 90% 50%, var(--bg-dots), transparent 5px),
+        radial-gradient(circle at 60% 10%, var(--bg-dots), transparent 8px),
+        radial-gradient(circle at 70% 90%, var(--bg-dots), transparent 5px);
+      animation: radar-move 200s infinite linear reverse, radar-rotate 200s linear infinite;
+    }
+
+    &::before {
+      background:
+        radial-gradient(circle at 45% 50%, var(--bg-dots), transparent 4px),
+        radial-gradient(circle at 49% 55%, var(--bg-dots), transparent 5px),
+        radial-gradient(circle at 35% 35%, var(--bg-dots), transparent 6px),
+        radial-gradient(circle at 45% 15%, var(--bg-dots), transparent 7px),
+        radial-gradient(circle at 25% 35%, var(--bg-dots), transparent 8px);
+      animation: radar-move 600s infinite linear reverse, radar-rotate 600s linear infinite;
+    }
+  }
+
+  &__selector {
+    position: relative;
+    display: block;
+    width: 120px;
+    height: 30px;
+    appearance: none;
+    border-radius: 15px;
+    background: var(--bg-dark);
+    box-shadow: inset 0 2px 4px #0007;
+    cursor: pointer;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      width: 60%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      border-radius: inherit;
+      background: linear-gradient(to bottom, var(--white-hi), var(--white-low));
+      color: var(--bg-dark);
+      content: "Ver. 1";
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    &:checked::before {
+      left: 40%;
+      content: "Ver. 2";
+    }
+  }
+}
+
+@keyframes radar-rotate {
+  to { transform: translate(-50%, -50%) rotate(1turn); }
+}
+
+@keyframes radar-move {
+  to { background-position: 0 67.5vmin; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radar-component__radar::after,
+  .radar-component__targets,
+  .radar-component__targets::before,
+  .radar-component__targets::after {
+    animation: none;
+  }
+}

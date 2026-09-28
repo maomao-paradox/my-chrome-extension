@@ -1,0 +1,72 @@
+.aladdin {
+  container-type: inline-size;
+  display: grid;
+  width: 100%;
+  height: 280px;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(145deg, #f7edf2 0%, #fff 58%, #f0edf4 100%);
+  color: #202027;
+  --aladdin-slow-shift: 0px;
+  --aladdin-fast-shift: 0px;
+}
+
+.aladdin__lines {
+  width: 100%;
+  transform: translateY(12px);
+}
+
+.aladdin__line {
+  display: flex;
+  width: 100%;
+  font-size: clamp(2.4rem, 16cqi, 3.5rem);
+  line-height: 0.8;
+  text-transform: uppercase;
+}
+
+.aladdin__side {
+  display: inline-block;
+  width: 50%;
+  overflow: hidden;
+}
+
+.aladdin__side--left {
+  transform: skewY(-15deg);
+  color: #db77a0;
+}
+
+.aladdin__side--right {
+  transform: skewY(15deg);
+  color: #202027;
+}
+
+.aladdin__content {
+  width: 200%;
+  text-align: center;
+}
+
+.aladdin__side--right .aladdin__content {
+  transform: translateX(-50%);
+}
+
+.aladdin__word {
+  display: inline-block;
+  font-family: "Montserrat", "Avenir Next", sans-serif;
+  transition: transform 600ms ease-out;
+  white-space: nowrap;
+}
+
+.aladdin__word--slow {
+  transform: translateX(var(--aladdin-slow-shift));
+}
+
+.aladdin__word--fast {
+  transform: translateX(var(--aladdin-fast-shift));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aladdin__word {
+    transition: none;
+    transform: none;
+  }
+}

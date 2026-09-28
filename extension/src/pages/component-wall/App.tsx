@@ -6,32 +6,43 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { X } from "lucide-react";
-import MagneticPointer from "../../components/MagneticPointer";
-import NavigationCircle from "../../components/NavigationCircle";
-import ScrollingTimeline from "../../components/ScrollingTimeline";
-import Static404 from "../../components/Static404";
-import Waves from "../../components/Waves";
-import JungleKnotButton from "../../components/Jungle-knot/Button";
-import FlowerLoading from "../../components/loading/main";
-import ChromaticText from "../../components/text";
-import { ArknightsButton } from "../../components/Arknights/ArknightsButton";
-import { ArknightsCard } from "../../components/Arknights/ArknightsCard";
-import { ArknightsProgress } from "../../components/Arknights/ArknightsProgress";
-import { ArknightsTag } from "../../components/Arknights/ArknightsTag";
-import { JungleCruxButton } from "../../components/Arknights/JungleCruxButton";
-import ArknightsModal from "../../components/Arknights/Modal";
-import AnimatedSearch from "../../components/special/AnimatedSearch";
-import CarouselScene from "../../components/special/CarouselScene";
-import InteractiveGradient from "../../components/InteractiveGradient";
-import MASwitch from "../../components/switch/main";
+import MagneticPointer from "@/components/Magnetic/MagneticPointer";
+import MagneticButton from "@/components/Magnetic/MagneticButton";
+import Select from "@/components/Select";
+import SlicedText from "@/components/SlicedText";
+import NavigationCircle from "@/components/NavigationCircle";
+import ScrollingTimeline from "@/components/ScrollingTimeline";
+import Static404 from "@/components/Static404";
+import Waves from "@/components/Waves";
+import Radar from "@/components/Radar";
+import JungleKnotButton from "@/components/Jungle-knot/Button";
+import FlowerLoading from "@/components/loading/Flower";
+import PointLoading from "@/components/loading/Point";
+import RingDisc from "@/components/loading/RingDisc";
+import CSSDoodleParticles from "@/components/DoodleParticles";
+import MenuButton, { type MenuAction } from "@/components/MenuButton";
+import Weather from "@/components/Weather";
+import PushParticles from "@/components/particles/PushParticles";
+import Aladdin from "@/components/Aladdin";
+import ChromaticText from "@/components/text";
+import { ArknightsButton } from "@/components/Arknights/ArknightsButton";
+import { ArknightsCard } from "@/components/Arknights/ArknightsCard";
+import { ArknightsProgress } from "@/components/Arknights/ArknightsProgress";
+import { ArknightsTag } from "@/components/Arknights/ArknightsTag";
+import { JungleCruxButton } from "@/components/Arknights/JungleCruxButton";
+import ArknightsModal from "@/components/Arknights/Modal";
+import AnimatedSearch from "@/components/special/AnimatedSearch";
+import CarouselScene from "@/components/special/CarouselScene";
+import InteractiveGradient from "@/components/InteractiveGradient";
+import MASwitch from "@/components/switch/main";
 import TextScramble, {
   DEFAULT_TEXT_SCRAMBLE_PHRASES,
-} from "../../components/TextScramble";
-import AnimatedTextFill from "../../components/richtext/AnimatedTextFill";
-import MaMarkdown from "../../components/richtext/MaMarkdown";
-import RollingText from "../../components/richtext/RollingText";
-import Animate403 from "../../components/response-code/Animate403";
-import "../../components/switch/style.scss";
+} from "@/components/TextScramble";
+import AnimatedTextFill from "@/components/richtext/AnimatedTextFill";
+import MaMarkdown from "@/components/richtext/MaMarkdown";
+import RollingText from "@/components/richtext/RollingText";
+import Animate403 from "@/components/response-code/Animate403";
+import "@/components/switch/style.scss";
 import "./app.scss";
 
 interface PropertyInfo {
@@ -166,14 +177,25 @@ const buildUsageSnippet = (
 type PreviewKind =
   | "draggable"
   | "magnetic"
+  | "magnetic-buttons"
+  | "accessible-select"
   | "navigation"
   | "timeline"
   | "error"
   | "waves"
+  | "radar"
   | "interactive-gradient"
   | "jungle-button"
   | "flower-loading"
+  | "point-loading"
+  | "ring-disc-loading"
+  | "css-doodle-particles"
+  | "menu-button"
+  | "weather-icons"
+  | "push-particles"
+  | "aladdin"
   | "chromatic-text"
+  | "sliced-text"
   | "text-scramble"
   | "rolling-text"
   | "animated-text-fill"
@@ -318,6 +340,45 @@ const COMPONENTS: ComponentInfo[] = [
     ],
   },
   {
+    id: "magnetic-buttons",
+    name: "Magnetic Buttons",
+    category: "INTERACTION / MAGNETIC",
+    source: "src/components/Magnetic/MagneticButton.tsx",
+    description: "三个彩色图标按钮会随指针产生磁吸位移与亮度变化。",
+    preview: "magnetic-buttons",
+    height: "short",
+    properties: [],
+  },
+  {
+    id: "accessible-select",
+    name: "Accessible Select",
+    category: "INTERACTION / ACCESSIBILITY",
+    source: "src/components/Select.tsx",
+    description:
+      "支持键盘导航、清晰焦点提示与减少动态效果偏好的可访问下拉选择器。",
+    preview: "accessible-select",
+    height: "short",
+    properties: [],
+  },
+  {
+    id: "sliced-text",
+    name: "Sliced Text",
+    category: "TEXT / DISTORTION",
+    source: "src/components/SlicedText.tsx",
+    description: "双层文字通过错位裁切形成切片效果，可自定义展示文案。",
+    preview: "sliced-text",
+    height: "short",
+    detailLayout: "top-split",
+    properties: [
+      {
+        name: "text",
+        type: "string",
+        description: "切片文字内容，默认 Sliced。",
+        defaultValue: "Sliced",
+      },
+    ],
+  },
+  {
     id: "navigation-circle",
     name: "Navigation Circle",
     category: "NAVIGATION / ORBIT",
@@ -377,38 +438,22 @@ const COMPONENTS: ComponentInfo[] = [
     ],
   },
   {
-    id: "static-404",
-    name: "Static 404",
-    category: "FEEDBACK / ERROR",
-    source: "src/components/Static404.tsx",
-    description: "轻量 404 占位界面，可选提供返回操作。",
-    preview: "error",
-    height: "short",
-    properties: [
-      {
-        name: "onGoBack",
-        type: "() => void",
-        description: "传入后显示“返回首页”按钮。",
-      },
-    ],
-  },
-  {
-    id: "animate-403",
-    name: "Animate 403",
-    category: "FEEDBACK / ERROR",
-    source: "src/components/response-code/Animate403.tsx",
-    description: "逐字输出 HTTP 403 错误信息与访问权限说明的终端告示。",
-    preview: "animate-403",
-    height: "medium",
-    properties: [],
-  },
-  {
     id: "waves",
     name: "Waves",
     category: "DECORATION / MOTION",
     source: "src/components/Waves.tsx",
     description: "循环滚动的波纹背景，可用作页面或区块的动态底纹。",
     preview: "waves",
+    height: "medium",
+    properties: [],
+  },
+  {
+    id: "radar",
+    name: "Radar",
+    category: "DECORATION / RADAR",
+    source: "src/components/Radar.tsx",
+    description: "带有扫描轨迹、动态目标点和双模式切换的雷达面板。",
+    preview: "radar",
     height: "medium",
     properties: [],
   },
@@ -486,6 +531,76 @@ const COMPONENTS: ComponentInfo[] = [
         defaultValue: "4s",
       },
     ],
+  },
+  {
+    id: "point-loading",
+    name: "Point Loading",
+    category: "LOADING / POINT",
+    source: "src/components/loading/Point.tsx",
+    description: "环形轨道上的动态点阵，点击可切换明暗配色。",
+    preview: "point-loading",
+    height: "medium",
+    properties: [],
+  },
+  {
+    id: "ring-disc-loading",
+    name: "Ring Disc Loading",
+    category: "LOADING / RING DISC",
+    source: "src/components/loading/RingDisc.tsx",
+    description: "由三层旋转环、延迟旋转圆盘与状态提示组成的加载动画。",
+    preview: "ring-disc-loading",
+    height: "medium",
+    properties: [],
+  },
+  {
+    id: "css-doodle-particles",
+    name: "CSS Doodle Particles",
+    category: "DECORATION / PARTICLES",
+    source: "src/components/1.tsx",
+    description:
+      "彩色爱心与光点在 3D 透视空间中循环飞散，支持减少动态效果偏好。",
+    preview: "css-doodle-particles",
+    height: "medium",
+    detailLayout: "top-split",
+    properties: [],
+  },
+  {
+    id: "menu-button",
+    name: "Menu Button",
+    category: "INTERACTION / MENU",
+    source: "src/components/MenuButton.tsx",
+    description: "圆形汉堡按钮展开带有图标和逐项入场动画的快捷操作菜单。",
+    preview: "menu-button",
+    height: "short",
+    properties: [
+      {
+        name: "onAction",
+        type: "function",
+        description: "点击菜单项时回调对应操作 ID。",
+      },
+    ],
+  },
+  {
+    id: "weather-icons",
+    name: "Animated Weather Icons",
+    category: "DECORATION / WEATHER",
+    source: "src/components/Weather.tsx",
+    description: "六种天气图标组成的动画图鉴，展示日照、云层、雨雪和闪电效果。",
+    preview: "weather-icons",
+    height: "medium",
+    detailLayout: "top-split",
+    properties: [],
+  },
+  {
+    id: "aladdin",
+    name: "Aladdin",
+    category: "TEXT / DISTORTION",
+    source: "src/components/Aladdin.tsx",
+    description: "左右镜像斜切文字随指针产生不同速度的横向位移。",
+    preview: "aladdin",
+    height: "medium",
+    detailLayout: "top-split",
+    properties: [],
   },
   {
     id: "chromatic-text",
@@ -634,35 +749,6 @@ const COMPONENTS: ComponentInfo[] = [
         name: "...buttonProps",
         type: "ButtonHTMLAttributes",
         description: "原生 button 属性与事件。",
-      },
-    ],
-  },
-  {
-    id: "arknights-card",
-    name: "Arknights Card",
-    category: "ARKNIGHTS / PANEL",
-    source: "src/components/Arknights/ArknightsCard.tsx",
-    description: "带 PRTS 标题栏、定位角标和警示斜纹的终端面板。",
-    preview: "arknights-card",
-    height: "medium",
-    properties: [
-      {
-        name: "title",
-        type: "string",
-        description: "面板标题，展示默认值 OPERATION。",
-        defaultValue: "OPERATION",
-      },
-      {
-        name: "systemCode",
-        type: "string",
-        description: "右上角系统编号。",
-        defaultValue: "// RHODES_ISLAND",
-      },
-      { name: "children", type: "ReactNode", description: "面板主体内容。" },
-      {
-        name: "style",
-        type: "CSSProperties",
-        description: "覆盖面板容器样式。",
       },
     ],
   },
@@ -1018,6 +1104,24 @@ function Preview({
       return <DraggablePreview previewProps={props} />;
     case "magnetic":
       return <MagneticPreview previewProps={props} />;
+    case "magnetic-buttons":
+      return (
+        <div className="art art--magnetic-buttons">
+          <MagneticButton />
+        </div>
+      );
+    case "accessible-select":
+      return (
+        <div className="art art--accessible-select">
+          <Select />
+        </div>
+      );
+    case "sliced-text":
+      return (
+        <div className="art art--sliced-text">
+          <SlicedText text={String(props.text ?? "Sliced")} />
+        </div>
+      );
     case "navigation":
       return (
         <div className="art art--navigation">
@@ -1055,6 +1159,12 @@ function Preview({
           <Waves />
         </div>
       );
+    case "radar":
+      return (
+        <div className="art art--radar">
+          <Radar />
+        </div>
+      );
     case "interactive-gradient":
       return (
         <div className="art art--interactive-gradient">
@@ -1080,6 +1190,54 @@ function Preview({
       return (
         <div className="art art--loading">
           <FlowerLoading progressDelay={String(props.progressDelay ?? "4s")} />
+        </div>
+      );
+    case "point-loading":
+      return (
+        <div className="art art--point-loading">
+          <PointLoading />
+        </div>
+      );
+    case "ring-disc-loading":
+      return (
+        <div className="art art--ring-disc-loading">
+          <RingDisc />
+        </div>
+      );
+    case "css-doodle-particles":
+      return (
+        <div className="art art--css-doodle-particles">
+          <CSSDoodleParticles />
+        </div>
+      );
+    case "menu-button":
+      return (
+        <div className="art art--menu-button">
+          <MenuButton
+            onAction={
+              typeof props.onAction === "function"
+                ? (props.onAction as (action: MenuAction) => void)
+                : undefined
+            }
+          />
+        </div>
+      );
+    case "weather-icons":
+      return (
+        <div className="art art--weather-icons">
+          <Weather />
+        </div>
+      );
+    case "push-particles":
+      return (
+        <div className="art art--push-particles">
+          <PushParticles particleCount={Number(props.particleCount ?? 400)} />
+        </div>
+      );
+    case "aladdin":
+      return (
+        <div className="art art--aladdin">
+          <Aladdin />
         </div>
       );
     case "chromatic-text":

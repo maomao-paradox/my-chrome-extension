@@ -33,7 +33,7 @@ const InteractiveGradient = ({
       const target = targetPositionRef.current;
       current.x += (target.x - current.x) / 20;
       current.y += (target.y - current.y) / 20;
-      bubble.style.transform = `translate3d(${current.x.toFixed(2)}px, ${current.y.toFixed(2)}px, 0)`;
+      bubble.style.transform = `translate(-50%, -50%) translate3d(${current.x.toFixed(2)}px, ${current.y.toFixed(2)}px, 0)`;
 
       if (Math.abs(target.x - current.x) > 0.5 || Math.abs(target.y - current.y) > 0.5) {
         animationFrameRef.current = window.requestAnimationFrame(animate);

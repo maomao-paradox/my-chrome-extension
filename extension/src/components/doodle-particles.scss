@@ -1,0 +1,14 @@
+.css-doodle-particles {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 280px;
+  place-items: center;
+  overflow: hidden;
+  background: #270f34;
+  contain: content;
+}
+
+.css-doodle-particles > css-doodle {
+  display: block;
+}

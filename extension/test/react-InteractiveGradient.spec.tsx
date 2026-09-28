@@ -78,6 +78,8 @@ describe("InteractiveGradient", () => {
 
     expect(
       container.querySelector<HTMLElement>(".interactive-gradient__blob--interactive")?.style.transform,
-    ).toBe("translate3d(2.50px, -0.50px, 0)");
+    ).toBe(
+      "translate(-50%, -50%) translate3d(2.50px, -0.50px, 0)",
+    );
   });
 });

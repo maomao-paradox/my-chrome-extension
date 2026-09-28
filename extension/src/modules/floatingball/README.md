@@ -41,7 +41,7 @@ floatingball/
 
 - **Shadow DOM 样式注入**：所有 SCSS 通过 `?inline` 导入为字符串，在 `index.ts` 中用 `injectStyles` 注入 shadow root，避免 Vite CSS 代码分割创建 `<link>` 标签导致相对路径请求失败
 - **Drawer 容器挂载**：antd Drawer 默认 portal 到 `document.body`，通过 `getContainer` 指向 shadow root 内的容器，确保样式生效
-- **Draggable 共享组件**：React 版位于 `@/assets/components/Draggable.tsx`，用 `forwardRef` + `useImperativeHandle` 暴露 `getCurrentPosition/setPosition/setPositionImmediate`，高频更新用 `useRef` 保证 60fps
+- **Draggable 共享组件**：React 版由 `Draggable.tsx` 渲染、`useDraggable.ts` 管理拖拽状态和事件，支持鼠标/触摸拖动；用 `forwardRef` + `useImperativeHandle` 暴露 `getCurrentPosition/setPosition/setPositionImmediate`，高频更新用 `useRef` 保证 60fps
 - **全屏动画**：用 `requestAnimationFrame` + `easeInOutCubic` 缓动函数，通过 Draggable 命令式 API 直接驱动位置，绕过 React 渲染周期
 - **状态管理**：Zustand store 位于 `@/stores/floatingball`，React 中用 selector 订阅，非组件代码用 `getState()` 调用
 - **光谱效应工具**：`SpectrumEffects.tsx` 提供棱镜折射、极光幕布、光谱环和衍射薄膜四种 CSS 效果，可在抽屉内切换预览、调节强度并复制样式片段

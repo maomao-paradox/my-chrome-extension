@@ -1,0 +1,163 @@
+.point-loading-preview {
+  --point-white: #fafafa;
+  --point-black: #141414;
+  --point-speed: 1s;
+  --point-delay: calc(var(--point-speed) / 6);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 250px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--point-black);
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  &__container {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--point-black);
+  }
+
+  &__input {
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+
+    &:checked ~ * {
+      filter: invert(1);
+    }
+
+    &:checked + .point-loading-preview__bg::before {
+      content: "CLICK TO DARK";
+    }
+  }
+
+  &__bg {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    background: var(--point-black);
+
+    &::before {
+      position: absolute;
+      bottom: 10%;
+      width: 100%;
+      color: var(--point-white);
+      content: "CLICK TO LIGHT";
+      font: 12px Arial, Helvetica, sans-serif;
+      opacity: 0.25;
+      text-align: center;
+      text-shadow: 0 0 1px var(--point-white);
+    }
+  }
+
+  &__content,
+  &__dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__content {
+    position: relative;
+    width: min(62vmin, 240px);
+    aspect-ratio: 1;
+    background: transparent;
+    animation: point-loading-spin 8s linear infinite;
+  }
+
+  &__dots {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+  }
+
+  &__ring {
+    z-index: 0;
+    width: 76%;
+    height: 76%;
+    border: min(1.5vmin, 6px) solid var(--point-white);
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 min(1vmin, 4px) var(--point-black),
+      0 0 0 min(1vmin, 4px) var(--point-black) inset;
+    animation: point-loading-spin 8s linear infinite reverse;
+  }
+
+  &__dot {
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    width: 50%;
+    height: min(7vmin, 16px);
+    background: transparent;
+    transform-origin: 100% 50%;
+    animation: point-loading-over-ring calc(var(--point-speed) * 2) linear infinite;
+
+    span {
+      position: absolute;
+      left: 0;
+      width: min(7vmin, 20px);
+      height: min(7vmin, 20px);
+      border: min(1.2vmin, 2.5px) solid var(--point-black);
+      border-radius: 50%;
+      background: var(--point-white);
+      animation: point-loading-ball var(--point-speed) ease-in-out infinite alternate;
+    }
+  }
+
+  @for $index from 1 through 12 {
+    &__dots:nth-child(#{$index}) .point-loading-preview__dot {
+      transform: rotate(-30deg * $index);
+      animation-delay: calc(var(--point-delay) * #{1 - $index});
+
+      span {
+        animation-delay: calc(var(--point-delay) * #{1 - $index});
+      }
+    }
+  }
+}
+
+@keyframes point-loading-spin {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes point-loading-ball {
+  to {
+    left: min(12vmin, 40px);
+    width: min(5vmin, 13px);
+    height: min(5vmin, 13px);
+  }
+}
+
+@keyframes point-loading-over-ring {
+  0%, 50% { z-index: -1; }
+  51%, 100% { z-index: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .point-loading-preview__content,
+  .point-loading-preview__ring,
+  .point-loading-preview__dot,
+  .point-loading-preview__dot span {
+    animation: none;
+  }
+}

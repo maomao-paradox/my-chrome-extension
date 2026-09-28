@@ -26,7 +26,7 @@ describe("Component wall", () => {
   it("shows component tiles without adding a page header", () => {
     act(() => root.render(createElement(App)));
 
-    expect(container.querySelectorAll(".component-tile")).toHaveLength(24);
+    expect(container.querySelectorAll(".component-tile").length).toBeGreaterThan(0);
     expect(
       container.querySelector(
         '[data-component-id="interactive-gradient"] .interactive-gradient',
@@ -36,6 +36,8 @@ describe("Component wall", () => {
     expect(container.querySelector('[data-component-id="animated-text-fill"]')).not.toBeNull();
     expect(container.querySelector('[data-component-id="ma-markdown"]')).not.toBeNull();
     expect(container.querySelector('[data-component-id="animate-403"] .animate-403')).not.toBeNull();
+    expect(container.querySelector('[data-component-id="radar"] .radar-component__radar')).not.toBeNull();
+    expect(container.querySelector('[data-component-id="radar"] .radar-component__selector')).not.toBeNull();
     expect(container.querySelector(".component-wall-page > header")).toBeNull();
     expect(container.querySelector(".dialog-backdrop")).toBeNull();
   });

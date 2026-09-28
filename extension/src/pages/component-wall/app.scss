@@ -112,6 +112,18 @@ button { font: inherit; }
 .art--magnetic .magnetic-pointer__content { z-index: 1; display: grid; justify-items: center; gap: 12px; }
 .gallery-magnetic-target { display: grid; width: 108px; height: 48px; place-items: center; border: 1px solid #99ee79; color: #e9f6df; font: 11px monospace; letter-spacing: .08em; cursor: crosshair; }
 .art--magnetic .magnetic-caption { position: static; }
+.art--magnetic-buttons { min-height: 206px; padding: 0; background: #111; }
+.art--magnetic-buttons .magnetic-button-gallery { min-height: 206px; gap: 4px; padding: 10px; }
+.art--magnetic-buttons .gravityButton { width: min(100%, 96px); }
+.art--magnetic-buttons .gravityButton > button { width: clamp(42px, 48%, 56px); }
+.art--accessible-select { min-height: 190px; padding: 22px; background: #142329; }
+.art--menu-button { min-height: 240px; padding: 0; background: #2d2d2d; }
+.art--weather-icons { display: block; min-height: 280px; padding: 0; background: #252731; }
+.art--push-particles { display: block; height: 300px; min-height: 300px; padding: 0; background: #17121f; }
+.art--push-particles .push-particles { height: 100%; min-height: 300px; }
+.art--aladdin { display: block; min-height: 280px; padding: 0; background: #f7edf2; }
+.art--aladdin .aladdin { height: 280px; }
+.art--sliced-text { min-height: 230px; padding: 0; background: #080b0b; }
 
 .orbit-ring { position: relative; width: 168px; height: 168px; border: 1px solid #f3cf72; border-radius: 50%; box-shadow: 0 0 0 16px rgba(243,207,114,.07), 0 0 0 32px rgba(243,207,114,.04); }
 .orbit-ring > span { position: absolute; top: 50%; left: 50%; display: grid; width: 46px; height: 46px; place-items: center; border: 1px solid #f3cf72; border-radius: 50%; color: #f3cf72; font: 12px monospace; transform: translate(-50%,-50%); }
@@ -179,6 +191,14 @@ button { font: inherit; }
 .art--jungle-knot .operation-button { width: min(230px, 85%); }
 .art--loading { min-height: 240px; padding: 0; background: #161b29; }
 .art--loading .flower-loading-preview { min-height: 240px; }
+.art--point-loading { display: block; height: 260px; min-height: 260px; padding: 0; background: #141414; }
+.art--point-loading .point-loading-preview,
+.art--point-loading .point-loading-preview__container { min-height: 260px; }
+.art--point-loading .point-loading-preview__content { width: min(62vmin, 230px); }
+.art--ring-disc-loading { display: block; min-height: 280px; padding: 0; background: #02143c; }
+.art--ring-disc-loading .ring-disc-loader { min-height: 280px; }
+.art--css-doodle-particles { display: block; min-height: 280px; padding: 0; background: #270f34; }
+.art--css-doodle-particles .css-doodle-particles { height: 100%; }
 .art--chromatic { min-height: 230px; padding: 0; background: #101b1c; }
 .art--chromatic .chromatic-text-preview,
 .art--chromatic .poster { min-height: 230px; }
@@ -209,6 +229,9 @@ button { font: inherit; }
 .art--waves { height: 218px; background:#121212;}
 .art--waves .bg-scroll-box { top: 0; max-height: 100%; }
 .art--waves .bg { width: 50%; height: 100%; min-height: 0; object-fit: cover; }
+.art--radar { display: block; height: 340px; min-height: 340px; padding: 0; background: #1f1f1f; }
+.art--radar .radar-component { min-height: 340px; }
+.art--radar .radar-component__radar { width: min(75vmin, 220px); }
 .art--interactive-gradient { min-height: 330px; padding: 0; background: #0b1417; }
 .art--interactive-gradient .interactive-gradient { min-height: 330px; }
 .art--interactive-gradient .interactive-gradient__title { top: 11%; font-size: 7px; }

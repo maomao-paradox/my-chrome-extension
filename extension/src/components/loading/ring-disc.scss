@@ -1,0 +1,100 @@
+.ring-disc-loader {
+  --ring-disc-red: #ff3420;
+  --ring-disc-bg: #02143c;
+
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 260px;
+  place-items: center;
+  overflow: hidden;
+  background: var(--ring-disc-bg);
+}
+
+.ring-disc-loader__rings,
+.ring-disc-loader__discs,
+.ring-disc-loader__ring,
+.ring-disc-loader__disc {
+  position: absolute;
+}
+
+.ring-disc-loader__rings,
+.ring-disc-loader__discs {
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.ring-disc-loader__ring {
+  border: 2px solid rgba(255, 35, 49, 0.1);
+  border-right-color: var(--ring-disc-red);
+  border-left-color: var(--ring-disc-red);
+  border-radius: 50%;
+}
+
+.ring-disc-loader__ring:nth-child(1) {
+  animation: ring-disc-spin 1s linear infinite;
+}
+
+.ring-disc-loader__ring:nth-child(2) {
+  animation: ring-disc-spinner 1.25s linear infinite;
+}
+
+.ring-disc-loader__ring:nth-child(3) {
+  animation: ring-disc-spin 1.5s linear infinite;
+}
+
+.ring-disc-loader__disc {
+  width: 150px;
+  height: 150px;
+  border: 2px solid var(--ring-disc-red);
+  border-radius: 50%;
+  opacity: 0.9;
+  animation: ring-disc-rotate 3s linear infinite;
+}
+
+.ring-disc-loader__label {
+  z-index: 1;
+  color: var(--ring-disc-red);
+  font-family: "Avenir Next", "PingFang SC", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  animation: ring-disc-blink 1s ease infinite;
+}
+
+@keyframes ring-disc-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes ring-disc-rotate {
+  to {
+    transform: rotate3d(0.5, 0.5, 0.5, -720deg);
+  }
+}
+
+@keyframes ring-disc-spin {
+  to {
+    transform: rotateZ(-360deg);
+  }
+}
+
+@keyframes ring-disc-spinner {
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-disc-loader__ring,
+  .ring-disc-loader__disc,
+  .ring-disc-loader__label {
+    animation: none;
+  }
+}

@@ -1,0 +1,177 @@
+.menu-button {
+  --menu-accent: #5c67ff;
+  --menu-ink: #1c3991;
+
+  position: relative;
+  width: 50px;
+  height: 50px;
+  color: #fff;
+}
+
+.menu-button__trigger {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--menu-accent);
+  box-shadow: 0 0 0 4px rgba(92, 103, 255, 0.3);
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.menu-button__trigger:hover {
+  background: #4854ff;
+  box-shadow: 0 0 0 8px rgba(92, 103, 255, 0.3);
+}
+
+.menu-button__trigger:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.menu-button__icon {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 2px;
+  transition: transform 330ms ease-out;
+}
+
+.menu-button__line {
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.menu-button__line--half {
+  width: 50%;
+}
+
+.menu-button__line--first {
+  transform-origin: right;
+  transition: transform 300ms cubic-bezier(0.52, -0.8, 0.52, 0.52);
+}
+
+.menu-button__line--last {
+  align-self: flex-end;
+  transform-origin: left;
+  transition: transform 300ms cubic-bezier(0.52, -0.8, 0.52, 0.52);
+}
+
+.menu-button__list {
+  position: absolute;
+  right: 24px;
+  bottom: 0;
+  z-index: 1;
+  width: 140px;
+  height: 170px;
+  margin: 0;
+  padding: 6px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 0 4px 4px rgba(150, 157, 249, 0.16);
+  list-style: none;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0);
+  transform-origin: bottom right;
+  transition: opacity 300ms ease 100ms, transform 300ms ease 100ms;
+}
+
+.menu-button__item {
+  height: 39px;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.menu-button__item:not(:last-child)::after {
+  position: relative;
+  top: -1px;
+  display: block;
+  width: calc(100% - 24px);
+  height: 1px;
+  margin: 0 12px;
+  background: rgba(132, 160, 244, 0.1);
+  content: "";
+  pointer-events: none;
+}
+
+.menu-button__item-action {
+  display: flex;
+  width: 100%;
+  height: 39px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--menu-ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+
+.menu-button__item-action:hover,
+.menu-button__item-action:focus-visible {
+  color: var(--menu-accent);
+}
+
+.menu-button__item-action:focus-visible {
+  outline: 2px solid var(--menu-accent);
+  outline-offset: -2px;
+}
+
+.menu-button--open .menu-button__list {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.menu-button--open .menu-button__item {
+  animation: menu-button-fade-in 600ms 200ms forwards;
+}
+
+.menu-button--open .menu-button__item:nth-child(2) { animation-delay: 400ms; }
+.menu-button--open .menu-button__item:nth-child(3) { animation-delay: 600ms; }
+.menu-button--open .menu-button__item:nth-child(4) { animation-delay: 800ms; }
+.menu-button--open .menu-button__trigger { animation: menu-button-pulse 600ms linear forwards; }
+.menu-button--open .menu-button__icon { transform: rotate(-45deg); }
+.menu-button--open .menu-button__line--first { transform: rotate(-90deg) translateX(1px); }
+.menu-button--open .menu-button__line--last { transform: rotate(-90deg) translateX(-1px); }
+
+@keyframes menu-button-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(92, 103, 255, 0.3); }
+  50% { box-shadow: 0 0 0 12px rgba(92, 103, 255, 0.1); }
+  100% { box-shadow: 0 0 0 4px rgba(92, 103, 255, 0.3); }
+}
+
+@keyframes menu-button-fade-in {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-button__trigger,
+  .menu-button__icon,
+  .menu-button__line,
+  .menu-button__list,
+  .menu-button__item,
+  .menu-button--open .menu-button__trigger {
+    animation: none;
+    transition: none;
+  }
+
+  .menu-button--open .menu-button__item { opacity: 1; transform: none; }
+}

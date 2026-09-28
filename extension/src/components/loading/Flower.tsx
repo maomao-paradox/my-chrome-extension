@@ -1,5 +1,5 @@
 import React from "react";
-import "./style.scss";
+import "./flower.scss";
 
 const getItemStyle = (index: number) => {
   return {
@@ -8,7 +8,7 @@ const getItemStyle = (index: number) => {
   };
 };
 
-const Loading: React.FC<{ progressDelay?: string }> = ({
+const FlowerLoading: React.FC<{ progressDelay?: string }> = ({
   progressDelay = "2.5s",
 }) => {
   return (
@@ -35,4 +35,4 @@ const Loading: React.FC<{ progressDelay?: string }> = ({
   );
 };
 
-export default Loading;
+export default FlowerLoading;
