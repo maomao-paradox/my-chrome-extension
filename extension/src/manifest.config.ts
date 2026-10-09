@@ -28,18 +28,18 @@ export const createManifest = (pages: ManifestPageFlags) =>
     // key: "ZXh0ZW5zaW9uX2RlZmF1bHRfcHVibGljX2tleQ==",
 
     icons: {
-      16: "icons/favicon16.ico" as never,
-      48: "icons/favicon48.ico" as never,
-      128: "icons/favicon128.ico" as never,
+      16: "imgs/favicon16.ico" as never,
+      48: "imgs/favicon48.ico" as never,
+      128: "imgs/favicon128.ico" as never,
     },
 
     action: {
       default_title: "配置项",
       ...(pages.popup ? { default_popup: "pages/popup.html" as never } : {}),
       default_icon: {
-        16: "icons/favicon16.ico" as never,
-        48: "icons/favicon48.ico" as never,
-        128: "icons/favicon128.ico" as never,
+        16: "imgs/favicon16.ico" as never,
+        48: "imgs/favicon48.ico" as never,
+        128: "imgs/favicon128.ico" as never,
       },
     },
     commands: {
@@ -79,7 +79,6 @@ export const createManifest = (pages: ManifestPageFlags) =>
         resources: [
           "js/*",
           "css/*",
-          "icons/*",
           "imgs/*",
           "keytone/Piano/*.wav",
           "fonts/*",

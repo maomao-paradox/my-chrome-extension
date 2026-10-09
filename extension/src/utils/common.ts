@@ -247,3 +247,41 @@ export const getSingleFileScript = (scriptName: string) => {
 export const getStaticAbstractPath = (path: string) => {
   return chrome.runtime.getURL(`${path}`);
 };
+
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  if (typeof func !== "function") {
+    throw new Error("func is not a function");
+  }
+  let timeout: NodeJS.Timeout | null = null;
+  let lastRun = 0;
+  return function (this: any, ...args: any[]) {
+    const now = Date.now();
+    if (now - lastRun >= wait) {
+      func.apply(this, args);
+      lastRun = now;
+    } else if (!timeout) {
+      timeout = setTimeout(() => {
+        func.apply(this, args);
+        lastRun = Date.now();
+        timeout = null;
+      }, wait);
+    }
+  };
+}
+
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  if (typeof func !== "function") {
+    throw new Error("func is not a function");
+  }
+  let timeout: NodeJS.Timeout | null = null;
+  return function (this: any, ...args: any[]) {
+    clearTimeout(timeout!);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}

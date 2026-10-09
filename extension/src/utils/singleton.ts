@@ -1,7 +1,9 @@
 import { AppModule } from "@/types";
 
 // 创建代理类，拦截所有 new 操作
-export const useSingletonEffect = (className: AppModule) =>
+export const useSingletonEffect = (
+  className: AppModule & ((...args: any[]) => unknown),
+) =>
   new Proxy(className, {
     construct(target, args, newTarget) {
       // 如果实例不存在，创建新实例

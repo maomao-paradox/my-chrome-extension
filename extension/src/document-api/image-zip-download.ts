@@ -8,7 +8,7 @@
  */
 
 import JSZip from "jszip";
-//@ts-ignore
+
 import { saveAs } from "file-saver";
 
 import { ImageInfo } from "@/types/utils";

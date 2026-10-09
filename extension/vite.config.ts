@@ -176,7 +176,7 @@ export default ({
         output: {
           manualChunks: isProduction
             ? {
-              // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
+                // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
                 "infrastructure-chrome": ["@/service-worker/chrome-api"],
                 // DOM 工具 - 仅限有 DOM 访问权限的上下文使用
                 "infrastructure-document": ["@/document-api"],
@@ -195,15 +195,14 @@ export default ({
           assetFileNames: (assetInfo: any) => {
             // console.log(assetInfo.names);
             const fileExtname = path.extname(assetInfo.names?.[0] || "");
-            if ([".ttf", ".woff", ".woff2"].includes(fileExtname)) {
+            if ([".ttf", ".otf", ".woff", ".woff2"].includes(fileExtname)) {
               return `fonts/[hash].[ext]`;
             } else if (
+              [".png", ".jpg", ".jpeg", ".gif", ".svg"].includes(fileExtname)
+            ) {
+              return `imgs/[hash].[ext]`;
+            } else if (
               [
-                ".png",
-                ".jpg",
-                ".jpeg",
-                ".gif",
-                ".svg",
                 ".webp",
                 ".mp3",
                 ".wav",
@@ -214,6 +213,8 @@ export default ({
               ].includes(fileExtname)
             ) {
               return `static/[hash].[ext]`;
+            } else if ([".md"].includes(fileExtname)) {
+              return `docs/[hash].[ext]`;
             } else if (fileExtname === ".css") {
               return `css/[hash].[ext]`;
             } else if (fileExtname === ".js") {

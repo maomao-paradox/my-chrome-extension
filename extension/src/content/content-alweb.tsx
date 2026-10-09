@@ -9,21 +9,13 @@
 import {
   whenDomReady,
   waitForSelector,
-  getElementAbsolutePosition,
-  PositionStrategy,
-  cloneEl,
-  addElementToDom,
-  createEl,
 } from "@/document-api";
-import { InsertDomPosition, type Tool } from "@/types";
+import type { Tool } from "@/types";
 import { storage } from "@/stores";
 
 import messenger from "@/message";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 import { request } from "@/utils";
-import JungleKnotButton from "@/components/Jungle-knot/Button";
-import JungleKnotButtonStyle from "@/components/Jungle-knot/styles/button.scss?inline";
-import { createRoot } from "react-dom/client";
 
 const ADMIN = "admin";
 
@@ -59,87 +51,30 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     }
   };
 
-  /**
-   * 在指定元素旁挂载 QuickLogin Vue 组件到 Shadow DOM
-   */
-  const enrichQuickLogin = (
-    byElement: HTMLElement,
-    position: {
-      strategy?: PositionStrategy;
-      offset?: { x?: number; y?: number };
-    },
-  ): void => {
-    if (!byElement) {
-      return;
-    }
-
-    const shadowRoot = ctx.gmod("__SHADOW_DOM");
-    if (!shadowRoot) {
-      maLogger.error("Shadow DOM 不存在");
-      return;
-    }
-
-    const positionInfo = getElementAbsolutePosition(byElement);
-    // maLogger.log("positionInfo:", positionInfo);
-
-    const adminButtonWrapper = createEl({
-      tag: "div",
-      attrs: {
-        className: "quick-login-shadow-container",
-      },
-    });
-
-    shadowRoot.appendChild(adminButtonWrapper);
-
-    const root = createRoot(adminButtonWrapper);
-    root.render(
-      <>
-        <style>
-          {JungleKnotButtonStyle +
-            ".operation-button__content span { font-size: 16px; }"}
-        </style>
-        <JungleKnotButton
-          onClick={() => quickLogin("mp" + ADMIN, ADMIN + "123")}
-          mainTitle="管理员登录"
-        />
-      </>,
-    );
-
-    const { strategy = PositionStrategy.Down, offset } = position;
-
-    positionInfo.positionElement({
-      targetElement: adminButtonWrapper,
-      strategy,
-      alignment: "center",
-      offset,
-      pinned: true,
-      observeReference: true,
-    });
-  };
-
   featureRegistry.register("alweb.enrichQuickLogin", "管理员一键登录", () => {
-    // 监听 quickLogin 事件
     if (location.hash.match("#/login")) {
       waitForSelector({
-        selector: "#app > div > div.auth-page__main > div > form > button",
-        filter: (el) => el.textContent === "登录",
-        callback: (el) =>
-          enrichQuickLogin(el!, { strategy: PositionStrategy.Down }),
-        // addElementToDom({
-        //   el,
-        //   attrs: {
-        //     textContent: "管理员登录",
-        //     className: [
-        //       "quick-login-shadow-container",
-        //       ...el!.classList,
-        //     ].join(" "),
-        //   },
-        //   eventlistener: {
-        //     click: () => {
-        //       quickLogin("mp" + ADMIN, ADMIN + "123");
-        //     },
-        //   },
-        // })(el, InsertDomPosition.AE),
+        selector:
+          "#app > div > div.auth-page__main > div > form > div.login-title > img",
+        callback: (el) => {
+          const image = el as HTMLImageElement;
+          const originalTransform = image.style.transform;
+
+          image.style.cursor = "pointer";
+          image.style.transition = "transform 120ms ease";
+          image.addEventListener("click", () => {
+            void quickLogin("mp" + ADMIN, ADMIN + "123");
+          });
+          image.addEventListener("pointerdown", () => {
+            image.style.transform = "scale(0.9)";
+          });
+          const restoreImage = () => {
+            image.style.transform = originalTransform;
+          };
+          image.addEventListener("pointerup", restoreImage);
+          image.addEventListener("pointercancel", restoreImage);
+          image.addEventListener("pointerleave", restoreImage);
+        },
         maxWaitTimes: 10,
         useMutationObserver: true,
         timeout: 5000,

@@ -14,7 +14,6 @@ import { storage } from "@/stores";
 import {
   shadowRoot,
   injectCssDom,
-  debounce,
   ElementPositionInfo,
   addElementToDom,
   PositionStrategy,
@@ -22,6 +21,7 @@ import {
 } from "@/document-api";
 
 import {
+  debounce,
   getAssetsAbstractPathSync,
   generateId,
   componentManager,

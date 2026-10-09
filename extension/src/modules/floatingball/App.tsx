@@ -190,7 +190,7 @@ const App: React.FC<AppProps> = ({
     <>
       {/* 悬浮球 */}
       <FloatingBall
-        icon={icon ?? getStaticAbstractPath("icons/floatingball.png")}
+        icon={icon ?? getStaticAbstractPath("imgs/floatingball.png")}
         onClick={handleFloatingBallClick}
       />
 

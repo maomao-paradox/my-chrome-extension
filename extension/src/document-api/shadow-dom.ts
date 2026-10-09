@@ -7,8 +7,7 @@
  * @date 2026-02-05T02:38:01.699Z
  */
 
-import { $id } from "./element-control";
-import shadowThemeCss from "@/assets/styles/shadow-theme.css?raw";
+import shadowThemeCss from "@/assets/styles/shadow-theme.css?inline";
 import { shadowHostId } from "@/config";
 
 type ShadowContext = {
@@ -22,7 +21,7 @@ export function getShadowContext(
 ): ShadowContext {
   try {
     // 检查是否已存在
-    const existingHost = $id(id);
+    const existingHost = document.getElementById(id);
     if (existingHost) {
       // maLogger.log("已存在Shadow Host:", existingHost);
       return {

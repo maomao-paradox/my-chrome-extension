@@ -136,9 +136,7 @@ export default (ctx: AppContext, config = {}) => {
         "auth-user-info",
         JSON.stringify(loginRes.user_profile),
       );
-      // document.cookie = "Portal-token=" + loginRes.data["access_token"];
-      // 使用接口响应标头的set-Cookie设置cookie
-      // 重新构建requester
+
       location.reload();
     } catch (err) {
       maLogger.error(err);
@@ -375,12 +373,10 @@ export default (ctx: AppContext, config = {}) => {
         addLoadingMask(tableEl);
         // 调用AI生成JSON数据
         const result = await requestAI(
-          `请根据表头 \`${headerTitle.map(
-            (item) => item.textContent,
-          )}\` 和表体${bodyRows.length}行，生成一个合法的JSON字符串。JSON输出结构如下：[{"key1": "你好", "key2": "2026-04-21", "..."}, {...}, {...} ...]`,
+          `Please generate a valid JSON string based on the table header \`${headerTitle.map((item) => item.textContent)}\` and ${bodyRows.length} rows of the table body. The JSON output structure is as follows: [{"key1": "Hello", "key2": "2026-04-21", "..."}, {...}, {...} ...], and the language is Chinese`,
           {
             systemPrompt:
-              "你是一个数据处理助手，请只输出合法的JSON字符串，不要包含任何其他文字或解释。",
+              "You are a data processing assistant. Please output only valid JSON strings and do not include any other text or explanations.",
             timeoutMs: 30000,
             role: "table_data_generator",
           },
