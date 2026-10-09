@@ -20,6 +20,7 @@ export class RouteWatcher {
   private currentUrl: string;
   private historyStateListener: ((event: PopStateEvent) => void) | null = null;
   private hashChangeListener: ((event: HashChangeEvent) => void) | null = null;
+  private pollIntervalId: ReturnType<typeof setInterval> | null = null;
 
   /**
    * 构造函数
@@ -35,20 +36,12 @@ export class RouteWatcher {
   private setupListeners() {
     // 监听 History API 变化
     this.historyStateListener = () => {
-      const newUrl = window.location.href;
-      if (newUrl !== this.currentUrl) {
-        const previousUrl = this.currentUrl;
-        this.currentUrl = newUrl;
-        this.notifyCallbacks(newUrl, previousUrl);
-      }
+      this.checkForRouteChange();
     };
 
     // 监听 hash 变化
-    this.hashChangeListener = (event: HashChangeEvent) => {
-      const newUrl = window.location.href;
-      const previousUrl = event.oldURL || this.currentUrl;
-      this.currentUrl = newUrl;
-      this.notifyCallbacks(newUrl, previousUrl);
+    this.hashChangeListener = () => {
+      this.checkForRouteChange();
     };
 
     // 添加事件监听器
@@ -57,6 +50,26 @@ export class RouteWatcher {
 
     // 重写 pushState 和 replaceState 方法，以便捕获这些变化
     this.overrideHistoryMethods();
+  }
+
+  private checkForRouteChange(): void {
+    const newUrl = window.location.href;
+    if (newUrl === this.currentUrl) return;
+
+    const previousUrl = this.currentUrl;
+    this.currentUrl = newUrl;
+    this.notifyCallbacks(newUrl, previousUrl);
+  }
+
+  private startPolling(): void {
+    if (this.pollIntervalId !== null) return;
+    this.pollIntervalId = setInterval(() => this.checkForRouteChange(), 100);
+  }
+
+  private stopPolling(): void {
+    if (this.pollIntervalId === null) return;
+    clearInterval(this.pollIntervalId);
+    this.pollIntervalId = null;
   }
 
   /**
@@ -69,24 +82,14 @@ export class RouteWatcher {
     // 重写 pushState
     history.pushState = ((...args) => {
       const result = originalPushState.apply(history, args);
-      const newUrl = window.location.href;
-      if (newUrl !== this.currentUrl) {
-        const previousUrl = this.currentUrl;
-        this.currentUrl = newUrl;
-        this.notifyCallbacks(newUrl, previousUrl);
-      }
+      this.checkForRouteChange();
       return result;
     }) as typeof history.pushState;
 
     // 重写 replaceState
     history.replaceState = ((...args) => {
       const result = originalReplaceState.apply(history, args);
-      const newUrl = window.location.href;
-      if (newUrl !== this.currentUrl) {
-        const previousUrl = this.currentUrl;
-        this.currentUrl = newUrl;
-        this.notifyCallbacks(newUrl, previousUrl);
-      }
+      this.checkForRouteChange();
       return result;
     }) as typeof history.replaceState;
   }
@@ -113,8 +116,12 @@ export class RouteWatcher {
    */
   subscribe(callback: RouteChangeCallback): () => void {
     this.callbacks.add(callback);
+    this.startPolling();
     return () => {
       this.callbacks.delete(callback);
+      if (this.callbacks.size === 0) {
+        this.stopPolling();
+      }
     };
   }
 
@@ -123,6 +130,7 @@ export class RouteWatcher {
    */
   unsubscribeAll() {
     this.callbacks.clear();
+    this.stopPolling();
   }
 
   /**
@@ -139,6 +147,7 @@ export class RouteWatcher {
 
     // 清除回调
     this.callbacks.clear();
+    this.stopPolling();
   }
 
   /**

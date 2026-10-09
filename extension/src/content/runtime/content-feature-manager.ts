@@ -1,4 +1,5 @@
 import { createContentFeaturePanel } from "@/components/content-feature-panel/main";
+import { useRouteWatcher } from "@/document-api/route-watcher";
 import messenger from "@/message";
 
 export const CONTENT_FEATURE_CONFIG_PREFIX = "kria-nove:content-script-config:";
@@ -19,6 +20,11 @@ export interface ContentFeatureDefinition {
   id: string;
   label: string;
   setup: ContentFeatureSetup;
+  restartOnRouteChange?: boolean;
+}
+
+export interface ContentFeatureRegistrationOptions {
+  restartOnRouteChange?: boolean;
 }
 
 export interface ContentFeatureRegistryOptions {
@@ -27,7 +33,12 @@ export interface ContentFeatureRegistryOptions {
 }
 
 export interface ContentFeatureRegistry {
-  register: (id: string, label: string, setup: ContentFeatureSetup) => void;
+  register: (
+    id: string,
+    label: string,
+    setup: ContentFeatureSetup,
+    options?: ContentFeatureRegistrationOptions,
+  ) => void;
   initialize: () => Promise<void>;
   openPanel: () => void;
 }
@@ -60,26 +71,49 @@ export const createContentFeatureRegistry = (
   const configKey = `${CONTENT_FEATURE_CONFIG_PREFIX}${options.scriptId}`;
   const features = new Map<string, ContentFeatureDefinition>();
   const cleanups = new Map<string, () => void | Promise<void>>();
+  const generations = new Map<string, number>();
   let currentConfig: Record<string, boolean> = {};
   let initialized = false;
+  let featuresSuspended = false;
+  let unsubscribeRouteWatcher: (() => void) | null = null;
 
-  // 注册功能块，应该在最顶层调用，确保所有功能块都已注册，不要放在异步或者setTimeout中
-  const register = (
-    id: string,
-    label: string,
-    setup: ContentFeatureSetup,
-  ): void => {
-    if (!id || features.has(id)) {
-      throw new Error(`[ContentFeature] 重复或无效的功能 ID: ${id}`);
-    }
-    features.set(id, { id, label, setup });
+  const stopWatchingRoutes = (): void => {
+    unsubscribeRouteWatcher?.();
+    unsubscribeRouteWatcher = null;
   };
 
-  const runFeature = async (
+  const nextGeneration = (id: string): number => {
+    const generation = (generations.get(id) || 0) + 1;
+    generations.set(id, generation);
+    return generation;
+  };
+
+  const cleanupFeature = async (id: string): Promise<void> => {
+    const cleanup = cleanups.get(id);
+    cleanups.delete(id);
+    if (!cleanup) return;
+    try {
+      await cleanup();
+    } catch (error) {
+      maLogger.error(`[ContentFeature] 清理功能失败: ${id}`, error);
+    }
+  };
+
+  const installFeature = async (
     feature: ContentFeatureDefinition,
+    generation: number,
   ): Promise<void> => {
     try {
       const cleanup = await feature.setup();
+      if (
+        generations.get(feature.id) !== generation ||
+        currentConfig[feature.id] !== true
+      ) {
+        if (typeof cleanup === "function") {
+          await cleanup();
+        }
+        return;
+      }
       if (typeof cleanup === "function") {
         cleanups.set(feature.id, cleanup);
       }
@@ -88,15 +122,51 @@ export const createContentFeatureRegistry = (
     }
   };
 
-  const cleanupFeatures = async (): Promise<void> => {
-    for (const [id, cleanup] of cleanups) {
-      try {
-        await cleanup();
-      } catch (error) {
-        maLogger.error(`[ContentFeature] 清理功能失败: ${id}`, error);
-      }
+  // 注册功能块，应该在最顶层调用，确保所有功能块都已注册，不要放在异步或者setTimeout中
+  const register = (
+    id: string,
+    label: string,
+    setup: ContentFeatureSetup,
+    registrationOptions: ContentFeatureRegistrationOptions = {},
+  ): void => {
+    if (!id || features.has(id)) {
+      throw new Error(`[ContentFeature] 重复或无效的功能 ID: ${id}`);
     }
-    cleanups.clear();
+    features.set(id, {
+      id,
+      label,
+      setup,
+      restartOnRouteChange: registrationOptions.restartOnRouteChange === true,
+    });
+  };
+
+  const runFeature = async (
+    feature: ContentFeatureDefinition,
+  ): Promise<void> => {
+    await installFeature(feature, nextGeneration(feature.id));
+  };
+
+  const restartFeature = async (
+    feature: ContentFeatureDefinition,
+  ): Promise<void> => {
+    const generation = nextGeneration(feature.id);
+    await cleanupFeature(feature.id);
+    if (
+      generations.get(feature.id) !== generation ||
+      currentConfig[feature.id] !== true
+    ) {
+      return;
+    }
+    await installFeature(feature, generation);
+  };
+
+  const cleanupFeatures = async (): Promise<void> => {
+    for (const id of features.keys()) {
+      nextGeneration(id);
+    }
+    for (const id of Array.from(cleanups.keys())) {
+      await cleanupFeature(id);
+    }
   };
 
   const openPanel = (): void => {
@@ -111,9 +181,12 @@ export const createContentFeatureRegistry = (
       config: currentConfig,
       onSave: (nextConfig) => {
         void (async () => {
+          featuresSuspended = true;
+          stopWatchingRoutes();
           await cleanupFeatures();
           currentConfig = nextConfig;
           writeConfig(configKey, nextConfig);
+          featuresSuspended = false;
         })();
       },
     });
@@ -149,6 +222,25 @@ export const createContentFeatureRegistry = (
     currentConfig =
       storedConfig ||
       Object.fromEntries(Array.from(features.keys()).map((id) => [id, false]));
+
+    if (
+      Array.from(features.values()).some(
+        (feature) =>
+          feature.restartOnRouteChange && currentConfig[feature.id] === true,
+      )
+    ) {
+      unsubscribeRouteWatcher = useRouteWatcher(() => {
+        if (featuresSuspended) return;
+        for (const feature of features.values()) {
+          if (
+            feature.restartOnRouteChange &&
+            currentConfig[feature.id] === true
+          ) {
+            void restartFeature(feature);
+          }
+        }
+      });
+    }
 
     if (!firstUse) {
       for (const feature of features.values()) {

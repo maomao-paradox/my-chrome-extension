@@ -8,7 +8,8 @@
     "dev:options": "vite --open /pages/options.html",
     "dp": "npx depcruise --output-type json src > src/deps.json && vite --open /interactive-graph.html",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "test:react": "vitest run --config vitest.config.react.ts",
+    "test": "vitest run",
+    "test:react": "vitest run",
     "cp": "du -sh dist && rm -rf /mnt/h/my-chrome-extension/* && cp -rf ./dist/ /mnt/h/my-chrome-extension/",
     "zip": "zip -r dist.zip dist/* && mv dist.zip /mnt/h/my-chrome-extension/",
     "build": "vite build"

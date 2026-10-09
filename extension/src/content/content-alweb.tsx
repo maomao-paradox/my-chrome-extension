@@ -52,36 +52,63 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
   };
 
   featureRegistry.register("alweb.enrichQuickLogin", "管理员一键登录", () => {
+    const controller = new AbortController();
+    const cleanupHandlers: Array<() => void> = [];
+
     if (location.hash.match("#/login")) {
-      waitForSelector({
+      void waitForSelector({
         selector:
           "#app > div > div.auth-page__main > div > form > div.login-title > img",
+        signal: controller.signal,
+        once: true,
         callback: (el) => {
           const image = el as HTMLImageElement;
+          const originalCursor = image.style.cursor;
+          const originalTransition = image.style.transition;
           const originalTransform = image.style.transform;
-
-          image.style.cursor = "pointer";
-          image.style.transition = "transform 120ms ease";
-          image.addEventListener("click", () => {
+          const handleClick = () => {
             void quickLogin("mp" + ADMIN, ADMIN + "123");
-          });
-          image.addEventListener("pointerdown", () => {
+          };
+          const handlePointerDown = () => {
             image.style.transform = "scale(0.9)";
-          });
+          };
           const restoreImage = () => {
             image.style.transform = originalTransform;
           };
+
+          image.style.cursor = "pointer";
+          image.style.transition = "transform 120ms ease";
+          image.addEventListener("click", handleClick);
+          image.addEventListener("pointerdown", handlePointerDown);
           image.addEventListener("pointerup", restoreImage);
           image.addEventListener("pointercancel", restoreImage);
           image.addEventListener("pointerleave", restoreImage);
+
+          cleanupHandlers.push(() => {
+            image.removeEventListener("click", handleClick);
+            image.removeEventListener("pointerdown", handlePointerDown);
+            image.removeEventListener("pointerup", restoreImage);
+            image.removeEventListener("pointercancel", restoreImage);
+            image.removeEventListener("pointerleave", restoreImage);
+            image.style.cursor = originalCursor;
+            image.style.transition = originalTransition;
+            image.style.transform = originalTransform;
+          });
         },
-        maxWaitTimes: 10,
         useMutationObserver: true,
         timeout: 5000,
-        once: true,
+      }).catch((error) => {
+        if (!controller.signal.aborted) {
+          maLogger.error("等待管理员登录图片失败:", error);
+        }
       });
     }
-  });
+
+    return () => {
+      controller.abort();
+      cleanupHandlers.forEach((cleanup) => cleanup());
+    };
+  }, { restartOnRouteChange: true });
 
   const updateSidebar = async (tools: Tool[]) => {
     // 侧边栏配置

@@ -1,22 +1,14 @@
 /**
  * @file vitest.config.ts
- * @description Vitest 测试框架配置文件
- *   - 使用 happy-dom 提供 DOM 模拟环境（element-control.ts 重度依赖 DOM API）
- *   - 复用 tsconfig 的路径别名（@ -> src/），让被测代码 import 顺利解析
- *   - 故意不加载 vite.config.ts 中的 chrome 扩展插件（crx / encryptFileMapPlugin 等），
- *     避免测试环境被构建期插件污染
- * @author Vivy
- * @date 2026-08-03
+ * @description React tests use the React plugin to avoid Preact aliases.
  */
 
 import { defineConfig } from "vitest/config";
-import vue from "@vitejs/plugin-vue";
-import preact from "@preact/preset-vite";
+import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-  // 启用 Vue SFC 支持（单文件组件测试必需）和 Preact 支持
-  plugins: [vue(), preact()],
+  plugins: [react()],
   // 解析与 vite.config.ts 保持一致的路径别名
   resolve: {
     alias: {
@@ -36,16 +28,13 @@ export default defineConfig({
       },
     },
     // 测试文件匹配规则
-    include: ["test/**/*.spec.ts", "test/**/*.spec.tsx", "test/**/*.test.ts", "test/**/*.test.tsx"],
-    // 排除 React 专用测试（由 vitest.config.react.ts 单独处理）
-    // 避免在没有 plugin-react 的环境下编译 .tsx 失败
-    exclude: [
-      "node_modules/**",
-      "dist/**",
+    include: [
       "test/react-*.spec.ts",
       "test/react-*.spec.tsx",
       "test/react-*.test.ts",
       "test/react-*.test.tsx",
+      "test/content-feature-manager.spec.ts",
+      "test/route-watcher.spec.ts",
     ],
     // 全局 setup：注入 maLogger / chrome API 等 chrome 扩展运行时
     setupFiles: ["./test/setup.ts"],
@@ -53,7 +42,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      include: ["src/utils/**/*.{ts,tsx}"],
+      include: ["src/modules/**/*.{ts,tsx}"],
       exclude: ["node_modules/", "dist/", "**/*.d.ts"],
     },
     // 全局 API（describe/it/expect）无需 import 即可使用

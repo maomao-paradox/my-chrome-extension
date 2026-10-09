@@ -41,18 +41,18 @@ VITE_BUILD_DEVTOOLS=false
 
 ## 测试
 
-项目使用 [Vitest](https://vitest.dev/) + [happy-dom](https://github.com/capricorn86/happy-dom) + [Vue Test Utils](https://test-utils.vuejs.org/) 进行单元测试和组件测试。
+项目使用 [Vitest](https://vitest.dev/) + [happy-dom](https://github.com/capricorn86/happy-dom) + React Testing Library 进行单元测试和组件测试。
 
 ```bash
-# 运行全部测试（一次性）
-npm test -- run
-
-# 进入 watch 模式
+# 运行测试
 npm test
 
+# 进入 watch 模式
+npx vitest
+
 # 指定测试文件
-npx vitest run test/element-control.spec.ts
-npx vitest run test/BookmarkPage.spec.ts
+npx vitest run test/react-Aladdin.spec.tsx
+npx vitest run test/content-feature-manager.spec.ts
 ```
 
 ### 测试框架说明
@@ -95,6 +95,7 @@ npx vitest run test/BookmarkPage.spec.ts
 - 首次进入未保存过配置的内容脚本页面时，面板默认关闭全部功能并引导用户配置。
 - 使用 `Ctrl+Shift+K`（macOS 使用 `Command+Shift+K`）打开当前页面的配置面板。
 - 配置保存在当前网页的 `localStorage`，键名为 `kria-nove:content-script-config:{contentScriptId}`；保存配置后重新启用功能需要刷新页面。
+- 支持路由重启的功能会在 SPA 路由变化时先清理自身，再重新等待当前页面元素；其他功能不受影响。
 
 ### 自定义组件展示页
 
