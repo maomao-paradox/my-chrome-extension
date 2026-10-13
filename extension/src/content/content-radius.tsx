@@ -15,17 +15,19 @@ import {
   PositionStrategy,
   waitForSelector,
   whenDomReady,
+  toast,
 } from "@/document-api";
 import { Tool } from "@/types";
 import messenger from "@/message";
-import { requestAI } from "@/utils/ai-request";
+import { requestAI } from "@/service-worker/deepseek/ai-request";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
 import lmaskStyles from "@/assets/styles/lmask.scss?inline";
-import { request } from "@/utils";
+import { createRequestService } from "@/utils";
 import { storage } from "@/stores";
 import { createRoot } from "react-dom/client";
-import JungleKnotButton from "@/components/Jungle-knot/Button";
-import JungleKnotButtonStyle from "@/components/Jungle-knot/styles/button.scss?inline";
+import JungleKnotButton, {
+  JungleKnotButtonStyle,
+} from "@/components/Jungle-knot/Button";
 import { flushSync } from "react-dom";
 
 function addLoadingMask(el: HTMLElement, loadingText: string = "填写中...") {
@@ -102,6 +104,13 @@ function removeLoadingMask(el: HTMLElement): number {
 }
 
 export default (ctx: AppContext, config = {}) => {
+  const request = createRequestService({
+    apiBaseURL: "/api",
+    timeout: 15000,
+    messageService: toast,
+    devTokenKey: "auth-token",
+  });
+
   const quickLogin = async (username: string, password: string) => {
     if (!username || !password) {
       ctx.message.error("用户名或密码不能为空");
@@ -231,24 +240,30 @@ export default (ctx: AppContext, config = {}) => {
     });
   };
 
-  featureRegistry.register("radius.enrichQuickLogin", "管理员一键登录", () => {
-    // 监听 quickLogin 事件
-    if (location.hash.match("#/login")) {
-      waitForSelector({
-        selector: "#app > div > div > div.login-card > button",
-        filter: (el) => el.dataset.testid === "auth-login-submit-button",
-        callback: (el) =>
-          enrichQuickLogin(el!, {
-            strategy: PositionStrategy.Down,
-            offset: { y: 10 },
-          }),
-        maxWaitTimes: 10,
-        useMutationObserver: true,
-        timeout: 5000,
-        iframeSelector: "#app > div > div > div > wujie-app",
-      });
-    }
-  });
+  featureRegistry.register(
+    "radius.enrichQuickLogin",
+    "管理员一键登录",
+    () => {
+      // 监听 quickLogin 事件
+      if (location.hash.match("#/login")) {
+        waitForSelector({
+          selector: "#app > div > div > div.login-card > button",
+          filter: (el) => el.dataset.testid === "auth-login-submit-button",
+          callback: (el) =>
+            enrichQuickLogin(el!, {
+              strategy: PositionStrategy.Down,
+              offset: { y: 10 },
+            }),
+          once: true,
+          maxWaitTimes: 10,
+          useMutationObserver: true,
+          timeout: 5000,
+          iframeSelector: "#app > div > div > div > wujie-app",
+        });
+      }
+    },
+    { restartOnRouteChange: true },
+  );
 
   const updateSidebar = async (tools: Tool[]) => {
     // 侧边栏配置
@@ -274,66 +289,6 @@ export default (ctx: AppContext, config = {}) => {
       maLogger.log("发送侧边栏工具更新请求失败: ", error);
     }
   };
-
-  /**
-   * 切换版本函数
-   * @param element 版本选择元素
-   */
-  const switchVersion = (element: HTMLElement) => {
-    // 创建 select 元素
-    const selectElement = document.createElement("select");
-    selectElement.className = element.className;
-    selectElement.style.cssText =
-      element.style.cssText +
-      "border: none; background: #202020; outline: none; cursor: pointer; font-family: MicrosoftYaHei; font-size: 12px; color: rgba(255, 255, 255, .8);";
-
-    // 添加选项
-    const versions = [
-      { value: "v3.0.0", text: "v3.0.0.11" },
-      { value: "v3.0.1", text: "v3.0.1.11" },
-      { value: "v3.0.2", text: "v3.0.2.11" },
-    ];
-
-    versions.forEach((version) => {
-      const option = document.createElement("option");
-      option.value = version.value;
-      option.textContent = version.text;
-      selectElement.appendChild(option);
-    });
-
-    // 添加切换事件
-    selectElement.addEventListener("change", (e) => {
-      const selectedVersion = (e.target as HTMLSelectElement).value;
-      maLogger.log("切换到版本:", selectedVersion);
-      // 这里可以添加版本切换的逻辑
-      // 发送指令到后台脚本
-      messenger.ext.send({
-        type: "SWITCH_VERSION",
-        payload: { version: selectedVersion, name: "radius" },
-        target: "background",
-      });
-    });
-
-    // 替换元素
-    element.parentNode?.replaceChild(selectElement, element);
-  };
-
-  featureRegistry.register("radius.version-label", "版本标记", async () => {
-    const controller = new AbortController();
-    waitForSelector({
-      selector:
-        "#app > div > div > div.top-menu-bar > div.top-menu-bar__left > span",
-      signal: controller.signal,
-      timeout: 10000,
-      callback: (element: HTMLElement) => {
-        element.innerText = "内测版";
-      },
-    }).catch((err) => maLogger.error(err));
-    return () => controller.abort();
-  });
-
-  // cypress();
-  // updateSidebar(tools)
 
   const handleFillForm = (tableElement?: HTMLElement) => {
     const EL_TABLE_HEADER = "table.el-table__header";
@@ -420,14 +375,13 @@ export default (ctx: AppContext, config = {}) => {
     const controller = new AbortController();
     const inserted: HTMLElement[] = [];
     const parentSelector =
-      "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-input-content > div.right-content > div.right-content-body > div";
+      "#app > div > div > .main-content > .main-content-wrapper > div > .data-input-content > .right-content > .right-content-body > div";
     void waitForSelector({
       selector: [
         parentSelector,
         parentSelector +
-          " > div.el-overlay.el-modal-dialog > div > div > div.el-dialog__body",
-        parentSelector +
-          " > div:nth-child(4) > div > div > div.el-dialog__body",
+          " > div.el-overlay.el-modal-dialog > div > div > .el-dialog__body",
+        parentSelector + " > div:nth-child(4) > div > div > .el-dialog__body",
       ],
       signal: controller.signal,
       timeout: -1, //设为-1表示无限等待
@@ -472,7 +426,7 @@ export default (ctx: AppContext, config = {}) => {
       let inserted: HTMLElement | null = null;
       waitForSelector({
         selector:
-          "#app > div > div > div.main-content > div.main-content-wrapper > div > div.data-source-header > span",
+          "#app > div > div > .main-content > .main-content-wrapper > div > .data-source-header > span",
         signal: controller.signal,
         timeout: 10000,
         callback: (element: HTMLElement) => {
@@ -506,8 +460,7 @@ export default (ctx: AppContext, config = {}) => {
       let inserted: HTMLElement | null = null;
       waitForSelector({
         selector:
-          "#app > div > div > div.main-content > div.main-content-wrapper > div > div.search-header-wrapper > div.search-header-left > span",
-
+          "#app > div > div > .main-content > .main-content-wrapper > div > .search-header-wrapper > .search-header-left > span",
         filter: (el: HTMLElement) => el.textContent === "字典配置",
         signal: controller.signal,
         timeout: 10000,

@@ -4,7 +4,7 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2020",
+    "target": "es2021",
     "module": "esnext",
     "baseUrl": ".",
     "moduleResolution": "node",
@@ -25,7 +25,7 @@
       ]
     },
     "lib": [
-      "es2020",
+      "es2021",
       "dom",
       "dom.iterable",
       "scripthost"

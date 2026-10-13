@@ -7,7 +7,7 @@
  * @date 2026-02-05T02:38:01.699Z
  */
 
-import shadowThemeCss from "@/assets/styles/shadow-theme.css?inline";
+import shadowThemeCss from "@/assets/styles/shadow-theme.scss?inline";
 import { shadowHostId } from "@/config";
 
 type ShadowContext = {

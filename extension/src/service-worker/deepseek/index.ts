@@ -8,7 +8,7 @@ import {
   type DeepSeekSessionStore,
   type DeepSeekStreamCallbacks,
   type SessionData,
-} from "@/shared/deepseek-core";
+} from "./deepseek-core";
 import { powWasmModule } from "./pow";
 
 const OPENAI_COMPATIBLE_ENDPOINT = "/chat/completions";

@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef } from "react";
+import JungleKnotButtonStyle from "./styles/button.scss?inline";
 import "./styles/button.scss";
 
 interface ButtonProps {
@@ -52,3 +53,4 @@ const Button: React.FC<ButtonProps> = ({
 };
 
 export default Button;
+export { JungleKnotButtonStyle };

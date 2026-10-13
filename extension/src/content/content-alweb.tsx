@@ -6,20 +6,25 @@
  * @file src/content/content-mria.ts
  * @date 2026-02-05T02:38:01.694Z
  */
-import {
-  whenDomReady,
-  waitForSelector,
-} from "@/document-api";
+import { whenDomReady, waitForSelector } from "@/document-api";
 import type { Tool } from "@/types";
 import { storage } from "@/stores";
 
 import messenger from "@/message";
 import { createContentFeatureRegistry } from "./runtime/content-feature-manager";
-import { request } from "@/utils";
+import { createRequestService } from "@/utils";
+import { toast } from "@/document-api";
 
 const ADMIN = "admin";
 
 export default (ctx: AppContext & { userInfo: any }, config = {}) => {
+  const request = createRequestService({
+    apiBaseURL: "/api",
+    timeout: 15000,
+    messageService: toast,
+    devTokenKey: "auth-token",
+  });
+
   const featureRegistry = createContentFeatureRegistry({
     scriptId: "alweb",
     scriptName: "ALWEB",
@@ -51,64 +56,69 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     }
   };
 
-  featureRegistry.register("alweb.enrichQuickLogin", "管理员一键登录", () => {
-    const controller = new AbortController();
-    const cleanupHandlers: Array<() => void> = [];
+  featureRegistry.register(
+    "alweb.enrichQuickLogin",
+    "管理员一键登录",
+    () => {
+      const controller = new AbortController();
+      const cleanupHandlers: Array<() => void> = [];
 
-    if (location.hash.match("#/login")) {
-      void waitForSelector({
-        selector:
-          "#app > div > div.auth-page__main > div > form > div.login-title > img",
-        signal: controller.signal,
-        once: true,
-        callback: (el) => {
-          const image = el as HTMLImageElement;
-          const originalCursor = image.style.cursor;
-          const originalTransition = image.style.transition;
-          const originalTransform = image.style.transform;
-          const handleClick = () => {
-            void quickLogin("mp" + ADMIN, ADMIN + "123");
-          };
-          const handlePointerDown = () => {
-            image.style.transform = "scale(0.9)";
-          };
-          const restoreImage = () => {
-            image.style.transform = originalTransform;
-          };
+      if (location.hash.match("#/login")) {
+        void waitForSelector({
+          selector:
+            "#app > div > div.auth-page__main > div > form > div.login-title > img",
+          signal: controller.signal,
+          once: true,
+          callback: (el) => {
+            const image = el as HTMLImageElement;
+            const originalCursor = image.style.cursor;
+            const originalTransition = image.style.transition;
+            const originalTransform = image.style.transform;
+            const handleClick = () => {
+              void quickLogin("mp" + ADMIN, ADMIN + "123");
+            };
+            const handlePointerDown = () => {
+              image.style.transform = "scale(0.9)";
+            };
+            const restoreImage = () => {
+              image.style.transform = originalTransform;
+            };
 
-          image.style.cursor = "pointer";
-          image.style.transition = "transform 120ms ease";
-          image.addEventListener("click", handleClick);
-          image.addEventListener("pointerdown", handlePointerDown);
-          image.addEventListener("pointerup", restoreImage);
-          image.addEventListener("pointercancel", restoreImage);
-          image.addEventListener("pointerleave", restoreImage);
+            image.style.cursor = "pointer";
+            image.style.transition = "transform 120ms ease";
+            image.addEventListener("click", handleClick);
+            image.addEventListener("pointerdown", handlePointerDown);
+            image.addEventListener("pointerup", restoreImage);
+            image.addEventListener("pointercancel", restoreImage);
+            image.addEventListener("pointerleave", restoreImage);
 
-          cleanupHandlers.push(() => {
-            image.removeEventListener("click", handleClick);
-            image.removeEventListener("pointerdown", handlePointerDown);
-            image.removeEventListener("pointerup", restoreImage);
-            image.removeEventListener("pointercancel", restoreImage);
-            image.removeEventListener("pointerleave", restoreImage);
-            image.style.cursor = originalCursor;
-            image.style.transition = originalTransition;
-            image.style.transform = originalTransform;
-          });
-        },
-        useMutationObserver: true,
-        timeout: 5000,
-      }).catch((error) => {
-        if (!controller.signal.aborted) {
-          maLogger.error("等待管理员登录图片失败:", error);
-        }
-      });
-    }
+            cleanupHandlers.push(() => {
+              image.removeEventListener("click", handleClick);
+              image.removeEventListener("pointerdown", handlePointerDown);
+              image.removeEventListener("pointerup", restoreImage);
+              image.removeEventListener("pointercancel", restoreImage);
+              image.removeEventListener("pointerleave", restoreImage);
+              image.style.cursor = originalCursor;
+              image.style.transition = originalTransition;
+              image.style.transform = originalTransform;
+            });
+          },
+          useMutationObserver: true,
+          timeout: 5000,
+        }).catch((error) => {
+          if (!controller.signal.aborted) {
+            maLogger.error("等待管理员登录图片失败:", error);
+          }
+        });
+      }
 
-    return () => {
-      controller.abort();
-      cleanupHandlers.forEach((cleanup) => cleanup());
-    };
-  }, { restartOnRouteChange: true });
+      return () => {
+        controller.abort();
+        cleanupHandlers.forEach((cleanup) => cleanup());
+      };
+    },
+    { restartOnRouteChange: true },
+  );
 
   const updateSidebar = async (tools: Tool[]) => {
     // 侧边栏配置

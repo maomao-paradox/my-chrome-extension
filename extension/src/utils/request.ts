@@ -14,7 +14,6 @@ import axios, {
   AxiosError,
   InternalAxiosRequestConfig,
 } from "axios";
-// import { toast } from "@/dom-api";
 
 // 请求配置扩展
 export interface RequestConfig extends AxiosRequestConfig {
@@ -613,20 +612,20 @@ export function createRequestService(
 }
 
 // 创建请求服务实例
-export const request = createRequestService({
-  apiBaseURL: "/api",
-  timeout: 15000,
-  //   loadingService: {
-  //     show: () =>
-  //       ElLoading.service({
-  //         lock: true,
-  //         text: "",
-  //         background: "rgba(0, 0, 0, 0.7)",
-  //       }),
-  //     hide: (instance) => instance?.close(),
-  //   },
-  // messageService: {
-  //   error: (msg) => toast.error(msg),
-  // },
-  devTokenKey: "auth-token",
-});
+// export const request = createRequestService({
+//   apiBaseURL: "/api",
+//   timeout: 15000,
+//   loadingService: {
+//     show: () =>
+//       ElLoading.service({
+//         lock: true,
+//         text: "",
+//         background: "rgba(0, 0, 0, 0.7)",
+//       }),
+//     hide: (instance) => instance?.close(),
+//   },
+// messageService: {
+//   error: (msg) => toast.error(msg),
+// },
+//   devTokenKey: "auth-token",
+// });
