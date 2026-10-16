@@ -1,0 +1,192 @@
+/* 页面基础背景，烘托故障科技感 */
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+}
+
+.content {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+
+  .text {
+    position: relative;
+    color: #fff;
+    font-size: 45px;
+    font-weight: 700;
+    text-transform: uppercase;
+    transform: scale(2);
+    letter-spacing: 2px;
+    padding: 30px;
+  }
+
+  .text::before,
+  .text::after {
+    position: absolute;
+    content: attr(data-text);
+    padding: 30px;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: #000;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  .text::before {
+    left: 3px;
+    text-shadow: -2px 0 red;
+    animation: glitch-anim 2s 0s linear reverse infinite;
+  }
+
+  .text::after {
+    left: -3px;
+    text-shadow: -2px 0 blue;
+    animation: glitch-anim2 2s 0s linear reverse infinite;
+  }
+}
+
+/* ---------------- 动画帧定义 ---------------- */
+
+/* 模拟信号随机跳动的动画 1 */
+@keyframes glitch-anim {
+  0% {
+    clip: rect(132px, 350px, 101px, 30px);
+  }
+  5% {
+    clip: rect(17px, 350px, 94px, 30px);
+  }
+  10% {
+    clip: rect(40px, 350px, 66px, 30px);
+  }
+  15% {
+    clip: rect(87px, 350px, 82px, 30px);
+  }
+  20% {
+    clip: rect(137px, 350px, 61px, 30px);
+  }
+  25% {
+    clip: rect(34px, 350px, 14px, 30px);
+  }
+  30% {
+    clip: rect(120px, 350px, 99px, 30px);
+  }
+  35% {
+    clip: rect(7px, 350px, 98px, 30px);
+  }
+  40% {
+    clip: rect(63px, 350px, 145px, 30px);
+  }
+  45% {
+    clip: rect(15px, 350px, 89px, 30px);
+  }
+  50% {
+    clip: rect(63px, 350px, 145px, 30px);
+  }
+  55% {
+    clip: rect(98px, 350px, 134px, 30px);
+  }
+  60% {
+    clip: rect(15px, 350px, 89px, 30px);
+  }
+  65% {
+    clip: rect(52px, 350px, 42px, 30px);
+  }
+  70% {
+    clip: rect(98px, 350px, 134px, 30px);
+  }
+  75% {
+    clip: rect(15px, 350px, 89px, 30px);
+  }
+  80% {
+    clip: rect(52px, 350px, 42px, 30px);
+  }
+  85% {
+    clip: rect(98px, 350px, 134px, 30px);
+  }
+  90% {
+    clip: rect(120px, 350px, 11px, 30px);
+  }
+  95% {
+    clip: rect(15px, 350px, 89px, 30px);
+  }
+  100% {
+    clip: rect(7px, 350px, 98px, 30px);
+  }
+}
+
+/* 模拟信号随机跳动的动画 2 */
+@keyframes glitch-anim2 {
+  0% {
+    clip: rect(132px, 350px, 101px, 30px);
+  }
+  5% {
+    clip: rect(17px, 350px, 94px, 30px);
+  }
+  10% {
+    clip: rect(40px, 350px, 66px, 30px);
+  }
+  15% {
+    clip: rect(87px, 350px, 82px, 30px);
+  }
+  20% {
+    clip: rect(137px, 350px, 61px, 30px);
+  }
+  25% {
+    clip: rect(34px, 350px, 14px, 30px);
+  }
+  30% {
+    clip: rect(120px, 350px, 99px, 30px);
+  }
+  35% {
+    clip: rect(7px, 350px, 98px, 30px);
+  }
+  40% {
+    clip: rect(63px, 350px, 145px, 30px);
+  }
+  45% {
+    clip: rect(15px, 350px, 89px, 30px);
+  }
+  50% {
+    clip: rect(63px, 350px, 145px, 30px);
+  }
+  55% {
+    clip: rect(98px, 350px, 134px, 30px);
+  }
+  60% {
+    clip: rect(15px, 350px, 89px, 30px);
+  }
+  65% {
+    clip: rect(52px, 350px, 42px, 30px);
+  }
+  70% {
+    clip: rect(98px, 350px, 134px, 30px);
+  }
+  75% {
+    clip: rect(133px, 350px, 79px, 30px);
+  }
+  80% {
+    clip: rect(78px, 350px, 52px, 30px);
+  }
+  85% {
+    clip: rect(35px, 350px, 39px, 30px);
+  }
+  90% {
+    clip: rect(67px, 350px, 70px, 30px);
+  }
+  95% {
+    clip: rect(71px, 350px, 103px, 30px);
+  }
+  100% {
+    clip: rect(83px, 350px, 40px, 30px);
+  }
+}

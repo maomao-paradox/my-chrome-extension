@@ -369,16 +369,21 @@ export function getCSSSelector(element: HTMLElement): string {
   const tagName = element.tagName.toLowerCase();
 
   // 获取当前元素的类名
-  const className = element.className.trim();
+  const className =
+    element?.className
+      ?.trim() // 去掉首尾空白，避免开头多个点
+      .split(/\s+/)
+      .map((c) => "." + CSS.escape(c))
+      .join("") || ""; // 冒号转义
 
   // 获取同级元素中的索引
   const siblings = Array.from(element.parentElement!.children).filter(
     (el) => el.tagName === element.tagName && el.className.trim() === className,
   );
 
-  if (siblings.length === 1) {
+  if (siblings.length === 1 && className) {
     // 如果是唯一的同标签元素，使用标签名+类名
-    return `${parentSelector} > ${tagName}.${className.replace(/\s+/g, ".")}`;
+    return `${parentSelector} > ${tagName}.${className}`;
   } else {
     // 否则使用 nth-child
     const index =

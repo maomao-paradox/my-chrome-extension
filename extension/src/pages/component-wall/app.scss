@@ -123,6 +123,8 @@ button { font: inherit; }
 .art--push-particles .push-particles { height: 100%; min-height: 300px; }
 .art--aladdin { display: block; min-height: 280px; padding: 0; background: #f7edf2; }
 .art--aladdin .aladdin { height: 280px; }
+.art--signal-glitch-card { display: flex; padding: 0; background: #000; }
+.component-tile__art .art--signal-glitch-card .content .text {font-size:24px;}
 .art--sliced-text { min-height: 230px; padding: 0; background: #080b0b; }
 
 .orbit-ring { position: relative; width: 168px; height: 168px; border: 1px solid #f3cf72; border-radius: 50%; box-shadow: 0 0 0 16px rgba(243,207,114,.07), 0 0 0 32px rgba(243,207,114,.04); }

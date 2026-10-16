@@ -15,12 +15,6 @@ import React, {
   LazyExoticComponent,
 } from "react";
 import GlassCursor from "@/components/cursors/GlassCursor";
-import PanelNav, {
-  DIRECTION_OFFSETS,
-  Panel,
-  PanelBase,
-  PanelNavs,
-} from "@/layout/PanelNav";
 import { STARSHIP_MODULES, StarshipPanelId } from "./views/starshipModules";
 import Static404 from "@/components/Static404";
 import ContentScriptDomainConfig from "./views/ContentScriptDomainConfig";
@@ -32,19 +26,13 @@ import AITerminalView from "./views/AITerminalView";
 import KnowledgeGraphView from "./views/KnowledgeGraphView";
 import UserOption from "./views/UserOption";
 import "./views/options-views.scss";
+import SlicedText from "@/components/SlicedText";
+import TextScramble from "@/components/TextScramble";
+import NavigationCircle from "@/components/NavigationCircle";
+import Aladdin from "@/components/Aladdin";
 
 // 懒加载组件
 const HeroSection = lazy(() => import("./views/HeroSection"));
-// const ContentScriptDomainConfig = lazy(() => import('@/pages/options/views/ContentScriptDomainConfig'));
-// const UserOption = lazy(() => import('@/pages/options/views/UserOption'));
-// const ExtensionSettings = lazy(() => import('@/pages/options/views/ExtensionSettings'));
-// const ErrorMonitorConfig = lazy(() => import('@/pages/options/views/ErrorMonitorConfig'));
-// const BrowserVarView = lazy(() => import('@/pages/options/views/BrowserVarView'));
-// const XHRuleOption = lazy(() => import('@/pages/options/views/XHRuleOption'));
-// const AITerminalView = lazy(() => import('@/pages/options/views/AITerminalView'));
-// const KnowledgeGraphView = lazy(() => import('@/pages/options/views/KnowledgeGraphView'));
-// const TacticalOverview = lazy(() => import('@/pages/options/views/TacticalOverview'));
-
 type PerformanceLevel = "low" | "medium" | "high";
 
 const PERFORMANCE_BODY_CLASSES = [
@@ -66,50 +54,6 @@ const componentMap: Record<
   bottom: ContentScriptDomainConfig,
   "bottom-left": KnowledgeGraphView,
   "bottom-right": AITerminalView,
-};
-
-const createBasePanels = (): Record<StarshipPanelId, PanelBase> => {
-  return STARSHIP_MODULES.reduce(
-    (acc, module) => {
-      acc[module.id] = {
-        xPos: module.position.x,
-        yPos: module.position.y,
-        page: componentMap[module.id] || Static404,
-        title: module.title,
-        meta: module,
-      };
-      return acc;
-    },
-    {} as Record<StarshipPanelId, PanelBase>,
-  );
-};
-
-const buildPanels = (): Record<string, Panel> => {
-  const basePanels = createBasePanels();
-  const entries = Object.entries(basePanels) as [string, PanelBase][];
-
-  return entries.reduce(
-    (acc, [key, panel]) => {
-      const navs = Object.entries(DIRECTION_OFFSETS).reduce(
-        (navAcc, [direction, offset]) => {
-          navAcc[direction as keyof PanelNavs] = entries.some(
-            ([, candidate]) =>
-              candidate.xPos === panel.xPos + offset.x &&
-              candidate.yPos === panel.yPos + offset.y,
-          );
-          return navAcc;
-        },
-        {} as PanelNavs,
-      );
-
-      acc[key] = {
-        ...panel,
-        navs,
-      };
-      return acc;
-    },
-    {} as Record<string, Panel>,
-  );
 };
 
 const normalizePerformanceLevel = (value: unknown): PerformanceLevel => {
@@ -145,8 +89,6 @@ const readPerformanceLevel = async (): Promise<PerformanceLevel> => {
 const App = () => {
   const [performanceLevel, setPerformanceLevel] =
     useState<PerformanceLevel>("high");
-
-  const panels = buildPanels();
 
   useEffect(() => {
     let disposed = false;
@@ -200,8 +142,25 @@ const App = () => {
 
   return (
     <main className={`options-page options-page--${performanceLevel}`}>
-      {performanceLevel === "high" ? <GlassCursor /> : null}
-      <PanelNav shipModules={panels} />
+      <GlassCursor />
+      <SlicedText text="Sliced" />
+      <TextScramble
+        phrases={[
+          "Neo,",
+          "sooner or later",
+          "you're going to realize",
+          "just as I did",
+          "that there's a difference",
+          "between knowing the path",
+          "and walking the path",
+        ]}
+        chars="!<>-_\/[]{}?=+*^?#________"
+        speed={800}
+      />
+      <div style={{ height: "100vh" }}>
+        <Aladdin />
+      </div>
+      <NavigationCircle />
     </main>
   );
 };

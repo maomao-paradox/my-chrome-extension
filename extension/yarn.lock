@@ -2251,6 +2251,11 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
+await-element@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/await-element/-/await-element-1.0.0.tgz#43f57a6489704134d3348e023860787344e1663c"
+  integrity sha512-Nn0nAFGYwD3SDTT5pZRQ+uTeegbesnYbTVl23LJP5dU4Q4n0NUzWavi0cBWDd6ZYsOBd8Ox2oLLlSAw+oDeKtw==
+
 axios@^1.20.0:
   version "1.20.0"
   resolved "https://registry.npmmirror.com/axios/-/axios-1.20.0.tgz"

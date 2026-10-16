@@ -7,8 +7,9 @@
  * @date 2026-02-05T02:38:01.694Z
  */
 
-import { injectScriptToActivateTab, waitForSelector } from "@/document-api";
+import { injectScriptToActivateTab } from "@/document-api";
 import messenger from "@/message";
+import { waitForSelector } from "await-element";
 import { ExtMessage, Tool } from "@/types";
 import { getSingleFileScript } from "@/utils";
 import { sendMessageToBackground } from "@/message/message";

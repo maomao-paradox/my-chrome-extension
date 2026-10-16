@@ -7,8 +7,8 @@
  * @date 2026-02-05T02:38:01.694Z
  */
 
+import { waitForSelector } from "await-element";
 import {
-  waitForSelector,
   addElementToDom,
   getElementAbsolutePosition,
   createEl,

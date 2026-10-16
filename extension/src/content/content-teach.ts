@@ -8,13 +8,12 @@
  */
 
 import {
-  waitForSelector,
   getElementAbsolutePosition,
   createEl,
   PositionStrategy,
   whenDomReady,
 } from "@/document-api";
-
+import { waitForSelector } from "await-element";
 import { Requester, get_token } from "@/services/api/mria-api";
 import type { Response, ExtMessage, MessageHandler, Tool } from "@/types";
 // import { QuickLogin } from '@/components/index';

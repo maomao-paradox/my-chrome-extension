@@ -24,11 +24,11 @@ import {
   addElementToDom,
   injectScriptToActivateTab,
   addFileInput,
-  waitForSelector,
   getElementAbsolutePosition,
   PositionStrategy,
   createEl,
 } from "@/document-api";
+import { waitForSelector } from "await-element";
 import {
   Requester,
   getFormCodeByName,

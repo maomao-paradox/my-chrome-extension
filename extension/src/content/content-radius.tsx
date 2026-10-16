@@ -13,10 +13,10 @@ import {
   getElementAbsolutePosition,
   injectScriptToActivateTab,
   PositionStrategy,
-  waitForSelector,
   whenDomReady,
   toast,
 } from "@/document-api";
+import { waitForSelector } from "await-element";
 import { Tool } from "@/types";
 import messenger from "@/message";
 import { requestAI } from "@/service-worker/deepseek/ai-request";

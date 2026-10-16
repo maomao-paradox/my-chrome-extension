@@ -65,7 +65,6 @@ import {
   addElementToDom,
   injectScriptToActivateTab,
   addFileInput,
-  waitForSelector,
   injectVueComponent,
   saveToLocal,
   PositionStrategy,
@@ -73,7 +72,7 @@ import {
   getElementAbsolutePosition,
   getActualZIndex,
   showSuccessMessage,
-} from "@/dom-api";
+} from "@/document-api";
 
 /* ================================================================ *
  * 1. DOM 查询：$id / $query
@@ -609,127 +608,6 @@ describe("addFileInput", () => {
     const fn2 = vi.fn();
     const input2 = addFileInput(fn2);
     expect(input2).toBe(input);
-  });
-});
-
-/* ================================================================ *
- * 12. waitForSelector
- * ================================================================ */
-describe("waitForSelector", () => {
-  beforeEach(() => vi.useFakeTimers());
-  afterEach(() => vi.useRealTimers());
-
-  it("selector 缺失直接 reject", async () => {
-    await expect(waitForSelector({ selector: "" } as any)).rejects.toThrowError(
-      "selector is required",
-    );
-  });
-
-  it("空数组 selector reject", async () => {
-    await expect(waitForSelector({ selector: [] })).rejects.toThrowError(
-      "selector array cannot be empty",
-    );
-  });
-
-  it("once 模式找到首个即 resolve", async () => {
-    document.body.innerHTML = '<div class="hook"></div>';
-    const cb = vi.fn();
-    const promise = waitForSelector({
-      selector: ".hook",
-      once: true,
-      callback: cb,
-      interval: 50,
-      useMutationObserver: false,
-    });
-    await vi.advanceTimersByTimeAsync(100);
-    const result = await promise;
-    expect(result.length).toBe(1);
-    expect(cb).toHaveBeenCalledTimes(1);
-  });
-
-  it("maxWaitTimes 达到后停止", async () => {
-    document.body.innerHTML = "";
-    const promise = waitForSelector({
-      selector: ".no-match",
-      maxWaitTimes: 3,
-      interval: 10,
-      useMutationObserver: false,
-    });
-    await vi.advanceTimersByTimeAsync(100);
-    const result = await promise;
-    expect(result.length).toBe(0);
-  });
-
-  it("filter 过滤掉不满足条件的元素", async () => {
-    document.body.innerHTML = `
-      <div class="t" data-keep="false"></div>
-      <div class="t" data-keep="true"></div>
-    `;
-    const promise = waitForSelector({
-      selector: ".t",
-      once: true,
-      filter: (el: Element) => el.getAttribute("data-keep") === "true",
-      interval: 10,
-      useMutationObserver: false,
-    });
-    await vi.advanceTimersByTimeAsync(50);
-    const result = await promise;
-    expect(result.length).toBe(1);
-    expect(result[0].getAttribute("data-keep")).toBe("true");
-  });
-
-  it("非法 selector reject", async () => {
-    await expect(
-      waitForSelector({
-        selector: "!!!invalid",
-        interval: 10,
-        useMutationObserver: false,
-      } as any),
-    ).rejects.toThrow();
-  });
-
-  it("AbortSignal 预先 abort 时 reject", async () => {
-    const ac = new AbortController();
-    ac.abort();
-    await expect(
-      waitForSelector({
-        selector: ".whatever",
-        signal: ac.signal,
-        useMutationObserver: false,
-      }),
-    ).rejects.toThrowError("aborted");
-  });
-
-  it("initCallback 在 start 时执行一次", async () => {
-    document.body.innerHTML = '<p class="init-target"></p>';
-    const initCb = vi.fn();
-    const promise = waitForSelector({
-      selector: ".init-target",
-      once: true,
-      initCallback: initCb,
-      interval: 10,
-      useMutationObserver: false,
-    });
-    await vi.advanceTimersByTimeAsync(30);
-    await promise;
-    expect(initCb).toHaveBeenCalledTimes(1);
-  });
-
-  it("selector 数组：合并多选择器结果", async () => {
-    document.body.innerHTML = `
-      <i class="a1"></i>
-      <i class="a2"></i>
-    `;
-    // 使用 timeout 终止而非 maxWaitTimes，避免首轮 shouldStop 提前 break
-    const promise = waitForSelector({
-      selector: [".a1", ".a2"],
-      timeout: 50,
-      interval: 10,
-      useMutationObserver: false,
-    });
-    await vi.advanceTimersByTimeAsync(80);
-    const result = await promise;
-    expect(result.length).toBe(2);
   });
 });
 

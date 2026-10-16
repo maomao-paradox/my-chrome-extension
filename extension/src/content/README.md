@@ -85,7 +85,8 @@ src/content/
 
 #### 2.2 导入语句
 ```typescript
-import { addElementToDom, injectScriptToActivateTab, waitForSelector } from '@/dom-api'
+import { addElementToDom, injectScriptToActivateTab } from '@/dom-api'
+import { waitForSelector } from "await-element";
 import messenger from "@/message"
 import { ExtMessage, Tool, TextTool } from "@/types"
 ```

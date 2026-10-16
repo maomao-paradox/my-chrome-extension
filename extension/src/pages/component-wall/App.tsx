@@ -24,6 +24,7 @@ import MenuButton, { type MenuAction } from "@/components/MenuButton";
 import Weather from "@/components/Weather";
 import PushParticles from "@/components/particles/PushParticles";
 import Aladdin from "@/components/Aladdin";
+import SignalGlitchCard from "@/components/SignalGlitchCard";
 import ChromaticText from "@/components/text";
 import { ArknightsButton } from "@/components/Arknights/ArknightsButton";
 import { ArknightsCard } from "@/components/Arknights/ArknightsCard";
@@ -194,6 +195,7 @@ type PreviewKind =
   | "weather-icons"
   | "push-particles"
   | "aladdin"
+  | "signal-glitch-card"
   | "chromatic-text"
   | "sliced-text"
   | "text-scramble"
@@ -601,6 +603,24 @@ const COMPONENTS: ComponentInfo[] = [
     height: "medium",
     detailLayout: "top-split",
     properties: [],
+  },
+  {
+    id: "signal-glitch-card",
+    name: "Signal Glitch Card",
+    category: "DECORATION / SIGNAL",
+    source: "src/components/SignalGlitchCard.tsx",
+    description: "信号卡片每隔数秒短暂出现锯齿波形、色彩错位与扫描撕裂效果。",
+    preview: "signal-glitch-card",
+    height: "short",
+    properties: [
+      {
+        name: "text",
+        type: "string",
+        description: "要展示的字样，展示默认值 TEXT GLITCH。",
+        defaultValue: "TEXT GLITCH",
+      },
+    ],
+    detailLayout: "top-split",
   },
   {
     id: "chromatic-text",
@@ -1238,6 +1258,12 @@ function Preview({
       return (
         <div className="art art--aladdin">
           <Aladdin />
+        </div>
+      );
+    case "signal-glitch-card":
+      return (
+        <div className="art art--signal-glitch-card">
+          <SignalGlitchCard text={String(props.text ?? "TEXT GLITCH")} />
         </div>
       );
     case "chromatic-text":

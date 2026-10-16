@@ -5,18 +5,18 @@
  * @file src/pages/popup/views/CapturePage.tsx
  * @description 广告拦截入口 - 从当前页面点选并保存广告元素规则
  */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { CameraOutlined } from '@ant-design/icons';
-import TableContainer from '../layout/TableContainer';
-import { useDomainState } from '../composables/useDomainState';
-import type { ExtMessage } from '@/types';
-import { appConfigKey } from '@/config';
-import './capture-page.scss';
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { CameraOutlined } from "@ant-design/icons";
+import TableContainer from "../layout/TableContainer";
+import { useDomainState } from "../composables/useDomainState";
+import type { ExtMessage } from "@/types";
+import { appConfigKey } from "@/config";
+import "./capture-page.scss";
 
 /**
  * 广告拦截状态枚举
  */
-type CaptureStatus = 'on' | 'pending' | 'off';
+type CaptureStatus = "on" | "pending" | "off";
 
 /**
  * 广告拦截页面组件
@@ -24,23 +24,30 @@ type CaptureStatus = 'on' | 'pending' | 'off';
 export const CapturePage: React.FC = () => {
   const { isDomainDisabled, checkDomainStatus } = useDomainState();
   const [isCheckingSiteReadiness, setIsCheckingSiteReadiness] = useState(false);
-  const [isContentScriptReady, setIsContentScriptReady] = useState<boolean | null>(null);
+  const [isContentScriptReady, setIsContentScriptReady] = useState<
+    boolean | null
+  >(null);
   const [isAdBlockerEnabled, setIsAdBlockerEnabled] = useState(false);
 
   /** 拦截状态文本 */
   const captureStatusText = useMemo(() => {
-    if (isDomainDisabled) return '已禁止';
-    if (isCheckingSiteReadiness) return '连接中';
-    if (isContentScriptReady) return '已就绪';
-    return '未就绪';
+    if (isDomainDisabled) return "已禁止";
+    if (isCheckingSiteReadiness) return "连接中";
+    if (isContentScriptReady) return "已就绪";
+    return "未就绪";
   }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady]);
 
   /** 拦截状态样式类 */
   const captureStatusClass = useMemo(() => {
-    if (isDomainDisabled || !isAdBlockerEnabled) return 'capture-status--off';
-    if (isCheckingSiteReadiness) return 'capture-status--pending';
-    return isContentScriptReady ? 'capture-status--on' : 'capture-status--off';
-  }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady, isAdBlockerEnabled]);
+    if (isDomainDisabled || !isAdBlockerEnabled) return "capture-status--off";
+    if (isCheckingSiteReadiness) return "capture-status--pending";
+    return isContentScriptReady ? "capture-status--on" : "capture-status--off";
+  }, [
+    isDomainDisabled,
+    isCheckingSiteReadiness,
+    isContentScriptReady,
+    isAdBlockerEnabled,
+  ]);
 
   /** 是否禁用拦截按钮 */
   const isCaptureDisabled = useMemo(() => {
@@ -50,43 +57,52 @@ export const CapturePage: React.FC = () => {
       isContentScriptReady !== true ||
       !isAdBlockerEnabled
     );
-  }, [isDomainDisabled, isCheckingSiteReadiness, isContentScriptReady, isAdBlockerEnabled]);
+  }, [
+    isDomainDisabled,
+    isCheckingSiteReadiness,
+    isContentScriptReady,
+    isAdBlockerEnabled,
+  ]);
 
   /** 向活动内容脚本发送消息 */
-  const sendMessageToActiveContentScript = useCallback(async (
-    message: ExtMessage,
-  ): Promise<any> => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    maLogger.log('当前活动标签页:', tab);
+  const sendMessageToActiveContentScript = useCallback(
+    async (message: ExtMessage): Promise<any> => {
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      maLogger.log("当前活动标签页:", tab);
 
-    if (!tab?.id) {
-      throw new Error('未找到当前活动标签页');
-    }
+      if (!tab?.id) {
+        throw new Error("未找到当前活动标签页");
+      }
 
-    return new Promise((resolve, reject) => {
-      chrome.tabs.sendMessage(
-        tab.id!,
-        { ...message, target: 'content' },
-        (response: any) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-            return;
-          }
-          resolve(response);
-        },
-      );
-    });
-  }, []);
+      return new Promise((resolve, reject) => {
+        chrome.tabs.sendMessage(
+          tab.id!,
+          { ...message, target: "content" },
+          (response: any) => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+              return;
+            }
+            resolve(response);
+          },
+        );
+      });
+    },
+    [],
+  );
 
   /** 检查内容脚本是否就绪 */
   const checkContentScriptReady = useCallback(async (): Promise<void> => {
     try {
       const response = await sendMessageToActiveContentScript({
-        type: 'POPUP_CAPTURE_HANDSHAKE',
+        type: "POPUP_CAPTURE_HANDSHAKE",
       });
       setIsContentScriptReady(response?.success === true);
     } catch (error) {
-      maLogger.log('当前站点内容脚本未就绪:', error);
+      maLogger.log("当前站点内容脚本未就绪:", error);
       setIsContentScriptReady(false);
     }
   }, [sendMessageToActiveContentScript]);
@@ -97,9 +113,16 @@ export const CapturePage: React.FC = () => {
     setIsContentScriptReady(null);
 
     try {
-      const config = await chrome.storage.local.get(appConfigKey);
-      setIsAdBlockerEnabled(config?.[appConfigKey]?.adBlocker?.enabled === true);
-      await Promise.allSettled([checkDomainStatus(), checkContentScriptReady()]);
+      const config = await chrome?.storage?.local?.get(appConfigKey);
+      setIsAdBlockerEnabled(
+        config?.[appConfigKey]?.adBlocker?.enabled === true,
+      );
+      await Promise.allSettled([
+        checkDomainStatus(),
+        checkContentScriptReady(),
+      ]);
+    } catch (error) {
+      maLogger.error("刷新捕获状态失败:", error);
     } finally {
       setIsCheckingSiteReadiness(false);
     }
@@ -110,14 +133,14 @@ export const CapturePage: React.FC = () => {
     if (isCaptureDisabled) return;
 
     try {
-      maLogger.log('从 popup 触发广告拦截选择...');
+      maLogger.log("从 popup 触发广告拦截选择...");
       const res = await sendMessageToActiveContentScript({
-        type: 'TRIGGER_COMPONENT_CAPTURE',
+        type: "TRIGGER_COMPONENT_CAPTURE",
       });
-      maLogger.log('广告拦截响应:', res);
+      maLogger.log("广告拦截响应:", res);
       window.close();
     } catch (error) {
-      maLogger.error('启动广告拦截失败:', error);
+      maLogger.error("启动广告拦截失败:", error);
     }
   }, [isCaptureDisabled, sendMessageToActiveContentScript]);
 
@@ -140,7 +163,7 @@ export const CapturePage: React.FC = () => {
       headRight={
         <div className={`capture-status ${captureStatusClass}`}>
           <span className="status-dot"></span>
-          <span>{!isAdBlockerEnabled ? '未启用' : captureStatusText}</span>
+          <span>{!isAdBlockerEnabled ? "未启用" : captureStatusText}</span>
         </div>
       }
     >

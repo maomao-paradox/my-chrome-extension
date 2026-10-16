@@ -6,7 +6,8 @@
  * @file src/content/content-mria.ts
  * @date 2026-02-05T02:38:01.694Z
  */
-import { whenDomReady, waitForSelector } from "@/document-api";
+import { whenDomReady } from "@/document-api";
+import { waitForSelector } from "await-element";
 import type { Tool } from "@/types";
 import { storage } from "@/stores";
 
