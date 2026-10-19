@@ -29,6 +29,7 @@ import {
 import { BookmarkStorage } from "@/services/bookmarkStorage";
 import { loadAIConfig } from "@/service-worker/chrome-api/ai-config";
 import { fillTextareaElementByAI } from "./textarea-ai";
+import dotStyle from "@/assets/styles/textarea-ai-dot.scss?inline";
 
 const appName = "textSelectionToolbar";
 
@@ -410,9 +411,12 @@ class TextSelectionToolbarModule implements AppModule {
         if (!button) {
           continue;
         }
+        // 直接插入到dom树中，不再通过定时器获取定位
+        textarea.parentElement?.insertAdjacentElement("beforeend", button);
         this.textareaAIButtons.set(textarea, button);
       }
-      this.positionTextareaAIDot(textarea, button);
+      //
+      // this.positionTextareaAIDot(textarea, button);
     }
   };
 
@@ -423,7 +427,7 @@ class TextSelectionToolbarModule implements AppModule {
     this.textareaAIPositionTimer = window.setTimeout(() => {
       this.textareaAIPositionTimer = null;
       this.syncTextareaAIDots();
-    }, 80);
+    }, 500);
   };
 
   /**
@@ -592,6 +596,11 @@ class TextSelectionToolbarModule implements AppModule {
     if (!this.textareaAIEnabled) {
       return;
     }
+
+    document.head.insertAdjacentHTML(
+      "beforeend",
+      `<style id="${this.textareaAIStyleId}">${dotStyle}</style>`,
+    );
 
     this.syncTextareaAIDots();
 
