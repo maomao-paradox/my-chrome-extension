@@ -210,6 +210,10 @@ await chrome.runtime.sendMessage({
 
 可选参数：`active` 控制新页签是否激活，默认 `true`；`world` 支持 `ISOLATED` 或 `MAIN`，默认 `ISOLATED`；`allFrames` 默认 `false`；`waitUntil` 支持 `loading` 或 `complete`，默认 `loading`；`timeoutMs` 默认 `30000`。
 
+### Side Panel 图片下载
+
+- “图片下载”通过内容脚本扫描当前网页中的图片和 CSS 背景图，再在侧栏预览、筛选并打包下载；浏览器内部页面等未注入内容脚本的页面会显示扫描失败原因。
+
 ### 真实标签页自动化
 
 - Side Panel 新增“自动化”页，可连接当前真实 Chrome 标签页，读取 title/url，执行截图，录制用户操作并生成结构化步骤

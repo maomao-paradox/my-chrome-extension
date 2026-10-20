@@ -285,3 +285,68 @@ export function debounce<T extends (...args: any[]) => any>(
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
 }
+
+export async function getAllFrameOrigins(tabId: number): Promise<string[]> {
+  const frames = await chrome.webNavigation.getAllFrames({ tabId });
+  const origins =
+    frames
+      ?.map((frame) => {
+        try {
+          return new URL(frame.url).origin;
+        } catch (e) {
+          return "null";
+        }
+      })
+      ?.filter((origin) => origin !== "null") ?? [];
+
+  return [...new Set(origins)];
+}
+
+// 从原 sidebar.js 原样迁移，纯函数
+export function generateTemplateFromSchema(schema) {
+  if (!schema || typeof schema !== 'object') return null;
+  if (schema.hasOwnProperty('const')) return schema.const;
+  if (Array.isArray(schema.oneOf) && schema.oneOf.length > 0) {
+    return generateTemplateFromSchema(schema.oneOf[0]);
+  }
+  if (schema.hasOwnProperty('default')) return schema.default;
+  if (Array.isArray(schema.examples) && schema.examples.length > 0) {
+    return schema.examples[0];
+  }
+  switch (schema.type) {
+    case 'object': {
+      const obj = {};
+      if (schema.properties) {
+        Object.keys(schema.properties).forEach((key) => {
+          obj[key] = generateTemplateFromSchema(schema.properties[key]);
+        });
+      }
+      return obj;
+    }
+    case 'array':
+      return schema.items ? [generateTemplateFromSchema(schema.items)] : [];
+    case 'string': {
+      if (schema.enum && schema.enum.length > 0) return schema.enum[0];
+      const iso = new Date().toISOString();
+      if (schema.format === 'date') return iso.substring(0, 10);
+      if (schema.format === '^[0-9]{4}-(0[1-9]|1[0-2])-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9](\\.[0-9]{1,3})?)?$') return iso.substring(0, 23);
+      if (schema.format === '^[0-9]{4}-(0[1-9]|1[0-2])-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$') return iso.substring(0, 19);
+      if (schema.format === '^[0-9]{4}-(0[1-9]|1[0-2])-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9]$') return iso.substring(0, 16);
+      if (schema.format === '^[0-9]{4}-(0[1-9]|1[0-2])$') return iso.substring(0, 7);
+      if (schema.format === '^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$') return `${iso.substring(0, 4)}-W01`;
+      if (schema.format === '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9](\\.[0-9]{1,3})?)?$') return iso.substring(11, 23);
+      if (schema.format === '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$') return iso.substring(11, 19);
+      if (schema.format === '^([01][0-9]|2[0-3]):[0-5][0-9]$') return iso.substring(11, 16);
+      if (schema.format === '^#[0-9a-zA-Z]{6}$') return '#ff00ff';
+      if (schema.format === 'tel') return '123-456-7890';
+      if (schema.format === 'email') return 'user@example.com';
+      return 'example_string';
+    }
+    case 'number':
+    case 'integer':
+      return schema.minimum !== undefined ? schema.minimum : 0;
+    case 'boolean': return false;
+    case 'null': return null;
+    default: return {};
+  }
+}

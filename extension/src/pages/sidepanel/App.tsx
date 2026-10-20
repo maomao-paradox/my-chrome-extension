@@ -5,20 +5,23 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import ImageDownload from "./views/ImageDownload";
 import PageInfo from "./views/PageInfo";
 // import CoreFeatures from './views/CoreFeatures';
 // import TextOperations from './views/TextOperations';
 // import DeveloperTools from './views/DeveloperTools';
 // import About from './views/About';
 // import HiddenPathScanner from './views/HiddenPathScanner';
-// import AutomationPanel from './views/AutomationPanel';
 import "./styles/app.scss";
 import AutomationPanel from "./views/AutomationPanel";
+import TableContainer from "../popup/layout/TableContainer";
+import "../popup/layout/style.scss"; // 导入 TableContainer 的样式
 
 // 导航选项卡定义
 interface Tab {
   id: string;
   name: string;
+  description: string;
 }
 
 // Toast类型定义
@@ -28,9 +31,10 @@ const App: React.FC = () => {
   // 导航选项卡列表
   const tabs: Tab[] = useMemo(
     () => [
-      { id: "automation", name: "网页自动化" },
-      { id: "other-features", name: "功能面板" },
-      { id: "path-scanner", name: "路径扫描" },
+      { id: "automation", name: "网页自动化", description: "自动化网页操作" },
+      { id: "image-download", name: "图片下载", description: "下载网页图片" },
+      { id: "other-features", name: "功能面板", description: "各种实用功能" },
+      { id: "path-scanner", name: "路径扫描", description: "扫描网页路径" },
     ],
     [],
   );
@@ -54,6 +58,7 @@ const App: React.FC = () => {
   const getTabIcon = useCallback((tabId: string): string => {
     const icons: Record<string, string> = {
       automation: "🤖",
+      "image-download": "🖼️",
       "other-features": "⚙️",
       "path-scanner": "🔐",
       "xhr-patch": "🔧",
@@ -196,19 +201,21 @@ const App: React.FC = () => {
     };
   }, [handleWheel]);
 
+  const activeTab =
+    tabs.find((tab) => tab.id === currentTab) ||
+    ({ id: "", name: "", description: "" } as Tab);
+
   // 渲染当前面板内容
   const renderPanel = useCallback(() => {
     switch (currentTab) {
       case "automation":
-        return (
-          <div className="automation-container fade-in">
-            <AutomationPanel />
-          </div>
-        );
+        return <AutomationPanel />;
+      case "image-download":
+        return <ImageDownload />;
       case "other-features":
         return (
           <div className="features-container">
-            <div className="feature-cards fade-in">
+            <div className="feature-cards ">
               <div className="feature-card">
                 <PageInfo />
               </div>
@@ -221,13 +228,13 @@ const App: React.FC = () => {
         );
       case "path-scanner":
         return (
-          <div className="path-scanner-container fade-in">
+          <div className="path-scanner-container ">
             {/* <HiddenPathScanner /> */}
           </div>
         );
       default:
         return (
-          <div className="automation-container fade-in">
+          <div className="automation-container ">
             {/* <AutomationPanel /> */}
           </div>
         );
@@ -262,7 +269,25 @@ const App: React.FC = () => {
       </nav>
 
       {/* 主内容区域 */}
-      <main className="main-content">{renderPanel()}</main>
+      <main className="main-content">
+        <TableContainer
+          density="compact"
+          sectionGap="8px"
+          contentGap="8px"
+          heroGap="8px"
+          rightMaxWidth="88px"
+          headLeft={
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" ,justifyContent: "center"}}>
+              <p className="section-kicker">{currentTab}</p>
+              <span className="section-divider">|</span>
+              <h2 className="section-title">{activeTab.name}</h2>
+              {/* <p className="section-subtitle">{activeTab.description}</p> */}
+            </div>
+          }
+        >
+          <div className="fade-in">{renderPanel()}</div>
+        </TableContainer>
+      </main>
 
       {/* 状态栏 */}
       <div ref={statusBarRef} className="status-bar">

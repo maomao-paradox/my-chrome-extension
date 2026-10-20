@@ -4,6 +4,7 @@ import type { PageTools } from "./page-tools";
 import { applyWebpageMouseTrail } from "./mouse-trail";
 import { getAssetsAbstractPathSync } from "@/utils";
 import { stopEarlyAdBlocker } from "@/modules/adBlocker/early";
+import { scanImages } from "@/document-api/image-zip-download";
 
 export type ContentMessageHandler = (
   data: any,
@@ -152,6 +153,22 @@ export const createMessageHandlers = (
 
   EXTRACT_LINKS: (_data, sendResponse) => {
     sendResponse(pageTools.extractLinks());
+    return false;
+  },
+
+  SCAN_PAGE_IMAGES: (_data, sendResponse) => {
+    try {
+      const images = scanImages(document).map(
+        ({ src, alt, isBase64, name }) => ({ src, alt, isBase64, name }),
+      );
+      sendResponse({ success: true, images });
+    } catch (error) {
+      maLogger.error("扫描页面图片失败:", error);
+      sendResponse({
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
     return false;
   },
 

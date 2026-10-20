@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "ignoreDeprecations":"6.0",
+    "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
@@ -11,44 +11,25 @@
     "isolatedModules": true,
     "strict": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@types/*": [
-        "src/types/*"
-      ],
-      "@components/*": [
-        "src/components/*"
-      ],
-      "@icons/*": [
-        "src/assets/icons/*"
-      ]
+      "@/*": ["./src/*"],
+      "@types/*": ["src/types/*"],
+      "@components/*": ["src/components/*"],
+      "@icons/*": ["src/assets/icons/*"]
     },
-    "lib": [
-      "es2021",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ],
-    "types": [
-      "chrome"
-    ],
+    "lib": ["es2021", "dom", "dom.iterable", "scripthost"],
+    "types": ["chrome"],
     "skipLibCheck": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "src/types"
-    ]
+    "typeRoots": ["./node_modules/@types", "src/types"]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "src/types/*"
-, "src/pages/study-table.tsx", "src/service-worker/chrome-api"  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build"
-  ]
+    "src/types/*",
+    "src/pages/study-table.tsx",
+    "src/service-worker/chrome-api",
+    "src/sfs/web-mcp.js"
+  ],
+  "exclude": ["node_modules", "dist", "build"]
 }
