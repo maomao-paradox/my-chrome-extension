@@ -18,10 +18,15 @@ export interface DeepSeekPowChallenge {
     [key: string]: unknown;
 }
 
+export interface ChatFlowResult {
+  text: string;
+  functionCalls?: Array<{ id: string; name: string; args: Record<string, unknown> }>;
+}
+
 export interface DeepSeekStreamCallbacks {
     onData?: (data: string) => void;
     onError?: (error: unknown) => void;
-    onComplete?: () => void;
+    onComplete?: (result?: ChatFlowResult) => void;
 }
 
 export interface DeepSeekSessionStore {
@@ -48,6 +53,15 @@ export interface DeepSeekCompletionOptions {
     prompt: string;
     chat_session_id: string;
     parent_message_id?: number | null;
+}
+
+export interface DeepSeekWebTool {
+    type: 'function';
+    function: {
+        name: string;
+        description?: string;
+        parameters: unknown;
+    };
 }
 
 interface DeepSeekRequestOptions {
@@ -250,13 +264,95 @@ export function normalizeSystemPrompt(systemPrompt?: string): string {
     return typeof systemPrompt === 'string' ? systemPrompt.trim() : '';
 }
 
-export function buildPromptWithSystemPrompt(prompt: string, systemPrompt?: string): string {
+export function buildPromptWithSystemPrompt(
+    prompt: string,
+    systemPrompt?: string,
+    tools: DeepSeekWebTool[] = [],
+): string {
     const normalizedSystemPrompt = normalizeSystemPrompt(systemPrompt);
-    if (!normalizedSystemPrompt) {
+    if (!normalizedSystemPrompt && tools.length === 0) {
         return prompt;
     }
 
-    return ['[SYSTEM PROTOCOL]', normalizedSystemPrompt, '', '[USER REQUEST]', prompt].join('\n');
+    const sections = ['[SYSTEM PROTOCOL]'];
+    if (normalizedSystemPrompt) {
+        sections.push(normalizedSystemPrompt);
+    }
+    if (tools.length > 0) {
+        sections.push(
+            '',
+            '[AVAILABLE WEBMCP TOOLS]',
+            JSON.stringify(tools.map(({ function: tool }) => tool)),
+            '',
+            '[TOOL CALL PROTOCOL]',
+            'If a listed tool is needed, respond with exactly one <webmcp_tool_calls>...</webmcp_tool_calls> block containing JSON shaped as {"tool_calls":[{"name":"tool_name","arguments":{}}]}. Use only listed tool names and provide arguments matching the schema. Do not include markdown or prose in the block. If no tool is needed, answer normally without this block.',
+        );
+    }
+    sections.push('', '[USER REQUEST]', prompt);
+    return sections.join('\n');
+}
+
+export function parseDeepSeekToolCalls(
+    content: string,
+    tools: DeepSeekWebTool[],
+): Array<{ id: string; name: string; args: Record<string, unknown> }> {
+    const availableNames = new Set(tools.map(({ function: tool }) => tool.name));
+    const payloads: Array<{ name: string; body: string }> = [];
+    const markerMatch = content.match(/<webmcp_tool_calls>\s*([\s\S]*?)\s*<\/webmcp_tool_calls>/i);
+    if (markerMatch) {
+        payloads.push({ name: 'webmcp_tool_calls', body: markerMatch[1] });
+    }
+
+    const dsmlInvokePattern = /<｜｜DSML｜｜\s*invoke\s+name="([^"]+)"\s*>([\s\S]*?)<\/｜｜DSML｜｜\s*parameter\s*>[\s\S]*?<\/｜｜DSML｜｜\s*invoke\s*>/gi;
+    for (const match of content.matchAll(dsmlInvokePattern)) {
+        payloads.push({ name: match[1], body: match[2] });
+    }
+
+    if (payloads.length === 0) {
+        return [];
+    }
+
+    const calls: Array<{ name: unknown; arguments: unknown }> = [];
+    for (const { name: invokedName, body } of payloads) {
+        let payload: unknown;
+        try {
+            payload = JSON.parse(body.trim());
+        } catch (error) {
+            throw new Error(
+                `DeepSeek returned invalid WebMCP tool-call JSON: ${error instanceof Error ? error.message : String(error)}`,
+            );
+        }
+
+        if (invokedName === 'webmcp_tool_calls') {
+            if (!payload || typeof payload !== 'object' || !Array.isArray((payload as Record<string, unknown>).tool_calls)) {
+                throw new Error('DeepSeek returned an invalid WebMCP tool-call response.');
+            }
+            calls.push(...(payload as { tool_calls: Array<{ name: unknown; arguments: unknown }> }).tool_calls);
+        } else if (availableNames.has(invokedName)) {
+            calls.push({ name: invokedName, arguments: payload });
+        } else {
+            throw new Error(`DeepSeek requested an unavailable WebMCP tool: ${invokedName}.`);
+        }
+    }
+
+    return calls.map((call, index) => {
+        if (!call || typeof call !== 'object') {
+            throw new Error(`DeepSeek returned an invalid tool call at index ${index}.`);
+        }
+        const name = call.name;
+        const args = call.arguments;
+        if (typeof name !== 'string' || !availableNames.has(name)) {
+            throw new Error(`DeepSeek requested an unavailable WebMCP tool: ${String(name)}.`);
+        }
+        if (!args || typeof args !== 'object' || Array.isArray(args)) {
+            throw new Error(`DeepSeek returned invalid arguments for WebMCP tool "${name}".`);
+        }
+        return {
+            id: `deepseek_${index}`,
+            name,
+            args: args as Record<string, unknown>,
+        };
+    });
 }
 
 function generateStreamId(): string {
@@ -276,6 +372,82 @@ function generateStreamId(): string {
 
 function nextParentMessageId(currentParentMessageId: number | null): number {
     return currentParentMessageId === null ? 2 : currentParentMessageId + 2;
+}
+
+function getRecord(value: unknown): Record<string, unknown> | null {
+    return value && typeof value === 'object' && !Array.isArray(value)
+        ? value as Record<string, unknown>
+        : null;
+}
+
+export function extractDeepSeekSessionId(result: unknown): string | null {
+    const root = getRecord(result);
+    const data = getRecord(root?.data);
+    const businessData = getRecord(data?.biz_data);
+    const chatSession = getRecord(businessData?.chat_session);
+    const session = getRecord(businessData?.session);
+    const candidates = [
+        businessData?.id,
+        businessData?.chat_session_id,
+        businessData?.session_id,
+        chatSession?.id,
+        session?.id,
+        data?.chat_session_id,
+        data?.session_id,
+        data?.id,
+        root?.chat_session_id,
+        root?.session_id,
+        root?.id,
+    ];
+
+    for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.trim()) {
+            return candidate.trim();
+        }
+        if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+            return String(candidate);
+        }
+    }
+
+    return null;
+}
+
+export function describeDeepSeekResponseError(result: unknown): string {
+    const root = getRecord(result);
+    const data = getRecord(root?.data);
+    const businessData = getRecord(data?.biz_data);
+    const messageCandidates = [
+        data?.biz_msg,
+        businessData?.biz_msg,
+        businessData?.msg,
+        businessData?.message,
+        root?.msg,
+        root?.message,
+        data?.message,
+        getRecord(root?.error)?.message,
+        root?.error,
+    ];
+    const codeCandidates = [
+        data?.biz_code,
+        businessData?.biz_code,
+        businessData?.code,
+        root?.code,
+        getRecord(root?.error)?.code,
+    ];
+    const message = messageCandidates.find(
+        (candidate): candidate is string =>
+            typeof candidate === 'string' && !!candidate.trim(),
+    );
+    const code = codeCandidates.find(
+        (candidate) =>
+            typeof candidate === 'string' || typeof candidate === 'number',
+    );
+    const details = [
+        code !== undefined ? `code ${String(code)}` : '',
+        message?.trim() ?? '',
+    ].filter(Boolean);
+
+    return details.join(': ');
 }
 
 export class DeepSeekClient {
@@ -351,11 +523,12 @@ export class DeepSeekClient {
         prompt: string,
         role: string,
         callbacks?: DeepSeekStreamCallbacks,
-        systemPrompt?: string
+        systemPrompt?: string,
+        tools: DeepSeekWebTool[] = [],
     ): Promise<unknown> {
         const flowStart = performance.now();
         const normalizedRole = normalizeRole(role);
-        const preparedPrompt = buildPromptWithSystemPrompt(prompt, systemPrompt);
+        const preparedPrompt = buildPromptWithSystemPrompt(prompt, systemPrompt, tools);
         let stageTimings: Record<string, number> = {};
 
         for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -369,12 +542,15 @@ export class DeepSeekClient {
                 // 阶段2: 创建会话（如果需要）
                 if (!sessionData.sessionId) {
                     const createSessionStart = performance.now();
-                    const createSessionResult = (await this.createSession()) as {
-                        data?: { biz_data?: { id?: string } };
-                    };
-                    const newSessionId = createSessionResult?.data?.biz_data?.id;
+                    const createSessionResult = await this.createSession();
+                    const newSessionId = extractDeepSeekSessionId(createSessionResult);
                     if (!newSessionId) {
-                        throw new Error('Failed to create session');
+                        const details = describeDeepSeekResponseError(createSessionResult);
+                        throw new Error(
+                            details
+                                ? `Failed to create DeepSeek session (${details})`
+                                : 'Failed to create DeepSeek session: the response did not contain a session ID. Check the stored DeepSeek login credentials and retry.',
+                        );
                     }
                     stageTimings['createSession'] = Math.round(performance.now() - createSessionStart);
 
@@ -410,6 +586,15 @@ export class DeepSeekClient {
 
                 // 阶段5: 发送完成请求（AI模型调用）
                 const completionStart = performance.now();
+                let streamedContent = '';
+                const completionCallbacks = tools.length > 0
+                    ? {
+                        onData: (content: string) => {
+                            streamedContent += content;
+                        },
+                        onError: callbacks?.onError,
+                    }
+                    : callbacks;
                 const response = await this.completion(
                     {
                         prompt: preparedPrompt,
@@ -417,7 +602,7 @@ export class DeepSeekClient {
                         parent_message_id: currentParentMessageId,
                     },
                     powResponse,
-                    callbacks,
+                    completionCallbacks,
                 );
                 stageTimings['completion'] = Math.round(performance.now() - completionStart);
 
@@ -445,7 +630,18 @@ export class DeepSeekClient {
                     timestamp: new Date().toISOString(),
                 });
 
-                callbacks?.onComplete?.();
+                if (tools.length > 0) {
+                    const functionCalls = parseDeepSeekToolCalls(streamedContent, tools);
+                    if (functionCalls.length > 0) {
+                        const result = { text: '', functionCalls };
+                        callbacks?.onComplete?.(result);
+                        return result;
+                    }
+                    callbacks?.onData?.(streamedContent);
+                    callbacks?.onComplete?.({ text: streamedContent, functionCalls: [] });
+                } else {
+                    callbacks?.onComplete?.();
+                }
                 return response;
             } catch (error) {
                 const attemptTime = Math.round(performance.now() - attemptStart);

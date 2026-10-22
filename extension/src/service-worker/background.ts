@@ -15,6 +15,7 @@ import { initMenuListener } from "./background/context-menu";
 import { initMessageListener } from "./background/message-listener";
 import { createBackgroundMessageHandlers } from "./background/message-handlers";
 import { initRuntimeConnectionListener } from "./background/runtime-connections";
+import { initWebMcpBackground } from "./background/web-mcp";
 
 installGlobalLogger({ title: "MRIA BACKGROUND", enabled: false });
 void syncGlobalLoggerFromStorage();
@@ -29,6 +30,7 @@ initRuntimeConnectionListener({
 initClearAiSessionListener();
 initMenuListener();
 initMessageListener(createBackgroundMessageHandlers(devToolsPortManager));
+initWebMcpBackground();
 
 chrome.commands.onCommand.addListener(async (command) => {
   if (command !== "open-content-feature-panel") {

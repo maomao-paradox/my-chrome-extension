@@ -3,89 +3,132 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+if (!window.__WEB_MCP_CONTENT_SCRIPT__) {
+window.__WEB_MCP_CONTENT_SCRIPT__ = true;
 console.debug(`[WebMCP] Content script injected in ${window.location.href}`);
 
 chrome.runtime.onMessage.addListener((message, _, reply) => {
-  const { action, name, inputArgs, fromOrigins } = message;
-  try {
+  const { action, name, inputArgs, fromOrigins } = message ?? {};
+  if (action === 'LIST_TOOLS') {
     if (!document.modelContext) {
-      throw new Error('Error: You must run Chrome with the "WebMCP for testing" flag enabled.');
+      reply({ success: false, error: '当前页面未启用 WebMCP。' });
+      return false;
     }
-    if (action == 'LIST_TOOLS') {
-      debouncedListTools(fromOrigins);
+    debouncedListTools(fromOrigins);
+    if (window === window.top) {
       document.modelContext.ontoolchange = debouncedListTools.bind(null, fromOrigins);
     }
-    if (action == 'EXECUTE_TOOL') {
-      console.debug(`[WebMCP] Execute tool "${name}" with ${inputArgs} in ${window.location.href}`);
-      let targetFrame, loadPromise;
-      // Check if this tool is associated with a form target
-      const formTarget = document.querySelector(`form[toolname="${name}"]`)?.target;
-      if (formTarget) {
-        // May be null, e.g. for target="_blank"; the result then lives in a
-        // new tab and the sidebar retrieves it from there.
-        targetFrame = document.querySelector(`[name=${formTarget}]`);
-      }
-      if (targetFrame) {
-        loadPromise = new Promise((resolve) => {
-          targetFrame.addEventListener('load', resolve, { once: true });
-        });
-      }
-      // Execute the experimental tool
-      document.modelContext
-        .getTools()
-        .then(async (tools) => {
-          const tool = tools.find((t) => t.name === name && t.window === window);
-          let result;
-          try {
-            result = await document.modelContext.executeTool(tool, JSON.parse(inputArgs));
-          } catch (e) {
-            // TODO: Remove this when executeTool doesn't accept JSON stringified inputArgs anymore in Chrome Stable.
-            if (e.message.startsWith('Failed to parse input')) {
-              result = await document.modelContext.executeTool(tool, inputArgs);
-            } else {
-              throw e;
-            }
-          }
-          return result;
-        })
-        .then(async (result) => {
-          // If result is null and we have a target frame, wait for the frame to reload.
-          if (result === null && targetFrame) {
-            console.debug(`[WebMCP] Waiting for form target ${targetFrame} to load`);
-            await loadPromise;
-            console.debug('[WebMCP] Get cross document script tool result');
-            result = targetFrame.contentWindow.document.querySelector(
-              'script[type="application/ld+json"]',
-            )?.textContent;
-          }
-          reply(result);
-        })
-        .catch(({ message }) => reply(JSON.stringify(message)));
-      return true;
-    }
-    if (action == 'GET_CROSS_DOCUMENT_SCRIPT_TOOL_RESULT') {
-      console.debug(`[WebMCP] Get cross document script tool result in ${window.location.href}`);
-      reply(document.querySelector('script[type="application/ld+json"]')?.textContent);
-    }
-  } catch ({ message }) {
-    chrome.runtime.sendMessage({ message });
+    reply({ success: true });
+    return false;
   }
+  if (action === 'EXECUTE_TOOL') {
+    if (!document.modelContext) {
+      reply({ success: false, error: '当前页面未启用 WebMCP。' });
+      return false;
+    }
+    executeTool(name, inputArgs)
+      .then((result) => reply({ success: true, result }))
+      .catch((error) => reply({ success: false, error: error.message || String(error) }));
+    return true;
+  }
+  if (action === 'GET_CROSS_DOCUMENT_SCRIPT_TOOL_RESULT') {
+    reply(document.querySelector('script[type="application/ld+json"]')?.textContent);
+  }
+  return false;
 });
+
+window.addEventListener('message', (event) => {
+  if (
+    window === window.top ||
+    event.data?.action !== 'GET_FRAME_ID'
+  ) {
+    return;
+  }
+  chrome.runtime.sendMessage({ action: 'WEB_MCP_GET_FRAME_ID' }).then(({ frameId }) => {
+    event.source?.postMessage(
+      { action: 'GET_FRAME_ID_RESPONSE', frameId },
+      event.origin === 'null' ? '*' : event.origin,
+    );
+  }).catch((error) => {
+    console.warn('[WebMCP] Failed to get frame ID:', error);
+  });
+});
+
+async function executeTool(name, inputArgs) {
+  console.debug(`[WebMCP] Execute tool "${name}" in ${window.location.href}`);
+  let targetFrame;
+  let loadPromise;
+  const formTarget = document.querySelector(`form[toolname="${name}"]`)?.target;
+  if (formTarget) {
+    targetFrame = document.querySelector(`[name="${CSS.escape(formTarget)}"]`);
+  }
+  if (targetFrame) {
+    loadPromise = new Promise((resolve) => {
+      targetFrame.addEventListener('load', resolve, { once: true });
+    });
+  }
+
+  const tools = await document.modelContext.getTools();
+  const tool = tools.find((item) => item.name === name && item.window === window);
+  if (!tool) {
+    throw new Error(`找不到工具 "${name}"。`);
+  }
+
+  let result;
+  const args = typeof inputArgs === 'string' ? JSON.parse(inputArgs) : inputArgs;
+  try {
+    result = await document.modelContext.executeTool(tool, args);
+  } catch (error) {
+    if (error.message?.startsWith('Failed to parse input')) {
+      result = await document.modelContext.executeTool(tool, JSON.stringify(args));
+    } else {
+      throw error;
+    }
+  }
+
+  if (result === null && targetFrame) {
+    await loadPromise;
+    result = targetFrame.contentWindow.document.querySelector(
+      'script[type="application/ld+json"]',
+    )?.textContent;
+  }
+  return result;
+}
 
 let timeout;
 function debouncedListTools(fromOrigins) {
   clearTimeout(timeout);
-  timeout = setTimeout(() => listTools(fromOrigins), 100);
+  timeout = setTimeout(() => {
+    listTools(fromOrigins).catch((error) => {
+      chrome.runtime.sendMessage({
+        type: 'TOOLS_UPDATED',
+        tools: [],
+        url: window.location.href,
+        error: error instanceof Error ? error.message : String(error),
+      }).catch((sendError) => {
+        console.warn('[WebMCP] Failed to report tool discovery error:', sendError);
+      });
+    });
+  }, 100);
 }
 
 async function listTools(fromOrigins) {
   let tools = [];
   for (const tool of await document.modelContext.getTools({ fromOrigins })) {
+    if (!tool || typeof tool.name !== 'string' || !tool.name) {
+      console.warn('[WebMCP] Skipping a tool without a valid name.');
+      continue;
+    }
     const frameId = tool.window == window ? 0 : await getFrameId(tool.window);
-    const inputSchema =
-      typeof tool.inputSchema === 'string' ? tool.inputSchema : JSON.stringify(tool.inputSchema);
+    if (frameId === null) {
+      console.warn(`[WebMCP] Unable to resolve frame for tool "${tool.name}".`);
+      continue;
+    }
+    const inputSchema = typeof tool.inputSchema === 'string'
+      ? tool.inputSchema
+      : JSON.stringify(tool.inputSchema ?? { type: 'object', properties: {} });
     tools.push({
-      description: tool.description,
+      description: tool.description || '',
       inputSchema,
       annotations: Object.keys(tool.annotations || {})
         .filter((k) => tool.annotations[k])
@@ -95,18 +138,21 @@ async function listTools(fromOrigins) {
     });
   }
   console.debug(`[WebMCP] Got ${tools.length} tools`, tools);
-  chrome.runtime.sendMessage({ tools, url: window.location.href });
+  chrome.runtime.sendMessage({
+    type: 'TOOLS_UPDATED',
+    tools,
+    url: window.location.href,
+  }).catch((error) => console.warn('[WebMCP] Failed to publish tools:', error));
 }
 
 async function getFrameId(targetWindow) {
-  await chrome.runtime.sendMessage({ action: 'INJECT_GET_FRAME_ID' });
   const promise = new Promise((resolve) => {
     let timeoutId;
     const listener = ({ source, data }) => {
-      if (source == targetWindow && data.action === 'GET_FRAME_ID_RESPONSE') {
+      if (source === targetWindow && data.action === 'GET_FRAME_ID_RESPONSE') {
         window.removeEventListener('message', listener);
         clearTimeout(timeoutId);
-        resolve(data.frameId);
+        resolve(Number.isInteger(data.frameId) ? data.frameId : null);
       }
     };
     window.addEventListener('message', listener);
@@ -137,4 +183,5 @@ targetFor('toolcancel', ({ toolName }) => {
 
 if (window === window.top) {
   chrome.runtime.sendMessage({ type: 'contentScriptReady' }).catch(() => {});
+}
 }

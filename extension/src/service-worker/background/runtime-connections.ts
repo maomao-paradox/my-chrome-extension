@@ -1,5 +1,6 @@
 import type { DevToolsPortManager } from "./devtools-port-manager";
 import type { StreamManager } from "./stream-manager";
+import type { ChatHistoryMessage } from "@/types/web-mcp";
 
 interface RuntimeConnectionManagers {
   streamManager: StreamManager;
@@ -44,6 +45,8 @@ function registerAiConversationPort(
       apiBaseUrl,
       systemPrompt,
       targetTabId,
+      messages,
+      tools,
     } = message.payload;
 
     console.log(
@@ -70,6 +73,11 @@ function registerAiConversationPort(
       apiKey,
       apiBaseUrl,
       systemPrompt,
+      {
+        messages: messages as ChatHistoryMessage[] | undefined,
+        tools,
+        targetTabId: resolvedTargetTabId,
+      },
     );
   });
 }

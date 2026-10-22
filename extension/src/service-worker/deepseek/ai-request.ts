@@ -19,6 +19,7 @@
  */
 
 import { loadAIConfig } from '@/service-worker/chrome-api';
+import type { ChatHistoryMessage } from '@/types/web-mcp';
 
 /**
  * AI请求配置选项
@@ -38,6 +39,23 @@ export interface AIRequestOptions {
   apiKey?: string;
   /** API基础URL */
   apiBaseUrl?: string;
+
+  // 新增
+  /** 多轮消息历史（优先于 prompt） */
+  messages?: ChatHistoryMessage[];
+  /** OpenAI-compatible function tool declarations. */
+  tools?: Array<{
+    type: 'function';
+    function: {
+      name: string;
+      description?: string;
+      parameters: unknown;
+    };
+  }>;
+  /** 流式增量回调 */
+  onDelta?: (delta: string) => void;
+  /** 当前标签页，用于页面工具调用。 */
+  targetTabId?: number;
 }
 
 /**
@@ -50,6 +68,8 @@ export interface AIRequestResult {
   content: string;
   /** 错误信息（失败时） */
   error?: string;
+  /** 后台解析的 functionCalls（如果有） */
+  functionCalls?: Array<{ id: string; name: string; args: Record<string, unknown> }>;
 }
 
 /**
@@ -226,6 +246,7 @@ export async function requestAI(
         const chunk = message.payload.content || '';
         if (chunk) {
           content += chunk;
+          options.onDelta?.(chunk);   // ← 透传增量
           // 首包日志 - 记录首次收到数据的时间
           if (!firstChunkTime) {
             firstChunkTime = performance.now();
@@ -243,10 +264,14 @@ export async function requestAI(
       // 请求完成
       if (message.type === 'AI_CONVERSATION_COMPLETE') {
         settle(() => {
-          if (content.trim()) {
+          const functionCalls = Array.isArray(message.payload.functionCalls)
+            ? message.payload.functionCalls
+            : [];
+          if (content.trim() || functionCalls.length > 0) {
             logAndResolve({
               success: true,
-              content: content.trim()
+              content: content.trim(),
+              functionCalls,
             });
           } else {
             logAndResolve({
@@ -307,7 +332,10 @@ export async function requestAI(
         model: effectiveModel,
         apiKey: effectiveApiKey,
         apiBaseUrl: effectiveApiBaseUrl,
-        systemPrompt: effectiveSystemPrompt
+        systemPrompt: effectiveSystemPrompt,
+        messages: options.messages,
+        tools: options.tools,
+        targetTabId: options.targetTabId,
       }
     });
   });

@@ -10,6 +10,7 @@
 import { installGlobalLogger } from '@/utils';
 import { installEarlyAdBlocker } from '@/modules/adBlocker/early';
 import { appConfigKey } from '@/config';
+import '@/sfs/web-mcp.js';
 
 type DomainConfig = {
   enabled?: boolean;

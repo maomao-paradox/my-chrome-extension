@@ -1,4 +1,5 @@
 import { completeChatFlow } from "../deepseek";
+import type { ChatHistoryMessage } from "@/types/web-mcp";
 
 interface StreamConnection {
   port: chrome.runtime.Port;
@@ -17,6 +18,18 @@ export class StreamManager {
     apiKey?: string,
     apiBaseUrl?: string,
     systemPrompt?: string,
+    options?: {
+      messages?: ChatHistoryMessage[];
+      tools?: Array<{
+        type: "function";
+        function: {
+          name: string;
+          description?: string;
+          parameters: unknown;
+        };
+      }>;
+      targetTabId?: number;
+    },
   ): void {
     const startTime = performance.now();
     console.log(
@@ -70,12 +83,12 @@ export class StreamManager {
             error instanceof Error ? error.message : "未知错误",
           );
         },
-        onComplete: () => {
+        onComplete: (result) => {
           const totalElapsed = Math.round(performance.now() - startTime);
           const generationTime = firstChunkTime
             ? Math.round(performance.now() - firstChunkTime)
             : null;
-
+          const functionCalls = result?.functionCalls ?? [];
           console.log(`[AI Stream] ${messageId} 完成:`, {
             totalTime: `${totalElapsed}ms`,
             ttfb: firstChunkTime
@@ -86,7 +99,7 @@ export class StreamManager {
             hasContent: hasSentData,
           });
 
-          if (!hasSentData) {
+          if (!hasSentData && functionCalls.length === 0) {
             this.sendError(
               port,
               messageId,
@@ -98,7 +111,7 @@ export class StreamManager {
           try {
             port.postMessage({
               type: "AI_CONVERSATION_COMPLETE",
-              payload: { messageId },
+              payload: { messageId, functionCalls },
             });
           } catch (error) {
             console.warn("发送完成消息失败:", error);
@@ -112,6 +125,7 @@ export class StreamManager {
       apiKey,
       apiBaseUrl,
       systemPrompt,
+      options,
     ).catch((error) => {
       const elapsed = Math.round(performance.now() - startTime);
       console.error(`[AI Stream] ${messageId} 流程异常 (${elapsed}ms):`, error);

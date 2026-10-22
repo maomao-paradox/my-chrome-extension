@@ -116,6 +116,13 @@ npx vitest run test/content-feature-manager.spec.ts
 - 首次发起 DeepSeek 请求且本地没有凭证时，扩展会打开 `chat.deepseek.com` 等待用户登录；登录成功后读取页面令牌及包含 HttpOnly 项的 Cookies，并保存到 `chrome.storage.local` 的 `ai_assistant_config` 中供后续请求使用。
 - DeepSeek 登录初始化最长等待 5 分钟；凭证获取成功后授权标签页会自动关闭，不再回退到扩展内置的默认令牌或 Cookies。
 
+### 网页工具（WebMCP）
+
+- 侧边栏“网页工具”页会发现当前网页及 iframe 注册的 WebMCP 工具，工具卡片会标明 frame，支持 JSON 参数手动执行。
+- AI 助手可以按工具 Schema 发起自动函数调用，并将结果带回对话；工具名包含 frame 信息以区分不同 frame 中的同名工具。
+- 自动函数调用支持 DeepSeek 内置网页会话、OpenAI 或 OpenAI-compatible API；DeepSeek 网页会话通过工具协议 Prompt 执行 WebMCP，无需 API Key（DeepSeek 配置中的 API Key 不参与该链路）。Anthropic 和 Google 链路暂不支持此功能。
+- AI 可自动执行网页注册的工具。请仅在信任该网页及其工具时使用。
+
 ### 隐藏成就
 
 - 成就状态保存在扩展本地，不上传网页内容、AI 会话、Cookie、密码或完整 URL。

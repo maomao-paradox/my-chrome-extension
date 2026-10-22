@@ -247,9 +247,9 @@ const providerCatalog: Record<ProviderMode, {
     label: 'DeepSeek Built-in',
     baseUrl: '',
     modelPlaceholder: 'deepseek-chat',
-    basePlaceholder: '内置链路无需填写',
-    apiKeyPlaceholder: '内置链路无需填写',
-    description: '使用扩展内置的 DeepSeek 会话链路，适合直接启用舰桥 AI。'
+    basePlaceholder: '内置网页会话无需填写',
+    apiKeyPlaceholder: '内置网页会话不使用此项；WebMCP 无需 API Key',
+    description: '使用扩展内置的 DeepSeek 网页会话；WebMCP 工具调用也通过此会话完成，不需要 API Key。'
   },
   openai: {
     label: 'OpenAI Compatible',

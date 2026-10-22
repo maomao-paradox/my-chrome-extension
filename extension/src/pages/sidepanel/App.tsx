@@ -6,6 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import ImageDownload from "./views/ImageDownload";
+import WebMcpPanel from "./views/WebMcpPanel";
 import PageInfo from "./views/PageInfo";
 // import CoreFeatures from './views/CoreFeatures';
 // import TextOperations from './views/TextOperations';
@@ -33,6 +34,7 @@ const App: React.FC = () => {
     () => [
       { id: "automation", name: "网页自动化", description: "自动化网页操作" },
       { id: "image-download", name: "图片下载", description: "下载网页图片" },
+      { id: "web-mcp", name: "网页工具", description: "发现并执行页面工具" },
       { id: "other-features", name: "功能面板", description: "各种实用功能" },
       { id: "path-scanner", name: "路径扫描", description: "扫描网页路径" },
     ],
@@ -59,6 +61,7 @@ const App: React.FC = () => {
     const icons: Record<string, string> = {
       automation: "🤖",
       "image-download": "🖼️",
+      "web-mcp": "🔌",
       "other-features": "⚙️",
       "path-scanner": "🔐",
       "xhr-patch": "🔧",
@@ -212,6 +215,8 @@ const App: React.FC = () => {
         return <AutomationPanel />;
       case "image-download":
         return <ImageDownload />;
+      case "web-mcp":
+        return <WebMcpPanel />;
       case "other-features":
         return (
           <div className="features-container">

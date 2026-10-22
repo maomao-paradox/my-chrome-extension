@@ -1,0 +1,183 @@
+.webmcp-panel {
+  display: grid;
+  gap: 16px;
+  color: var(--text-primary);
+}
+
+.webmcp-header,
+.webmcp-section {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-secondary);
+  padding: 16px;
+}
+
+.webmcp-header,
+.webmcp-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.webmcp-header h2,
+.webmcp-section-heading h3 {
+  margin: 0;
+}
+
+.webmcp-header p,
+.webmcp-tool-list p,
+.webmcp-empty,
+.webmcp-provider-note {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.webmcp-eyebrow {
+  color: var(--primary-light) !important;
+  font-size: 10px !important;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.webmcp-section {
+  display: grid;
+  gap: 12px;
+}
+
+.webmcp-section-heading span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.webmcp-tool-list {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.webmcp-tool-list li {
+  padding: 10px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--bg-primary);
+}
+
+.webmcp-tool-list li > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.webmcp-tool-list li span,
+.webmcp-tool-list li small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.webmcp-field {
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.webmcp-field textarea,
+.webmcp-field select,
+.webmcp-prompt-form textarea {
+  width: 100%;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 9px;
+  font: inherit;
+}
+
+.webmcp-field textarea,
+.webmcp-schema pre,
+.webmcp-output,
+.webmcp-chat-message pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.webmcp-schema summary {
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.webmcp-schema pre,
+.webmcp-output {
+  max-height: 240px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  border-radius: 6px;
+  background: var(--bg-primary);
+  font-size: 11px;
+}
+
+.webmcp-primary {
+  justify-self: start;
+  background: var(--primary-color);
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.webmcp-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.webmcp-notice,
+.webmcp-error {
+  color: #fca5a5;
+  font-size: 12px;
+}
+
+.webmcp-chat {
+  display: grid;
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.webmcp-chat-message {
+  padding: 9px;
+  border: 1px solid var(--border-light);
+  border-radius: 7px;
+  background: var(--bg-primary);
+}
+
+.webmcp-chat-message strong {
+  font-size: 11px;
+  color: var(--primary-light);
+}
+
+.webmcp-chat-message pre {
+  margin: 5px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.webmcp-chat-message--tool {
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.webmcp-prompt-form {
+  display: grid;
+  gap: 8px;
+}
+
+.webmcp-provider-note {
+  font-size: 11px;
+}

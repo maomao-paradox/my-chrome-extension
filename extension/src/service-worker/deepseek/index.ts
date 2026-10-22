@@ -10,6 +10,15 @@ import {
   type SessionData,
 } from "./deepseek-core";
 import { powWasmModule } from "./pow";
+import {
+  appendOpenAIToolCallDeltas,
+  finalizeOpenAIToolCalls,
+  type OpenAIToolCallDelta,
+} from "./openai-tool-calls";
+import {
+  buildOpenAICompatibleRequestBody,
+  type OpenAICompatibleRequestOptions,
+} from "./openai-request";
 
 const OPENAI_COMPATIBLE_ENDPOINT = "/chat/completions";
 const ANTHROPIC_ENDPOINT = "/messages";
@@ -203,11 +212,16 @@ export async function completeChatFlow(
   apiKey?: string,
   apiBaseUrl?: string,
   systemPrompt?: string,
-  targetTabId?: number,
+  options?: OpenAICompatibleRequestOptions & { targetTabId?: number },
 ): Promise<unknown> {
   const standardProviders = ["openai", "anthropic", "google", "deepseek"];
   const effectiveProvider = provider || "deepseek";
 
+  if (options?.tools?.length && ["anthropic", "google"].includes(effectiveProvider)) {
+    throw new Error(
+      `当前 ${effectiveProvider} 链路暂不支持 WebMCP 工具调用。请在 AI 设置中选择 DeepSeek、OpenAI 或兼容 API。`,
+    );
+  }
   if (standardProviders.includes(effectiveProvider)) {
     switch (effectiveProvider) {
       case "openai":
@@ -221,12 +235,19 @@ export async function completeChatFlow(
           apiBaseUrl,
           callbacks,
           systemPrompt,
+          options,
         );
       case "deepseek":
       default:
         return await (
           await getConfiguredDeepSeekClient()
-        ).completeChatFlow(prompt, role, callbacks, systemPrompt);
+        ).completeChatFlow(
+          prompt,
+          role,
+          callbacks,
+          systemPrompt,
+          options?.tools,
+        );
     }
   }
 
@@ -238,6 +259,7 @@ export async function completeChatFlow(
     apiBaseUrl,
     callbacks,
     systemPrompt,
+    options,
   );
 }
 
@@ -249,6 +271,7 @@ async function callGenericAIAPI(
   apiBaseUrl: string | undefined,
   callbacks?: DeepSeekStreamCallbacks,
   systemPrompt?: string,
+  options?: OpenAICompatibleRequestOptions,
 ): Promise<null> {
   try {
     if (!model) {
@@ -265,6 +288,9 @@ async function callGenericAIAPI(
     let baseUrl = normalizeApiBaseUrl(apiBaseUrl);
     if (!baseUrl) {
       switch (provider) {
+        case "deepseek":
+          baseUrl = "https://api.deepseek.com";
+          break;
         case "openai":
           baseUrl = "https://api.openai.com/v1";
           break;
@@ -286,19 +312,16 @@ async function callGenericAIAPI(
     headers.append("Accept", "text/event-stream, application/json");
 
     switch (provider) {
+      case "deepseek":
       case "openai":
         endpoint = OPENAI_COMPATIBLE_ENDPOINT;
         headers.append("Authorization", `Bearer ${apiKey}`);
-        requestBody = {
+        requestBody = buildOpenAICompatibleRequestBody(
           model,
-          messages: normalizedSystemPrompt
-            ? [
-                { role: "system", content: normalizedSystemPrompt },
-                { role: "user", content: prompt },
-              ]
-            : [{ role: "user", content: prompt }],
-          stream: true,
-        };
+          prompt,
+          normalizedSystemPrompt,
+          options,
+        );
         break;
       case "anthropic":
         endpoint = ANTHROPIC_ENDPOINT;
@@ -327,16 +350,12 @@ async function callGenericAIAPI(
         if (apiKey) {
           headers.append("Authorization", `Bearer ${apiKey}`);
         }
-        requestBody = {
+        requestBody = buildOpenAICompatibleRequestBody(
           model,
-          messages: normalizedSystemPrompt
-            ? [
-                { role: "system", content: normalizedSystemPrompt },
-                { role: "user", content: prompt },
-              ]
-            : [{ role: "user", content: prompt }],
-          stream: true,
-        };
+          prompt,
+          normalizedSystemPrompt,
+          options,
+        );
         break;
     }
 
@@ -363,6 +382,8 @@ async function callGenericAIAPI(
     let pendingBuffer = "";
     let hasContent = false;
     let rawSample = "";
+    let streamedContent = "";
+    const toolCallDeltas = new Map<number, OpenAIToolCallDelta>();
 
     while (true) {
       const { value, done } = await reader.read();
@@ -374,18 +395,28 @@ async function callGenericAIAPI(
         const segments = pendingBuffer.split("\n");
         pendingBuffer = segments.pop() || "";
 
-        const parsedContent = parseGenericStream(segments.join("\n"), provider);
+        const parsedContent = parseGenericStream(
+          segments.join("\n"),
+          provider,
+          toolCallDeltas,
+        );
         if (parsedContent) {
           hasContent = true;
+          streamedContent += parsedContent;
           callbacks?.onData?.(parsedContent);
         }
       }
 
       if (done) {
         if (pendingBuffer.trim()) {
-          const parsedContent = parseGenericStream(pendingBuffer, provider);
+          const parsedContent = parseGenericStream(
+            pendingBuffer,
+            provider,
+            toolCallDeltas,
+          );
           if (parsedContent) {
             hasContent = true;
+            streamedContent += parsedContent;
             callbacks?.onData?.(parsedContent);
           }
         }
@@ -393,11 +424,12 @@ async function callGenericAIAPI(
       }
     }
 
-    if (!hasContent) {
+    const functionCalls = finalizeOpenAIToolCalls(toolCallDeltas);
+    if (!hasContent && functionCalls.length === 0) {
       throw createEmptyGenericStreamError(provider, rawSample);
     }
 
-    callbacks?.onComplete?.();
+    callbacks?.onComplete?.({ text: streamedContent, functionCalls });
     return null;
   } catch (error) {
     callbacks?.onError?.(error);
@@ -425,7 +457,11 @@ function createEmptyGenericStreamError(
   return new Error(`${provider} stream completed without content: ${detail}`);
 }
 
-function parseGenericStream(data: string, provider: string): string {
+function parseGenericStream(
+  data: string,
+  provider: string,
+  toolCallDeltas: Map<number, OpenAIToolCallDelta>,
+): string {
   let content = "";
 
   for (const line of data.split("\n")) {
@@ -436,6 +472,9 @@ function parseGenericStream(data: string, provider: string): string {
 
     try {
       const json = JSON.parse(payload) as Record<string, unknown>;
+      if (provider !== "anthropic" && provider !== "google") {
+        appendOpenAIToolCallDeltas(json, toolCallDeltas);
+      }
       content += extractResponseText(json, provider);
     } catch {
       // Ignore malformed SSE frames.

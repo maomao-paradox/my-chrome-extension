@@ -1,68 +1,111 @@
-function waitForPageLoad(tabId) {
-  return new Promise((resolve) => {
-    let timeoutId;
-    const done = () => {
+const waitForPageLoad = (tabId: number): Promise<void> =>
+  new Promise<void>((resolve) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const done = (): void => {
       clearTimeout(timeoutId);
       chrome.tabs.onUpdated.removeListener(listener);
       resolve();
     };
-    const listener = (updatedTabId, changeInfo) => {
-      if (updatedTabId === tabId && changeInfo.status === 'complete') done();
+    const listener = (
+      updatedTabId: number,
+      changeInfo: chrome.tabs.OnUpdatedInfo,
+    ): void => {
+      if (updatedTabId === tabId && changeInfo.status === "complete") done();
     };
     timeoutId = setTimeout(done, 5000);
     chrome.tabs.onUpdated.addListener(listener);
-    chrome.tabs.get(tabId).then((tab) => {
-      if (tab.status === 'complete') done();
-    }).catch(done);
+    void chrome.tabs
+      .get(tabId)
+      .then((tab) => {
+        if (tab.status === "complete") done();
+      })
+      .catch(() => done());
   });
-}
 
-export async function executeTool(tabId, name, inputArgs, frameId) {
-  let toolsReady;
-  const toolsPromise = new Promise((resolve) => { toolsReady = resolve; });
-
+export async function executeTool(
+  tabId: number,
+  name: string,
+  inputArgs: string,
+  frameId: number,
+): Promise<unknown> {
   let targetTabId = tabId;
-  let contentScriptReadyResolve;
-  const contentScriptReadyPromise = new Promise((r) => { contentScriptReadyResolve = r; });
+  let resolveToolsReady!: () => void;
+  let resolveContentScriptReady!: () => void;
+  const toolsReady = new Promise<void>((resolve) => {
+    resolveToolsReady = resolve;
+  });
+  const contentScriptReady = new Promise<void>((resolve) => {
+    resolveContentScriptReady = resolve;
+  });
 
-  const listener = (msg, sender) => {
-    if (msg.type === 'contentScriptReady' && sender.tab) {
-      if (sender.tab.id === tabId || sender.tab.openerTabId === tabId) {
-        targetTabId = sender.tab.id;
-        contentScriptReadyResolve();
-      }
+  const listener = (
+    rawMessage: unknown,
+    sender: chrome.runtime.MessageSender,
+  ): void => {
+    if (!rawMessage || typeof rawMessage !== "object") return;
+    const message = rawMessage as {
+      type?: string;
+      tools?: unknown[];
+    };
+    if (
+      message.type === "contentScriptReady" &&
+      sender.tab &&
+      (sender.tab.id === tabId || sender.tab.openerTabId === tabId)
+    ) {
+      targetTabId = sender.tab.id ?? tabId;
+      resolveContentScriptReady();
     }
-    if (msg.tools && sender.tab?.id === targetTabId) {
-      toolsReady();
+    if (
+      message.type === "TOOLS_UPDATED" &&
+      sender.tab?.id === targetTabId &&
+      Array.isArray(message.tools)
+    ) {
+      resolveToolsReady();
     }
   };
   chrome.runtime.onMessage.addListener(listener);
 
   try {
     try {
-      const result = await chrome.tabs.sendMessage(
+      const response: unknown = await chrome.tabs.sendMessage(
         tabId,
-        { action: 'EXECUTE_TOOL', name, inputArgs },
+        { action: "EXECUTE_TOOL", name, inputArgs, frameId },
         { frameId },
       );
-      if (result !== null) return result;
+      if (response && typeof response === "object" && "success" in response) {
+        const result = response as {
+          success: boolean;
+          result?: unknown;
+          error?: string;
+        };
+        if (!result.success) {
+          throw new Error(result.error || `工具 "${name}" 执行失败。`);
+        }
+        return result.result;
+      }
+      if (response !== null) return response;
     } catch (error) {
-      if (!/message channel (is )?closed/.test(error.message)) throw error;
+      if (
+        !(error instanceof Error) ||
+        !/message channel (is )?closed/i.test(error.message)
+      ) {
+        throw error;
+      }
     }
 
     await Promise.race([
-      contentScriptReadyPromise,
-      new Promise((r) => setTimeout(r, 2000)),
+      contentScriptReady,
+      new Promise<void>((resolve) => setTimeout(resolve, 2000)),
     ]);
     await Promise.race([
-      toolsPromise,
-      new Promise((r) => setTimeout(r, 2000)),
+      toolsReady,
+      new Promise<void>((resolve) => setTimeout(resolve, 2000)),
     ]);
     await waitForPageLoad(targetTabId);
 
     return await chrome.tabs.sendMessage(
       targetTabId,
-      { action: 'GET_CROSS_DOCUMENT_SCRIPT_TOOL_RESULT' },
+      { action: "GET_CROSS_DOCUMENT_SCRIPT_TOOL_RESULT" },
       { frameId: targetTabId === tabId ? frameId : 0 },
     );
   } finally {
