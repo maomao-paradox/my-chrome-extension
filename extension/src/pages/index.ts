@@ -6,6 +6,11 @@ interface PageLink {
 
 const pages: PageLink[] = [
   {
+    title: "一日公园",
+    description: "滚动驱动昼夜变化的 3D 公园体验。",
+    path: "hero.html",
+  },
+  {
     title: "组件墙",
     description: "展示扩展中可用的 UI 组件和元素。",
     path: "components.html",

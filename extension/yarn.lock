@@ -4526,6 +4526,11 @@ less@^4.6.4:
     probe-image-size "^7.2.3"
     source-map "~0.6.0"
 
+lenis@^1.3.27:
+  version "1.3.27"
+  resolved "https://registry.npmjs.org/lenis/-/lenis-1.3.27.tgz"
+  integrity sha512-QIHNH4LIfWyLfgH/5K0aTGZgyFJJ7GfHNcaH/AIgyKjb8gstLh5siNGvrVqz1w5ClLXzOvllBVk7vby8JzUVPQ==
+
 levn@^0.4.1:
   version "0.4.1"
   resolved "https://registry.npmmirror.com/levn/-/levn-0.4.1.tgz"

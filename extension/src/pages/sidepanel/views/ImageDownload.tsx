@@ -139,7 +139,16 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
         throw new Error(response?.error || "页面扫描未能完成");
       }
 
-      setImages(response.images.map((img) => ({ ...img, loaded: false })));
+      const scannedImages = response.images;
+      setImages((previous) => {
+        const loadedSources = new Set(
+          previous.filter((img) => img.loaded).map((img) => img.src),
+        );
+        return scannedImages.map((img) => ({
+          ...img,
+          loaded: loadedSources.has(img.src),
+        }));
+      });
       setScanned(true);
       onAddMessage?.({
         message:
@@ -237,9 +246,9 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
   /**
    * 图片加载完成回调
    */
-  const handleImageLoad = useCallback((idx: number) => {
+  const handleImageLoad = useCallback((src: string) => {
     setImages((prev) =>
-      prev.map((img, i) => (i === idx ? { ...img, loaded: true } : img)),
+      prev.map((img) => (img.src === src ? { ...img, loaded: true } : img)),
     );
   }, []);
 
@@ -369,7 +378,8 @@ const ImageDownload: React.FC<ImageDownloadProps> = ({ onAddMessage }) => {
                 <img
                   src={img.src}
                   alt={`Image ${idx}`}
-                  onLoad={() => handleImageLoad(idx)}
+                  onLoad={() => handleImageLoad(img.src)}
+                  onError={() => handleImageLoad(img.src)}
                 />
                 <div className="image-overlay scifi-overlay">
                   <button
