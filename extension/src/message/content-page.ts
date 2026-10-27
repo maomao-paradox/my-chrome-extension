@@ -66,7 +66,7 @@ export function listenForPageMessages(handler?: (message: any) => void): void {
   window.addEventListener("message", (event: MessageEvent) => {
     try {
       const { id, source, payload } = event.data;
-      maLogger.log(id, source, payload);
+      // maLogger.log(id, source, payload);
       // 验证消息格式和目标
       if (!(id && source === "page")) {
         return;

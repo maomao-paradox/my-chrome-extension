@@ -102,7 +102,7 @@ const setupBatchEditFormStoryButton = (): void => {
         "td:nth-child(7) > select > option",
       ) as HTMLOptionElement
     )?.value || "";
-  maLogger.log(story_id);
+  // maLogger.log(story_id);
   cases.forEach((e) => {
     (
       e.querySelector("td:nth-child(7) > div > div > input") as HTMLInputElement
@@ -121,7 +121,7 @@ const setupBatchEditFormModuleButton = (): void => {
   const module_id =
     (cases[0].querySelector("td:nth-child(5) > select") as HTMLOptionElement)
       ?.value || "";
-  maLogger.log(module_id);
+  // maLogger.log(module_id);
   cases.forEach((e) => {
     (
       e.querySelector(
@@ -156,22 +156,22 @@ const executeZenTaoMessageHandlers = (type: string, data: any): void => {
 
 const initZenTaoMessageListener = (): void => {
   messenger.ext.listen((message: ExtMessage, sender) => {
-    maLogger.log(
-      "Received message:",
-      message,
-      "from",
-      sender.tab ? `tab ${sender.tab.id}` : "background",
-    );
+    // maLogger.log(
+    //   "Received message:",
+    //   message,
+    //   "from",
+    //   sender.tab ? `tab ${sender.tab.id}` : "background",
+    // );
     const { type, payload } = message;
     if (!shouldHandleZenTaoMessage(message) || !type) {
       return true;
     }
-    maLogger.info(
-      `Received request: ${type}`,
-      payload,
-      "from",
-      sender.tab ? `tab ${sender.tab.id}` : "background",
-    );
+    // maLogger.info(
+    //   `Received request: ${type}`,
+    //   payload,
+    //   "from",
+    //   sender.tab ? `tab ${sender.tab.id}` : "background",
+    // );
     executeZenTaoMessageHandlers(type, payload as any);
   });
 };
@@ -197,7 +197,7 @@ const initializeZentaoContent = (ctx: AppContext, config = {}) => {
         const reader = new FileReader();
         reader.onload = function (e: any) {
           bugData = parseCSV(e.target.result);
-          maLogger.log(bugData);
+          // maLogger.log(bugData);
         };
         reader.readAsText(file);
       }
@@ -207,7 +207,7 @@ const initializeZentaoContent = (ctx: AppContext, config = {}) => {
         return;
       }
       await fetchBugComments(bugData);
-      maLogger.log(bugData);
+      // maLogger.log(bugData);
       const csvContent = convertToCSV(bugData);
       downloadCSV(csvContent, filename);
     });
@@ -219,7 +219,7 @@ const initializeZentaoContent = (ctx: AppContext, config = {}) => {
       if (ctx.self === ctx.top) {
         const toolBarInstance = ctx.gmod("__MODULE_TEXTSELECTIONTOOLBAR");
         if (!toolBarInstance) {
-          maLogger.info("无法访问textSelectionToolbar实例，尝试加载");
+          maLogger.warn("无法访问textSelectionToolbar实例，尝试加载");
           messenger.ext.send({
             type: "UPDATE_TOOLBAR_TOOLS",
             payload: { tools },
@@ -230,7 +230,7 @@ const initializeZentaoContent = (ctx: AppContext, config = {}) => {
         }
       }
     } catch (error) {
-      maLogger.log("发送侧边栏工具更新请求失败: ", error);
+      maLogger.error("发送侧边栏工具更新请求失败: ", error);
     }
   };
 
@@ -350,7 +350,8 @@ export default (ctx: AppContext, config = {}) => {
       iframeSelector: "#appIframe-qa",
       useMutationObserver: true,
       filter: (el) =>
-        el.firstElementChild?.classList.contains("icon-testtask-runCase"),
+        el.firstElementChild?.classList.contains("icon-testtask-runCase") ||
+        false,
       callback: (el: HTMLElement) => {
         const newEl = el.cloneNode(true) as HTMLElement;
         newEl.lastElementChild!.innerHTML = "录制";

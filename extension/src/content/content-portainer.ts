@@ -109,7 +109,7 @@ const initializePortainerContent = (ctx: AppContext): (() => void) => {
         }
       }
     } catch (error) {
-      maLogger.log('发送侧边栏工具更新请求失败: ', error);
+      maLogger.error('发送侧边栏工具更新请求失败: ', error);
     }
   };
 

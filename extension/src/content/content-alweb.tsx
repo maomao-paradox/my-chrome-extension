@@ -127,7 +127,6 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
       // 只在主页面更新侧边栏，避免iframe中重复创建
       if (ctx.self === ctx.top) {
         const sideBarInstance = ctx.gmod("__MODULE_SIDEBAR");
-        maLogger.info("当前sidebar实例:", sideBarInstance);
 
         // 如果sidebar实例不存在，尝试获取sidebar模块并加载
         if (!sideBarInstance) {

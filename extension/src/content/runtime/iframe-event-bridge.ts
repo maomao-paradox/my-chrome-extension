@@ -238,7 +238,7 @@ export const installTopFrameEventBridge = (ctx: AppContext): void => {
       return;
     }
 
-    maLogger.info('通过Pointer Events捕获到iframe上的鼠标移动事件');
+    // maLogger.info('通过Pointer Events捕获到iframe上的鼠标移动事件');
     ctx.dispatchEvent(new MouseEvent('mousemove', {
       clientX: event.clientX,
       clientY: event.clientY,

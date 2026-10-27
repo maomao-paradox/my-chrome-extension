@@ -78,6 +78,7 @@ async function executeTool(name, inputArgs) {
   const args = typeof inputArgs === 'string' ? JSON.parse(inputArgs) : inputArgs;
   try {
     result = await document.modelContext.executeTool(tool, args);
+    console.debug(`[WebMCP] Tool "${name}" executed finished with result:`, result);
   } catch (error) {
     if (error.message?.startsWith('Failed to parse input')) {
       result = await document.modelContext.executeTool(tool, JSON.stringify(args));

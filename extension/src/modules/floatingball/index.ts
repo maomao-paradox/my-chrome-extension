@@ -287,7 +287,7 @@ class FloatingBall implements AppModule {
       // 直接操作 DOM，确保组件被隐藏
       if (this.reactContainer) {
         this.reactContainer.style.display = "none";
-        maLogger.info("悬浮球已直接隐藏");
+        // maLogger.info("悬浮球已直接隐藏");
       }
     } catch (error) {
       maLogger.error("禁用悬浮球失败:", error);

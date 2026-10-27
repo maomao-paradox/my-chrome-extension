@@ -99,7 +99,7 @@ const App: React.FC<AppProps> = ({
     const store = storeActionsRef.current;
     if (!store.isEnabled) return;
     try {
-      maLogger.log("clickBehavior:", store.clickBehavior);
+      // maLogger.log("clickBehavior:", store.clickBehavior);
       if (store.clickBehavior === "sidepanel") {
         // 调用 store 中的 toggleSidepanel 方法打开侧边栏
         store.toggleSidepanel(true);
@@ -127,7 +127,7 @@ const App: React.FC<AppProps> = ({
     store.changeTool(tool);
     store.toggle("dialog", false);
     store.toggle("drawer", true);
-    maLogger.info("点击了工具：", tool.label);
+    // maLogger.info("点击了工具：", tool.label);
   }, []);
 
   /** 关闭面板 */
@@ -163,7 +163,7 @@ const App: React.FC<AppProps> = ({
       namespace: string,
     ) => {
       if (namespace === "local" && changes[appConfigKey]) {
-        maLogger.log("应用配置变化:", changes[appConfigKey]);
+        // maLogger.log("应用配置变化:", changes[appConfigKey]);
         const newConfig = changes[appConfigKey].newValue as ModuleConfigMap;
         if (newConfig && newConfig.floatingball) {
           const store = storeActionsRef.current;

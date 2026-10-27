@@ -62,7 +62,6 @@ export class ESMModuleLoader<T extends Record<string, any> = any> {
       `%c[ESM] ${moduleOption.flag} has been loaded.`,
       "font-weight: bold; color: rgba(94, 235, 153, 1)",
     );
-    // maLogger.groupEnd();
     return instance;
   }
 }

@@ -192,7 +192,7 @@ const checkVaild = (value: { string: any }): boolean =>
 const createHandleRequest =
   (ctx: AppContext) =>
   (_R: Function, ...args: any): Promise<any> => {
-    maLogger.log(_R.name, ...args);
+    // maLogger.log(_R.name, ...args);
     return new Promise((resolve, reject) => {
       if (!_R || typeof _R !== "function") {
         reject(new Error(`api[${_R}] not found in serverApi`));
@@ -213,7 +213,7 @@ const createHandleRequest =
 const createHandleResponse =
   (ctx: AppContext) =>
   (res: Response<any>, condition?: boolean): any => {
-    maLogger.log(res, condition);
+    // maLogger.log(res, condition);
     const timeout = 2000;
     const msg = res.msg || res.message || res;
 
@@ -260,7 +260,7 @@ const sendRequestToBack = async (
 ): Promise<void> => {
   chrome.runtime.sendMessage(requests, (response) =>
     chrome.runtime.lastError
-      ? maLogger.log(chrome.runtime.lastError.message)
+      ? maLogger.error(chrome.runtime.lastError.message)
       : handleResponse
         ? handleResponse(response)
         : maLogger.log("Received response from background:", response),
@@ -375,13 +375,13 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
   ): boolean => {
     const { type, payload: data } = message;
 
-    maLogger.log(
-      "Received request: ",
-      type,
-      data,
-      "from",
-      sender.tab ? `tab ${sender.tab.id}` : "background",
-    );
+    // maLogger.log(
+    //   "Received request: ",
+    //   type,
+    //   data,
+    //   "from",
+    //   sender.tab ? `tab ${sender.tab.id}` : "background",
+    // );
 
     if (!shouldHandleMessage(message) || !type) {
       return false;
@@ -418,7 +418,7 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
    * 根据 roles 数组批量生成完整的 userConfig 配置对象
    */
   const buildUserConfigFromRoles = async (): Promise<Record<string, any>> => {
-    maLogger.info("初始化默认登录用户", roles);
+    // maLogger.info("初始化默认登录用户", roles);
     const userConfig: Record<string, any> = {};
 
     if (roles.length === 0) {
@@ -503,7 +503,7 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
       return;
     }
 
-    maLogger.log(byElement);
+    // maLogger.log(byElement);
 
     const shadowRoot = ctx.gmod("__SHADOW_DOM");
     if (!shadowRoot) {
@@ -512,7 +512,7 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
     }
 
     const positionInfo = getElementAbsolutePosition(byElement);
-    maLogger.log("positionInfo:", positionInfo);
+    // maLogger.log("positionInfo:", positionInfo);
     const loginContainer = createEl({
       tag: "div",
       style: "width: 180px; height: 20px;",
@@ -739,7 +739,7 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
         if (!imageData || !imageData.size) {
           throw new Error("接收到的图片数据无效:" + imageData.size);
         }
-        maLogger.log("成功接收图片数据，大小:", imageData.size, "bytes");
+        // maLogger.log("成功接收图片数据，大小:", imageData.size, "bytes");
         handleRequest(
           updatePatientImage,
           id_number,
@@ -854,7 +854,7 @@ export default (ctx: AppContext & { userInfo: any }, config = {}) => {
       // 只在主页面更新侧边栏，避免iframe中重复创建
       if (ctx.self === ctx.top) {
         const sideBarInstance = ctx.gmod("__MODULE_SIDEBAR");
-        maLogger.info("当前sidebar实例:", sideBarInstance);
+        // maLogger.info("当前sidebar实例:", sideBarInstance);
 
         // 如果sidebar实例不存在，尝试获取sidebar模块并加载
         if (!sideBarInstance) {

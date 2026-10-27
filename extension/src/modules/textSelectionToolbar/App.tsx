@@ -584,7 +584,7 @@ const App: React.FC<AppProps> = ({
       const CommentStorage = await getCommentStorage();
       const comments = await CommentStorage.getCommentsForCurrentPage();
       setPageComments(comments);
-      maLogger.log("加载当前页面留言:", comments);
+      // maLogger.log("加载当前页面留言:", comments);
       // 在下一帧高亮文本
       setTimeout(() => {
         highlightCommentedText();
@@ -640,7 +640,7 @@ const App: React.FC<AppProps> = ({
           await CommentStorage.updateComment(data.commentId, {
             comment: data.comment,
           });
-          maLogger.log("更新留言成功:", data.commentId);
+          // maLogger.log("更新留言成功:", data.commentId);
         } else {
           await CommentStorage.saveComment({
             text: data.text,
@@ -649,7 +649,7 @@ const App: React.FC<AppProps> = ({
             hash,
             rangeInfo: currentRangeInfo || undefined,
           });
-          maLogger.log("保存留言成功");
+          // maLogger.log("保存留言成功");
         }
 
         hideCommentModal();
@@ -671,7 +671,7 @@ const App: React.FC<AppProps> = ({
       try {
         const CommentStorage = await getCommentStorage();
         await CommentStorage.deleteComment(commentId);
-        maLogger.log("删除留言成功:", commentId);
+        // maLogger.log("删除留言成功:", commentId);
         hideCommentModal();
         await loadPageComments();
         toast.success("留言删除成功！");
@@ -707,7 +707,7 @@ const App: React.FC<AppProps> = ({
    * 此处仅用于接收回调通知
    */
   const handleToolClick = useCallback((tool: TextTool) => {
-    maLogger.log("工具栏工具点击(回调通知):", tool.id);
+    // maLogger.log("工具栏工具点击(回调通知):", tool.id);
     if (
       ["copy", "search", "translate", "bookmark", "replace"].includes(tool.id)
     ) {
@@ -729,7 +729,7 @@ const App: React.FC<AppProps> = ({
     const [_, unsubscribe] = eventManager.useBus(
       "update:toolbar:tools",
       (newTools: TextTool[]) => {
-        maLogger.log("接收到事件总线更新tools:", newTools);
+        // maLogger.log("接收到事件总线更新tools:", newTools);
         setLocalTools([...newTools]);
       },
     );

@@ -35,22 +35,22 @@ const initializeLanhuappContent = (): void => {
   const initMessageListener = () => {
     messenger.ext.listen(
       (message: ExtMessage, sender, sendResponse: Function) => {
-        maLogger.log(
-          "Received message:",
-          message,
-          "from",
-          sender.tab ? `tab ${sender.tab.id}` : "background",
-        );
+        // maLogger.log(
+        //   "Received message:",
+        //   message,
+        //   "from",
+        //   sender.tab ? `tab ${sender.tab.id}` : "background",
+        // );
         const { type, payload: data, target } = message;
         if (target !== "content-lanhuapp") {
           return true;
         }
-        maLogger.info(
-          `Received request: ${type}`,
-          data,
-          "from",
-          sender.tab ? `tab ${sender.tab.id}` : "background",
-        );
+        // maLogger.info(
+        //   `Received request: ${type}`,
+        //   data,
+        //   "from",
+        //   sender.tab ? `tab ${sender.tab.id}` : "background",
+        // );
         // 如果消息没有action字段，直接返回，视为其他消息类型
         if (!type) {
           return false;
@@ -77,7 +77,7 @@ const initializeLanhuappContent = (): void => {
 
   // 页面加载完成后执行
   window.onload = () => {
-    maLogger.log("蓝湖页面加载完成,开始监听消息");
+    // maLogger.log("蓝湖页面加载完成,开始监听消息");
 
     // 在这里添加蓝湖特定的功能
     // 例如：添加自定义按钮、修改页面元素等

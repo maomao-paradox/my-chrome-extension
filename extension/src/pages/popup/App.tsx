@@ -60,18 +60,18 @@ const TABS: TabConfig[] = [
     component: TOTPTokenPage,
   },
   {
-    key: "achievements",
-    label: "成就",
-    hint: "查看已发现的隐藏成就。",
-    icon: <TrophyOutlined />,
-    component: AchievementPage,
-  },
-  {
     key: "settings",
     label: "设置",
     hint: "管理内容脚本与插件默认打开方式。",
     icon: <SettingOutlined />,
     component: SettingPage,
+  },
+  {
+    key: "achievements",
+    label: "成就",
+    hint: "查看已发现的隐藏成就。",
+    icon: <TrophyOutlined />,
+    component: AchievementPage,
   },
 ];
 

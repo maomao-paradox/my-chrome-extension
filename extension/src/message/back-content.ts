@@ -67,7 +67,7 @@ export async function sendMessageToContentScript(
 
   return new Promise((resolve, reject) => {
     const { preferredTabId } = options;
-    maLogger.log("开始查询标签页...");
+    // maLogger.log("开始查询标签页...");
 
     const tryPreferredTab = () => {
       if (typeof preferredTabId !== "number") {
@@ -75,11 +75,11 @@ export async function sendMessageToContentScript(
         return;
       }
 
-      maLogger.log("优先向指定标签页发送消息:", preferredTabId, message);
+      // maLogger.log("优先向指定标签页发送消息:", preferredTabId, message);
       dispatchToTab(preferredTabId, message, callback)
         .then(resolve)
         .catch((error) => {
-          maLogger.warn("向指定标签页发送消息失败，回退到活动标签页:", error);
+          maLogger.error("向指定标签页发送消息失败，回退到活动标签页:", error);
           queryActiveTab();
         });
     };
@@ -87,12 +87,12 @@ export async function sendMessageToContentScript(
     const queryActiveTab = () => {
       // 首先尝试查询活动标签页
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        maLogger.log("查询活动标签页结果:", tabs);
+        // maLogger.log("查询活动标签页结果:", tabs);
         const validTabs = tabs.filter(isUsableContentScriptTab);
 
         if (validTabs && validTabs.length > 0) {
-          maLogger.log("找到活动标签页:", validTabs[0].id, validTabs[0].url);
-          maLogger.log("向内容脚本发送消息:", message);
+          // maLogger.log("找到活动标签页:", validTabs[0].id, validTabs[0].url);
+          // maLogger.log("向内容脚本发送消息:", message);
           dispatchToTab(validTabs[0].id!, message, callback)
             .then(resolve)
             .catch((error) => {
@@ -101,7 +101,7 @@ export async function sendMessageToContentScript(
               sendToAllTabs(message, callback, resolve, reject, preferredTabId);
             });
         } else {
-          maLogger.error("未找到活动标签页，尝试查询所有标签页...");
+          // maLogger.log("未找到活动标签页，尝试查询所有标签页...");
           // 如果没有找到活动标签页，尝试查询所有标签页
           sendToAllTabs(message, callback, resolve, reject, preferredTabId);
         }
@@ -121,7 +121,7 @@ function sendToAllTabs(
   preferredTabId?: number,
 ) {
   chrome.tabs.query({}, (tabs) => {
-    maLogger.log("查询所有标签页结果:", tabs);
+    // maLogger.log("查询所有标签页结果:", tabs);
     const validTabs = tabs
       .filter(isUsableContentScriptTab)
       .sort((left, right) => {
@@ -137,11 +137,11 @@ function sendToAllTabs(
     if (validTabs && validTabs.length > 0) {
       // 尝试向第一个标签页发送消息
       const firstTab = validTabs[0];
-      maLogger.log("尝试向第一个标签页发送消息:", firstTab.id, firstTab.url);
+      // maLogger.log("尝试向第一个标签页发送消息:", firstTab.id, firstTab.url);
 
       dispatchToTab(firstTab.id!, message, callback)
         .then((response) => {
-          maLogger.log("收到标签页响应:", response);
+          // maLogger.log("收到标签页响应:", response);
           if (resolve) {
             resolve(response);
           }

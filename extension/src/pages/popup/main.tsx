@@ -20,7 +20,7 @@ import "./styles/themes.scss";
 const APP_ROOT_ID = "app";
 
 installGlobalLogger({ title: "MRIA POPUP", enabled: false });
-syncGlobalLoggerFromStorage().then((bootstrap) => bootstrap.setEnabled(true));
+void syncGlobalLoggerFromStorage();
 
 /** 初始化并渲染 Popup 应用 */
 const bootstrap = (): void => {

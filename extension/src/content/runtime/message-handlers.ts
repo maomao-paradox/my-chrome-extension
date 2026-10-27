@@ -19,7 +19,7 @@ export const createMessageHandlers = (
   pageTools: PageTools,
 ): ContentMessageHandlers => ({
   EXECUTE_SCRIPT: (data, sendResponse) => {
-    maLogger.log("开始执行脚本：", data);
+    // maLogger.log("开始执行脚本：", data);
     try {
       const { code } = data;
       if (!code) {
@@ -28,7 +28,7 @@ export const createMessageHandlers = (
       }
 
       const result = new Function(code)();
-      maLogger.log("脚本执行结果：", result);
+      // maLogger.log("脚本执行结果：", result);
       sendResponse({ result });
     } catch (error) {
       maLogger.error("脚本执行失败：", error);
@@ -40,7 +40,7 @@ export const createMessageHandlers = (
   },
 
   SCRIPT_INJECTION_SUCCESS: (data, sendResponse) => {
-    maLogger.log("脚本注入成功：", data);
+    // maLogger.log("脚本注入成功：", data);
     ctx.message?.success?.("脚本注入成功");
     sendResponse({ success: true, message: "脚本注入成功" });
     return false;
@@ -111,7 +111,7 @@ export const createMessageHandlers = (
   UPDATE_SIDEBAR_TOOLS: async (data, sendResponse) => {
     const { tools } = data;
     try {
-      maLogger.log("接收到侧边栏工具更新请求:", tools);
+      // maLogger.log("接收到侧边栏工具更新请求:", tools);
       const updated = await moduleManager.updateModuleTools("sidebar", tools);
       sendResponse(
         updated
@@ -131,7 +131,7 @@ export const createMessageHandlers = (
   UPDATE_TOOLBAR_TOOLS: async (data, sendResponse) => {
     const { tools } = data;
     try {
-      maLogger.log("接收到文字工具更新请求:", tools);
+      // maLogger.log("接收到文字工具更新请求:", tools);
       const updated = await moduleManager.updateModuleTools(
         "textSelectionToolbar",
         tools,
@@ -236,7 +236,7 @@ export const createMessageHandlers = (
   },
 
   TRIGGER_COMPONENT_CAPTURE: async (_data, sendResponse) => {
-    maLogger.log("=====触发广告拦截选择=====");
+    // maLogger.log("=====触发广告拦截选择=====");
     try {
       const module = await moduleManager.getOrLoadModule("adBlocker");
       if (module && typeof module.triggerAdBlocker === "function") {

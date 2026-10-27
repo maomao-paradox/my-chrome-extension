@@ -3,6 +3,12 @@ import { buildConfig } from "@/utils/config";
 import { executeTool } from "@/utils/executeTool";
 import { requestAI } from "@/service-worker/deepseek/ai-request";
 import { loadAIConfig } from "@/service-worker/chrome-api";
+import {
+  buildTaskReminder,
+  buildToolContinuationPrompt,
+  limitToolResultForContext,
+  trimPriorConversationHistory,
+} from "@/utils/webMcpConversation";
 import type {
   ChatHistoryMessage,
   WebMcpTool,
@@ -51,10 +57,8 @@ export function usePromptAI({
         { role: "user", content: prompt },
         { role: "assistant", content: "" },
       ]);
-      historyRef.current = [
-        ...historyRef.current,
-        { role: "user", content: prompt },
-      ];
+      historyRef.current = trimPriorConversationHistory(historyRef.current);
+      historyRef.current.push({ role: "user", content: prompt });
 
       try {
         const config = buildConfig(tools);
@@ -70,11 +74,17 @@ export function usePromptAI({
         );
         let toolRounds = 0;
         let requestPrompt = prompt;
+        let isContinuationRequest = false;
 
         while (true) {
           const result = await requestAI(requestPrompt, {
             systemPrompt,
-            messages: historyRef.current,
+            messages: isContinuationRequest
+              ? [
+                  ...historyRef.current,
+                  { role: "user", content: buildTaskReminder(prompt) },
+                ]
+              : historyRef.current,
             tools: supportsToolCalls ? config.tools : [],
             targetTabId: tabId,
             onDelta: (delta) => {
@@ -169,20 +179,15 @@ export function usePromptAI({
             historyRef.current.push({
               role: "tool",
               tool_call_id: toolResult.toolCallId,
-              content: toolResult.content,
+              content: limitToolResultForContext(toolResult.content),
             });
             setMessages((current) => [
               ...current,
               { role: "tool", content: `${toolResult.name}: ${toolResult.content}` },
             ]);
           }
-          requestPrompt = [
-            "以下是你上一轮请求的网页工具执行结果：",
-            ...toolResults.map(
-              ({ name, content }) => `工具 ${name} 返回：\n${content}`,
-            ),
-            "请根据这些结果继续完成用户原始请求；如还需网页工具，请按工具调用协议返回，否则直接给出最终答复。",
-          ].join("\n\n");
+          requestPrompt = buildToolContinuationPrompt(prompt, toolResults);
+          isContinuationRequest = true;
 
           setMessages((current) => [
             ...current,

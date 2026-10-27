@@ -43,7 +43,7 @@ class ComponentCaptureModule implements AppModule {
   stylesInjected: boolean = false;
 
   constructor() {
-    maLogger.log("ComponentCaptureModule initialized");
+    // maLogger.log("ComponentCaptureModule initialized");
   }
 
   /**
@@ -52,7 +52,7 @@ class ComponentCaptureModule implements AppModule {
   async inject(): Promise<void> {
     try {
       if (window.self !== window.top) {
-        maLogger.log("不是主页面，不注入组件捕获模块");
+        maLogger.warn("不是主页面，不注入组件捕获模块");
         return;
       }
 
@@ -139,7 +139,7 @@ class ComponentCaptureModule implements AppModule {
    */
   async triggerComponentCapture(): Promise<void> {
     try {
-      maLogger.log("开始组件捕获...");
+      // maLogger.log("开始组件捕获...");
       await this.inject();
 
       // 显示 React 容器
@@ -168,7 +168,7 @@ class ComponentCaptureModule implements AppModule {
     if (this._container) {
       this._container.style.display = "none";
       this.isCapturing = false;
-      maLogger.log("组件捕获界面已隐藏");
+      // maLogger.log("组件捕获界面已隐藏");
     }
   }
 
@@ -198,7 +198,7 @@ class ComponentCaptureModule implements AppModule {
    */
   async init(context?: any): Promise<void> {
     this._ctx = context;
-    maLogger.log("ComponentCaptureModule initialized with context");
+    // maLogger.log("ComponentCaptureModule initialized with context");
   }
 }
 

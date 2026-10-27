@@ -51,7 +51,7 @@ const getTranslationSessionRole = (): string => {
  */
 const createTranslationStreamPort = (messageId: string) => {
   const port = chrome.runtime.connect({ name: `ai-conversation-${messageId}` });
-  maLogger.log("创建端口连接成功:", port);
+  // maLogger.log("创建端口连接成功:", port);
   return port;
 };
 
@@ -78,7 +78,7 @@ const setupTranslationStreamHandlers = (
   };
 
   port.onMessage.addListener((msg) => {
-    maLogger.log("收到端口消息:", msg);
+    // maLogger.log("收到端口消息:", msg);
     if (msg.payload?.messageId !== messageId) {
       return;
     }
@@ -87,13 +87,13 @@ const setupTranslationStreamHandlers = (
 
     if (msg.type === "AI_CONVERSATION_STREAM_DATA" && status) {
       fullTranslation += msg.payload.content;
-      maLogger.log("收到流式数据:", msg.payload.content);
+      // maLogger.log("收到流式数据:", msg.payload.content);
       onUpdate(fullTranslation, status);
     } else if (msg.type === "AI_CONVERSATION_ERROR" && status) {
-      maLogger.log("收到错误消息:", msg.payload.error);
+      // maLogger.log("收到错误消息:", msg.payload.error);
       onUpdate(`翻译失败: ${msg.payload.error}`, status);
     } else if (msg.type === "AI_CONVERSATION_COMPLETE") {
-      maLogger.log("收到完成消息");
+      // maLogger.log("收到完成消息");
       port.disconnect();
     }
   });

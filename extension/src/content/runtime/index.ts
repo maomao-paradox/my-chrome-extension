@@ -119,7 +119,7 @@ const installMessageListener = (
       return true;
     }
 
-    maLogger.info("Received message: ", type, data, "from", sender);
+    // maLogger.info("Received message: ", type, data, "from", sender);
     const handler = messageHandlers[type];
 
     if (!handler) {
@@ -142,7 +142,7 @@ const loadAppOptions = async (
   try {
     const result = await storage.ext.local.get(appConfigKey, null);
     if (!checkValid(result)) {
-      maLogger.info("初始化应用配置", defaultModuleConfigs);
+      // maLogger.info("初始化应用配置", defaultModuleConfigs);
       if (checkValid(defaultModuleConfigs)) {
         await storage.ext.local.set(appConfigKey, defaultModuleConfigs || {});
         await applyConfig(defaultModuleConfigs);
@@ -167,7 +167,7 @@ const sendFileMapToBackground = async (): Promise<void> => {
         target: "background",
         payload: fileMap,
       });
-      maLogger.log("已向后台发送 file_map");
+      // maLogger.log("已向后台发送 file_map");
     }
   } catch (error) {
     maLogger.error("向后台发送 file_map 失败:", error);
@@ -233,5 +233,5 @@ export const initializeContent = async (ctx: AppContext): Promise<void> => {
     enumerable: false,
     configurable: false,
   });
-  maLogger.log(ctx);
+  // maLogger.log(ctx);
 };

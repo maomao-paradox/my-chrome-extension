@@ -65,7 +65,11 @@ const createMethod = (
   options: { prefixed?: boolean } = { prefixed: true },
 ): LoggerMethod => {
   return (...args: any[]): Logger => {
-    if (!getEnabled()) {
+    if (
+      !getEnabled() &&
+      methodName !== "error" &&
+      methodName !== "warn"
+    ) {
       return getLogger();
     }
 

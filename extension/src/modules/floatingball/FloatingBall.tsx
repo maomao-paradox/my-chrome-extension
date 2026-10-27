@@ -77,7 +77,7 @@ const FloatingBall: React.FC<FloatingBallProps> = ({
       const target = e.target as HTMLElement | null;
       if (!target) return;
       const rootNode = target.getRootNode();
-      maLogger.info("点击目标", target, rootNode);
+      // maLogger.info("点击目标", target, rootNode);
       if (rootNode instanceof ShadowRoot) {
         trackFloatingBallOpen();
         onClick?.(e);

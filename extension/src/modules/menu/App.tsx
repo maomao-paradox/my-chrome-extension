@@ -31,7 +31,7 @@ const MenuApp: React.FC<MenuAppProps> = ({ tools }) => {
   const [autoClickVisible, setAutoClickVisible] = useState(false);
 
   const handleToolClick = useCallback((toolId: string) => {
-    maLogger.log(toolId);
+    // maLogger.log(toolId);
     if (toolId === "autoClick") {
       setAutoClickVisible((prev) => !prev);
       return;

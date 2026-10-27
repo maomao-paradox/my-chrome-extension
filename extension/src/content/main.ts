@@ -106,7 +106,7 @@ const loadRuntime = async (): Promise<void> => {
 
 (async () => {
   if (location.origin === 'chrome://extensions') {
-    maLogger.log('Content bootstrap is not available in chrome://extensions');
+    maLogger.warn('Content bootstrap is not available in chrome://extensions');
     return;
   }
 
@@ -142,7 +142,7 @@ const loadRuntime = async (): Promise<void> => {
       Array.isArray(disabledDomains) &&
       disabledDomains.includes(currentDomain)
     ) {
-      maLogger.log(`当前域名 ${currentDomain} 已被禁用，跳过注入`);
+      maLogger.warn(`当前域名 ${currentDomain} 已被禁用，跳过注入`);
       return;
     }
 

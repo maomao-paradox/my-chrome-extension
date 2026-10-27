@@ -286,7 +286,7 @@ export default (ctx: AppContext, config = {}) => {
         }
       }
     } catch (error) {
-      maLogger.log("发送侧边栏工具更新请求失败: ", error);
+      maLogger.error("发送侧边栏工具更新请求失败: ", error);
     }
   };
 
@@ -298,7 +298,7 @@ export default (ctx: AppContext, config = {}) => {
       tableElement ||
       document.querySelector<HTMLElement>(".el-table__inner-wrapper");
 
-    maLogger.log("tableEl:", tableEl);
+    // maLogger.log("tableEl:", tableEl);
     if (!tableEl) {
       return () => Promise.resolve(null);
     }
@@ -319,11 +319,11 @@ export default (ctx: AppContext, config = {}) => {
           header.querySelectorAll("thead > tr:last-child > th"),
         );
         const bodyRows = Array.from(body.querySelectorAll("tbody > tr"));
-        maLogger.log(
-          "表头:",
-          headerTitle.map((item) => item.textContent),
-        );
-        maLogger.log("表体行数:", bodyRows.length);
+        // maLogger.log(
+        //   "表头:",
+        //   headerTitle.map((item) => item.textContent),
+        // );
+        // maLogger.log("表体行数:", bodyRows.length);
 
         addLoadingMask(tableEl);
         // 调用AI生成JSON数据
@@ -349,7 +349,7 @@ export default (ctx: AppContext, config = {}) => {
           if (!rowData) {
             return;
           }
-          maLogger.log("rowData:", rowData);
+          // maLogger.log("rowData:", rowData);
           cells.forEach((cell, index) => {
             const input =
               cell.querySelector("input") || cell.querySelector("textarea");
@@ -393,7 +393,7 @@ export default (ctx: AppContext, config = {}) => {
           el.querySelector<HTMLButtonElement>(
             ".sub-form-toolbar > .el-button--primary",
           );
-        maLogger.log("buttonEl:", buttonEl);
+        // maLogger.log("buttonEl:", buttonEl);
         const tableEl = el.querySelector<HTMLElement>(
           ".el-table__inner-wrapper",
         );

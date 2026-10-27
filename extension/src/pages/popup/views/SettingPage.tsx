@@ -23,6 +23,7 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import TableContainer from "../layout/TableContainer";
+import DebugModeSetting from "../components/DebugModeSetting";
 import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
 import { appConfigKey, domainConfigsKey } from "@/config";
@@ -436,6 +437,8 @@ export const SettingPage: FC<{}> = () => {
       }
     >
       <div className="settings-dashboard">
+        <DebugModeSetting />
+
         {/* 主题设置面板 */}
         <section className="settings-panel settings-panel--theme">
           <div className="panel-heading">

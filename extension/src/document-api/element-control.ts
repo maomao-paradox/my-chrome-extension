@@ -250,7 +250,7 @@ const createScriptElement = async (
   script.onload = (evt: Event) => {
     (evt.target as HTMLElement)?.remove();
     // showSuccessMessage("脚本已生效!");
-    maLogger.info("脚本已生效!");
+    // maLogger.info("脚本已生效!");
   };
 
   script.onerror = (evt: Event | any) => {
@@ -344,7 +344,7 @@ export function saveToLocal(blob: Blob, fileName: string): void {
     })();
 
     (downloadLink as HTMLAnchorElement).click();
-    maLogger.log("文件下载成功:", fileName);
+    // maLogger.log("文件下载成功:", fileName);
   } catch (error) {
     maLogger.error("文件下载出错:", error);
     throw error;

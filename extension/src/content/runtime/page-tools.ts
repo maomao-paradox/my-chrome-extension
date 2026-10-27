@@ -17,10 +17,10 @@ export interface PageTools {
 
 export const createPageTools = (ctx: AppContext): PageTools => {
   const batchReplaceText = (oldText: string, newText: string) => {
-    maLogger.log(`=====批量替换页面文本: "${oldText}" -> "${newText}"=====`);
+    // maLogger.log(`=====批量替换页面文本: "${oldText}" -> "${newText}"=====`);
 
     if (!oldText) {
-      maLogger.error('批量替换文本失败: 未指定要替换的文本');
+      maLogger.warn('批量替换文本失败: 未指定要替换的文本');
       return { success: false, msg: '请指定要替换的文本' };
     }
 
@@ -53,7 +53,7 @@ export const createPageTools = (ctx: AppContext): PageTools => {
   };
 
   const extractLinks = () => {
-    maLogger.info('=====提取页面链接=====');
+    // maLogger.info('=====提取页面链接=====');
     const links = Array.from(document.querySelectorAll('a[href]')).map((link) => {
       const href = link.getAttribute('href') || '';
       const text = link.textContent?.trim() || '无文本';
@@ -78,7 +78,7 @@ export const createPageTools = (ctx: AppContext): PageTools => {
   };
 
   const clearStorage = () => {
-    maLogger.info('=====清除本地存储=====');
+    // maLogger.info('=====清除本地存储=====');
 
     try {
       localStorage.clear();
@@ -99,7 +99,7 @@ export const createPageTools = (ctx: AppContext): PageTools => {
   };
 
   const getPageSource = () => {
-    maLogger.info('=====获取页面源码=====');
+    // maLogger.info('=====获取页面源码=====');
 
     try {
       const html = document.documentElement.outerHTML;
@@ -157,12 +157,12 @@ export const createPageTools = (ctx: AppContext): PageTools => {
         result = sessionStorage;
         break;
     }
-    maLogger.info('=====获取页面变量=====', varPath, result);
+    // maLogger.info('=====获取页面变量=====', varPath, result);
     return result;
   };
 
   const setPageVariable = (varPath: string, value: any) => {
-    maLogger.info('=====设置页面变量=====', varPath, value);
+    // maLogger.info('=====设置页面变量=====', varPath, value);
     return new Promise((resolve) => {
       setTimeout(() => {
         try {
@@ -224,7 +224,7 @@ export const createPageTools = (ctx: AppContext): PageTools => {
   };
 
   const getLocalStorage = () => {
-    maLogger.log('=====获取localStorage=====');
+    // maLogger.log('=====获取localStorage=====');
 
     try {
       const localStorageData: Record<string, string> = {};
@@ -243,7 +243,7 @@ export const createPageTools = (ctx: AppContext): PageTools => {
   };
 
   const setLocalStorage = (data: Record<string, string> | string) => {
-    maLogger.log('=====设置localStorage=====', data);
+    // maLogger.log('=====设置localStorage=====', data);
     if (!data) {
       return { success: false, msg: '数据格式错误，必须是一个对象' };
     }
@@ -270,7 +270,7 @@ export const createPageTools = (ctx: AppContext): PageTools => {
   };
 
   const takeScreenshot = () => {
-    maLogger.log('=====截取网页截图=====');
+    // maLogger.log('=====截取网页截图=====');
 
     if (!('captureStream' in HTMLCanvasElement.prototype)) {
       return { success: false, msg: '您的浏览器不支持截图功能' };

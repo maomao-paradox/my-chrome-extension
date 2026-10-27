@@ -61,6 +61,10 @@ VITE_BUILD_DEVTOOLS=false
 
 项目使用 [Vitest](https://vitest.dev/) + [happy-dom](https://github.com/capricorn86/happy-dom) + React Testing Library 进行单元测试和组件测试。
 
+Popup 设置页提供调试模式开关，并将状态保存到 `extensionSettings.debugMode`。开启后显示 `log`、`info`、`debug` 等日志；`warn` 和 `error` 始终输出。
+
+WebMCP 的 AI 工具循环会在每次续问中重申当前任务原文，并带上本轮工具结果，避免模型只汇报结果而漏做用户要求的页面操作。旧对话按完整轮次保留最近约 16,000 字符，单条工具结果传给模型时最多 6,000 字符，避免上下文无限增长。
+
 ```bash
 # 运行测试
 npm test

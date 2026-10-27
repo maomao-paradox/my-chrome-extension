@@ -10,6 +10,9 @@
 import { type Requester } from "@/services/api/mria-api";
 import { type Logger } from "@/utils";
 import "react";
+import { ModelContext } from "./web-mcp";
+
+export {};
 
 declare module "react" {
   interface CSSProperties {
@@ -23,6 +26,10 @@ declare global {
 
   interface Window {
     maLogger: Logger;
+  }
+
+  interface Document {
+    readonly modelContext?: ModelContext;
   }
 
   interface AppContext extends Window {

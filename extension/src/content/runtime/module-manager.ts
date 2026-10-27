@@ -30,7 +30,7 @@ export const createModuleManager = (
 
     const module = appModules.get(moduleName);
     if (!module) {
-      maLogger.log(`未找到模块配置: ${moduleName}`);
+      maLogger.warn(`未找到模块配置: ${moduleName}`);
       return null;
     }
 
@@ -57,7 +57,7 @@ export const createModuleManager = (
 
         try {
           await moduleLoader.load(config);
-          maLogger.info(`成功加载脚本: ${config.flag}`);
+          // maLogger.info(`成功加载脚本: ${config.flag}`);
         } catch (msgError) {
           maLogger.error(`动态加载脚本失败: ${config.flag}`, msgError);
         }
@@ -74,7 +74,7 @@ export const createModuleManager = (
   ): Promise<void> => {
     const moduleConfig = appModules.get(moduleName);
     if (!moduleConfig) {
-      maLogger.log(`未找到模块配置: ${moduleName}`);
+      maLogger.warn(`未找到模块配置: ${moduleName}`);
       return;
     }
 
@@ -83,7 +83,6 @@ export const createModuleManager = (
         const moduleInstance = await getOrLoadModule(moduleName, options);
         if (moduleInstance && typeof moduleInstance.enable === "function") {
           moduleInstance.enable(options);
-          maLogger.info(`${moduleConfig.flag}模块已启用`);
         }
       } catch (error) {
         maLogger.error(`加载${moduleConfig.flag}模块失败:`, error);
@@ -94,7 +93,7 @@ export const createModuleManager = (
     const moduleInstance = moduleInstanceMap.get(moduleName);
     if (moduleInstance && typeof moduleInstance.disable === "function") {
       moduleInstance.disable();
-      maLogger.info(`${moduleConfig.flag}模块已禁用`);
+      // maLogger.info(`${moduleConfig.flag}模块已禁用`);
     }
   };
 
@@ -105,7 +104,7 @@ export const createModuleManager = (
       return;
     }
 
-    maLogger.table(config);
+    // maLogger.table(config);
     for (const [moduleName, { enabled, options }] of Object.entries(config)) {
       await toggleApp(moduleName, enabled, options);
     }

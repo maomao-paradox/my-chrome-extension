@@ -44,7 +44,7 @@ function initializeQaproContent(ctx: AppContext, config = {}) {
 
   // 登录相关的API处理函数
   const handleRequest = (_R: Function, ...args: any) => {
-      maLogger.log(_R.name, ...args);
+      // maLogger.log(_R.name, ...args);
       return new Promise((resolve, reject) => {
         if (!_R || typeof _R !== "function") {
           reject(new Error(`api[${_R}] not found in serverApi`));
@@ -59,7 +59,7 @@ function initializeQaproContent(ctx: AppContext, config = {}) {
       });
     },
     handleResponse = (res: any, condition?: boolean) => {
-      maLogger.log(res, condition);
+      // maLogger.log(res, condition);
       const timeout = 2000,
         msg = res.msg || res.message || res;
       if ((res.code && res.code === 1e4) || condition) {
@@ -176,7 +176,7 @@ function initializeQaproContent(ctx: AppContext, config = {}) {
     messenger.ext.listen((message: ExtMessage, sender, sendResponse) => {
       const { type, payload: data, target } = message;
 
-      maLogger.info("Received message: ", type, data, "from", sender);
+      // maLogger.info("Received message: ", type, data, "from", sender);
 
       if (!type || target !== "content") {
         return false;
@@ -192,7 +192,7 @@ function initializeQaproContent(ctx: AppContext, config = {}) {
   }
 
   function initQaproContent() {
-    maLogger.info("QAPRO content script initialized");
+    // maLogger.info("QAPRO content script initialized");
 
     function enrichQuickLogin(
       byElement: HTMLElement,

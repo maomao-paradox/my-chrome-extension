@@ -4,6 +4,12 @@ import {
 } from "@/service-worker/deepseek/openai-tool-calls";
 import { buildOpenAICompatibleRequestBody } from "@/service-worker/deepseek/openai-request";
 import { buildConfig } from "@/utils/config";
+import {
+  buildTaskReminder,
+  buildToolContinuationPrompt,
+  limitToolResultForContext,
+  trimPriorConversationHistory,
+} from "@/utils/webMcpConversation";
 
 describe("WebMCP OpenAI tool-call stream aggregation", () => {
   it("joins fragmented names and JSON arguments across SSE deltas", () => {
@@ -155,5 +161,39 @@ describe("WebMCP OpenAI tool-call stream aggregation", () => {
         { role: "user", content: "find flights" },
       ],
     });
+  });
+
+  it("repeats the complete original task in tool continuation prompts", () => {
+    const prompt = buildToolContinuationPrompt(
+      "计算 9 和 2 的结果，并将结果打印在页面上。",
+      [{ name: "coculate", content: '{"result":83}' }],
+    );
+
+    expect(prompt).toContain("计算 9 和 2 的结果，并将结果打印在页面上。");
+    expect(prompt).toContain('工具 coculate 返回：\n{"result":83}');
+    expect(prompt).toContain("必须调用相应工具完成该页面操作");
+    expect(
+      buildTaskReminder("计算结果并打印在页面上。"),
+    ).toContain("打印在页面上");
+  });
+
+  it("bounds tool results included in model context", () => {
+    const limited = limitToolResultForContext("x".repeat(7000));
+
+    expect(limited.length).toBeLessThan(7000);
+    expect(limited).toContain("[工具结果过长，后续内容已省略]");
+  });
+
+  it("trims old history by complete user turns and keeps the newest turn", () => {
+    const history = [
+      { role: "user" as const, content: "old request" },
+      { role: "assistant" as const, content: "old response".repeat(10) },
+      { role: "user" as const, content: "new request" },
+      { role: "assistant" as const, content: "new response" },
+    ];
+
+    expect(trimPriorConversationHistory(history, 100)).toEqual(
+      history.slice(2),
+    );
   });
 });
