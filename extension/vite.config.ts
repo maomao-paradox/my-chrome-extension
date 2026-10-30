@@ -1,12 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import AutoImport from "unplugin-auto-import/vite";
 import { crx } from "@crxjs/vite-plugin";
 import { createManifest, type ManifestPageFlags } from "./src/manifest.config";
 import { loadEnv } from "vite";
 import path from "path";
 import encryptFileMapPlugin from "./plugins/encrypt-file-map";
-import removeConsole from "vite-plugin-remove-console";
 import scanFiles from "./plugins/scan-input-file";
 import generateFileMapPlugin from "./plugins/generate-file-map";
 import checkSwSafe from "./plugins/vite-plugin-check-sw-safe";
@@ -61,12 +59,6 @@ export default ({
           injectCss: false,
         },
       }),
-      removeConsole({
-        // 保留指定的 console 方法
-        external: ["error", "warn"], // 保留 console.error 和 console.warn
-        // 保留包含指定值的 console.log 语句
-        externalValue: ["IMPORTANT"],
-      }),
       checkSwSafe({
         entryPattern: /service-worker\/background\.(ts|js)$/,
         failOnError: true,
@@ -76,28 +68,6 @@ export default ({
       isEncryptEnabled
         ? encryptFileMapPlugin(env.VITE_FILE_MAP_KEY)
         : undefined,
-      // 自定义插件，用于执行构建后的操作
-      // {
-      //   name: "trace-dom-importers",
-      //   generateBundle(options, bundle) {
-      //     const targets = [
-      //       "utils/dom-utils",
-      //       "element-control",
-      //       "shadow-dom",
-      //     ];
-      //     for (const [fileName, chunk] of Object.entries(bundle)) {
-      //       if (chunk.type !== "chunk") continue;
-      //       for (const [moduleId, mod] of Object.entries(chunk.modules)) {
-      //         if (targets.some((t) => moduleId.includes(t))) {
-      //           console.log(`\n==== ${moduleId} ====`);
-      //           console.log("chunk:", fileName);
-      //           console.log("importers:", mod.importers);
-      //           console.log("dynamicImporters:", mod.dynamicImporters);
-      //         }
-      //       }
-      //     }
-      //   },
-      // },
       {
         name: "post-build-actions", // 插件名称
         closeBundle: () => {
@@ -112,6 +82,10 @@ export default ({
       },
     ].filter(Boolean) as any,
     esbuild: {
+      // 只标记 console.log 为纯函数，生产构建时移除
+      pure: mode === "production" ? ["console.log", "console.info"] : [],
+      // 如果你也想删除 debugger 语句，可以同时保留 drop
+      drop: mode === "production" ? ["debugger"] : [],
       minifyIdentifiers: true,
       minifySyntax: true,
       minifyWhitespace: true,

@@ -18,8 +18,14 @@
  * @date 2026-10-29
  */
 import { getMemoryService } from "@/services/memory";
+import {
+    classifyDecayState,
+    computeRetention,
+    normalizeEntry,
+} from "@/services/memory/decay";
+import type { MemoryEntry, MemoryImportance } from "@/services/memory/types";
 import { loadAIConfig } from "../chrome-api/ai-config";
-import { completeChatFlow } from "../deepseek";
+import { completeChatFlow, uploadFile } from "../deepseek";
 import {
     createDefaultMoodState,
     deriveMood,
@@ -105,6 +111,121 @@ const WEEKDAY_LABELS = [
     "星期五",
     "星期六",
 ];
+
+/* ---------- 记忆上下文 ---------- */
+
+/**
+ * 记忆分段规则 —— 不同类型记忆的性质不同，混在一起会让模型分不清
+ * 「主人明确说过的偏好」和「某次闲聊的碎片」：
+ *   1. 对话记忆：只保留最近 24 小时、最多 20 条（了解近况即可，避免复读）
+ *   2. 用户偏好：走艾宾浩斯保留率，只注入仍然「清晰」（active）的那部分
+ *   3. 其他记忆（事实 / 情景 / 身份）：全部带上，按重要度排序
+ */
+/** 对话记忆的时间窗口（24 小时） */
+const CONVERSATION_MEMORY_WINDOW_MS = 24 * 60 * 60 * 1000;
+/** 对话记忆条数上限 */
+const MAX_CONVERSATION_MEMORIES = 20;
+/** 整段记忆上下文的字符预算，防止 prompt 无上限膨胀 */
+const MEMORY_CONTEXT_BUDGET = 2000;
+/** 单条记忆展示时的字符上限 */
+const MAX_MEMORY_LINE_CHARS = 120;
+
+/** 其他记忆的排序权重：重要度优先，同级再看新旧 */
+const IMPORTANCE_RANK: Record<MemoryImportance, number> = {
+    critical: 3,
+    high: 2,
+    medium: 1,
+    low: 0,
+};
+
+/** 主动消息的行为要求 —— 放在 user request 里，模型对「当前这一轮」更敏感 */
+const OPENING_INSTRUCTION =
+    "你要主动向用户开口。结合上面的记忆与当前时间，说 1 到 2 句自然简短的话；不要复述最近对话原文，也不要连续追问。";
+/** 下班收尾的行为要求 */
+const CLOSING_INSTRUCTION =
+    "这是今天最后一次主动消息。结合上面的记忆与当前时间，说 1 到 2 句收尾的话（类似「晚安，明天见」）；不要再追问，也不要安排新任务。";
+
+/**
+ * 单条记忆压缩成一行：去掉换行、按码点截断。
+ *
+ * 对话记忆的内容是「用户：…\nAI：…」的多行块，直接塞进列表会把排版撑乱，
+ * 也容易让某一条超长记忆吃光整段预算。
+ */
+function formatMemoryLine(entry: MemoryEntry): string {
+    const compact = entry.content.replace(/\s*\n+\s*/g, " / ").trim();
+    const chars = Array.from(compact);
+    const text =
+        chars.length > MAX_MEMORY_LINE_CHARS
+            ? `${chars.slice(0, MAX_MEMORY_LINE_CHARS).join("")}…`
+            : compact;
+    return `- ${text}`;
+}
+
+/**
+ * 把长期记忆按类型分段拼成主动对话的上下文。
+ *
+ * @param entries 该角色全部长期记忆（来自 listEntries，未经过检索排序）
+ * @param now     当前时间戳（毫秒）
+ * @returns 可直接拼进 system prompt 的分段文本；没有可用记忆时为空串
+ */
+export function assembleMemoryContext(
+    entries: readonly MemoryEntry[],
+    now: number,
+): string {
+    let budget = MEMORY_CONTEXT_BUDGET;
+
+    const render = (title: string, list: readonly MemoryEntry[]): string => {
+        const lines: string[] = [];
+        for (const entry of list) {
+            const line = formatMemoryLine(entry);
+            // 预算不足时保留优先级更高的段落，直接丢弃后面的条目
+            if (line.length + 1 > budget) break;
+            lines.push(line);
+            budget -= line.length + 1;
+        }
+        return lines.length > 0 ? `[${title}]\n${lines.join("\n")}` : "";
+    };
+
+    // 1) 对话记忆：最近 24 小时，最多 20 条，按时间正序展示（读起来像流水账）
+    const conversations = entries
+        .filter(
+            (entry) =>
+                entry.category === "conversation" &&
+                entry.createdAt >= now - CONVERSATION_MEMORY_WINDOW_MS,
+        )
+        .sort((a, b) => a.createdAt - b.createdAt)
+        .slice(-MAX_CONVERSATION_MEMORIES);
+
+    // 2) 用户偏好：只留保留率仍处于 active 的「清晰记忆」
+    const preferences = entries
+        .filter((entry) => entry.category === "preference")
+        .map((entry) => normalizeEntry(entry))
+        .filter((entry) => classifyDecayState(entry, now) === "active")
+        .sort(
+            (a, b) => computeRetention(b, now) - computeRetention(a, now),
+        );
+
+    // 3) 其他记忆（事实 / 情景 / 身份）：全量保留，按重要度与新旧排序
+    const others = entries
+        .filter(
+            (entry) =>
+                entry.category !== "conversation" &&
+                entry.category !== "preference",
+        )
+        .sort(
+            (a, b) =>
+                IMPORTANCE_RANK[b.importance] - IMPORTANCE_RANK[a.importance] ||
+                b.createdAt - a.createdAt,
+        );
+
+    return [
+        render("最近的对话记忆（24 小时内）", conversations),
+        render("用户偏好（清晰的记忆）", preferences),
+        render("其他记忆", others),
+    ]
+        .filter(Boolean)
+        .join("\n\n");
+}
 
 /** 本地降级模板池 —— AI 不可用或生成失败时按时间段随机挑一条 */
 const FALLBACK_TEMPLATES: Record<TimePeriod, string[]> = {
@@ -325,6 +446,45 @@ async function resolveRole(memoryService: MemoryService): Promise<string> {
 }
 
 /**
+ * 截取当前活跃标签页并上传到 DeepSeek
+ * 失败时静默返回 undefined（chrome:// / 扩展页 / 无活跃窗口等场景无法截图）
+ * @returns 上传成功的 file_id，或 undefined
+ */
+async function captureAndUploadActiveTab(): Promise<string | undefined> {
+    try {
+        // Service Worker 没有「当前窗口」概念，必须显式传 windowId，
+        // 否则 captureVisibleTab 会以 "No active window" 失败
+        const focusedWindow = await chrome.windows.getLastFocused({
+            windowTypes: ['normal'],
+        });
+        if (!focusedWindow.id) {
+            maLogger.warn("[ProactiveChat] 未取到聚焦窗口，跳过截图");
+            return undefined;
+        }
+
+        maLogger.info("[ProactiveChat] 开始截图，windowId:", focusedWindow.id);
+        const dataUrl = await chrome.tabs.captureVisibleTab(focusedWindow.id, {
+            format: 'png',
+        });
+        if (!dataUrl) {
+            maLogger.warn("[ProactiveChat] 截图返回空，跳过图片上传");
+            return undefined;
+        }
+
+        // data:image/png;base64,xxxxx → 去掉前缀，base64 → Uint8Array
+        const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+        const binary = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
+        const fileId = await uploadFile(binary, 'image/png', 'screenshot.png');
+        maLogger.info("[ProactiveChat] 截图上传成功:", fileId);
+        return fileId;
+    } catch (error) {
+        maLogger.warn("[ProactiveChat] 截图或上传失败，跳过图片:", error);
+        return undefined;
+    }
+}
+
+/**
  * 调用真实 AI 生成主动开场白。
  * 记忆检索由本模块显式完成（不走 StreamManager，因为它依赖 Port）。
  *
@@ -335,6 +495,8 @@ async function generateMessage(
     now: Date,
     closing: boolean,
     moodPrompt: string,
+    /** 可选：当前活跃标签页截图的 file_id，让 AI "看到"主人在做什么 */
+    fileIds?: string[],
 ): Promise<string> {
     const config = await loadAIConfig();
     if (!hasUsableAIConfig(config)) {
@@ -343,30 +505,40 @@ async function generateMessage(
 
     const memoryService = getMemoryService();
     const identity = await memoryService.getIdentity(role);
-    // 时间上下文只在这里出现一次（含日期 + 星期），避免在 prompt 里重复
+    // 时间上下文只在这里出现一次（含日期 + 星期），放在 user request 里避免重复
     const timeContext = `现在是 ${getDateContext(now)} ${getTimePeriod(now)} ${getFormattedTime(now)}`;
-    const prompt = "（请自然地向用户主动发起对话。）";
 
-    // 记忆检索失败不阻塞主流程，只降级为无记忆上下文
+    // 读取记忆失败不阻塞主流程，只降级为无记忆上下文
     let memoryContext = "";
     try {
-        const result = await memoryService.buildContext(role, prompt);
-        memoryContext = result.assembledContext || "";
+        const entries = await memoryService.listEntries(role);
+        memoryContext = assembleMemoryContext(entries, now.getTime());
     } catch (error) {
-        maLogger.warn("[ProactiveChat] 记忆检索失败，忽略记忆上下文:", error);
+        maLogger.warn("[ProactiveChat] 读取记忆失败，忽略记忆上下文:", error);
     }
 
+    // 系统提示词只放「身份 + 记忆 + 心情」这些长期设定
     const systemPrompt = [
         config.systemPrompt?.trim(),
         identity?.systemPromptTemplate?.trim(),
+        identity?.personaDescription?.trim()
+            ? `[角色身份]\n${identity.personaDescription}`
+            : undefined,
         memoryContext,
         `[当前心情] ${moodPrompt}`,
-        closing
-            ? "这是今天最后一次主动消息。结合记忆中的用户偏好、最近话题与当前时间，说 1 到 2 句收尾的话（类似「晚安，明天见」）；不要再追问，也不要安排新任务。"
-            : "你要主动向用户开口。结合记忆中的用户偏好、最近话题与当前时间，说 1 到 2 句自然简短的话；不要复述最近对话原文，也不要连续追问。",
     ]
         .filter(Boolean)
         .join("\n\n");
+
+    // 行为要求与时间一起放进 user request —— 模型对「当前这一轮」的指令更敏感
+    const promptSections: string[] = [timeContext];
+    if (fileIds && fileIds.length > 0) {
+        promptSections.push(
+            "我给你附上了一张当前屏幕的截图，你可以看到我现在正在做什么。请结合画面内容，用你的身份和心情自然地和我聊一句。",
+        );
+    }
+    promptSections.push(closing ? CLOSING_INSTRUCTION : OPENING_INSTRUCTION);
+    const requestPrompt = promptSections.join("\n\n");
 
     const chunks: string[] = [];
 
@@ -390,7 +562,7 @@ async function generateMessage(
         }, REQUEST_TIMEOUT_MS);
 
         void completeChatFlow(
-            prompt,
+            requestPrompt,
             role,
             {
                 onData: (data: string) => {
@@ -409,7 +581,9 @@ async function generateMessage(
             config.modelId,
             config.apiKey,
             config.apiBaseUrl,
-            `${systemPrompt}\n\n${timeContext}`,
+            systemPrompt,
+            undefined, // OpenAICompatibleRequestOptions
+            fileIds,
         )
             // 即使 onComplete 未被调用，Promise 正常结束也算完成
             .then(() => finish())
@@ -504,9 +678,21 @@ async function runProactiveMessage(): Promise<void> {
         nextState.ignoredStreak,
     );
 
+    // 尝试截取当前活跃标签页并上传 —— 让 AI "看到"主人在做什么
+    // 截图/上传失败静默降级，不阻塞主动对话主流程
+    let fileIds: string[] | undefined;
+    try {
+        const fileId = await captureAndUploadActiveTab();
+        if (fileId) {
+            fileIds = [fileId];
+        }
+    } catch (error) {
+        maLogger.warn("[ProactiveChat] 截图上传异常，降级为无图:", error);
+    }
+
     let text: string;
     try {
-        text = await generateMessage(role, now, closing, moodPrompt);
+        text = await generateMessage(role, now, closing, moodPrompt, fileIds);
     } catch (error) {
         maLogger.warn("[ProactiveChat] AI 生成失败，使用本地问候:", error);
         text = getFallbackMessage(period, closing);

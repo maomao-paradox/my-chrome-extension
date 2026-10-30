@@ -36,7 +36,12 @@ export interface DeepSeekSessionStore {
 }
 
 export interface DeepSeekPowSolver {
-    solve(challenge: DeepSeekPowChallenge): Promise<string>;
+    /**
+     * 解决 PoW 挑战
+     * @param challenge 服务器返回的 PoW 挑战数据
+     * @param targetPath 可选的目标接口路径，用于覆盖 challenge 中的 target_path
+     */
+    solve(challenge: DeepSeekPowChallenge, targetPath?: string): Promise<string>;
 }
 
 export interface DeepSeekClientOptions {
@@ -53,6 +58,8 @@ export interface DeepSeekCompletionOptions {
     prompt: string;
     chat_session_id: string;
     parent_message_id?: number | null;
+    /** 已上传文件的 file_id 列表，用于在对话中引用图片 */
+    ref_file_ids?: string[];
 }
 
 export interface DeepSeekWebTool {
@@ -482,9 +489,13 @@ export class DeepSeekClient {
         });
     }
 
-    async createPowChallenge(): Promise<unknown> {
+    /**
+     * 创建 PoW 挑战，支持自定义 target_path 以适配不同的受保护接口
+     * @param targetPath 需要 PoW 保护的目标接口路径，默认 `/api/v0/chat/completion`
+     */
+    async createPowChallenge(targetPath = '/api/v0/chat/completion'): Promise<unknown> {
         return this.sendRequest('/api/v0/chat/create_pow_challenge', {
-            body: JSON.stringify({ target_path: '/api/v0/chat/completion' }),
+            body: JSON.stringify({ target_path: targetPath }),
         });
     }
 
@@ -495,7 +506,7 @@ export class DeepSeekClient {
     ): Promise<unknown> {
         const body = JSON.stringify({
             ...options,
-            ref_file_ids: [],
+            ref_file_ids: options.ref_file_ids ?? [],
             thinking_enabled: false,
             search_enabled: false,
             client_stream_id: generateStreamId(),
@@ -519,12 +530,166 @@ export class DeepSeekClient {
         });
     }
 
+    /**
+     * 上传文件到 DeepSeek，完整走 PoW 保护流程
+     *
+     * 注意：服务端只接受 multipart/form-data，字段名为 `file`，
+     * 且**靠文件名后缀识别类型**（png/jpg/jpeg/webp/gif），裸二进制会返回 400。
+     *
+     * @param fileData 文件二进制数据
+     * @param contentType 文件 MIME 类型，默认 image/png
+     * @param fileName 上传文件名，必须带支持的图片后缀，默认 image.png
+     * @returns 上传成功后的文件 ID（如 "file-xxx-xxx"）
+     */
+    async uploadFile(
+        fileData: ArrayBuffer | Uint8Array | Blob,
+        contentType = 'image/png',
+        fileName = 'image.png',
+    ): Promise<string> {
+        const targetPath = '/api/v0/file/upload_file';
+
+        // 阶段1: 为文件上传接口创建 PoW 挑战
+        const challengeResponse = (await this.createPowChallenge(targetPath)) as {
+            data?: { biz_data?: { challenge?: DeepSeekPowChallenge } };
+        };
+        const challenge = challengeResponse?.data?.biz_data?.challenge;
+        if (!challenge) {
+            throw new Error('Failed to create POW challenge for file upload');
+        }
+
+        // 阶段2: 解决 PoW 挑战（传入对应 target_path）
+        const powResponse = await this.powSolver.solve(challenge, targetPath);
+        if (!powResponse) {
+            throw new Error('Failed to generate POW response for file upload');
+        }
+
+        // 阶段3: 携带 PoW 响应上传文件（multipart/form-data）
+        const url = `${this.apiBaseUrl}${targetPath}`;
+        const headers = this.createRequestHeaders({
+            'x-ds-pow-response': powResponse,
+        });
+        // FormData 会自动生成 multipart boundary，手动设置的 Content-Type 反而会让
+        // 服务端解析失败（Invalid `boundary` for `multipart/form-data` request）
+        headers.delete('Content-Type');
+
+        const blob =
+            fileData instanceof Blob
+                ? fileData
+                : new Blob([fileData as BlobPart], { type: contentType });
+        const form = new FormData();
+        // 字段名必须是 file；文件名后缀决定服务端识别的文件类型
+        form.append('file', blob, fileName);
+
+        const response = await this.fetchImpl(url, {
+            method: 'POST',
+            headers,
+            body: form,
+            redirect: 'follow',
+        });
+
+        const responseText = await response.text();
+        if (!response.ok) {
+            throw new Error(`DeepSeek file upload failed with status ${response.status}: ${responseText}`);
+        }
+
+        const parsed = responseText ? JSON.parse(responseText) : null;
+        if (!parsed) {
+            throw new Error('DeepSeek file upload returned empty response');
+        }
+
+        // 从响应中提取 file id: data.biz_data.id
+        const fileId = (parsed as Record<string, unknown>)
+            ?.data && typeof (parsed as Record<string, unknown>).data === 'object'
+            ? ((parsed as { data: { biz_data?: { id?: string } } }).data.biz_data?.id)
+            : undefined;
+
+        if (!fileId) {
+            const details = describeDeepSeekResponseError(parsed);
+            throw new Error(
+                details
+                    ? `DeepSeek file upload failed (${details})`
+                    : 'DeepSeek file upload response did not contain a file ID',
+            );
+        }
+
+        // 上传返回的 file_id 初始状态是 PENDING，必须等到 SUCCESS 才能被
+        // ref_file_ids 引用，否则对话接口会返回 biz_code 9「invalid ref file id」
+        await this.waitForFileReady(fileId);
+
+        return fileId;
+    }
+
+    /**
+     * 轮询文件处理状态，直到 SUCCESS 或超时
+     * @param fileId 上传返回的文件 ID
+     * @param timeoutMs 最长等待时间（默认 30s）
+     * @param intervalMs 轮询间隔（默认 1s）
+     */
+    private async waitForFileReady(
+        fileId: string,
+        timeoutMs = 30_000,
+        intervalMs = 1_000,
+    ): Promise<void> {
+        const terminalFailures = new Set([
+            'FAILED',
+            'CONTENT_EMPTY',
+            'CONTENT_FILTER',
+            'CONTENT_TOO_LONG',
+            'CANCELLED',
+        ]);
+        const deadline = Date.now() + timeoutMs;
+        let lastStatus = 'PENDING';
+
+        while (Date.now() < deadline) {
+            const headers = this.createRequestHeaders({ Accept: 'application/json' });
+            headers.delete('Content-Type'); // GET 无请求体
+            const url = `${this.apiBaseUrl}/api/v0/file/fetch_files?file_ids=${encodeURIComponent(fileId)}`;
+            const response = await this.fetchImpl(url, {
+                method: 'GET',
+                headers,
+                redirect: 'follow',
+            });
+
+            if (!response.ok) {
+                const body = await response.text().catch(() => '');
+                throw new Error(
+                    `DeepSeek file status query failed with status ${response.status}${body ? `: ${body}` : ''}`,
+                );
+            }
+
+            const parsed = (await response.json().catch(() => null)) as {
+                data?: { biz_data?: { files?: Array<{ status?: string }> } };
+            } | null;
+            const fileStatus = parsed?.data?.biz_data?.files?.[0]?.status;
+            lastStatus = fileStatus ? String(fileStatus).toUpperCase() : 'PENDING';
+
+            if (lastStatus === 'SUCCESS') {
+                return;
+            }
+            if (terminalFailures.has(lastStatus)) {
+                throw new Error(`DeepSeek file processing failed: status=${lastStatus}`);
+            }
+
+            const remaining = deadline - Date.now();
+            if (remaining <= 0) {
+                break;
+            }
+            await new Promise((resolve) =>
+                setTimeout(resolve, Math.min(intervalMs, remaining)),
+            );
+        }
+
+        throw new Error(`DeepSeek file processing timed out (last status: ${lastStatus})`);
+    }
+
     async completeChatFlow(
         prompt: string,
         role: string,
         callbacks?: DeepSeekStreamCallbacks,
         systemPrompt?: string,
         tools: DeepSeekWebTool[] = [],
+        /** 可选：已上传文件的 file_id 列表，用于在对话中引用图片 */
+        fileIds?: string[],
     ): Promise<unknown> {
         const flowStart = performance.now();
         const normalizedRole = normalizeRole(role);
@@ -600,6 +765,7 @@ export class DeepSeekClient {
                         prompt: preparedPrompt,
                         chat_session_id: sessionId,
                         parent_message_id: currentParentMessageId,
+                        ref_file_ids: fileIds,
                     },
                     powResponse,
                     completionCallbacks,

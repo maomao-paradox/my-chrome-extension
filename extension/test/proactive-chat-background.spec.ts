@@ -17,6 +17,7 @@
  *      因此用 chrome.alarms 做排期；测试通过覆写 chrome.alarms 模拟触发。
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { MemoryEntry } from "@/services/memory/types";
 
 /** 所有外部依赖的 mock 句柄（hoisted 保证 vi.mock 工厂可访问） */
 const mocks = vi.hoisted(() => ({
@@ -24,6 +25,7 @@ const mocks = vi.hoisted(() => ({
     getIdentity: vi.fn(),
     addEntry: vi.fn(),
     listByCategory: vi.fn(),
+    listEntries: vi.fn(),
     buildContext: vi.fn(),
     loadAIConfig: vi.fn(),
     completeChatFlow: vi.fn(),
@@ -42,6 +44,7 @@ vi.mock("@/services/memory", () => ({
         getIdentity: mocks.getIdentity,
         addEntry: mocks.addEntry,
         listByCategory: mocks.listByCategory,
+        listEntries: mocks.listEntries,
         buildContext: mocks.buildContext,
     }),
 }));
@@ -97,6 +100,7 @@ beforeEach(() => {
 
     mocks.listRoles.mockReset().mockResolvedValue(["miku"]);
     mocks.listByCategory.mockReset().mockResolvedValue([]);
+    mocks.listEntries.mockReset().mockResolvedValue([]);
     mocks.getIdentity.mockReset().mockResolvedValue(null);
     mocks.buildContext.mockReset().mockResolvedValue({
         entries: [],
@@ -219,11 +223,8 @@ describe("proactive-chat（background 调度层）", () => {
             "textarea_ai_autofill",
         );
         expect(mocks.getIdentity).toHaveBeenCalledWith("vivy_catgirl");
-        // 记忆检索也必须指向干净角色
-        expect(mocks.buildContext).toHaveBeenCalledWith(
-            "vivy_catgirl",
-            expect.any(String),
-        );
+        // 记忆也必须指向干净角色
+        expect(mocks.listEntries).toHaveBeenCalledWith("vivy_catgirl");
     });
 
     it("角色列表混合时优先聊天窗默认角色，并跳过所有功能角色", async () => {
@@ -436,8 +437,8 @@ describe("作息调度（9:00-19:00）", () => {
         mocks.alarmListeners[0]({ name: mod.PROACTIVE_ALARM_NAME });
         await vi.waitFor(() => expect(mocks.addEntry).toHaveBeenCalledTimes(1));
 
-        // 提示词切换为收尾模式
-        expect(mocks.completeChatFlow.mock.calls[0][7]).toContain(
+        // 提示词切换为收尾模式（行为要求放在 user request 里）
+        expect(mocks.completeChatFlow.mock.calls[0][0]).toContain(
             "今天最后一次",
         );
         // 当天标记已落库
@@ -484,7 +485,7 @@ describe("心情与时间上下文", () => {
         accessCount: 1,
     });
 
-    it("时间上下文只出现一次，且包含日期与星期", async () => {
+    it("时间与行为要求放在 user request，且时间只出现一次", async () => {
         const mod = await loadModule();
         mod.initProactiveChat();
         await flush();
@@ -493,14 +494,17 @@ describe("心情与时间上下文", () => {
         await vi.waitFor(() => expect(mocks.addEntry).toHaveBeenCalledTimes(1));
 
         const call = mocks.completeChatFlow.mock.calls[0];
-        // 第 1 个参数是 prompt，不应再携带时间
-        expect(call[0]).not.toContain("现在是");
+        // 第 1 个参数是 user request，时间只在这里出现一次
+        const request = call[0] as string;
+        expect(request).toContain("2026年10月30日");
+        expect(request).toContain("星期");
+        expect(request).toContain("你要主动向用户开口");
+        expect(request.match(/现在是/g)).toHaveLength(1);
 
-        // 第 8 个参数是 systemPrompt，时间只在这里出现一次
+        // 第 8 个参数是 systemPrompt，不应再携带时间与行为要求
         const systemPrompt = call[7] as string;
-        expect(systemPrompt).toContain("2026年10月30日");
-        expect(systemPrompt).toContain("星期");
-        expect(systemPrompt.match(/现在是/g)).toHaveLength(1);
+        expect(systemPrompt).not.toContain("现在是");
+        expect(systemPrompt).not.toContain("你要主动向用户开口");
     });
 
     it("当天被严厉批评时注入伤心心情", async () => {
@@ -534,6 +538,154 @@ describe("心情与时间上下文", () => {
         expect(mocks.completeChatFlow.mock.calls[5][7]).toContain(
             "原样连续重复",
         );
+    });
+});
+
+describe("记忆上下文分段", () => {
+    const NOW = FIXED_NOW.getTime();
+    const HOUR = 3_600_000;
+    const DAY = 24 * HOUR;
+
+    let seq = 0;
+
+    /** 构造一条长期记忆，字段按需覆盖 */
+    const entry = (
+        patch: Partial<MemoryEntry> & { content: string },
+    ): MemoryEntry => ({
+        id: `mem-${(seq += 1)}`,
+        role: "miku",
+        category: "fact",
+        importance: "medium",
+        createdAt: NOW,
+        lastAccessedAt: NOW,
+        accessCount: 1,
+        ...patch,
+    });
+
+    it("对话记忆只取最近 24 小时", async () => {
+        const mod = await loadModule();
+        const context = mod.assembleMemoryContext(
+            [
+                entry({
+                    content: "两天前的对话",
+                    category: "conversation",
+                    createdAt: NOW - 2 * DAY,
+                }),
+                entry({
+                    content: "一小时前的对话",
+                    category: "conversation",
+                    createdAt: NOW - HOUR,
+                }),
+            ],
+            NOW,
+        );
+
+        expect(context).toContain("一小时前的对话");
+        expect(context).not.toContain("两天前的对话");
+    });
+
+    it("对话记忆最多 20 条，保留最新的", async () => {
+        const mod = await loadModule();
+        const conversations = Array.from({ length: 25 }, (_, i) =>
+            entry({
+                content: `近期对话-${i + 1}`,
+                category: "conversation",
+                // i 越小越旧，i = 24 是最近的一条
+                createdAt: NOW - (25 - i) * 60_000,
+            }),
+        );
+
+        const context = mod.assembleMemoryContext(conversations, NOW);
+
+        expect(context).toContain("近期对话-25");
+        expect(context).not.toContain("近期对话-5");
+        expect(context.match(/近期对话-\d+/g)).toHaveLength(20);
+    });
+
+    it("用户偏好只保留仍然清晰的记忆", async () => {
+        const mod = await loadModule();
+        const context = mod.assembleMemoryContext(
+            [
+                entry({
+                    content: "清晰的偏好：喜欢猫",
+                    category: "preference",
+                    importance: "high",
+                    createdAt: NOW,
+                }),
+                entry({
+                    content: "模糊的偏好：旧口味",
+                    category: "preference",
+                    importance: "medium",
+                    // 30 天没被想起 → 保留率跌到 forgotten 区间
+                    createdAt: NOW - 30 * DAY,
+                    lastAccessedAt: NOW - 30 * DAY,
+                }),
+            ],
+            NOW,
+        );
+
+        expect(context).toContain("清晰的偏好：喜欢猫");
+        expect(context).not.toContain("模糊的偏好：旧口味");
+    });
+
+    it("事实 / 情景 / 身份记忆全部保留，并按重要度排序", async () => {
+        const mod = await loadModule();
+        const context = mod.assembleMemoryContext(
+            [
+                entry({
+                    content: "低优先事实",
+                    category: "fact",
+                    importance: "low",
+                    createdAt: NOW - HOUR,
+                }),
+                entry({
+                    content: "核心身份设定",
+                    category: "identity",
+                    importance: "critical",
+                    createdAt: NOW - DAY,
+                }),
+                entry({
+                    content: "一次情景回忆",
+                    category: "episodic",
+                    importance: "medium",
+                    createdAt: NOW - 2 * HOUR,
+                }),
+            ],
+            NOW,
+        );
+
+        expect(context).toContain("低优先事实");
+        expect(context).toContain("核心身份设定");
+        expect(context).toContain("一次情景回忆");
+        // critical 排在 low 之前
+        expect(context.indexOf("核心身份设定")).toBeLessThan(
+            context.indexOf("低优先事实"),
+        );
+    });
+
+    it("三类记忆分成独立段落", async () => {
+        const mod = await loadModule();
+        const context = mod.assembleMemoryContext(
+            [
+                entry({ content: "一次对话", category: "conversation" }),
+                entry({
+                    content: "明确偏好",
+                    category: "preference",
+                    importance: "high",
+                }),
+                entry({ content: "一条事实", category: "fact" }),
+            ],
+            NOW,
+        );
+
+        expect(context).toContain("[最近的对话记忆");
+        expect(context).toContain("[用户偏好");
+        expect(context).toContain("[其他记忆]");
+    });
+
+    it("没有记忆时返回空串", async () => {
+        const mod = await loadModule();
+        expect(mod.assembleMemoryContext([], NOW)).toBe("");
     });
 });
 

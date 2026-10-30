@@ -94,7 +94,13 @@ class ChromeSessionStore implements DeepSeekSessionStore {
 }
 
 class DirectPowSolver implements DeepSeekPowSolver {
-  async solve(challenge: DeepSeekPowChallenge): Promise<string> {
+  /** 默认的 PoW 保护目标路径 */
+  private static readonly DEFAULT_TARGET_PATH = "/api/v0/chat/completion";
+
+  async solve(
+    challenge: DeepSeekPowChallenge,
+    targetPath?: string,
+  ): Promise<string> {
     const {
       algorithm,
       challenge: challengeData,
@@ -118,6 +124,12 @@ class DirectPowSolver implements DeepSeekPowSolver {
       throw new Error("No solution found");
     }
 
+    // 优先使用调用方传入的 targetPath，其次读取 challenge 中的，最后用默认值
+    const resolvedTargetPath =
+      targetPath ??
+      (challenge.target_path as string | undefined) ??
+      DirectPowSolver.DEFAULT_TARGET_PATH;
+
     return btoa(
       unescape(
         encodeURIComponent(
@@ -127,7 +139,7 @@ class DirectPowSolver implements DeepSeekPowSolver {
             salt,
             answer,
             signature,
-            target_path: "/api/v0/chat/completion",
+            target_path: resolvedTargetPath,
           }),
         ),
       ),
@@ -155,8 +167,9 @@ export async function clearSessionData(role: string): Promise<void> {
 
 export async function testPOW(
   challenge: DeepSeekPowChallenge,
+  targetPath?: string,
 ): Promise<string> {
-  return deepSeekPowSolver.solve(challenge);
+  return deepSeekPowSolver.solve(challenge, targetPath);
 }
 
 export async function sendStreamingRequest(
@@ -180,8 +193,30 @@ export async function createSession(): Promise<unknown> {
   return (await getConfiguredDeepSeekClient()).createSession();
 }
 
-export async function createPowChallenge(): Promise<unknown> {
-  return (await getConfiguredDeepSeekClient()).createPowChallenge();
+export async function createPowChallenge(
+  targetPath = "/api/v0/chat/completion",
+): Promise<unknown> {
+  return (await getConfiguredDeepSeekClient()).createPowChallenge(targetPath);
+}
+
+/**
+ * 上传文件到 DeepSeek（走 PoW 保护流程）
+ * 服务端要求 multipart/form-data，字段名 `file`，并按文件名后缀识别类型
+ * @param fileData 文件二进制数据
+ * @param contentType 文件 MIME 类型，默认 image/png
+ * @param fileName 上传文件名（需带 png/jpg/jpeg/webp/gif 后缀），默认 image.png
+ * @returns 上传成功后的文件 ID（如 "file-xxx-xxx"）
+ */
+export async function uploadFile(
+  fileData: ArrayBuffer | Uint8Array | Blob,
+  contentType = "image/png",
+  fileName = "image.png",
+): Promise<string> {
+  return (await getConfiguredDeepSeekClient()).uploadFile(
+    fileData,
+    contentType,
+    fileName,
+  );
 }
 
 export async function completion(
@@ -213,6 +248,8 @@ export async function completeChatFlow(
   apiBaseUrl?: string,
   systemPrompt?: string,
   options?: OpenAICompatibleRequestOptions & { targetTabId?: number },
+  /** 可选：已上传文件的 file_id 列表，用于在对话中引用图片 */
+  fileIds?: string[],
 ): Promise<unknown> {
   const standardProviders = ["openai", "anthropic", "google", "deepseek"];
   const effectiveProvider = provider || "deepseek";
@@ -247,6 +284,7 @@ export async function completeChatFlow(
           callbacks,
           systemPrompt,
           options?.tools,
+          fileIds,
         );
     }
   }
