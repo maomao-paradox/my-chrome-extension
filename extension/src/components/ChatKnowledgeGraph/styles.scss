@@ -1,0 +1,144 @@
+/* src/components/ChatKnowledgeGraph/styles.css */
+.ckg-wrapper {
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+  font-family: 'Segoe UI', 'PingFang SC', Roboto, sans-serif;
+  transition: background 0.2s;
+}
+
+.ckg-theme-dark {
+  background: #1e293b;
+  color: #f1f5f9;
+  --ckg-canvas-bg: #0f172a;
+  --ckg-border: #334155;
+  --ckg-sub: #94a3b8;
+  --ckg-badge-bg: #334155;
+  --ckg-badge-color: #cbd5e1;
+}
+
+.ckg-theme-light {
+  background: #ffffff;
+  color: #0f172a;
+  --ckg-canvas-bg: #f8fafc;
+  --ckg-border: #e2e8f0;
+  --ckg-sub: #64748b;
+  --ckg-badge-bg: #f1f5f9;
+  --ckg-badge-color: #475569;
+}
+
+.ckg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 12px;
+}
+
+.ckg-header h1 {
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ckg-badge {
+  background: var(--ckg-badge-bg);
+  color: var(--ckg-badge-color);
+  padding: 6px 16px;
+  border-radius: 40px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid var(--ckg-border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ckg-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.ckg-canvas-container {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--ckg-border);
+  background: var(--ckg-canvas-bg);
+}
+
+.ckg-canvas-container canvas {
+  display: block;
+}
+
+.ckg-tooltip {
+  position: absolute;
+  background: var(--ckg-badge-bg);
+  color: var(--ckg-badge-color);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--ckg-border);
+  pointer-events: none;
+  max-width: 360px;
+  line-height: 1.5;
+  z-index: 100;
+}
+
+.ckg-tooltip strong {
+  color: #fbbf24;
+}
+
+.ckg-tooltip-type {
+  font-size: 0.8rem;
+  color: var(--ckg-sub);
+}
+
+.ckg-tooltip p {
+  margin-top: 6px;
+  color: var(--ckg-sub);
+}
+
+.ckg-legend {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 14px;
+  color: var(--ckg-sub);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.ckg-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--ckg-badge-bg);
+  padding: 5px 14px;
+  border-radius: 30px;
+  border: 1px solid var(--ckg-border);
+}
+
+.ckg-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.ckg-footer {
+  text-align: center;
+  color: var(--ckg-sub);
+  font-size: 0.78rem;
+  margin-top: 10px;
+}

@@ -214,30 +214,9 @@ const AIConversation: React.FC<AIConversationProps> = ({
         }
     }, []);
 
-    /** 保存一轮对话到记忆系统（category: "conversation"） */
-    const saveTurnToMemory = useCallback(
-        async (roleKey: string, userText: string, aiText: string) => {
-            if (!roleKey || !userText.trim() || !aiText.trim()) return;
-            try {
-                const svc = getMemoryService();
-                const chunk = buildConversationChunk(userText, aiText);
-                await svc.addEntry({
-                    role: roleKey,
-                    content: chunk,
-                    category: "conversation",
-                    importance: "medium",
-                    source: "ai-conversation",
-                });
-                // 保存成功后刷新历史
-                void loadHistoryForRole(roleKey);
-            } catch (err) {
-                console.warn("[AIConversation] saveTurnToMemory failed:", err);
-            }
-        },
-        [loadHistoryForRole],
-    );
-
-    /** 滚顶加载更早历史：扩大时间窗口 */
+    /* ══════════════════════════════════════════════════════════════════
+     * 滚顶加载更早历史：扩大时间窗口
+     * ══════════════════════════════════════════════════════════════════ */
     const loadMoreHistory = useCallback(() => {
         if (historyLoading) return;
 
@@ -475,8 +454,9 @@ const AIConversation: React.FC<AIConversationProps> = ({
         // 发送新消息 → 强制自动滚到底部
         autoScrollRef.current = true;
 
+        const userMsgId = genId();
         const userMsg: ChatMessage = {
-            id: genId(),
+            id: userMsgId,
             role: "user",
             content: prompt,
             createdAt: Date.now(),
@@ -495,8 +475,66 @@ const AIConversation: React.FC<AIConversationProps> = ({
         const messageId = `sidebar-${Date.now()}`;
         let port: chrome.runtime.Port | null = null;
 
-        // 保存 AI 最终回复用
-        let aiFinalText = "";
+        /* ── 连续回复追踪 ── */
+        // 当前正在 streaming 的 AI 消息 id —— 首条 = aiMsgId；续轮 CONTINUING 后会更新
+        let currentStreamingAiId = aiMsgId;
+        // 本轮所有 AI 回复的 id 列表 —— 用于 persistTurn 时批量过滤
+        const allAiMsgIds = [aiMsgId];
+
+        // 同一轮只落库一次：COMPLETE / ERROR / onDisconnect 三条路径都可能触发
+        let persistStarted = false;
+        /**
+         * 落库并让历史列表接管这一轮。
+         * 批量保存：把首条回复 + 所有连续回复续轮合并成一个 conversation entry。
+         */
+        const persistTurn = async (): Promise<void> => {
+            if (persistStarted) return;
+            persistStarted = true;
+
+            // 收集所有 role: "assistant" 的实时消息 content
+            setMessages((prev) => {
+                const userEntry = prev.find((m) => m.id === userMsgId);
+                const aiEntries = prev.filter(
+                    (m) => m.role === "assistant" && m.content.trim(),
+                );
+
+                // 如果有至少一条 AI 回复 → 批量保存为一个 conversation entry
+                if (userEntry && aiEntries.length > 0) {
+                    const userText = userEntry.content;
+                    const aiTexts = aiEntries.map((m) => m.content.trim());
+                    const chunk = buildConversationChunk(
+                        userText,
+                        aiTexts.join("\n"), // 多条 AI 回复拼成 "\nAI：xxx" 格式
+                    );
+
+                    void (async () => {
+                        try {
+                            const svc = getMemoryService();
+                            await svc.addEntry({
+                                role,
+                                content: chunk,
+                                category: "conversation",
+                                importance: "medium",
+                                source: "ai-conversation",
+                            });
+                            // 历史重载后移除所有本轮实时消息
+                            await loadHistoryForRole(role);
+                        } catch (err) {
+                            console.warn(
+                                "[AIConversation] 批量 persistTurn 失败:",
+                                err,
+                            );
+                            // 落库失败时允许重试
+                            persistStarted = false;
+                        }
+                    })();
+                }
+
+                // 移除所有本轮临时消息（user + 所有 assistant）
+                const allTempIds = new Set([userMsgId, ...allAiMsgIds]);
+                return prev.filter((m) => !allTempIds.has(m.id));
+            });
+        };
 
         try {
             if (typeof chrome === "undefined" || !chrome.runtime?.connect) {
@@ -508,46 +546,92 @@ const AIConversation: React.FC<AIConversationProps> = ({
             });
 
             port.onMessage.addListener((message: any) => {
+                // IGNORED 不需要检查 messageId —— 入口层发的消息格式略有不同
+                if (message?.type === "AI_CONVERSATION_IGNORED") {
+                    // 心情驱动忽略：AI 选择不回复，移除 placeholder ai 消息，只留用户消息
+                    setMessages((prev) =>
+                        prev.filter((m) => m.id !== aiMsgId),
+                    );
+                    // 后端已经存了 "用户：xxx" 到记忆，这里不需要再调 persistTurn
+                    setLoading(false);
+                    port.disconnect();
+                    return;
+                }
+
                 if (!message?.payload || message.payload.messageId !== messageId) return;
+
+                if (message.type === "AI_CONVERSATION_CONTINUING") {
+                    // 连续回复开始：创建新的 placeholder AI 消息
+                    const newAiMsgId = genId();
+                    const newAiMsg: ChatMessage = {
+                        id: newAiMsgId,
+                        role: "assistant",
+                        content: "",
+                        streaming: true,
+                        createdAt: Date.now(),
+                    };
+                    currentStreamingAiId = newAiMsgId;
+                    allAiMsgIds.push(newAiMsgId);
+                    setMessages((prev) => [...prev, newAiMsg]);
+                    return;
+                }
 
                 if (message.type === "AI_CONVERSATION_STREAM_DATA") {
                     const chunk = message.payload.content || "";
                     if (!chunk) return;
 
-                    aiFinalText += chunk;
-
                     setMessages((prev) =>
                         prev.map((m) =>
-                            m.id === aiMsgId
+                            m.id === currentStreamingAiId
                                 ? { ...m, content: m.content + chunk }
                                 : m,
                         ),
                     );
-                } else if (message.type === "AI_CONVERSATION_COMPLETE") {
+                    return;
+                }
+
+                if (message.type === "AI_CONVERSATION_CONTINUOUS_COMPLETE") {
+                    // 所有连续回复轮次结束 —— 把正在 streaming 的消息都停掉
                     setMessages((prev) =>
                         prev.map((m) =>
-                            m.id === aiMsgId ? { ...m, streaming: false } : m,
+                            m.id === currentStreamingAiId
+                                ? { ...m, streaming: false }
+                                : m,
                         ),
                     );
-                    // 对话完成 → 写入记忆系统（category: "conversation"）
-                    void saveTurnToMemory(role, prompt, aiFinalText);
+                    return;
+                }
+
+                if (message.type === "AI_CONVERSATION_COMPLETE") {
+                    // 最终终点：确保所有 streaming 消息都停掉
+                    setMessages((prev) =>
+                        prev.map((m) =>
+                            m.role === "assistant" && m.streaming
+                                ? { ...m, streaming: false }
+                                : m,
+                        ),
+                    );
+                    // 对话完成 → 批量写入记忆系统
+                    void persistTurn();
                     setLoading(false);
                     port?.disconnect();
                 } else if (message.type === "AI_CONVERSATION_ERROR") {
                     setErrorNotice(message.payload.error || "AI 响应失败");
                     setMessages((prev) =>
                         prev.map((m) =>
-                            m.id === aiMsgId
+                            m.id === currentStreamingAiId
                                 ? {
                                       ...m,
                                       streaming: false,
-                                      content: m.content + (m.content ? "" : "[AI 返回失败]"),
+                                      content:
+                                          m.content +
+                                          (m.content ? "" : "[AI 返回失败]"),
                                   }
                                 : m,
                         ),
                     );
-                    // 出错也保存（有多少存多少）
-                    void saveTurnToMemory(role, prompt, aiFinalText);
+                    // 出错也批量保存（有多少存多少）
+                    void persistTurn();
                     setLoading(false);
                     port?.disconnect();
                 }
@@ -562,7 +646,7 @@ const AIConversation: React.FC<AIConversationProps> = ({
                             ),
                         );
                         // 断开时也尝试保存
-                        void saveTurnToMemory(role, prompt, aiFinalText);
+                        void persistTurn();
                     }
                     return false;
                 });
@@ -591,7 +675,7 @@ const AIConversation: React.FC<AIConversationProps> = ({
                 ),
             );
         }
-    }, [draft, role, config, buildFinalSystemPrompt, saveTurnToMemory]);
+    }, [draft, role, config, buildFinalSystemPrompt]);
 
     /* ══════════════════════════════════════════════════════════════════
      * 键盘 / 角色切换

@@ -33,9 +33,17 @@ import {
     detectHurt,
     extractUserText,
     getDateKey,
+    getContinuousReplyProbability,
     normalizeMoodState,
     type ProactiveMoodState,
 } from "./proactive-mood";
+import {
+    MAX_CONTINUOUS_ROUNDS,
+    computeNextProbability,
+    shouldTrigger,
+    buildFollowupPrompt,
+    generateFollowupReply,
+} from "./chat-chain";
 
 /** 时间段 —— 按小时分段，用于挑选问候语与提示 AI 的时间上下文 */
 type TimePeriod = "清晨" | "上午" | "下午" | "傍晚" | "晚上" | "深夜";
@@ -52,11 +60,11 @@ export const PROACTIVE_ALARM_NAME = "ai-proactive-chat";
 /**
  * 随机间隔下限（分钟）。
  * chrome.alarms 的 delayInMinutes 硬下限是 30 秒（Chrome 120+，更早版本 1 分钟），
- * 所以「0~10 分钟」实际落地为「0.5~10 分钟」。
+ * 所以「0~20 分钟」实际落地为「0.5~20 分钟」。
  */
 const MIN_DELAY_MINUTES = 0.5;
-/** 随机间隔上限（分钟） */
-const MAX_DELAY_MINUTES = 10;
+/** 随机间隔上限（分钟）—— 之前 10 分钟太频繁，调到 20 分钟更自然 */
+const MAX_DELAY_MINUTES = 20;
 /** AI 请求超时（毫秒）—— 超时后降级到本地模板 */
 const REQUEST_TIMEOUT_MS = 30_000;
 /** 主动消息最大长度（按字符/码点裁剪） */
@@ -98,8 +106,8 @@ const CLOSING_TEMPLATES = [
     "收工啦，去好好休息，明天见。",
 ];
 
-/** 心情状态存储键 */
-const MOOD_STATE_KEY = "proactive_chat_mood_state";
+/** 心情状态存储键（export 给 runtime-connections / proactive-chat 共用） */
+export const MOOD_STATE_KEY = "proactive_chat_mood_state";
 
 /** 星期标签 —— 让模型能区分工作日与周末 */
 const WEEKDAY_LABELS = [
@@ -352,8 +360,11 @@ async function markOffDuty(dateKey: string): Promise<void> {
     }
 }
 
-/** 读取当天心情状态（跨天自动重置为「活跃开心」） */
-async function loadMoodState(dateKey: string): Promise<ProactiveMoodState> {
+/**
+ * 读取当天心情状态（跨天自动重置为「活跃开心」）。
+ * export 给 runtime-connections.ts 共用（入口层忽略判断也需要读心情）。
+ */
+export async function loadMoodState(dateKey: string): Promise<ProactiveMoodState> {
     try {
         const result = await chrome.storage.local.get(MOOD_STATE_KEY);
         return normalizeMoodState(result[MOOD_STATE_KEY], dateKey);
@@ -489,6 +500,10 @@ async function captureAndUploadActiveTab(): Promise<string | undefined> {
  * 记忆检索由本模块显式完成（不走 StreamManager，因为它依赖 Port）。
  *
  * @throws 配置不可用 / 请求失败 / 超时 / 空结果时抛出，由调用方降级
+ *
+ * @param presetSystemPrompt 可选：调用方已经组装好的 systemPrompt。
+ *   如果传入则跳过内部的 identity + memory 组装 —— 让 runProactiveMessage
+ *   可以组装一次 systemPrompt 后，首条回复和连续回复续轮都复用它。
  */
 async function generateMessage(
     role: string,
@@ -497,38 +512,46 @@ async function generateMessage(
     moodPrompt: string,
     /** 可选：当前活跃标签页截图的 file_id，让 AI "看到"主人在做什么 */
     fileIds?: string[],
+    presetSystemPrompt?: string,
 ): Promise<string> {
     const config = await loadAIConfig();
     if (!hasUsableAIConfig(config)) {
         throw new Error("AI 配置不可用");
     }
 
-    const memoryService = getMemoryService();
-    const identity = await memoryService.getIdentity(role);
-    // 时间上下文只在这里出现一次（含日期 + 星期），放在 user request 里避免重复
+    // 系统提示词：优先使用调用方预设的，否则自己组装（identity + memory + 心情）
+    // 时间上下文放在 systemPrompt 组装之前 —— promptSections 里也要用
     const timeContext = `现在是 ${getDateContext(now)} ${getTimePeriod(now)} ${getFormattedTime(now)}`;
 
-    // 读取记忆失败不阻塞主流程，只降级为无记忆上下文
-    let memoryContext = "";
-    try {
-        const entries = await memoryService.listEntries(role);
-        memoryContext = assembleMemoryContext(entries, now.getTime());
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 读取记忆失败，忽略记忆上下文:", error);
-    }
+    let systemPrompt: string;
+    if (presetSystemPrompt) {
+        systemPrompt = presetSystemPrompt;
+    } else {
+        const memoryService = getMemoryService();
+        const identity = await memoryService.getIdentity(role);
 
-    // 系统提示词只放「身份 + 记忆 + 心情」这些长期设定
-    const systemPrompt = [
-        config.systemPrompt?.trim(),
-        identity?.systemPromptTemplate?.trim(),
-        identity?.personaDescription?.trim()
-            ? `[角色身份]\n${identity.personaDescription}`
-            : undefined,
-        memoryContext,
-        `[当前心情] ${moodPrompt}`,
-    ]
-        .filter(Boolean)
-        .join("\n\n");
+        // 读取记忆失败不阻塞主流程，只降级为无记忆上下文
+        let memoryContext = "";
+        try {
+            const entries = await memoryService.listEntries(role);
+            memoryContext = assembleMemoryContext(entries, now.getTime());
+        } catch (error) {
+            maLogger.warn("[ProactiveChat] 读取记忆失败，忽略记忆上下文:", error);
+        }
+
+        // 系统提示词只放「身份 + 记忆 + 心情」这些长期设定
+        systemPrompt = [
+            config.systemPrompt?.trim(),
+            identity?.systemPromptTemplate?.trim(),
+            identity?.personaDescription?.trim()
+                ? `[角色身份]\n${identity.personaDescription}`
+                : undefined,
+            memoryContext,
+            `[当前心情] ${moodPrompt}`,
+        ]
+            .filter(Boolean)
+            .join("\n\n");
+    }
 
     // 行为要求与时间一起放进 user request —— 模型对「当前这一轮」的指令更敏感
     const promptSections: string[] = [timeContext];
@@ -690,9 +713,48 @@ async function runProactiveMessage(): Promise<void> {
         maLogger.warn("[ProactiveChat] 截图上传异常，降级为无图:", error);
     }
 
+    /* ══════════════════════════════════════════════════════════════════
+     * 组装 systemPrompt —— 一次组装，首条回复和连续回复续轮都复用
+     * 避免 generateMessage 和后续 generateFollowupReply 各自独立 loadAIConfig + listEntries
+     * ══════════════════════════════════════════════════════════════════ */
+    let sharedSystemPrompt: string | undefined;
+    let aiConfig: Awaited<ReturnType<typeof loadAIConfig>> | null = null;
+    try {
+        aiConfig = await loadAIConfig();
+        if (hasUsableAIConfig(aiConfig)) {
+            const identity = await memoryService.getIdentity(role);
+
+            // 读取记忆失败不阻塞主流程，只降级为无记忆上下文
+            let memoryContext = "";
+            try {
+                const entries = await memoryService.listEntries(role);
+                memoryContext = assembleMemoryContext(entries, now.getTime());
+            } catch (memErr) {
+                maLogger.warn("[ProactiveChat] 组装 systemPrompt 时读取记忆失败:", memErr);
+            }
+
+            sharedSystemPrompt = [
+                aiConfig.systemPrompt?.trim(),
+                identity?.systemPromptTemplate?.trim(),
+                identity?.personaDescription?.trim()
+                    ? `[角色身份]\n${identity.personaDescription}`
+                    : undefined,
+                memoryContext,
+                `[当前心情] ${moodPrompt}`,
+            ]
+                .filter(Boolean)
+                .join("\n\n");
+        }
+    } catch (sysPromptErr) {
+        maLogger.warn("[ProactiveChat] 组装 systemPrompt 失败，续轮链将跳过:", sysPromptErr);
+    }
+
     let text: string;
     try {
-        text = await generateMessage(role, now, closing, moodPrompt, fileIds);
+        // 传入 presetSystemPrompt —— generateMessage 跳过重复组装
+        text = await generateMessage(
+            role, now, closing, moodPrompt, fileIds, sharedSystemPrompt,
+        );
     } catch (error) {
         maLogger.warn("[ProactiveChat] AI 生成失败，使用本地问候:", error);
         text = getFallbackMessage(period, closing);
@@ -723,6 +785,81 @@ async function runProactiveMessage(): Promise<void> {
     }
 
     await notifyActiveTab(finalText, role);
+
+    /* ══════════════════════════════════════════════════════════════════
+     * 主动对话的连续回复循环
+     *   - 只有在主消息（非 closing 收尾）成功后才进入
+     *   - 续轮不带截图（首条 captureVisibleTab + uploadFile 已完成，
+     *     续轮复用同一个 systemPrompt，不再消耗截图上传开销）
+     *   - 任何一轮失败都 break，不影响主链路
+     *   - 连续回复不影响 mood 推导（不算 ignoredStreak / lastPushAt）
+     * ══════════════════════════════════════════════════════════════════ */
+    if (!closing && sharedSystemPrompt && aiConfig) {
+        const baseContProb = getContinuousReplyProbability(deriveMood(nextState));
+        let contRound = 1;
+
+        while (contRound < MAX_CONTINUOUS_ROUNDS) {
+            const prob = computeNextProbability(baseContProb, contRound);
+            if (prob <= 0 || !shouldTrigger(prob)) break;
+
+            maLogger.info(
+                "[ProactiveChat] 主动对话连续回复触发 ——",
+                `round=${contRound}, prob=${(prob * 100).toFixed(1)}%`,
+            );
+
+            try {
+                const followupPrompt = buildFollowupPrompt({
+                    scenario: "proactive",
+                    moodPrompt,
+                    lastMessage: finalText.slice(0, 60),
+                    round: contRound,
+                });
+
+                // ⚠️ 续轮不带 fileIds —— 只有主消息才 captureVisibleTab + uploadFile
+                const followupText = await generateFollowupReply(
+                    role,
+                    sharedSystemPrompt,
+                    followupPrompt,
+                    {
+                        provider: aiConfig.provider,
+                        modelId: aiConfig.modelId,
+                        apiKey: aiConfig.apiKey,
+                        apiBaseUrl: aiConfig.apiBaseUrl,
+                    },
+                );
+
+                const trimmed = Array.from(followupText)
+                    .slice(0, MAX_MESSAGE_LENGTH)
+                    .join("");
+
+                // 续轮消息落记忆 + 通知 dock 再次弹出
+                await memoryService.addEntry({
+                    role,
+                    content: `AI：${trimmed}`,
+                    category: "conversation",
+                    importance: "low",
+                    source: "ai-proactive-followup",
+                });
+                await notifyActiveTab(trimmed, role);
+            } catch (contErr) {
+                // 续轮任何一轮失败都停，不影响主链路
+                maLogger.warn(
+                    "[ProactiveChat] 主动对话连续回复生成失败，停止续轮:",
+                    contErr,
+                );
+                break;
+            }
+
+            contRound++;
+        }
+
+        if (contRound > 1) {
+            maLogger.info(
+                "[ProactiveChat] 主动对话连续回复链结束 ——",
+                `累计续轮 ${contRound - 1} 次`,
+            );
+        }
+    }
 }
 
 /** 排下一次触发：工作时段内随机；时段外或当天已收尾则直接对齐到下次上班 */

@@ -64,8 +64,19 @@ import {
   type MemoryEntry,
   type MemoryImportance,
 } from "@/services/memory";
-import KnowledgeGraph from "./memory/KnowledgeGraph";
+import KnowledgeGraphAI from "./memory/KnowledgeGraphAI";
+import type { GraphNode, NodeType } from "@/components/ChatKnowledgeGraph/types";
 import "./memory-center.scss";
+
+/** 图谱节点类型 → 中文标签（与 ChatKnowledgeGraph 图例保持一致） */
+const NODE_TYPE_LABEL: Record<NodeType, string> = {
+  role: "角色/用户",
+  preference: "偏好/称呼",
+  topic: "对话主题",
+  behavior: "互动行为",
+  proactive: "AI主动行为",
+  custom: "自定义",
+};
 
 /** 分类 → 中文标签 */
 const CATEGORY_LABEL: Record<MemoryCategory, string> = {
@@ -188,8 +199,8 @@ const MemoryManagerView: React.FC = () => {
   const [editingEntry, setEditingEntry] = useState<MemoryEntry | null>(null);
   /** 右侧区域当前视图：记忆条目 / 知识网络 */
   const [rightView, setRightView] = useState<"list" | "graph">("list");
-  /** 知识网络中被选中的记忆 —— 用于详情浮层 */
-  const [graphSelected, setGraphSelected] = useState<MemoryEntry | null>(null);
+  /** 知识网络中被选中的节点 —— 用于详情浮层 */
+  const [graphSelected, setGraphSelected] = useState<GraphNode | null>(null);
 
   // ─── 加载角色列表 ─── //
   const loadRoles = useCallback(async () => {
@@ -212,6 +223,8 @@ const MemoryManagerView: React.FC = () => {
     list.sort((a, b) => b.lastAccessedAt - a.lastAccessedAt);
     setEntries(list);
     setIdentity(await service.getIdentity(selectedRole));
+    // 切换角色后清掉上一张图谱里选中的节点，避免详情串台
+    setGraphSelected(null);
   }, [selectedRole, service]);
 
   useEffect(() => {
@@ -831,9 +844,10 @@ const MemoryManagerView: React.FC = () => {
             >
               {rightView === "graph" ? (
                 <div>
-                  <KnowledgeGraph
-                    entries={decoratedEntries.map((item) => item.entry)}
-                    onSelectEntry={setGraphSelected}
+                  <KnowledgeGraphAI
+                    role={selectedRole}
+                    entries={entries}
+                    onSelectNode={setGraphSelected}
                   />
                   {/* 点击图谱节点后的只读详情 */}
                   {graphSelected && (
@@ -855,12 +869,10 @@ const MemoryManagerView: React.FC = () => {
                         }}
                       >
                         <Space size={4}>
-                          <Tag
-                            color={IMPORTANCE_COLOR[graphSelected.importance]}
-                          >
-                            {IMPORTANCE_LABEL[graphSelected.importance]}
+                          <Tag color="blue">
+                            {NODE_TYPE_LABEL[graphSelected.type]}
                           </Tag>
-                          <Tag>{CATEGORY_LABEL[graphSelected.category]}</Tag>
+                          <strong>{graphSelected.label}</strong>
                         </Space>
                         <Button
                           size="small"
@@ -871,8 +883,19 @@ const MemoryManagerView: React.FC = () => {
                         </Button>
                       </div>
                       <div className="memory-center__content">
-                        {graphSelected.content}
+                        {graphSelected.desc || "（该节点没有补充说明）"}
                       </div>
+                      {graphSelected.sourceQuote && (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 12,
+                            color: "#9fb0c7",
+                          }}
+                        >
+                          来源：{graphSelected.sourceQuote}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

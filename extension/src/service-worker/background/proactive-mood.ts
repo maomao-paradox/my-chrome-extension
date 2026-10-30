@@ -124,3 +124,44 @@ export function describeMood(
             return "你今天心情很好，语气活泼亲昵，可以带一点调皮的小情绪。";
     }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+ * 心情驱动的概率函数 —— 单一真值源
+ *   getIgnoreProbability       : 用户发问后 AI 直接忽略不回复的概率
+ *   getContinuousReplyProbability: AI 回复后继续多说一句的基础概率
+ * ══════════════════════════════════════════════════════════════════ */
+
+/**
+ * 用户发问后，AI 直接忽略不回复的概率（心情驱动）。
+ * happy 永远回复；sad/angry 有概率不理；frenzy 气头上 70% 都懒得理。
+ */
+export function getIgnoreProbability(mood: ProactiveMood): number {
+    switch (mood) {
+        case "happy":
+            return 0.0;
+        case "sad":
+            return 0.5;
+        case "angry":
+            return 0.3;
+        case "frenzy":
+            return 0.7;
+    }
+}
+
+/**
+ * AI 回复后，继续多说一句的基础概率（心情驱动）。
+ * 实际触发概率 = getContinuousReplyProbability(mood) * 0.5^(round-1)，
+ * 每次续轮减半，最低到 MIN_PROBABILITY 以下直接停止。
+ */
+export function getContinuousReplyProbability(mood: ProactiveMood): number {
+    switch (mood) {
+        case "happy":
+            return 0.4;
+        case "sad":
+            return 0.1;
+        case "angry":
+            return 0.3;
+        case "frenzy":
+            return 0.05;
+    }
+}

@@ -1,14 +1,22 @@
 /**
  * @file service-worker/background/stream-manager.ts
- * @description 管理 AI 对话流式传输 —— 已集成记忆系统
+ * @description 管理 AI 对话流式传输 —— 已集成记忆系统 + 心情驱动的连续回复
  *
  * 记忆集成流程：
  *   1. startStream 收到 prompt 后，先调用 memoryService.buildContext(role, prompt)
  *      检索该角色相关的长期记忆 + 短期记忆 + 身份设定，拼成 assembledContext
  *   2. 把 assembledContext 追加到 systemPrompt 后面，传给 completeChatFlow
  *   3. 流式过程中累计 AI 返回的完整内容
- *   4. 对话完成后，调用 memoryService.observe(role, prompt, aiFullContent)
+ *   4. 全部对话（首条 + 连续回复续轮）完成后，调用 memoryService.observe(...)
  *      让记忆系统自动提取值得记住的内容（用户偏好、事实信息等）
+ *
+ * 心情驱动的连续回复（在 onComplete 后触发）：
+ *   - 入口层 runtime-connections.ts 已根据心情做过「忽略判断」，不命中才走到这里
+ *   - 首条 AI 回复完成后，掷骰决定要不要续轮：
+ *       prob = getContinuousReplyProbability(mood) * 0.5^(round-1)
+ *   - 每轮续轮都发 CONTINUING + STREAM_DATA，前端据此创建新的 placeholder
+ *   - 所有续轮结束后发 CONTINUOUS_COMPLETE + 最终 COMPLETE
+ *   - mood 参数由入口层传入，这里不再重复读 storage
  *
  * 注意：记忆相关操作全部 try-catch，记忆系统失败不会阻塞对话主流程。
  */
@@ -16,6 +24,15 @@
 import { completeChatFlow } from "../deepseek";
 import type { ChatHistoryMessage } from "@/types/web-mcp";
 import { getMemoryService } from "@/services/memory";
+import type { ProactiveMood } from "./proactive-mood";
+import { getContinuousReplyProbability } from "./proactive-mood";
+import {
+    MAX_CONTINUOUS_ROUNDS,
+    computeNextProbability,
+    shouldTrigger,
+    buildFollowupPrompt,
+    generateFollowupReply,
+} from "./chat-chain";
 
 interface StreamConnection {
     port: chrome.runtime.Port;
@@ -55,6 +72,10 @@ export class StreamManager {
         userPrompt: string,
         aiResponse: string,
     ): Promise<void> {
+        // 工具型请求（如知识图谱抽取）不写入角色记忆，避免 JSON 回复污染对话历史
+        if (role.startsWith("graph_extractor")) {
+            return;
+        }
         try {
             await this.memoryService.observe(role, userPrompt, aiResponse);
         } catch (error) {
@@ -84,6 +105,8 @@ export class StreamManager {
             }>;
             targetTabId?: number;
         },
+        /** 入口层 runtime-connections.ts 已读取好的心情状态，传进来避免重复读 storage */
+        mood?: ProactiveMood,
     ): void {
         const startTime = performance.now();
         console.log(
@@ -167,9 +190,6 @@ export class StreamManager {
                             hasContent: hasSentData,
                         });
 
-                        // 3. 对话完成后：让记忆系统观察学习
-                        void this.observeConversation(role, prompt, aiFullContent);
-
                         if (!hasSentData && functionCalls.length === 0) {
                             this.sendError(
                                 port,
@@ -179,16 +199,68 @@ export class StreamManager {
                             return;
                         }
 
-                        try {
-                            port.postMessage({
-                                type: "AI_CONVERSATION_COMPLETE",
-                                payload: { messageId, functionCalls },
-                            });
-                        } catch (error) {
-                            console.warn("发送完成消息失败:", error);
-                        }
+                        /* ══════════════════════════════════════════════════════════════════
+                         * 心情驱动的连续回复链
+                         *   - mood 由入口层传入：有 mood 才尝试续轮；无 mood 降级为正常结束
+                         *   - 所有续轮结束后统一 observe（把首条 + 续轮拼在一起让记忆系统学习）
+                         * ══════════════════════════════════════════════════════════════════ */
+                        void (async () => {
+                            // 用 try-catch 包整个续轮链，任何异常都降级为正常结束
+                            let finalCompensationError: unknown = null;
+                            let allAiContent = aiFullContent;
 
-                        this.connections.delete(messageId);
+                            try {
+                                if (mood) {
+                                    allAiContent = await this.tryContinuousReplyChain(
+                                        port,
+                                        messageId,
+                                        role,
+                                        provider,
+                                        model,
+                                        apiKey,
+                                        apiBaseUrl,
+                                        memoryEnhancedPrompt,
+                                        prompt,
+                                        mood,
+                                        aiFullContent,
+                                    );
+                                }
+                            } catch (chainError) {
+                                // 续轮链整体异常不应阻塞主流程，降级为正常结束
+                                console.warn(
+                                    `[AI Stream] ${messageId} 连续回复链异常，降级正常结束:`,
+                                    chainError,
+                                );
+                                finalCompensationError = chainError;
+                            }
+
+                            // 所有续轮结束（或降级）后：让记忆系统一次性观察完整对话
+                            void this.observeConversation(role, prompt, allAiContent);
+
+                            if (mood) {
+                                // 发 CONTINUOUS_COMPLETE 告诉前端：所有续轮的 streaming 都可以停了
+                                try {
+                                    port.postMessage({
+                                        type: "AI_CONVERSATION_CONTINUOUS_COMPLETE",
+                                        payload: { messageId },
+                                    });
+                                } catch (postErr) {
+                                    console.warn("发送 CONTINUOUS_COMPLETE 失败:", postErr);
+                                }
+                            }
+
+                            // 发最终 COMPLETE —— 前端收到后触发 persistTurn
+                            try {
+                                port.postMessage({
+                                    type: "AI_CONVERSATION_COMPLETE",
+                                    payload: { messageId, functionCalls },
+                                });
+                            } catch (postErr) {
+                                console.warn("发送 COMPLETE 失败:", postErr);
+                            }
+
+                            this.connections.delete(messageId);
+                        })();
                     },
                 },
                 provider,
@@ -214,6 +286,107 @@ export class StreamManager {
             console.log("端口断开连接:", messageId);
             this.connections.delete(messageId);
         });
+    }
+
+    /**
+     * 心情驱动的连续回复链 —— 核心循环。
+     *
+     * 首条 AI 回复完成后调用。根据 mood 计算概率，每次续轮概率减半，
+     * 硬上限 MAX_CONTINUOUS_ROUNDS 轮。任何一轮失败都 break，不阻塞主流程。
+     *
+     * @returns 首条回复 + 所有续轮内容的拼接字符串（让 observe 能学习完整对话）
+     */
+    private async tryContinuousReplyChain(
+        port: chrome.runtime.Port,
+        messageId: string,
+        role: string,
+        provider: string | undefined,
+        modelId: string | undefined,
+        apiKey: string | undefined,
+        apiBaseUrl: string | undefined,
+        systemPrompt: string | undefined,
+        userPrompt: string,
+        mood: ProactiveMood,
+        firstReplyContent: string,
+    ): Promise<string> {
+        let allContent = firstReplyContent;
+        const baseContProb = getContinuousReplyProbability(mood);
+        let round = 1;
+
+        while (round < MAX_CONTINUOUS_ROUNDS) {
+            const prob = computeNextProbability(baseContProb, round);
+
+            // 概率 ≤ 0（MIN_PROBABILITY 拦截）或不命中 → 停止续轮
+            if (prob <= 0 || !shouldTrigger(prob)) break;
+
+            console.log(
+                `[AI Stream] ${messageId} 连续回复触发 —— `,
+                `round=${round}, prob=${(prob * 100).toFixed(1)}%`,
+            );
+
+            // 发 CONTINUING —— 前端收到后创建新的 placeholder AI 消息
+            try {
+                port.postMessage({
+                    type: "AI_CONVERSATION_CONTINUING",
+                    payload: { messageId },
+                });
+            } catch (postErr) {
+                console.warn("发送 CONTINUING 失败，停止续轮:", postErr);
+                break;
+            }
+
+            try {
+                // 构建续轮提示词 —— 把用户问题 + 首条回复拼进去作为上下文
+                const followupPrompt = buildFollowupPrompt({
+                    scenario: "user-dialog",
+                    moodPrompt: "", // systemPrompt 已经包含心情描述（通过 buildMemoryContext 注入）
+                    lastMessage: `用户：${userPrompt} / AI：${firstReplyContent.slice(0, 60)}`,
+                    round,
+                });
+
+                const followupText = await generateFollowupReply(
+                    role,
+                    systemPrompt ?? "",
+                    followupPrompt,
+                    { provider, modelId, apiKey, apiBaseUrl },
+                );
+
+                // 模拟流式：把续轮文本按字符块发 STREAM_DATA
+                // （续轮不是真正的流式生成，直接拿到完整文本后分块推送即可）
+                const chunkSize = 12;
+                for (let i = 0; i < followupText.length; i += chunkSize) {
+                    const chunk = followupText.slice(i, i + chunkSize);
+                    try {
+                        port.postMessage({
+                            type: "AI_CONVERSATION_STREAM_DATA",
+                            payload: { messageId, content: chunk },
+                        });
+                    } catch (postErr) {
+                        console.warn("续轮 STREAM_DATA 发送失败:", postErr);
+                        break;
+                    }
+                }
+
+                allContent += "\n" + followupText;
+            } catch (followupError) {
+                // 任何一轮续轮失败都停，不要再尝试后续轮次
+                console.warn(
+                    `[AI Stream] ${messageId} 连续回复第 ${round} 轮生成失败，停止续轮:`,
+                    followupError,
+                );
+                break;
+            }
+
+            round++;
+        }
+
+        if (round > 1) {
+            console.log(
+                `[AI Stream] ${messageId} 连续回复链结束 —— 累计续轮 ${round - 1} 次`,
+            );
+        }
+
+        return allContent;
     }
 
     private sendError(
