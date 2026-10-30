@@ -25,6 +25,11 @@ import {
   SiteFavoriteStorage,
   FAVORITE_SITES_STORAGE_KEY,
 } from "@/services/siteFavoriteStorage";
+import {
+  disableProactiveReminder,
+  enableProactiveReminder,
+  playProactiveReminder,
+} from "./proactive-chat";
 
 // 通过 ?inline 导入聚合 SCSS 为字符串
 import sidebarStyles from "./styles/index.scss?inline";
@@ -319,6 +324,9 @@ class SideBar implements AppModule {
           this._container.style.display = "block";
         }
       }
+      if (this._container) {
+        enableProactiveReminder();
+      }
     } catch (error) {
       maLogger.error("启用侧边工具栏失败:", error);
     }
@@ -328,6 +336,7 @@ class SideBar implements AppModule {
    * 禁用侧边工具栏
    */
   public disable(): void {
+    disableProactiveReminder();
     try {
       // 触发卸载事件
       window.dispatchEvent(this.unloadSidebarEvent);
@@ -432,6 +441,34 @@ class SideBar implements AppModule {
     }
   }
 }
+
+/**
+ * 监听后台发来的主动对话提醒。
+ * 调度与内容生成已迁移到 background（chrome.alarms），
+ * 这里只负责收到指令后播放 dock 的滑出动画。
+ *
+ * 注意：这里刻意不用 messenger.ext.listen —— 它会对每条消息都返回 true
+ * （异步保持通道），而本监听器并不处理其他类型的消息，会白白占用 popup /
+ * background 的响应通道，触发 "message port closed before a response was
+ * received" 报错。因此直接注册 onMessage，只在命中目标消息时立即回执。
+ */
+chrome.runtime.onMessage.addListener(
+  (
+    message: { type?: string; target?: string },
+    _sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: unknown) => void,
+  ) => {
+    if (
+      message?.type === "PROACTIVE_AI_MESSAGE" &&
+      message?.target === "content"
+    ) {
+      playProactiveReminder();
+      // 立即回执，避免发送方等待超时
+      sendResponse({ ok: true });
+    }
+    // 不返回 true：非目标消息完全交还给其他监听器处理
+  },
+);
 
 export default (ctx: AppContext, options?: any): AppModule => {
   const appInstance = new SideBar(options);

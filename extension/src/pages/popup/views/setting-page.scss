@@ -508,12 +508,20 @@
     var(--popup-bg-primary) 100%
   );
 
+  /* 底栏左右双按钮：保存按钮弹性收窄，右侧为刷新页面按钮 */
+  &__row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+  }
+
   .primary-btn {
     display: grid;
     grid-template-columns: 30px minmax(0, 1fr);
     align-items: center;
     gap: 9px;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     min-height: 46px;
     padding: 7px 10px;
     border: 1px solid var(--popup-button-border);
@@ -596,6 +604,44 @@
 
     .primary-btn__copy small {
       color: color-mix(in srgb, var(--popup-danger-text) 82%, transparent);
+    }
+  }
+
+  /* 刷新页面按钮：仅图标的正方形按钮（1:1），垂直居中于底栏 */
+  .refresh-btn {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 1px solid var(--popup-border-strong);
+    border-radius: 14px;
+    background: var(--popup-control-bg);
+    color: var(--popup-accent);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--popup-inset-highlight);
+
+    .anticon {
+      font-size: 15px;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: var(--popup-accent);
+      background: var(--popup-control-hover-bg);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 4px var(--popup-focus-ring);
     }
   }
 }

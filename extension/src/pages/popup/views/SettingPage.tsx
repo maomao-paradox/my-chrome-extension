@@ -21,12 +21,11 @@ import {
   FileTextOutlined,
   ToolOutlined,
   CheckCircleOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import TableContainer from "../layout/TableContainer";
 import DebugModeSetting from "../components/DebugModeSetting";
-import { storage } from "@/stores";
 import { sendMessageToContentScript } from "@/message/back-content";
-import { appConfigKey, domainConfigsKey } from "@/config";
 import { extractDomain } from "../composables/useDomainState";
 import {
   popupThemes,
@@ -42,7 +41,6 @@ import {
 import { usePluginManager } from "../composables/usePluginManager";
 import JungleKnotButton from "@/components/Jungle-knot/Button";
 import "./setting-page.scss";
-import { ConfigItem } from "@/types";
 
 /**
  * 保存状态类型
@@ -322,6 +320,26 @@ export const SettingPage: FC<{}> = () => {
     scheduleSaveStateReset,
   ]);
 
+  /** 刷新当前活跃标签页 */
+  const handleRefreshActiveTab = useCallback(async (): Promise<void> => {
+    try {
+      if (!chrome.tabs) {
+        console.warn("chrome.tabs not available, skip refresh");
+        return;
+      }
+      const tabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      const tab = tabs[0];
+      if (tab?.id !== undefined) {
+        await chrome.tabs.reload(tab.id);
+      }
+    } catch (error) {
+      maLogger.error("刷新当前标签页失败:", error);
+    }
+  }, []);
+
   /** 更新插件启用状态 */
   const handlePluginToggle = useCallback((key: string, enabled: boolean) => {
     setPluginConfigs((prev: any) => ({
@@ -462,7 +480,7 @@ export const SettingPage: FC<{}> = () => {
                 aria-pressed={activeTheme === theme.key}
               >
                 <JungleKnotButton
-                  label="THEME"
+                  subTitle="THEME"
                   onClick={() => selectTheme(theme.key)}
                   primaryColor={theme.primaryColor}
                   secondaryColor={theme.secondaryColor}
@@ -621,21 +639,32 @@ export const SettingPage: FC<{}> = () => {
         </section>
       </div>
 
-      {/* 保存按钮 */}
+      {/* 保存按钮 + 刷新页面按钮 */}
       <div className={`save-dock save-dock--${saveState}`} aria-live="polite">
-        <button
-          className="primary-btn"
-          disabled={isSaving()}
-          onClick={saveAllConfigs}
-        >
-          <span className="primary-btn__icon">
-            <CheckCircleOutlined />
-          </span>
-          <span className="primary-btn__copy">
-            <strong>{saveButtonTitle()}</strong>
-            <small>{saveButtonHint()}</small>
-          </span>
-        </button>
+        <div className="save-dock__row">
+          <button
+            className="primary-btn"
+            disabled={isSaving()}
+            onClick={saveAllConfigs}
+          >
+            <span className="primary-btn__icon">
+              <CheckCircleOutlined />
+            </span>
+            <span className="primary-btn__copy">
+              <strong>{saveButtonTitle()}</strong>
+              <small>{saveButtonHint()}</small>
+            </span>
+          </button>
+          <button
+            className="refresh-btn"
+            type="button"
+            title="刷新当前的活跃页面"
+            aria-label="刷新当前的活跃页面"
+            onClick={handleRefreshActiveTab}
+          >
+            <ReloadOutlined />
+          </button>
+        </div>
       </div>
     </TableContainer>
   );

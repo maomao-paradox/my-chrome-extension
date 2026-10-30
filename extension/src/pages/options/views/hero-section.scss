@@ -1,2129 +1,283 @@
-.bridge-console {
-  --hero-motion-micro: 0.22s;
-  --hero-motion-pulse: 2.8s;
-  --hero-motion-instrument: 5.2s;
-  --hero-motion-slow: 8.8s;
-  --hero-glow-blue: rgba(105, 183, 255, 0.18);
-  --hero-glow-green: rgba(122, 247, 208, 0.18);
-  position: relative;
-  min-height: calc(100vh - 134px);
-  padding: 18px 22px 24px;
-  color: #eaf9ff;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  isolation: isolate;
-}
+/**
+ * hero-section.scss — AI 核心链路视图（极简蓝图版）
+ *
+ * 视觉结构（对齐手绘参考图）：
+ *   [感知] → [计划] → [执行]
+ *              ↑        │
+ *              │        ↓
+ *            [记忆] ←───┘
+ *
+ * - 四个方块节点，仅保留名称，无额外文字说明
+ * - SVG 叠加层绘制流线：虚线流动 + 脉冲光点（动态数据线条）
+ * - 记忆方块圆角更大（呼应参考图）
+ */
 
-.bridge-console::before,
-.bridge-console::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-}
-
-.bridge-console::before {
-  z-index: -1;
-  inset: 0;
-  background:
-    linear-gradient(118deg, rgba(122, 247, 208, 0.1) 0 1px, transparent 1px 13%),
-    linear-gradient(242deg, rgba(105, 183, 255, 0.1) 0 1px, transparent 1px 13%),
-    linear-gradient(90deg, rgba(8, 20, 36, 0.82), transparent 18% 82%, rgba(8, 20, 36, 0.82)),
-    radial-gradient(ellipse at 50% 18%, rgba(105, 183, 255, 0.11), transparent 58%);
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% 100%,
-    calc(100% - 36px) 100%,
-    calc(100% - 92px) calc(100% - 32px),
-    92px calc(100% - 32px),
-    36px 100%,
-    0 100%
-  );
-}
-
-.bridge-console::after {
-  z-index: 0;
-  left: 5%;
-  right: 5%;
-  bottom: 10px;
-  height: 34px;
-  background:
-    linear-gradient(90deg, transparent, rgba(122, 247, 208, 0.16), transparent),
-    linear-gradient(180deg, rgba(7, 18, 31, 0), rgba(4, 12, 22, 0.74));
-  clip-path: polygon(0 100%, 7% 0, 93% 0, 100% 100%);
-  box-shadow: 0 -16px 42px rgba(0, 0, 0, 0.18);
-}
-
-.bridge-header {
-  position: relative;
+/* ══════════════════════════════════════════════════════════════════
+ * TOKEN SYSTEM
+ * ══════════════════════════════════════════════════════════════════ */
+/* 主面板容器：将 50% 宽高的蓝图画布居中 */
+.panel-content--hero {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 14px 16px;
-  clip-path: polygon(
-    0 16px,
-    16px 0,
-    calc(100% - 22px) 0,
-    100% 18px,
-    100% 100%,
-    18px 100%,
-    0 calc(100% - 18px)
-  );
-  border: 1px solid rgba(92, 174, 232, 0.18);
-  background:
-    linear-gradient(180deg, rgba(4, 13, 25, 0.74), rgba(2, 8, 16, 0.44)),
-    radial-gradient(circle at 50% 0, rgba(105, 183, 255, 0.1), transparent 58%);
-  box-shadow:
-    inset 0 1px 0 rgba(183, 231, 255, 0.05),
-    0 14px 42px rgba(0, 0, 0, 0.16);
-}
-
-.bridge-header::before {
-  content: "";
-  position: absolute;
-  inset: 0 18px auto;
-  height: 1px;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(122, 247, 208, 0.44),
-    rgba(105, 183, 255, 0.48),
-    transparent
-  );
-  opacity: 0.74;
-}
-
-.bridge-header::after {
-  content: "";
-  position: absolute;
-  left: 18%;
-  right: 18%;
-  bottom: -10px;
-  height: 10px;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(7, 18, 32, 0.9) 12% 88%,
-    transparent
-  );
-  clip-path: polygon(0 0, 100% 0, 94% 100%, 6% 100%);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
-}
-
-.bridge-header__title {
-  flex: 1;
-  display: grid;
-  grid-template-columns: minmax(110px, 1fr) auto minmax(110px, 1fr);
-  align-items: center;
-  gap: 18px;
-}
-
-.bridge-header__copy {
-  text-align: center;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.bridge-signal-stack {
-  position: relative;
-  display: grid;
-  gap: 5px;
-  min-width: min(470px, 46vw);
-  padding: 8px 16px 9px;
-  overflow: hidden;
-  color: rgba(167, 222, 242, 0.72);
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 9px;
-  letter-spacing: 0.13em;
-  text-align: left;
-  text-transform: uppercase;
-  background:
-    linear-gradient(90deg, rgba(105, 183, 255, 0.07), transparent 24% 76%, rgba(122, 247, 208, 0.07)),
-    repeating-linear-gradient(180deg, transparent 0 7px, rgba(114, 202, 248, 0.04) 8px);
-  border-top: 1px solid rgba(105, 183, 255, 0.18);
-  border-bottom: 1px solid rgba(122, 247, 208, 0.18);
-  clip-path: polygon(0 7px, 7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px));
-}
-
-.bridge-signal-stack::before {
-  position: absolute;
-  inset: 0;
-  content: "";
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    transparent 0 42%,
-    rgba(122, 247, 208, 0.12) 50%,
-    transparent 58% 100%
-  );
-  transform: translateY(-100%);
-  animation: bridgeSignalScan var(--hero-motion-instrument) ease-in-out infinite;
-}
-
-.bridge-signal-line {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 1.15fr 1fr auto;
-  gap: 14px;
-  align-items: center;
-  white-space: nowrap;
-}
-
-.bridge-signal-line span:last-child,
-.bridge-signal-line strong {
-  color: rgba(223, 248, 255, 0.82);
-  font-weight: 500;
-  text-align: right;
-}
-
-.bridge-signal-line--primary {
-  color: rgba(122, 247, 208, 0.86);
-}
-
-.bridge-signal-line--secondary {
-  color: rgba(105, 183, 255, 0.7);
-  opacity: 0.82;
-}
-
-.bridge-signal-line--noise {
-  grid-template-columns: 1fr auto;
-  color: rgba(155, 198, 220, 0.44);
-  font-size: 8px;
-  opacity: 0.76;
-}
-
-.bridge-signal-meter {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: end;
-  gap: 3px;
-  height: 8px;
-  margin-top: 2px;
-  opacity: 0.72;
-}
-
-.bridge-signal-meter i {
-  display: block;
-  flex: 1;
-  min-width: 2px;
-  height: var(--signal-height);
-  background: linear-gradient(180deg, #dffcff, #69b7ff 55%, #7af7d0);
-  box-shadow: 0 0 6px rgba(122, 247, 208, 0.42);
-  transform-origin: bottom;
-  animation: bridgeSignalMeter 1.7s ease-in-out infinite alternate;
-  animation-delay: var(--signal-delay);
-}
-
-.bridge-header__eyebrow,
-.hud-rail__text,
-.meta-chip__label,
-.card-heading span,
-.core-footer,
-.feed-line__time,
-.feed-line__prompt,
-.module-pod__meta,
-.module-pod__footer em,
-.ship-focus__label,
-.quick-dock__btn,
-.detail-card__header small {
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.bridge-header__eyebrow {
-  margin: 0 0 8px;
-  color: rgba(137, 203, 239, 0.78);
-  font-size: 11px;
-}
-
-.bridge-header h1 {
-  margin: 0;
-  font-size: clamp(32px, 3.7vw, 42px);
-  line-height: 1;
-  text-shadow: 0 0 14px rgba(107, 189, 255, 0.16);
-}
-
-.bridge-header__subtitle {
-  max-width: 720px;
-  margin: 10px auto 0;
-  color: rgba(197, 225, 241, 0.78);
-  line-height: 1.5;
-}
-
-.hud-rail {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.hud-rail__line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(122, 198, 255, 0.72),
-    transparent
-  );
-  box-shadow: 0 0 12px rgba(105, 183, 255, 0.32);
-}
-
-.hud-rail__text {
-  color: rgba(139, 205, 241, 0.72);
-  font-size: 10px;
-  white-space: nowrap;
-  text-shadow: 0 0 16px rgba(105, 183, 255, 0.24);
-}
-
-.bridge-header__meta {
-  display: flex;
-  gap: 8px;
-  align-self: stretch;
-  align-items: stretch;
-}
-
-.meta-chip,
-.bridge-card,
-.quick-dock {
-  position: relative;
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(6, 15, 29, 0.94), rgba(3, 8, 16, 0.78)),
-    radial-gradient(circle at top, rgba(40, 112, 255, 0.14), transparent 42%);
-  border: 1px solid rgba(90, 169, 228, 0.18);
-  box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.28),
-    0 0 34px rgba(85, 174, 255, 0.07),
-    inset 0 1px 0 rgba(183, 231, 255, 0.06);
-}
-
-.meta-chip {
-  min-width: 138px;
-  padding: 10px 12px;
-  clip-path: polygon(
-    0 12px,
-    12px 0,
-    100% 0,
-    100% calc(100% - 12px),
-    calc(100% - 12px) 100%,
-    0 100%
-  );
-}
-
-.meta-chip__label {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 9px;
-  color: rgba(127, 186, 220, 0.72);
-}
-
-.meta-chip strong {
-  color: #f3fbff;
-  font-size: 13px;
-  text-shadow: 0 0 12px rgba(105, 183, 255, 0.16);
-}
-
-.meta-chip--status[data-status="online"] {
-  border-color: rgba(105, 183, 255, 0.34);
-}
-
-.meta-chip--status[data-status="warning"] {
-  border-color: rgba(255, 98, 98, 0.34);
-}
-
-.meta-chip--status[data-status="standby"] {
-  border-color: rgba(122, 247, 208, 0.34);
-}
-
-.bridge-layout {
-  position: relative;
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 320px;
-  gap: 18px;
-  align-items: stretch;
-  padding: 8px 10px 14px;
-}
-
-.bridge-layout::before,
-.bridge-layout::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-}
-
-.bridge-layout::before {
-  z-index: 0;
-  inset: 0;
-  border: 1px solid rgba(105, 183, 255, 0.1);
-  background:
-    linear-gradient(112deg, transparent 0 16%, rgba(122, 247, 208, 0.12) 16.2%, transparent 16.6%),
-    linear-gradient(248deg, transparent 0 16%, rgba(105, 183, 255, 0.12) 16.2%, transparent 16.6%),
-    linear-gradient(180deg, rgba(7, 18, 32, 0.2), rgba(2, 8, 16, 0.3));
-  clip-path: polygon(
-    0 24px,
-    24px 0,
-    calc(100% - 24px) 0,
-    100% 24px,
-    100% calc(100% - 28px),
-    calc(100% - 44px) 100%,
-    44px 100%,
-    0 calc(100% - 28px)
-  );
-}
-
-.bridge-layout::after {
-  z-index: 0;
-  top: 16px;
-  bottom: 18px;
-  left: calc(280px + 18px);
-  right: calc(320px + 18px);
-  border-left: 1px solid rgba(122, 247, 208, 0.14);
-  border-right: 1px solid rgba(105, 183, 255, 0.14);
-  box-shadow:
-    -22px 0 34px rgba(0, 0, 0, 0.12),
-    22px 0 34px rgba(0, 0, 0, 0.12);
-}
-
-.bridge-layout__overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 4;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.bridge-guide,
-.bridge-guide__node,
-.bridge-guide__pulse {
-  --guide-color: #69b7ff;
-}
-
-.bridge-guide {
-  fill: none;
-  stroke: var(--guide-color);
-  stroke-width: 1.45;
-  stroke-dasharray: 8 8;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  opacity: 0.88;
-  animation: bridgeGuideShift var(--hero-motion-instrument) linear infinite;
-}
-
-.bridge-guide--glow {
-  stroke-width: 4.8;
-  opacity: 0.2;
-  filter: blur(4px);
-}
-
-.bridge-guide__node,
-.bridge-guide__pulse {
-  fill: var(--guide-color);
-  filter: drop-shadow(0 0 10px var(--guide-color));
-}
-
-.bridge-guide__node {
-  fill: rgba(6, 14, 28, 0.92);
-  stroke: var(--guide-color);
-  stroke-width: 1.4;
-}
-
-.bridge-guide__pulse {
-  animation: bridgeGuidePulse var(--hero-motion-pulse) ease-out infinite;
-}
-
-.bridge-sidebar,
-.bridge-center {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.bridge-card {
-  padding: 18px;
-  clip-path: polygon(
-    0 16px,
-    16px 0,
-    calc(100% - 30px) 0,
-    100% 18px,
-    100% 100%,
-    26px 100%,
-    0 calc(100% - 26px)
-  );
-}
-
-.bridge-card::before,
-.bridge-card::after,
-.meta-chip::before,
-.quick-dock::before {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-}
-
-.bridge-card::before,
-.meta-chip::before,
-.quick-dock::before {
-  inset: 0;
-  background:
-    linear-gradient(transparent 96%, rgba(84, 154, 212, 0.05) 100%),
-    linear-gradient(90deg, transparent 96%, rgba(84, 154, 212, 0.04) 100%);
-  background-size:
-    100% 18px,
-    18px 100%;
-  opacity: 0.18;
-}
-
-.bridge-card::after {
-  top: 12px;
-  right: 14px;
-  width: 88px;
-  height: 14px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0),
-    rgba(138, 197, 235, 0.24),
-    rgba(255, 255, 255, 0)
-  );
-  opacity: 0.4;
-}
-
-.card-heading {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.card-heading--tight {
-  margin-bottom: 10px;
-}
-
-.card-heading span {
-  color: rgba(129, 190, 223, 0.7);
-  font-size: 10px;
-}
-
-.card-heading strong {
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 12px;
-  color: rgba(237, 248, 255, 0.92);
-  text-shadow: 0 0 12px rgba(105, 183, 255, 0.16);
-}
-
-.compact-card {
-  min-height: 250px;
-}
-
-.metric-stack {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.metric-row__top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 8px;
-  color: rgba(208, 238, 255, 0.88);
-}
-
-.metric-row__top span {
-  font-size: 12px;
-}
-
-.metric-row__top strong {
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 13px;
-}
-
-.metric-row__track,
-.detail-metric__track {
-  height: 9px;
-  background: rgba(17, 44, 70, 0.86);
-  overflow: hidden;
-  clip-path: polygon(
-    0 0,
-    calc(100% - 8px) 0,
-    100% 50%,
-    calc(100% - 8px) 100%,
-    0 100%
-  );
-}
-
-.metric-row__fill,
-.detail-metric__fill {
-  height: 100%;
-  box-shadow: 0 0 20px currentColor;
-}
-
-.metric-row__fill--blue {
-  background: linear-gradient(90deg, #4883ff, #7ad8ff);
-  color: #69b7ff;
-}
-
-.metric-row__fill--red {
-  background: linear-gradient(90deg, #ff5a5a, #ff8e8e);
-  color: #ff6262;
-}
-
-.metric-row__fill--green {
-  background: linear-gradient(90deg, #23d0a3, #7af7d0);
-  color: #7af7d0;
-}
-
-.core-footer {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  margin-top: 18px;
-  font-size: 10px;
-  color: rgba(127, 191, 221, 0.7);
-}
-
-.starship-ai-card {
-  min-height: 250px;
-  display: flex;
-  flex-direction: column;
-  background:
-    radial-gradient(circle at 50% 42%, rgba(122, 247, 208, 0.12), transparent 40%),
-    linear-gradient(180deg, rgba(6, 15, 29, 0.94), rgba(3, 8, 16, 0.78));
-}
-
-.starship-ai-emblem {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  flex: 1;
-  min-height: 150px;
-  place-items: center;
-  overflow: hidden;
-}
-
-.starship-ai-emblem__halo {
-  position: absolute;
-  width: 150px;
-  aspect-ratio: 1;
-  border: 1px solid rgba(122, 247, 208, 0.24);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, rgba(122, 247, 208, 0.12), transparent 58%),
-    conic-gradient(from 90deg, transparent 0 18%, rgba(122, 247, 208, 0.28), transparent 38% 100%);
-  box-shadow:
-    inset 0 0 24px rgba(105, 183, 255, 0.08),
-    0 0 32px rgba(122, 247, 208, 0.1);
-  animation: starshipAiHaloPulse var(--hero-motion-pulse) ease-in-out infinite;
-}
-
-.starship-ai-emblem__svg {
-  position: relative;
-  width: min(176px, 88%);
-  aspect-ratio: 1;
-  overflow: visible;
-  filter:
-    drop-shadow(0 0 14px rgba(105, 183, 255, 0.18))
-    drop-shadow(0 0 26px rgba(122, 247, 208, 0.1));
-}
-
-.starship-ai-emblem__orbit {
-  fill: none;
-  stroke: rgba(122, 247, 208, 0.32);
-  stroke-width: 1.2;
-  stroke-dasharray: 7 10;
-}
-
-.starship-ai-emblem__orbit ellipse:last-child {
-  stroke: rgba(105, 183, 255, 0.26);
-}
-
-.starship-ai-emblem__particles {
-  fill: #7af7d0;
-  filter:
-    drop-shadow(0 0 8px rgba(122, 247, 208, 0.78))
-    drop-shadow(0 0 16px rgba(105, 183, 255, 0.32));
-}
-
-.starship-ai-emblem__particles circle:nth-child(2),
-.starship-ai-emblem__particles circle:nth-child(4) {
-  fill: #69b7ff;
-  opacity: 0.82;
-}
-
-.starship-ai-emblem__ship {
-  transform-origin: 110px 116px;
-  animation: starshipAiFloat var(--hero-motion-pulse) ease-in-out infinite;
-}
-
-.starship-ai-emblem__hull {
-  fill: rgba(105, 183, 255, 0.08);
-  stroke: url("#aiShipHull");
-  stroke-width: 2;
-  stroke-linejoin: round;
-}
-
-.starship-ai-emblem__wing,
-.starship-ai-emblem__keel,
-.starship-ai-emblem__thruster {
-  fill: none;
-  stroke: rgba(122, 247, 208, 0.74);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.starship-ai-emblem__keel {
-  stroke: rgba(233, 251, 255, 0.8);
-}
-
-.starship-ai-emblem__core {
-  fill: url("#aiCoreGlow");
-  filter: drop-shadow(0 0 16px rgba(122, 247, 208, 0.55));
-  animation: starshipAiCore var(--hero-motion-pulse) ease-in-out infinite;
-}
-
-.starship-ai-emblem__thruster {
-  stroke-dasharray: 4 8;
-  animation: starshipAiThrust 1.4s ease-in-out infinite;
-}
-
-.starship-ai-emblem__nodes {
-  fill: #7af7d0;
-  filter: drop-shadow(0 0 10px rgba(122, 247, 208, 0.64));
-}
-
-.starship-ai-emblem__nodes circle {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: starshipAiNode var(--hero-motion-pulse) ease-in-out infinite;
-}
-
-.starship-ai-emblem__nodes circle:nth-child(2) {
-  animation-delay: 0.28s;
-}
-
-.starship-ai-emblem__nodes circle:nth-child(3) {
-  animation-delay: 0.56s;
-}
-
-.starship-ai-card__status {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 8px 12px;
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: rgba(158, 222, 238, 0.76);
-  text-transform: uppercase;
+  background: #000;
 }
 
-.radar-shell {
+.ai-core-console {
+  /* Tone steps */
+  --tone-1: #0b1a2e;
+
+  /* Accent */
+  --accent-execution: #06b6d4;
+  --accent-memory: #8b5cf6;
+
+  /* 文字 */
+  --ink-primary: #e2e8f0;
+
+  /* 圆角 / 时长 */
+  --radius-md: 12px;
+  --motion-micro: 150ms;
+
+  /* 容器：收紧到页面 50% 宽高，由 panel-content--hero 居中 */
   position: relative;
-  z-index: 1;
-  padding: 10px 10px 12px;
-  clip-path: polygon(
-    0 10px,
-    10px 0,
-    calc(100% - 14px) 0,
-    100% 14px,
-    100% 100%,
-    0 100%
-  );
-  border: 1px solid rgba(103, 194, 248, 0.2);
-  background:
-    linear-gradient(180deg, rgba(2, 18, 29, 0.82), rgba(2, 10, 18, 0.96)),
-    radial-gradient(circle at center, rgba(64, 178, 255, 0.08), transparent 58%);
-  box-shadow:
-    inset 0 0 0 1px rgba(145, 220, 255, 0.04),
-    inset 0 18px 28px rgba(89, 195, 255, 0.04),
-    0 0 24px rgba(55, 145, 255, 0.06);
-}
-
-.radar-shell::before,
-.radar-shell::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.radar-shell::before {
-  background:
-    linear-gradient(transparent 94%, rgba(114, 202, 248, 0.05) 100%),
-    linear-gradient(90deg, transparent 94%, rgba(114, 202, 248, 0.04) 100%);
-  background-size:
-    100% 20px,
-    20px 100%;
-  opacity: 0.18;
-}
-
-.radar-shell::after {
-  inset: auto 10px 12px;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(122, 247, 208, 0.42),
-    transparent
-  );
-  box-shadow: 0 0 14px rgba(122, 247, 208, 0.2);
-}
-
-.radar-shell__hud,
-.radar-shell__footer {
   display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  box-sizing: border-box;
+  isolation: isolate;
+  color: var(--ink-primary);
+  background: #000;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Inter",
+    sans-serif;
+}
+
+.ai-console-glitch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+ * CONSOLE CHROME — 顶栏 / 底栏装饰组件
+ * （PointLoading 状态球 / SignalGlitchCard 故障牌 / TextScramble 台词）
+ * ══════════════════════════════════════════════════════════════════ */
+.ai-console-topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(132, 201, 236, 0.78);
+  margin-bottom: 12px;
 }
 
-.radar-shell__hud span,
-.radar-shell__footer span {
-  white-space: nowrap;
+/* 底部 Matrix 台词乱码打字机 */
+.ai-console-ticker {
+  position: absolute;
+  bottom: 0;
+  flex-shrink: 0;
+  height: 56px;
+  overflow: hidden;
+
+  .text-scramble {
+    min-height: 0;
+    padding: 4px 16px;
+    background: transparent;
+  }
+
+  .text-scramble__text {
+    font-size: 14px;
+    letter-spacing: 0.06em;
+  }
 }
 
-.radar-shell__footer {
-  color: rgba(147, 219, 241, 0.7);
-}
-
-.radar-shell__footer span:nth-child(2) {
+/* ══════════════════════════════════════════════════════════════════
+ * FLOW — 点阵画布 + 四方块 + 流线叠加层
+ * ══════════════════════════════════════════════════════════════════ */
+.ai-flow {
+  position: relative;
   flex: 1;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.radar-wrap {
-  position: relative;
-  z-index: 1;
+  min-height: 0;
   display: grid;
-  place-items: center;
-  margin: 10px 0 12px;
-  padding: 12px;
-  clip-path: polygon(
-    0 10px,
-    10px 0,
-    100% 0,
-    100% calc(100% - 12px),
-    calc(100% - 12px) 100%,
-    0 100%
-  );
-  border: 1px solid rgba(101, 186, 240, 0.14);
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(24, 149, 255, 0.08),
-      transparent 58%
-    ),
-    linear-gradient(180deg, rgba(2, 12, 20, 0.96), rgba(2, 8, 14, 0.88));
-}
-
-.radar-wrap::before,
-.radar-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  pointer-events: none;
-  border-radius: 50%;
-}
-
-.radar-wrap::before {
-  background:
-    radial-gradient(circle, rgba(122, 247, 208, 0.08) 0 1px, transparent 1px),
-    radial-gradient(
-      circle at center,
-      rgba(122, 247, 208, 0.05),
-      transparent 68%
-    );
-  background-size:
-    18px 18px,
-    100% 100%;
-  opacity: 0.28;
-  animation: radarBackdropPulse var(--hero-motion-instrument) ease-in-out infinite;
-}
-
-.radar-wrap::after {
-  border: 1px solid rgba(114, 202, 248, 0.12);
-  box-shadow: inset 0 0 22px rgba(105, 183, 255, 0.05);
-}
-
-.radar-svg {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 214px;
-  aspect-ratio: 1;
-}
-
-.radar-plate {
-  fill: url("#radarPlateGlow");
-  stroke: rgba(122, 247, 208, 0.18);
-  stroke-width: 1;
-  filter:
-    drop-shadow(0 0 18px rgba(105, 183, 255, 0.08))
-    drop-shadow(0 0 26px rgba(122, 247, 208, 0.08));
-}
-
-.radar-grid circle,
-.radar-grid line {
-  fill: none;
-  stroke: rgba(121, 207, 255, 0.2);
-  stroke-width: 1;
-  animation: radarGridBreath var(--hero-motion-instrument) ease-in-out infinite;
-}
-
-.radar-grid--rings circle {
-  stroke-dasharray: 1 5;
-}
-
-.radar-grid--bearings line:not(.radar-grid__tick) {
-  stroke: rgba(122, 247, 208, 0.14);
-  stroke-dasharray: 4 8;
-}
-
-.radar-range-band {
-  stroke: rgba(122, 247, 208, 0.34);
-  stroke-width: 1.35;
-  stroke-dasharray: 18 260;
-  stroke-linecap: round;
-  transform-origin: 110px 110px;
-  animation: radarRangeOrbit var(--hero-motion-slow) linear infinite;
-}
-
-.radar-grid__tick {
-  stroke: rgba(132, 214, 252, 0.34);
-  stroke-width: 0.92;
-}
-
-.radar-pulse-ring {
-  fill: none;
-  stroke: rgba(122, 247, 208, 0.42);
-  stroke-width: 1.2;
-  stroke-dasharray: 3 8;
-  transform-box: fill-box;
-  transform-origin: center;
-  filter: drop-shadow(0 0 8px rgba(122, 247, 208, 0.24));
-  animation: radarPulseRing var(--hero-motion-pulse) ease-out infinite;
-}
-
-.radar-target-vector {
-  stroke: var(--target-color);
-  stroke-width: 0.72;
-  stroke-dasharray: 3 7;
-  opacity: 0.28;
-  filter: drop-shadow(
-    0 0 6px color-mix(in srgb, var(--target-color) 28%, transparent)
-  );
-}
-
-.radar-labels text {
-  fill: rgba(137, 210, 240, 0.62);
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 7.8px;
-  letter-spacing: 0.16em;
-}
-
-.radar-sweep {
-  transform-origin: 110px 110px;
-  animation: radarSpinContinuous var(--hero-motion-instrument) linear infinite;
-  will-change: transform;
-}
-
-.radar-sweep__trail {
-  opacity: 0.86;
-}
-
-.radar-sweep__lead {
-  opacity: 0.98;
-}
-
-.radar-sweep__line {
-  fill: none;
-  stroke: rgba(122, 247, 208, 0.72);
-  stroke-width: 1.7;
-  filter: drop-shadow(0 0 10px rgba(122, 247, 208, 0.52));
-  animation: radarLinePulse var(--hero-motion-pulse) ease-in-out infinite;
-}
-
-.radar-core-halo {
-  fill: rgba(122, 247, 208, 0.22);
-  stroke: none;
-  filter: blur(2px);
-}
-
-.radar-core-halo--outer {
-  fill: none;
-  stroke: rgba(122, 247, 208, 0.28);
-  stroke-width: 1;
-  filter: drop-shadow(0 0 14px rgba(122, 247, 208, 0.28));
-  animation: radarCorePulse var(--hero-motion-pulse) ease-in-out infinite;
-}
-
-.radar-core {
-  fill: rgba(232, 253, 255, 0.96);
-  stroke: none;
-  filter: drop-shadow(0 0 10px rgba(122, 247, 208, 0.72));
-}
-
-.radar-target-unit {
-  cursor: default;
-}
-
-.radar-target-hit {
-  fill: transparent;
-  stroke: none;
-}
-
-.radar-target-echo {
-  fill: color-mix(in srgb, var(--target-color) 14%, transparent);
-  stroke: color-mix(in srgb, var(--target-color) 48%, rgba(255, 255, 255, 0));
-  stroke-width: 1.2;
-  filter: drop-shadow(
-    0 0 10px color-mix(in srgb, var(--target-color) 28%, transparent)
-  );
-  animation: radarEchoPulse var(--hero-motion-pulse) ease-in-out infinite;
-  animation-delay: var(--target-delay);
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.radar-target-lock {
-  fill: none;
-  stroke: var(--target-color);
-  stroke-width: 1.15;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(
-    0 0 8px color-mix(in srgb, var(--target-color) 46%, transparent)
-  );
-}
-
-.radar-target-dot {
-  fill: var(--target-color);
-  stroke: none;
-  filter: drop-shadow(0 0 10px var(--target-color));
-  animation: radarTargetPing var(--hero-motion-pulse) ease-in-out infinite;
-  animation-delay: var(--target-delay);
-}
-
-.radar-target-unit--hovered .radar-target-echo,
-.radar-target-unit--active .radar-target-echo {
-  opacity: 1;
-  animation-duration: calc(var(--hero-motion-pulse) * 0.45);
-}
-
-.radar-target-unit--hovered .radar-target-lock,
-.radar-target-unit--active .radar-target-lock {
-  stroke-width: 1.4;
-}
-
-.radar-target-unit--hovered .radar-target-dot,
-.radar-target-unit--active .radar-target-dot {
-  filter: drop-shadow(0 0 14px var(--target-color));
-}
-
-.radar-legend {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 8px;
-}
-
-.radar-legend__item {
-  appearance: none;
-  width: 100%;
-  border: 1px solid rgba(96, 181, 239, 0.12);
-  background: rgba(5, 14, 24, 0.64);
-  padding: 8px 10px;
-  text-align: left;
-  display: grid;
-  grid-template-columns: 10px 1fr auto;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr 1fr;
   align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  color: rgba(202, 228, 241, 0.84);
-  clip-path: polygon(
-    0 8px,
-    8px 0,
-    100% 0,
-    100% calc(100% - 8px),
-    calc(100% - 8px) 100%,
-    0 100%
-  );
-  transition:
-    transform var(--hero-motion-micro) ease,
-    border-color var(--hero-motion-micro) ease,
-    box-shadow var(--hero-motion-micro) ease;
-  cursor: pointer;
-}
-
-.radar-legend__item:hover,
-.radar-legend__item--active {
-  transform: translateX(2px);
-  border-color: rgba(122, 247, 208, 0.3);
-  box-shadow: 0 0 18px rgba(122, 247, 208, 0.08);
-}
-
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  box-shadow: 0 0 14px rgba(122, 247, 208, 0.34);
-}
-
-.ship-card {
-  min-height: 620px;
+  justify-items: center;
   padding: 20px;
-  border-color: rgba(122, 247, 208, 0.22);
-  background:
-    linear-gradient(180deg, rgba(7, 18, 32, 0.94), rgba(2, 8, 15, 0.84)),
-    radial-gradient(ellipse at 50% 18%, rgba(105, 183, 255, 0.14), transparent 50%);
-  box-shadow:
-    inset 0 0 0 1px rgba(183, 231, 255, 0.06),
-    inset 0 -34px 62px rgba(0, 0, 0, 0.26),
-    0 22px 58px rgba(0, 0, 0, 0.34),
-    0 0 34px rgba(122, 247, 208, 0.06);
-}
-
-.ship-card::before {
-  inset: 8px 10px auto;
-  height: 18px;
-  background:
-    linear-gradient(90deg, rgba(122, 247, 208, 0), rgba(122, 247, 208, 0.26), rgba(105, 183, 255, 0.2), rgba(122, 247, 208, 0)),
-    repeating-linear-gradient(90deg, transparent 0 24px, rgba(183, 231, 255, 0.14) 24px 25px);
-  clip-path: polygon(0 0, 100% 0, calc(100% - 20px) 100%, 20px 100%);
-  opacity: 0.8;
-}
-
-.ship-card::after {
-  left: 34px;
-  right: 34px;
-  top: auto;
-  bottom: 9px;
-  width: auto;
-  height: 16px;
-  background:
-    linear-gradient(90deg, transparent, rgba(105, 183, 255, 0.18), rgba(122, 247, 208, 0.2), transparent),
-    linear-gradient(180deg, rgba(7, 18, 32, 0.12), rgba(7, 18, 32, 0.72));
-  clip-path: polygon(0 100%, 4% 0, 96% 0, 100% 100%);
-  opacity: 0.9;
-}
-
-.ship-stage {
-  position: relative;
-  z-index: 1;
-  min-height: 530px;
-  overflow: hidden;
-  border: 1px solid rgba(122, 247, 208, 0.16);
-  clip-path: polygon(
-    0 30px,
-    30px 0,
-    calc(100% - 30px) 0,
-    100% 30px,
-    100% calc(100% - 36px),
-    calc(100% - 44px) 100%,
-    44px 100%,
-    0 calc(100% - 36px)
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: var(--radius-md);
+  /* 点阵画布，呼应蓝图参考图 */
+  background-image: radial-gradient(
+    rgba(148, 163, 184, 0.14) 1px,
+    transparent 1.4px
   );
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(122, 247, 208, 0.1),
-      transparent 24%
-    ),
-    radial-gradient(
-      ellipse at 50% 56%,
-      rgba(25, 112, 255, 0.18),
-      transparent 42%
-    ),
-    linear-gradient(180deg, rgba(3, 11, 22, 0.84), rgba(2, 7, 13, 0.98));
-  box-shadow:
-    inset 0 0 0 1px rgba(183, 231, 255, 0.04),
-    inset 0 28px 44px rgba(105, 183, 255, 0.05),
-    inset 0 -34px 58px rgba(0, 0, 0, 0.28);
+  background-size: 24px 24px;
 }
 
-.ship-stage::before,
-.ship-stage::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  pointer-events: none;
+/* ── 节点网格定位：上排三块，下排记忆居中 ── */
+.ai-node-box[data-node="perception"] {
+  grid-area: 1 / 1;
+}
+.ai-node-box[data-node="planning"] {
+  grid-area: 1 / 2;
+}
+.ai-node-box[data-node="execution"] {
+  grid-area: 1 / 3;
+}
+.ai-node-box[data-node="memory"] {
+  grid-area: 2 / 2;
 }
 
-.ship-stage::before {
-  z-index: 2;
-  top: 50%;
-  width: min(74%, 680px);
-  aspect-ratio: 1.9;
-  border: 1px solid rgba(122, 247, 208, 0.2);
-  border-radius: 50%;
-  box-shadow:
-    0 0 26px rgba(122, 247, 208, 0.08),
-    inset 0 0 28px rgba(105, 183, 255, 0.08);
-  transform: translate(-50%, -42%) perspective(900px) rotateX(62deg);
+/* ── 节点方块 ── */
+.ai-node-box {
+  width: clamp(64px, 8.5vw, 112px);
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tone-1);
+  border: 1.5px solid rgba(148, 163, 184, 0.4);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--ink-primary);
+  user-select: none;
+  transition:
+    border-color var(--motion-micro) ease,
+    box-shadow var(--motion-micro) ease;
 }
 
-.ship-stage::after {
-  z-index: 2;
-  bottom: 12%;
-  width: min(66%, 610px);
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(105, 183, 255, 0.34),
-    rgba(122, 247, 208, 0.42),
-    transparent
-  );
-  box-shadow:
-    0 0 16px rgba(105, 183, 255, 0.18),
-    0 0 34px rgba(122, 247, 208, 0.12);
-  transform: translateX(-50%);
+/* 参考图里记忆方块圆角明显更大 */
+.ai-node-box[data-node="memory"] {
+  border-radius: 20px;
 }
 
-.ship-stage__floor,
-.ship-stage__glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+/* ── 状态变体 ── */
+.ai-node-box--ghost {
+  opacity: 0.45;
 }
 
-.ship-stage__floor {
-  transform: perspective(900px) rotateX(72deg)
-    translate3d(
-      calc(var(--parallax-x) * 14px),
-      calc(var(--parallax-y) * 12px),
-      0
-    );
-  transform-origin: center 72%;
-  background:
-    linear-gradient(transparent 95%, rgba(104, 182, 255, 0.12) 100%),
-    linear-gradient(90deg, transparent 95%, rgba(104, 182, 255, 0.12) 100%);
-  background-size:
-    100% 28px,
-    28px 100%;
-  opacity: 0.28;
+.ai-node-box--active {
+  border-color: var(--accent-execution);
+  color: var(--accent-execution);
+  animation: nodePulse 2.8s ease-in-out infinite;
 }
 
-.ship-stage__glow {
-  inset: 12% 8% 16%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(105, 183, 255, 0.14),
-    transparent 54%
-  );
-  filter: blur(18px);
-  transform: translate3d(
-    calc(var(--parallax-x) * -20px),
-    calc(var(--parallax-y) * -16px),
-    0
-  );
+.ai-node-box--live {
+  border-color: var(--accent-memory);
+  color: var(--accent-memory);
+  box-shadow: 0 0 18px rgba(139, 92, 246, 0.16);
 }
 
-.ship-stage__rotation {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: auto;
+@keyframes nodePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.16);
+  }
 }
 
-.ship-stage .rotation3d-page--projection {
-  display: block;
-}
-
-.ship-stage .rotation3d-page--projection .rotation3d-stage {
-  transform: translate(-50%, -50%) scale(0.9);
-}
-
-.ship-scene {
+/* ── 动态数据流线（SVG 叠加层，坐标由 TS 动态计算） ── */
+.ai-flow__lines {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
+  overflow: visible;
   pointer-events: none;
-  transform: translate3d(
-      calc(var(--parallax-x) * 18px),
-      calc(var(--parallax-y) * 12px),
-      0
-    )
-    scale(1.015);
+  z-index: 2;
 }
 
-.ship-grid path {
+.flow-line {
   fill: none;
-  stroke: rgba(116, 190, 241, 0.06);
-  stroke-width: 1;
+  stroke: rgba(148, 163, 184, 0.55);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
 }
 
-.ship-projection__glow,
-.ship-projection__asset {
-  transform-origin: 500px 350px;
+.flow-arrow {
+  fill: rgba(226, 232, 240, 0.85);
 }
 
-.ship-projection__glow {
-  opacity: 0.22;
-  filter: brightness(1.08) saturate(0.82)
-    drop-shadow(0 0 22px rgba(105, 183, 255, 0.18))
-    drop-shadow(0 0 46px rgba(122, 247, 208, 0.1));
+.flow-pulse {
+  fill: #7dd3fc;
+  filter: drop-shadow(0 0 4px rgba(125, 211, 252, 0.9));
 }
 
-.ship-projection__asset {
-  opacity: 0.42;
-  filter: saturate(0.84) contrast(1.06)
-    drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3))
-    drop-shadow(0 0 14px rgba(105, 183, 255, 0.1));
+/* 虚线沿路径方向流动 */
+.ai-core-console:not(.is-low-perf) .flow-line {
+  animation: flowDash 1.1s linear infinite;
 }
 
-.ship-core-dot {
-  fill: rgba(195, 247, 255, 0.94);
-  stroke: none !important;
-  filter: drop-shadow(0 0 22px rgba(122, 247, 208, 0.75));
-}
-
-.connector-line {
-  fill: none;
-  stroke-width: 1.9;
-  stroke-dasharray: 7 11;
-  animation: linkDrift var(--hero-motion-instrument) linear infinite;
-  filter: drop-shadow(0 0 10px rgba(105, 183, 255, 0.16));
-}
-
-.connector-line--online {
-  stroke: rgba(105, 183, 255, 0.86);
-}
-
-.connector-line--warning {
-  stroke: rgba(255, 98, 98, 0.86);
-  animation-duration: calc(var(--hero-motion-instrument) * 0.62);
-}
-
-.connector-line--standby {
-  stroke: rgba(122, 247, 208, 0.88);
-  animation-duration: var(--hero-motion-slow);
-}
-
-.flow-particle {
-  fill: var(--flow-color);
-  filter: drop-shadow(0 0 12px var(--flow-color));
-}
-
-.module-pod {
-  position: absolute;
-  z-index: 3;
-  transform: translate(-50%, -50%);
-  width: 160px;
-  min-height: 80px;
-  padding: 7px 12px 7px 24px;
-  color: #eefaff;
-  border: 1px solid
-    color-mix(in srgb, var(--pod-color) 42%, rgba(102, 164, 219, 0.2));
-  background:
-    linear-gradient(180deg, rgba(6, 15, 29, 0.95), rgba(3, 8, 16, 0.72)),
-    radial-gradient(
-      circle at top right,
-      color-mix(in srgb, var(--pod-color) 16%, transparent),
-      transparent 55%
-    );
-  clip-path: polygon(
-    0 14px,
-    14px 0,
-    calc(100% - 18px) 0,
-    100% 18px,
-    100% 100%,
-    0 100%
-  );
-  box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.28),
-    0 0 22px color-mix(in srgb, var(--pod-color) 20%, transparent),
-    inset 0 1px 0 rgba(188, 233, 255, 0.06);
-  transition:
-    transform var(--hero-motion-micro) ease,
-    border-color var(--hero-motion-micro) ease,
-    box-shadow var(--hero-motion-micro) ease;
-  cursor: pointer;
-}
-
-.module-pod:hover,
-.module-pod--active,
-.module-pod--tracking {
-  transform: translate(-50%, -52%);
-  box-shadow:
-    0 22px 48px rgba(0, 0, 0, 0.3),
-    0 0 28px color-mix(in srgb, var(--pod-color) 28%, transparent),
-    inset 0 1px 0 rgba(188, 233, 255, 0.1);
-}
-
-.module-pod--tracking {
-  border-color: color-mix(
-    in srgb,
-    var(--pod-color) 62%,
-    rgba(150, 218, 255, 0.22)
-  );
-}
-
-.module-pod__strip {
-  position: absolute;
-  top: 14px;
-  left: 10px;
-  bottom: 14px;
-  width: 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.module-pod__cell {
-  display: block;
-  width: 100%;
-  height: 10px;
-  background: var(--pod-color);
-  box-shadow: 0 0 8px var(--pod-color);
-  transform-origin: bottom;
-  animation: stripPulse 1.2s ease-in-out infinite alternate;
-  transform: scaleY(var(--cell-scale));
-}
-
-.module-pod__content {
-  position: relative;
-  z-index: 1;
-}
-
-.module-pod__meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  color: rgba(138, 201, 238, 0.72);
-  font-size: 9px;
-}
-
-.module-pod__meta span {
-  font-size: 11px;
-  color: var(--pod-color);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--pod-color) 50%, transparent);
-}
-
-.module-pod strong {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 15px;
-  text-shadow: 0 0 18px rgba(105, 183, 255, 0.18);
-}
-
-.module-pod p {
-  margin: 0;
-  /* min-height: 34px; */
-  color: rgba(196, 227, 243, 0.76);
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.module-pod__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-top: 10px;
-}
-
-.module-pod__footer em {
-  font-style: normal;
-  color: rgba(137, 201, 238, 0.74);
-  font-size: 9px;
-}
-
-.module-pod__footer span {
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 12px;
-  color: #f0fbff;
-}
-
-.ship-focus {
-  position: absolute;
-  left: 50%;
-  bottom: 26px;
-  transform: translateX(-50%);
-  width: min(300px, calc(100% - 36px));
-  padding: 18px 20px;
-  text-align: center;
-  clip-path: polygon(
-    0 12px,
-    12px 0,
-    calc(100% - 12px) 0,
-    100% 12px,
-    100% 100%,
-    0 100%
-  );
-  border: 1px solid rgba(100, 184, 242, 0.2);
-  background: rgba(4, 11, 21, 0.76);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 0 28px rgba(105, 183, 255, 0.12);
-}
-
-.ship-focus__label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 10px;
-  color: rgba(137, 201, 238, 0.72);
-}
-
-.ship-focus strong {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 22px;
-  text-shadow: 0 0 20px rgba(105, 183, 255, 0.16);
-}
-
-.ship-focus p,
-.ship-focus small {
-  display: block;
-  margin: 0;
-  line-height: 1.55;
-}
-
-.ship-focus p {
-  color: rgba(196, 227, 243, 0.82);
-}
-
-.ship-focus small {
-  margin-top: 6px;
-  color: rgba(154, 205, 234, 0.64);
-}
-
-.detail-card__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-end;
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  clip-path: polygon(
-    0 10px,
-    10px 0,
-    100% 0,
-    100% calc(100% - 14px),
-    calc(100% - 14px) 100%,
-    0 100%
-  );
-  border: 1px solid rgba(101, 183, 241, 0.18);
-  background: rgba(5, 13, 24, 0.76);
-}
-
-.detail-card__header[data-status="online"] {
-  border-color: rgba(105, 183, 255, 0.3);
-}
-
-.detail-card__header[data-status="warning"] {
-  border-color: rgba(255, 98, 98, 0.3);
-}
-
-.detail-card__header[data-status="standby"] {
-  border-color: rgba(122, 247, 208, 0.3);
-}
-
-.detail-card__header small {
-  display: block;
-  margin-bottom: 4px;
-  color: rgba(132, 196, 233, 0.72);
-  font-size: 9px;
-}
-
-.detail-card__header h2 {
-  margin: 0;
-  font-size: 26px;
-}
-
-.detail-card__metric {
-  text-align: right;
-}
-
-.detail-card__metric span {
-  display: block;
-  margin-bottom: 4px;
-  color: rgba(141, 204, 239, 0.72);
-  font-size: 10px;
-  font-family: "JetBrains Mono", "Consolas", monospace;
-}
-
-.detail-card__metric strong {
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 16px;
-}
-
-.detail-card__description {
-  margin: 0 0 18px;
-  color: rgba(193, 223, 240, 0.8);
-  line-height: 1.6;
-}
-
-.detail-metrics {
-  display: grid;
-  gap: 14px;
-}
-
-.detail-metric__top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 8px;
-  color: rgba(208, 238, 255, 0.86);
-}
-
-.detail-metric__top span {
-  font-size: 12px;
-}
-
-.detail-metric__top strong {
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 13px;
-}
-
-.detail-metric__fill {
-  background: linear-gradient(
-    90deg,
-    var(--metric-color),
-    color-mix(in srgb, var(--metric-color) 20%, #ffffff)
-  );
-  color: var(--metric-color);
-}
-
-.feed-card {
-  flex: 1;
-  min-height: 280px;
-}
-
-.feed-list {
-  display: grid;
-  gap: 10px;
-  max-height: 250px;
-  overflow-y: hidden;
-}
-
-.feed-line {
-  display: grid;
-  grid-template-columns: 72px 16px minmax(0, 1fr);
-  gap: 10px;
-  align-items: start;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(84, 154, 212, 0.08);
-  color: rgba(196, 227, 243, 0.8);
-}
-
-.feed-line:last-child {
-  border-bottom: 0;
-}
-
-.feed-line__time,
-.feed-line__prompt {
-  font-size: 10px;
-}
-
-.feed-line__time {
-  color: rgba(133, 197, 232, 0.68);
-}
-
-.feed-line__prompt {
-  color: rgba(105, 183, 255, 0.84);
-}
-
-.feed-line[data-status="warning"] .feed-line__prompt {
-  color: rgba(255, 98, 98, 0.9);
-}
-
-.feed-line[data-status="standby"] .feed-line__prompt {
-  color: rgba(122, 247, 208, 0.92);
-}
-
-.feed-line__text {
-  font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 11px;
-  line-height: 1.6;
-}
-
-.quick-dock {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 12px;
-  clip-path: polygon(
-    0 12px,
-    12px 0,
-    calc(100% - 12px) 0,
-    100% 12px,
-    100% 100%,
-    0 100%
-  );
-}
-
-.quick-dock__btn {
-  border: 1px solid rgba(95, 176, 236, 0.2);
-  background: rgba(5, 13, 24, 0.72);
-  color: #def7ff;
-  padding: 12px 16px;
-  clip-path: polygon(
-    0 8px,
-    8px 0,
-    100% 0,
-    100% calc(100% - 8px),
-    calc(100% - 8px) 100%,
-    0 100%
-  );
-  transition:
-    transform var(--hero-motion-micro) ease,
-    border-color var(--hero-motion-micro) ease,
-    box-shadow var(--hero-motion-micro) ease;
-}
-
-.quick-dock__btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(122, 247, 208, 0.4);
-  box-shadow: 0 0 20px rgba(122, 247, 208, 0.1);
-}
-
-.quick-dock__btn--primary {
-  background: linear-gradient(
-    135deg,
-    rgba(61, 129, 255, 0.72),
-    rgba(56, 204, 214, 0.28)
-  );
-  border-color: rgba(118, 220, 255, 0.38);
-}
-
-@keyframes radarSpinContinuous {
-  from {
-    transform: rotate(0deg);
-  }
-
+@keyframes flowDash {
   to {
-    transform: rotate(360deg);
+    stroke-dashoffset: -12;
   }
 }
 
-@keyframes bridgeSignalScan {
-  0%,
-  100% {
-    opacity: 0;
-    transform: translateY(-100%);
+/* ══════════════════════════════════════════════════════════════════
+ * RESPONSIVE
+ * ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 680px) {
+  .ai-flow {
+    padding: 16px;
+    background-size: 18px 18px;
   }
 
-  42%,
-  58% {
-    opacity: 1;
-  }
-
-  76% {
-    opacity: 0;
-    transform: translateY(100%);
+  .ai-node-box {
+    width: 64px;
+    font-size: 12px;
   }
 }
 
-@keyframes bridgeSignalMeter {
-  from {
-    opacity: 0.46;
-    transform: scaleY(0.56);
-  }
-
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-}
-
-@keyframes starshipAiHaloPulse {
-  0%,
-  100% {
-    opacity: 0.7;
-    transform: scale(0.98);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.03);
-  }
-}
-
-@keyframes starshipAiFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes starshipAiCore {
-  0%,
-  100% {
-    opacity: 0.76;
-    transform: scale(0.94);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.08);
-  }
-}
-
-@keyframes starshipAiThrust {
-  0%,
-  100% {
-    opacity: 0.42;
-    stroke-dashoffset: 0;
-  }
-
-  50% {
-    opacity: 0.94;
-    stroke-dashoffset: -18;
-  }
-}
-
-@keyframes starshipAiNode {
-  0%,
-  100% {
-    opacity: 0.42;
-    transform: scale(0.9);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.18);
-  }
-}
-
-@keyframes radarBackdropPulse {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-
-  50% {
-    opacity: 0.36;
-  }
-}
-
-@keyframes radarRangeOrbit {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes radarGridBreath {
-  0%,
-  100% {
-    stroke-opacity: 0.72;
-  }
-
-  50% {
-    stroke-opacity: 1;
-  }
-}
-
-@keyframes radarCorePulse {
-  0%,
-  100% {
-    opacity: 0.46;
-    transform: scale(0.9);
-  }
-
-  50% {
-    opacity: 0.86;
-    transform: scale(1.08);
-  }
-}
-
-@keyframes radarPulseRing {
-  0% {
-    opacity: 0;
-    stroke-width: 1.8;
-    transform: scale(0.74);
-  }
-
-  22% {
-    opacity: 0.76;
-  }
-
-  100% {
-    opacity: 0;
-    stroke-width: 0.65;
-    transform: scale(1.34);
-  }
-}
-
-@keyframes radarLinePulse {
-  0%,
-  100% {
-    opacity: 0.56;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes radarEchoPulse {
-  0%,
-  100% {
-    opacity: 0.54;
-    transform: scale(0.92);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.08);
-  }
-}
-
-@keyframes radarTargetPing {
-  0%,
-  100% {
-    opacity: 0.82;
-  }
-
-  42% {
-    opacity: 1;
-    filter: drop-shadow(0 0 16px var(--target-color));
-  }
-}
-
-@keyframes linkDrift {
-  from {
-    stroke-dashoffset: 0;
-  }
-
-  to {
-    stroke-dashoffset: -72;
-  }
-}
-
-@keyframes stripPulse {
-  0% {
-    transform: scaleY(calc(var(--cell-scale) * 0.72));
-    opacity: 0.4;
-  }
-
-  100% {
-    transform: scaleY(calc(var(--cell-scale) * 1.18));
-    opacity: 1;
-  }
-}
-
-@keyframes bridgeGuideShift {
-  from {
-    stroke-dashoffset: 0;
-  }
-
-  to {
-    stroke-dashoffset: -64;
-  }
-}
-
-@keyframes bridgeGuidePulse {
-  0% {
-    opacity: 0.18;
-    transform: scale(0.9);
-  }
-
-  55% {
-    opacity: 0.88;
-    transform: scale(1.2);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(1.7);
-  }
-}
-
-@media (max-width: 1360px) {
-  .bridge-layout {
-    grid-template-columns: 250px minmax(0, 1fr) 300px;
-  }
-
-  .module-pod {
-    width: 174px;
-  }
-}
-
-@media (max-width: 1180px) {
-  .bridge-header,
-  .bridge-header__title {
-    grid-template-columns: 1fr;
-    flex-direction: column;
-  }
-
-  .bridge-layout::after {
-    display: none;
-  }
-
-  .bridge-header__copy {
-    text-align: left;
-    width: 100%;
-  }
-
-  .bridge-header__subtitle {
-    margin-left: 0;
-  }
-
-  .hud-rail--right {
-    justify-content: flex-end;
-  }
-
-  .bridge-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .bridge-sidebar--left,
-  .bridge-sidebar--right {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 860px) {
-  .bridge-header__meta,
-  .bridge-sidebar--left,
-  .bridge-sidebar--right {
-    grid-template-columns: 1fr;
-    display: grid;
-  }
-
-  .ship-card {
-    min-height: 640px;
-  }
-
-  .ship-stage {
-    min-height: 540px;
-  }
-}
-
-@media (max-width: 720px) {
-  .bridge-console {
-    min-height: auto;
-    padding: 12px;
-  }
-
-  .bridge-header h1 {
-    font-size: 32px;
-  }
-
-  .bridge-signal-stack {
-    min-width: 0;
-    width: 100%;
-    font-size: 8px;
-  }
-
-  .bridge-signal-line {
-    gap: 8px;
-  }
-
-  .ship-card {
-    min-height: 580px;
-  }
-
-  .ship-stage {
-    min-height: 500px;
-  }
-
-  .ship-stage .rotation3d-page--projection .rotation3d-stage {
-    transform: translate(-50%, -50%) scale(0.78);
-  }
-
-  .quick-dock__btn {
-    width: calc(50% - 6px);
-  }
-}
-
-@media (max-width: 560px) {
-  .bridge-header__meta {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .quick-dock__btn {
-    width: 100%;
-  }
-
-  .ship-stage {
-    min-height: 450px;
-  }
-
-  .ship-stage .rotation3d-page--projection .rotation3d-stage {
-    transform: translate(-50%, -50%) scale(0.66);
-  }
-}
-
+/* ══════════════════════════════════════════════════════════════════
+ * REDUCED MOTION / LOW PERF
+ * ══════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
-  .bridge-guide,
-  .bridge-guide__pulse,
-  .bridge-signal-stack::before,
-  .bridge-signal-meter i,
-  .radar-wrap::before,
-  .radar-grid circle,
-  .radar-grid line,
-  .radar-range-band,
-  .radar-pulse-ring,
-  .radar-sweep,
-  .radar-sweep__line,
-  .radar-core-halo--outer,
-  .radar-target-echo,
-  .radar-target-dot,
-  .connector-line,
-  .module-pod__cell,
-  .starship-ai-emblem__halo,
-  .starship-ai-emblem__ship,
-  .starship-ai-emblem__core,
-  .starship-ai-emblem__thruster,
-  .starship-ai-emblem__nodes circle {
+  .flow-line {
+    animation: none !important;
+  }
+  .flow-pulse {
+    display: none !important;
+  }
+  .ai-node-box--active {
+    animation: none !important;
+  }
+  /* 故障牌属于纯装饰，减弱动态模式下停用闪烁 */
+  .ai-console-glitch .content .text::before,
+  .ai-console-glitch .content .text::after {
+    animation: none !important;
+  }
+}
+
+.ai-core-console.is-low-perf {
+  .flow-line {
     animation: none;
   }
-
-  .starship-ai-emblem__particles {
+  .flow-pulse {
     display: none;
   }
+  .ai-node-box--active {
+    animation: none;
+  }
+  .ai-console-glitch .content .text::before,
+  .ai-console-glitch .content .text::after {
+    animation: none;
+  }
+}
 
-  .radar-pulse-ring {
-    opacity: 0.28;
-    transform: none;
+.ai-core-console.is-medium-perf {
+  .ai-node-box--active {
+    animation: none;
   }
 }

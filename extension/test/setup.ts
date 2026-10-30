@@ -79,6 +79,24 @@ const storageMap: Record<string, Record<string, unknown>> = { local: {} };
       }),
       onChanged: { addListener: () => {}, removeListener: () => {} },
     },
+    // 顶层 storage.onChanged —— 跨上下文（background → content）缓存同步用
+    onChanged: { addListener: () => {}, removeListener: () => {} },
+  },
+  // chrome.alarms：AI 主动对话调度使用（SW 挂起时的持久化定时器）
+  // 这里只提供最小 API 形状，具体行为由各测试文件按需覆写
+  alarms: {
+    /** 记录 create 调用，方便断言排期参数 */
+    __created: [] as Array<{ name: string; delayInMinutes?: number }>,
+    create: vi.fn(async (name: string, info?: { delayInMinutes?: number }) => {
+      (globalThis as any).chrome.alarms.__created.push({
+        name,
+        delayInMinutes: info?.delayInMinutes,
+      });
+    }),
+    get: vi.fn(async () => undefined),
+    clear: vi.fn(async () => true),
+    clearAll: vi.fn(async () => true),
+    onAlarm: { addListener: () => {}, removeListener: () => {} },
   },
 };
 
@@ -106,6 +124,11 @@ afterEach(() => {
   }
   // 重置所有 fake timer
   vi.clearAllTimers();
+  // 清空 chrome.alarms 的调用记录，避免用例间串味
+  const alarms = (globalThis as any).chrome?.alarms;
+  if (alarms?.__created) {
+    alarms.__created.length = 0;
+  }
 });
 
 afterAll(() => {

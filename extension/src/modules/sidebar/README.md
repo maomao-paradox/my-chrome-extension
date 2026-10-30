@@ -14,6 +14,7 @@ sidebar/
 ├── HoverMenu.tsx                 # 侧边悬浮菜单 + Miku trigger
 ├── MikuChatWindow.tsx            # Miku 角色对话窗口（可拖拽）
 ├── index.ts                      # 应用入口（React root + Shadow DOM）
+├── proactive-chat.ts             # 定时生成主动开场白并提醒
 ├── components/
 │   ├── SimpleCarousel.tsx        # 简化版轮播（替代 Element Plus el-carousel）
 │   └── AIConversationPlaceholder.tsx  # AIConversation 占位（待迁移）
@@ -29,6 +30,7 @@ sidebar/
 - 工具入口使用 `public/imgs/miku.png`。
 - 鼠标靠近浏览器右侧边缘时，Miku 图片会从右侧滑出，同时展开侧边栏工具。
 - 点击图片会打开或收起 Miku 角色对话窗口。
+- 侧边栏启用期间会随机间隔 0–10 分钟生成一条 AI 主动开场白，保存到对话记忆后让 dock 滑出提醒 2 秒；模型不可用时使用本地问候模板。禁用侧边栏会停止后续触发。
 - 对话窗口原复用 `AIConversation` 流式对话组件，迁移期间以 `AIConversationPlaceholder` 占位，
   后续将 `floatingball/views/AIConversation.vue` 完整迁移到 React 后替换。
 - Miku 对话窗口左侧图片上方预留音乐播放器控制区，提供上一首、播放/暂停、下一首三个图标按钮；

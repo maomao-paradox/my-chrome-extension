@@ -101,6 +101,8 @@ export const createManifest = (pages: ManifestPageFlags) =>
       "cookies",
       "sidePanel",
       "webNavigation",
+      // AI 主动对话的持久化排期依赖 chrome.alarms（SW 挂起后仍能唤醒）
+      "alarms",
       // "automation"
     ],
     host_permissions: ["<all_urls>"],

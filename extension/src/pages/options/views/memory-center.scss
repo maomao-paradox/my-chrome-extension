@@ -1,0 +1,69 @@
+/**
+ * @file memory-center.scss
+ * @description MemoryManagerView 专用样式 —— 深色主题、默认无衬线字体、图谱容器
+ */
+
+.memory-center {
+  // 统一使用系统默认无衬线字体：去掉等宽字体带来的"发虚"观感
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  color: #e6f4ff;
+  // 抵消面板 GPU 合成层导致的文字发虚
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  &__right-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__count {
+    font-size: 12px;
+    color: #9fb0c7;
+    line-height: 1.6;
+  }
+
+  // 记忆条目元信息（创建时间 / 访问次数 / 操作按钮）
+  &__meta {
+    font-size: 12px;
+    line-height: 1.7;
+    color: #9fb0c7;
+  }
+
+  // 记忆正文
+  &__content {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #dbeafe;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  // 知识网络画布
+  &__graph {
+    width: 100%;
+    height: 560px;
+    border-radius: 12px;
+    background: radial-gradient(
+      circle at 50% 40%,
+      rgba(13, 31, 53, 0.92),
+      rgba(5, 13, 24, 0.96)
+    );
+    border: 1px solid rgba(105, 183, 255, 0.16);
+    overflow: hidden;
+  }
+
+  &__graph-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 13, 24, 0.72);
+    border-radius: 12px;
+  }
+}

@@ -1,14 +1,3 @@
-/* 页面基础背景，烘托故障科技感 */
-body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #000;
-}
-
 .content {
   height: 100%;
   width: 100%;
@@ -26,6 +15,7 @@ body {
     transform: scale(2);
     letter-spacing: 2px;
     padding: 30px;
+    user-select: none;
   }
 
   .text::before,

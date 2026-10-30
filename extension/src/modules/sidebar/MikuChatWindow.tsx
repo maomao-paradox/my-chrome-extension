@@ -31,8 +31,8 @@ import {
   PauseOutlined,
 } from "@ant-design/icons";
 import { Draggable } from "@/components/react-index";
-import AIConversationPlaceholder from "./components/AIConversationPlaceholder";
-import type { AIRole } from "./components/AIConversationPlaceholder";
+import AIConversation from "./components/AIConversation";
+import type { AIRole } from "./components/AIConversation";
 import "./styles/miku-chat-window.scss";
 
 /** MikuChatWindow Props */
@@ -61,10 +61,10 @@ const MIKU_SYSTEM_PROMPT = [
   "回答尽量自然，短句优先。需要步骤时用简洁列表。",
 ].join("\n");
 
-/** Miku 角色选项 */
+/** Miku 角色选项 —— 默认使用主人实际使用的记忆命名空间 */
 const MIKU_ROLES: AIRole[] = [
   {
-    value: "hatsune_miku_tavern",
+    value: "vivy_catgirl",
     label: "Hatsune Miku",
     avatar: "MK",
     systemPrompt: MIKU_SYSTEM_PROMPT,
@@ -217,21 +217,19 @@ const MikuChatWindow: React.FC<MikuChatWindowProps> = ({ onClose }) => {
               </button>
             </header>
 
-            {/* AIConversation 占位组件 */}
-            <AIConversationPlaceholder
+            {/* AIConversation —— 真实对话组件 */}
+            <AIConversation
               className="miku-conversation"
               title="Miku"
               welcomeTitle="今晚想聊点什么？"
               welcomeMessage="这里是 Miku 的小酒馆席位。告诉她你的想法、歌词灵感、代码烦恼或日常碎碎念。"
-              welcomeIcon="MK"
               userIcon="YOU"
               aiIcon="MK"
               typingMessage="Miku 正在组织语言..."
               inputPlaceholder="和 Miku 说点什么..."
               sendButtonText="发送"
               inputHint="Enter 发送，Shift + Enter 换行。"
-              defaultRole="hatsune_miku_tavern"
-              showToolbar={false}
+              defaultRole="vivy_catgirl"
               roleOptions={MIKU_ROLES}
             />
           </section>

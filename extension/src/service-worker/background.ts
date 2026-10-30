@@ -16,6 +16,7 @@ import { initMessageListener } from "./background/message-listener";
 import { createBackgroundMessageHandlers } from "./background/message-handlers";
 import { initRuntimeConnectionListener } from "./background/runtime-connections";
 import { initWebMcpBackground } from "./background/web-mcp";
+import { initProactiveChat } from "./background/proactive-chat";
 
 installGlobalLogger({ title: "MRIA BACKGROUND", enabled: false });
 void syncGlobalLoggerFromStorage();
@@ -31,6 +32,8 @@ initClearAiSessionListener();
 initMenuListener();
 initMessageListener(createBackgroundMessageHandlers(devToolsPortManager));
 initWebMcpBackground();
+// AI 主动发起对话：chrome.alarms 排期（SW 挂起/重启后自动恢复）
+initProactiveChat();
 
 chrome.commands.onCommand.addListener(async (command) => {
   if (command !== "open-content-feature-panel") {

@@ -35,7 +35,7 @@ body {
   margin: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  background: var(--gradient-secondary);
+  background: var(--bg-primary);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
@@ -70,10 +70,10 @@ a {
   min-height: 100vh;
 }
 
-body.options-page-body.options-performance-high,
-body.options-page-body.options-performance-high * {
-  cursor: none !important;
-}
+// body.options-page-body.options-performance-high,
+// body.options-page-body.options-performance-high * {
+//   cursor: none !important;
+// }
 
 body.options-page-body.options-performance-medium *,
 body.options-page-body.options-performance-medium *::before,

@@ -36,6 +36,12 @@ export default defineConfig({
       "test/content-feature-manager.spec.ts",
       "test/route-watcher.spec.ts",
       "test/logger.spec.ts",
+      "test/memory-service.spec.ts",
+      "test/memory-decay-rag.spec.ts",
+      "test/memory-graph.spec.ts",
+      "test/panel-coordinates.spec.ts",
+      "test/proactive-chat-background.spec.ts",
+      "test/proactive-mood.spec.ts",
     ],
     // 全局 setup：注入 maLogger / chrome API 等 chrome 扩展运行时
     setupFiles: ["./test/setup.ts"],
