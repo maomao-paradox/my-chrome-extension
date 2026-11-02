@@ -18,7 +18,7 @@ import React from "react";
 import { render, fireEvent, cleanup, act } from "@testing-library/react";
 import type { Tool } from "@/types";
 import { bus } from "@/event/bus";
-import HoverMenu from "@/apps/sidebar/HoverMenu";
+import HoverMenu from "@/modules/sidebar/HoverMenu";
 
 afterEach(() => {
   cleanup();

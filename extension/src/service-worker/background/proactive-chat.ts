@@ -26,6 +26,7 @@ import {
 import type { MemoryEntry, MemoryImportance } from "@/services/memory/types";
 import { loadAIConfig } from "../chrome-api/ai-config";
 import { completeChatFlow, uploadFile } from "../deepseek";
+import { stripToolCallMarkup } from "../deepseek/tool-call-markup";
 import {
     createDefaultMoodState,
     deriveMood,
@@ -34,6 +35,7 @@ import {
     extractUserText,
     getDateKey,
     getContinuousReplyProbability,
+    MOOD_STATE_KEY,
     normalizeMoodState,
     type ProactiveMoodState,
 } from "./proactive-mood";
@@ -105,9 +107,6 @@ const CLOSING_TEMPLATES = [
     "下班时间到啦，今天就到这里吧，晚安。",
     "收工啦，去好好休息，明天见。",
 ];
-
-/** 心情状态存储键（export 给 runtime-connections / proactive-chat 共用） */
-export const MOOD_STATE_KEY = "proactive_chat_mood_state";
 
 /** 星期标签 —— 让模型能区分工作日与周末 */
 const WEEKDAY_LABELS = [
@@ -760,8 +759,10 @@ async function runProactiveMessage(): Promise<void> {
         text = getFallbackMessage(period, closing);
     }
 
-    // 按码点裁剪，避免把 emoji 切坏
-    const finalText = Array.from(text).slice(0, MAX_MESSAGE_LENGTH).join("");
+    // 主动消息没有 tools，但会话上下文可能让模型模仿输出工具标记 —— 先剥掉再裁剪
+    const finalText = Array.from(stripToolCallMarkup(text))
+        .slice(0, MAX_MESSAGE_LENGTH)
+        .join("");
 
     try {
         await memoryService.addEntry({
@@ -808,9 +809,9 @@ async function runProactiveMessage(): Promise<void> {
             );
 
             try {
+                // 心情已经在 sharedSystemPrompt 里注入，这里不重复传
                 const followupPrompt = buildFollowupPrompt({
                     scenario: "proactive",
-                    moodPrompt,
                     lastMessage: finalText.slice(0, 60),
                     round: contRound,
                 });
@@ -896,6 +897,40 @@ async function scheduleNext(): Promise<void> {
     } catch (error) {
         maLogger.warn("[ProactiveChat] 排期失败:", error);
     }
+}
+
+/** MCP 工具允许设置的最大延迟（分钟）—— 2 小时，避免模型给出离谱数值 */
+export const MAX_MANUAL_DELAY_MINUTES = 120;
+
+/**
+ * 按指定分钟数排下一次主动消息 —— 供 MCP 工具 `set_next_proactive_interval` 调用。
+ *
+ * 与随机排期不同，这里完全尊重调用方给的间隔（只做上下界夹取），
+ * 用于「主人说 X 分钟后再找我」这类明确指令。
+ * 若设置时间落在非工作时段，alarm 触发后 runProactiveMessage 会自行跳过并重新排期。
+ *
+ * @returns 实际生效的分钟数（夹取后的值）
+ */
+export async function scheduleProactiveMessageIn(
+    minutes: number,
+): Promise<number> {
+    if (!chrome.alarms?.create) {
+        throw new Error("chrome.alarms 不可用，无法设置主动消息间隔");
+    }
+
+    const safeMinutes = Math.min(
+        MAX_MANUAL_DELAY_MINUTES,
+        Math.max(MIN_DELAY_MINUTES, minutes),
+    );
+
+    await chrome.alarms.create(PROACTIVE_ALARM_NAME, {
+        delayInMinutes: safeMinutes,
+    });
+
+    maLogger.info(
+        `[ProactiveChat] MCP 设置下次主动消息间隔: ${safeMinutes} 分钟`,
+    );
+    return safeMinutes;
 }
 
 /**

@@ -2,7 +2,6 @@ import { act, createElement, Fragment } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AnimatedSearch from "../src/components/special/AnimatedSearch";
-import AnimatedSearchOptimized from "../src/components/special/AnimatedSearchOptimized";
 import CarouselScene from "../src/components/special/CarouselScene";
 
 let container: HTMLDivElement;
@@ -58,26 +57,6 @@ describe("AnimatedSearch", () => {
     });
 
     expect(onSubmitQuestion).toHaveBeenCalledWith("hello world");
-  });
-});
-
-describe("AnimatedSearchOptimized", () => {
-  it("expands on focus and submits with Ctrl+Enter", () => {
-    const onSubmitQuestion = vi.fn();
-    act(() => root.render(createElement(AnimatedSearchOptimized, { onSubmitQuestion })));
-
-    const textarea = container.querySelector<HTMLTextAreaElement>("textarea")!;
-    act(() => textarea.dispatchEvent(new MouseEvent("click", { bubbles: true })));
-    expect(container.querySelector(".special-search")?.classList.contains("is-active")).toBe(true);
-
-    const setValue = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
-    act(() => {
-      setValue?.call(textarea, "hello from optimized search");
-      textarea.dispatchEvent(new Event("input", { bubbles: true }));
-      textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
-    });
-
-    expect(onSubmitQuestion).toHaveBeenCalledWith("hello from optimized search");
   });
 });
 

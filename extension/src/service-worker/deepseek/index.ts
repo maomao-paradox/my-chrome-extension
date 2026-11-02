@@ -19,6 +19,10 @@ import {
   buildOpenAICompatibleRequestBody,
   type OpenAICompatibleRequestOptions,
 } from "./openai-request";
+import { stripToolCallMarkup } from "./tool-call-markup";
+
+/** 供连续回复 / 主动消息等无 tools 链路复用：去掉模型模仿输出的工具标记 */
+export { stripToolCallMarkup };
 
 const OPENAI_COMPATIBLE_ENDPOINT = "/chat/completions";
 const ANTHROPIC_ENDPOINT = "/messages";

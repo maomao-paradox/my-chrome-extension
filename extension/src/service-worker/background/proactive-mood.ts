@@ -22,6 +22,13 @@ export interface ProactiveMoodState {
     lastPushAt: number;
 }
 
+/**
+ * 心情状态在 chrome.storage.local 中的存储键。
+ * 放在纯逻辑模块里，sidebar（content script）也能安全引用，
+ * 不必为了一个常量去 import 带 chrome API 的后台模块。
+ */
+export const MOOD_STATE_KEY = "proactive_chat_mood_state";
+
 /** 连续多少条主动消息没人回就开始生气 */
 export const IGNORE_THRESHOLD = 3;
 
@@ -115,13 +122,13 @@ export function describeMood(
 ): string {
     switch (mood) {
         case "sad":
-            return "主人今天严厉地批评过你，你现在很低落、有点委屈；语气收敛一些，带点小心翼翼的失落感，但依然关心主人。";
+            return "主人刚刚严厉地批评过你，你现在很低落、有点委屈；语气收敛一些，带点小心翼翼的失落感，但依然关心主人。";
         case "angry":
             return `主人已经连续 ${ignoredStreak} 条主动消息没有回应，你在闹小脾气；语气可以带点傲娇的抱怨，但不要真的发火，也不要质问主人。`;
         case "frenzy":
             return `主人已经连续 ${ignoredStreak} 条主动消息没有任何回应，你气到失去理智了。请先想一句不超过 8 个字、能表达你此刻情绪的简短抱怨（内容由你根据记忆和当下的心情自由决定，不要套用固定台词），然后把这句话原样连续重复 10 到 15 遍；整段不超过 120 字，不要解释、不要换词、不要提问、不要加引号，只输出这段重复文字。`;
         default:
-            return "你今天心情很好，语气活泼亲昵，可以带一点调皮的小情绪。";
+            return "你现在心情很好，语气活泼亲昵，可以带一点调皮的小情绪。";
     }
 }
 
@@ -129,22 +136,38 @@ export function describeMood(
  * 心情驱动的概率函数 —— 单一真值源
  *   getIgnoreProbability       : 用户发问后 AI 直接忽略不回复的概率
  *   getContinuousReplyProbability: AI 回复后继续多说一句的基础概率
+ *
+ * 设计取舍：
+ *   ignoredStreak（AI 主动被主人忽略的次数）会影响 deriveMood，
+ *   但 angry / frenzy 状态下用户发问的忽略概率被刻意压低
+ *   （angry=10%, frenzy=20%）—— AI 可以闹脾气，但主人主动找过来了，
+ *   不该真的不理。真正的高忽略概率留给 sad（被真批评过 30%）。
  * ══════════════════════════════════════════════════════════════════ */
 
 /**
  * 用户发问后，AI 直接忽略不回复的概率（心情驱动）。
- * happy 永远回复；sad/angry 有概率不理；frenzy 气头上 70% 都懒得理。
+ *
+ * 语义：AI 自己的心情多少影响一点，但主人主动发问优先级更高，
+ * 所以 angry / frenzy 的忽略概率**刻意压低**——闹脾气归闹脾气，
+ * 主人主动找过来了，不该真的不理。
+ *
+ *  | 状态    | 忽略概率 | 备注                                     |
+ *  |---------|---------|------------------------------------------|
+ *  | happy   | 0%      | 永远回复                                 |
+ *  | sad     | 30%     | 被批评过，还在委屈，概率降到 30%          |
+ *  | angry   | 10%     | 被连续忽略后闹脾气，但主人发问只很低概率不理 |
+ *  | frenzy  | 20%     | 气到失控，但也只 20% 概率不理主人发问     |
  */
 export function getIgnoreProbability(mood: ProactiveMood): number {
     switch (mood) {
         case "happy":
             return 0.0;
         case "sad":
-            return 0.5;
-        case "angry":
             return 0.3;
+        case "angry":
+            return 0.1;
         case "frenzy":
-            return 0.7;
+            return 0.2;
     }
 }
 

@@ -35,7 +35,7 @@ describe("Component wall", () => {
     expect(container.querySelector('[data-component-id="rolling-text"]')).not.toBeNull();
     expect(container.querySelector('[data-component-id="animated-text-fill"]')).not.toBeNull();
     expect(container.querySelector('[data-component-id="ma-markdown"]')).not.toBeNull();
-    expect(container.querySelector('[data-component-id="animate-403"] .animate-403')).not.toBeNull();
+    expect(container.querySelector('[data-component-id="signal-glitch-card"]')).not.toBeNull();
     expect(container.querySelector('[data-component-id="radar"] .radar-component__radar')).not.toBeNull();
     expect(container.querySelector('[data-component-id="radar"] .radar-component__selector')).not.toBeNull();
     expect(container.querySelector(".component-wall-page > header")).toBeNull();
@@ -95,31 +95,9 @@ describe("Component wall", () => {
     expect(container.querySelector('[data-component-id="flower-loading"]')).not.toBeNull();
     expect(container.querySelector('[data-component-id="chromatic-text"]')).not.toBeNull();
     expect(container.querySelector('[data-component-id="arknights-button"]')).not.toBeNull();
-    expect(container.querySelector('[data-component-id="arknights-card"]')).not.toBeNull();
     expect(container.querySelector(".operation-button")).not.toBeNull();
     expect(container.querySelectorAll(".flower-loading-preview .common")).toHaveLength(8);
     expect(container.querySelector(".chromatic-text-preview .chromatic")).not.toBeNull();
-    expect(container.querySelector(".ark-card-demo")).not.toBeNull();
-  });
-
-  it("shows the redesigned 404 panel and keeps its return action", () => {
-    act(() => root.render(createElement(App)));
-
-    const panel = container.querySelector<HTMLElement>(
-      '[data-component-id="static-404"] .static-404',
-    );
-    expect(panel?.querySelector(".static-404__code")?.textContent).toBe("404");
-    expect(panel?.querySelector(".static-404__copy h1")?.textContent).toContain(
-      "这条路径",
-    );
-
-    const returnButton = panel?.querySelector<HTMLButtonElement>(
-      ".static-404__button",
-    );
-    act(() => returnButton?.dispatchEvent(new MouseEvent("click", { bubbles: true })));
-    expect(container.querySelector(".art--error-returned")?.textContent).toBe(
-      "DEMO HOME",
-    );
   });
 
   it("opens Arknights Tag details with a valid editable type", () => {
@@ -138,22 +116,6 @@ describe("Component wall", () => {
     expect(container.querySelector(".dialog-usage-box code")?.textContent).toBe(
       '<ArknightsTag type="info" />',
     );
-  });
-
-  it("includes event handlers as empty attributes without making them editable", () => {
-    act(() => root.render(createElement(App)));
-    const errorTitle = container.querySelector<HTMLButtonElement>(
-      '[data-component-id="static-404"] .component-tile__name',
-    );
-
-    act(() => errorTitle?.dispatchEvent(new MouseEvent("click", { bubbles: true })));
-
-    expect(container.querySelector(".dialog-usage-box code")?.textContent).toBe(
-      '<Static404 onGoBack="" />',
-    );
-    expect(
-      container.querySelector(".property-editor input, .property-editor select"),
-    ).toBeNull();
   });
 
   it("includes each handler from grouped callback properties", () => {

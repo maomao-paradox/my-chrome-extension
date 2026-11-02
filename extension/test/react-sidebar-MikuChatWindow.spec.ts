@@ -14,7 +14,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
 import { render, fireEvent, cleanup } from "@testing-library/react";
-import MikuChatWindow from "@/apps/sidebar/MikuChatWindow";
+import MikuChatWindow from "@/modules/sidebar/MikuChatWindow";
 
 afterEach(() => {
   cleanup();
@@ -113,14 +113,14 @@ describe("MikuChatWindow", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it("渲染 AIConversationPlaceholder 占位组件", () => {
-    const { getByText } = render(
+  it("渲染 AIConversation 对话组件", () => {
+    const { getByText, getByPlaceholderText } = render(
       React.createElement(MikuChatWindow, { onClose: vi.fn() }),
     );
-    // 占位组件应渲染欢迎标题
+    // 欢迎标题
     expect(getByText("今晚想聊点什么？")).toBeTruthy();
-    // 占位组件应渲染迁移提示
-    expect(getByText(/当前角色：Hatsune Miku/)).toBeTruthy();
+    // 输入框占位文案 —— 说明真实的 AIConversation 已经挂载
+    expect(getByPlaceholderText("和 Miku 说点什么...")).toBeTruthy();
   });
 
   it("渲染角色状态栏 'MIKU ONLINE'", () => {
@@ -131,11 +131,11 @@ describe("MikuChatWindow", () => {
   });
 
   it("渲染标题 'Hatsune Miku'", () => {
-    const { getByText } = render(
+    const { container } = render(
       React.createElement(MikuChatWindow, { onClose: vi.fn() }),
     );
-    // h3 标题
-    const title = getByText("Hatsune Miku");
-    expect(title.tagName.toLowerCase()).toBe("h3");
+    // 页面里可能有多处 Hatsune Miku（角色选项等），这里只断言 h3 标题
+    const title = container.querySelector("h3");
+    expect(title?.textContent).toBe("Hatsune Miku");
   });
 });

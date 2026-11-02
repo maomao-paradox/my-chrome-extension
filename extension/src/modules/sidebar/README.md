@@ -27,10 +27,13 @@ sidebar/
 
 ### 入口交互
 
-- 工具入口使用 `public/imgs/miku.png`。
+- 工具入口使用 `public/imgs/miku.png`；AI 处于生气心情时切换为 `public/imgs/miku_angry.png`。
 - 鼠标靠近浏览器右侧边缘时，Miku 图片会从右侧滑出，同时展开侧边栏工具。
 - 点击图片会打开或收起 Miku 角色对话窗口。
-- 侧边栏启用期间会随机间隔 0–10 分钟生成一条 AI 主动开场白，保存到对话记忆后让 dock 滑出提醒 2 秒；模型不可用时使用本地问候模板。禁用侧边栏会停止后续触发。
+- 侧边栏启用期间会随机间隔 0.5–20 分钟生成一条 AI 主动开场白，保存到对话记忆后让 dock 滑出提醒 2 秒；模型不可用时使用本地问候模板。禁用侧边栏会停止后续触发。
+- 对话链路内置 MCP 工具（JSON-RPC 2.0）。当前提供 `set_next_proactive_interval`，
+  由模型在 function_call 中调用，后台直接执行并调整下一次主动消息间隔；
+  工具调用轮不写入记忆，也不在聊天窗口中显示。
 - 对话窗口原复用 `AIConversation` 流式对话组件，迁移期间以 `AIConversationPlaceholder` 占位，
   后续将 `floatingball/views/AIConversation.vue` 完整迁移到 React 后替换。
 - Miku 对话窗口左侧图片上方预留音乐播放器控制区，提供上一首、播放/暂停、下一首三个图标按钮；

@@ -1,3 +1,5 @@
+import { stripToolCallMarkup } from './tool-call-markup';
+
 export const DEFAULT_DEEPSEEK_API_BASE_URL = 'https://chat.deepseek.com';
 export const DEFAULT_DEEPSEEK_USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36';
@@ -292,7 +294,7 @@ export function buildPromptWithSystemPrompt(
             JSON.stringify(tools.map(({ function: tool }) => tool)),
             '',
             '[TOOL CALL PROTOCOL]',
-            'If a listed tool is needed, respond with exactly one <webmcp_tool_calls>...</webmcp_tool_calls> block containing JSON shaped as {"tool_calls":[{"name":"tool_name","arguments":{}}]}. Use only listed tool names and provide arguments matching the schema. Do not include markdown or prose in the block. If no tool is needed, answer normally without this block.',
+            'If a listed tool is needed, you may first say one short sentence to the user, then output exactly one <webmcp_tool_calls>...</webmcp_tool_calls> block; never put anything after the block. The block must contain JSON shaped as {"tool_calls":[{"name":"tool_name","arguments":{}}]}; use only listed tool names and provide arguments matching the schema. After the block runs you will receive [TOOL RESULTS] and must answer the user in plain text, unless another tool is truly needed. If no tool is needed, answer normally without this block.',
         );
     }
     sections.push('', '[USER REQUEST]', prompt);
@@ -362,6 +364,37 @@ export function parseDeepSeekToolCalls(
     });
 }
 
+/**
+ * 计算「可以安全推送给前端」的截止下标（内容区间 [0, 返回值)）。
+ *
+ * DeepSeek 的工具调用以文本标记形式出现在正文里：
+ *   <webmcp_tool_calls>...</webmcp_tool_calls>  或  <｜｜DSML｜｜...>
+ * 流式过程中如果直接整段转发，标记会被用户看到。
+ * 这里把标记前缀及可能拼成标记的尾部字符挂起，等结束时再冲刷。
+ *
+ * @param final 是否已收到完整响应（true 时若非工具标记则全部可推送）
+ */
+function computeSafeEmitEnd(content: string, final: boolean): number {
+    // 大小写不敏感：模型偶尔会输出 <WebMCP_Tool_Calls>，用 indexOf 会漏判
+    const lowerContent = content.toLowerCase();
+    const markerIndexes = [
+        lowerContent.indexOf('<webmcp_tool_calls'),
+        content.indexOf('<｜｜DSML'),
+    ].filter((index) => index >= 0);
+
+    if (markerIndexes.length > 0) {
+        return Math.min(...markerIndexes);
+    }
+
+    if (final) {
+        return content.length;
+    }
+
+    // 未完成时，从最后一个 '<' 开始都可能是标记前缀，先挂起
+    const lastLt = content.lastIndexOf('<');
+    return lastLt >= 0 ? lastLt : content.length;
+}
+
 function generateStreamId(): string {
     const now = new Date();
     const year = String(now.getFullYear());
@@ -379,6 +412,26 @@ function generateStreamId(): string {
 
 function nextParentMessageId(currentParentMessageId: number | null): number {
     return currentParentMessageId === null ? 2 : currentParentMessageId + 2;
+}
+
+/**
+ * 单个 DeepSeek 会话允许的最大 parent_message_id。
+ * 每轮对话 parent_message_id 递增 2，超过该值后继续复用同一会话会导致上下文过载，
+ * 需要新开一个会话（换新的 chat_session_id / message_id）。
+ */
+export const MAX_DEEPSEEK_PARENT_MESSAGE_ID = 500;
+
+/**
+ * 判断当前会话是否已经达到 parent_message_id 上限，达到后应轮换新会话。
+ * @param parentMessageId 当前会话存储的 parent_message_id（null 表示会话刚开始）
+ */
+export function shouldRotateDeepSeekSession(
+    parentMessageId: number | null,
+): boolean {
+    return (
+        parentMessageId !== null &&
+        parentMessageId >= MAX_DEEPSEEK_PARENT_MESSAGE_ID
+    );
 }
 
 function getRecord(value: unknown): Record<string, unknown> | null {
@@ -704,6 +757,24 @@ export class DeepSeekClient {
                 let sessionData = await this.getSessionData(normalizedRole);
                 stageTimings['getSession'] = Math.round(performance.now() - sessionStart);
 
+                /*
+                 * 阶段1.5: parent_message_id 轮次已达上限 → 丢弃旧会话。
+                 * 清空 sessionStore 后，下面的「阶段2」会自动创建新的 session_id，
+                 * parent_message_id 也随之归零（从 null → 2），相当于新开一个对话。
+                 */
+                if (shouldRotateDeepSeekSession(sessionData.parentMessageId)) {
+                    const rotateStart = performance.now();
+                    console.log(
+                        `[DeepSeek Flow] ${role} parent_message_id=${sessionData.parentMessageId} 已达上限 ` +
+                        `${MAX_DEEPSEEK_PARENT_MESSAGE_ID}，新开会话`,
+                    );
+                    await this.clearSessionData(normalizedRole);
+                    sessionData = { sessionId: '', parentMessageId: null };
+                    stageTimings['rotateSession'] = Math.round(
+                        performance.now() - rotateStart,
+                    );
+                }
+
                 // 阶段2: 创建会话（如果需要）
                 if (!sessionData.sessionId) {
                     const createSessionStart = performance.now();
@@ -752,10 +823,24 @@ export class DeepSeekClient {
                 // 阶段5: 发送完成请求（AI模型调用）
                 const completionStart = performance.now();
                 let streamedContent = '';
+                /**
+                 * 已经推送给前端的字符数。
+                 * 带 tools 时不能直接边收边推 —— DeepSeek 的工具调用是写在正文里的
+                 * <webmcp_tool_calls> 标记，整段推出去会把标记漏给用户。
+                 * 这里只推「确定不会成为标记前缀」的部分，结束时再冲刷尾部。
+                 */
+                let emittedLength = 0;
                 const completionCallbacks = tools.length > 0
                     ? {
                         onData: (content: string) => {
                             streamedContent += content;
+                            const safeEnd = computeSafeEmitEnd(streamedContent, false);
+                            if (safeEnd > emittedLength) {
+                                callbacks?.onData?.(
+                                    streamedContent.slice(emittedLength, safeEnd),
+                                );
+                                emittedLength = safeEnd;
+                            }
                         },
                         onError: callbacks?.onError,
                     }
@@ -797,14 +882,27 @@ export class DeepSeekClient {
                 });
 
                 if (tools.length > 0) {
+                    // 冲刷尾部：如果整段没有工具标记，剩下被 '<' 挂起的文本也推给前端
+                    const finalSafeEnd = computeSafeEmitEnd(streamedContent, true);
+                    if (finalSafeEnd > emittedLength) {
+                        callbacks?.onData?.(
+                            streamedContent.slice(emittedLength, finalSafeEnd),
+                        );
+                        emittedLength = finalSafeEnd;
+                    }
+
                     const functionCalls = parseDeepSeekToolCalls(streamedContent, tools);
                     if (functionCalls.length > 0) {
-                        const result = { text: '', functionCalls };
+                        // 同一轮可能「既说话又调用工具」：正文保留为本次回复，
+                        // 工具交给后台执行，执行完再向模型发起下一轮请求
+                        const result = { text: stripToolCallMarkup(streamedContent), functionCalls };
                         callbacks?.onComplete?.(result);
                         return result;
                     }
-                    callbacks?.onData?.(streamedContent);
-                    callbacks?.onComplete?.({ text: streamedContent, functionCalls: [] });
+                    callbacks?.onComplete?.({
+                        text: stripToolCallMarkup(streamedContent),
+                        functionCalls: [],
+                    });
                 } else {
                     callbacks?.onComplete?.();
                 }

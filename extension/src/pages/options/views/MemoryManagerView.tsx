@@ -46,6 +46,9 @@ import {
   FileAddOutlined,
   PlusOutlined,
   ReloadOutlined,
+  SearchOutlined,
+  SortAscendingOutlined,
+  SortDescendingOutlined,
   ThunderboltOutlined,
   UserOutlined,
   TagOutlined,
@@ -201,6 +204,13 @@ const MemoryManagerView: React.FC = () => {
   const [rightView, setRightView] = useState<"list" | "graph">("list");
   /** 知识网络中被选中的节点 —— 用于详情浮层 */
   const [graphSelected, setGraphSelected] = useState<GraphNode | null>(null);
+  /** 单条删除确认 —— 不用 Modal.confirm 静态方法，改用 state 驱动的 Modal，避免被 ConfigProvider 隔离 */
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingEntry, setDeletingEntry] = useState<MemoryEntry | null>(null);
+  /** 排序方向：创建时间倒序（最新在前）/ 正序（最老在前），默认倒序 */
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  /** 文本筛选：匹配 content 内容，空字符串表示不筛选 */
+  const [textFilter, setTextFilter] = useState("");
 
   // ─── 加载角色列表 ─── //
   const loadRoles = useCallback(async () => {
@@ -220,7 +230,8 @@ const MemoryManagerView: React.FC = () => {
       return;
     }
     const list = await service.listEntries(selectedRole);
-    list.sort((a, b) => b.lastAccessedAt - a.lastAccessedAt);
+    // 默认按创建时间倒序（最新的排最前面），后续 sortOrder 状态在 visibleEntries 里二次排序
+    list.sort((a, b) => b.createdAt - a.createdAt);
     setEntries(list);
     setIdentity(await service.getIdentity(selectedRole));
     // 切换角色后清掉上一张图谱里选中的节点，避免详情串台
@@ -264,14 +275,30 @@ const MemoryManagerView: React.FC = () => {
     return counter;
   }, [decoratedEntries]);
 
-  /** 按遗忘状态二次过滤 */
-  const visibleEntries = useMemo(
-    () =>
+  /** 按遗忘状态二次过滤 + 文本筛选 + 排序 */
+  const visibleEntries = useMemo(() => {
+    let result =
       decayFilter === "all"
         ? decoratedEntries
-        : decoratedEntries.filter((item) => item.state === decayFilter),
-    [decoratedEntries, decayFilter],
-  );
+        : decoratedEntries.filter((item) => item.state === decayFilter);
+
+    // 文本筛选：匹配 content 内容（不区分大小写）
+    const keyword = textFilter.trim().toLowerCase();
+    if (keyword) {
+      result = result.filter((item) =>
+        item.entry.content.toLowerCase().includes(keyword),
+      );
+    }
+
+    // 按创建时间排序（倒序/正序）
+    result = [...result].sort((a, b) =>
+      sortOrder === "desc"
+        ? b.entry.createdAt - a.entry.createdAt
+        : a.entry.createdAt - b.entry.createdAt,
+    );
+
+    return result;
+  }, [decoratedEntries, decayFilter, textFilter, sortOrder]);
 
   // ─── 手动唤醒一条记忆（等价于用户再次提起） ─── //
   const handleRecall = async (id: string) => {
@@ -337,38 +364,29 @@ const MemoryManagerView: React.FC = () => {
     setModalMode("editMemory");
   };
 
-  // ─── 删除单条记忆 ─── //
+  // ─── 删除单条记忆（打开确认框 —— state 驱动的 Modal，避免 ConfigProvider 隔离问题） ─── //
   const handleDeleteEntry = (entry: MemoryEntry) => {
-    Modal.confirm({
-      title: "删除这条记忆？",
-      content: (
-        <div>
-          <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-            {entry.content}
-          </p>
-          <p style={{ color: "#888", fontSize: 12 }}>
-            删除后该记忆不再参与检索与对话注入，且无法恢复。
-          </p>
-        </div>
-      ),
-      okText: "删除",
-      okButtonProps: { danger: true },
-      cancelText: "取消",
-      onOk: async () => {
-        try {
-          setLoading(true);
-          await service.removeEntry(entry.id);
-          antdMessage.success("记忆已删除");
-          await loadEntries();
-        } catch (error) {
-          antdMessage.error(
-            `删除失败：${error instanceof Error ? error.message : String(error)}`,
-          );
-        } finally {
-          setLoading(false);
-        }
-      },
-    });
+    setDeletingEntry(entry);
+    setDeleteConfirmOpen(true);
+  };
+
+  // ─── 确认删除 ─── //
+  const handleConfirmDelete = async () => {
+    if (!deletingEntry) return;
+    try {
+      setLoading(true);
+      await service.removeEntry(deletingEntry.id);
+      antdMessage.success("记忆已删除");
+      setDeleteConfirmOpen(false);
+      setDeletingEntry(null);
+      await loadEntries();
+    } catch (error) {
+      antdMessage.error(
+        `删除失败：${error instanceof Error ? error.message : String(error)}`,
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ─── 从预设模板填充 ─── //
@@ -817,6 +835,29 @@ const MemoryManagerView: React.FC = () => {
                   </span>
                   {rightView === "list" && (
                     <Space size={4}>
+                      {/* 文本搜索 */}
+                      <Input
+                        size="small"
+                        allowClear
+                        prefix={<SearchOutlined />}
+                        placeholder="搜索记忆内容..."
+                        value={textFilter}
+                        onChange={(e) => setTextFilter(e.target.value)}
+                        style={{ width: 160 }}
+                      />
+                      {/* 排序方向切换：按创建时间 */}
+                      <Button
+                        size="small"
+                        icon={sortOrder === "desc"
+                          ? <SortDescendingOutlined />
+                          : <SortAscendingOutlined />}
+                        onClick={() =>
+                          setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
+                        }
+                        title={`按创建时间${sortOrder === "desc" ? "倒序（最新在前）" : "正序（最老在前）"}`}
+                      >
+                        {sortOrder === "desc" ? "最新" : "最老"}
+                      </Button>
                       <span style={{ fontSize: 12 }}>遗忘状态：</span>
                       <Select
                         size="small"
@@ -1154,6 +1195,38 @@ const MemoryManagerView: React.FC = () => {
             </Form>
           </Modal>
         )}
+
+        {/* ─── Modal: 单条记忆删除确认（state 驱动，与页面其他 Modal 同级，避免 ConfigProvider 隔离） ─── */}
+        <Modal
+          open={deleteConfirmOpen}
+          title="删除这条记忆？"
+          onCancel={() => {
+            setDeleteConfirmOpen(false);
+            setDeletingEntry(null);
+          }}
+          onOk={handleConfirmDelete}
+          okText="删除"
+          okButtonProps={{ danger: true }}
+          cancelText="取消"
+          confirmLoading={loading}
+          destroyOnClose
+        >
+          {deletingEntry && (
+            <div>
+              <p
+                style={{
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                }}
+              >
+                {deletingEntry.content}
+              </p>
+              <p style={{ color: "#888", fontSize: 12 }}>
+                删除后该记忆不再参与检索与对话注入，且无法恢复。
+              </p>
+            </div>
+          )}
+        </Modal>
       </div>
     </ConfigProvider>
   );

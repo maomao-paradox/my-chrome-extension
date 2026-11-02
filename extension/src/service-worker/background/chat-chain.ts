@@ -21,6 +21,7 @@
  */
 
 import { completeChatFlow } from "../deepseek";
+import { stripToolCallMarkup } from "../deepseek/tool-call-markup";
 import { loadAIConfig } from "../chrome-api/ai-config";
 
 /* ══════════════════════════════════════════════════════════════════
@@ -85,8 +86,6 @@ export function shouldTrigger(probability: number): boolean {
 export interface FollowupContext {
     /** 场景：主动对话续轮 / 用户对话续轮 */
     scenario: "proactive" | "user-dialog";
-    /** describeMood() 输出的心情描述 —— 让续轮保持心情一致性 */
-    moodPrompt: string;
     /** 上一条消息（主动场景 = AI 的开场白；对话场景 = 用户问题） */
     lastMessage: string;
     /** 当前是第几次续轮 —— 第 1 次续轮是"多说一句"，第 2 次就可能没那么多了 */
@@ -98,7 +97,7 @@ export interface FollowupContext {
  * 两种场景共享同一个 builder，通过 scenario 参数切换措辞。
  */
 export function buildFollowupPrompt(ctx: FollowupContext): string {
-    const { scenario, moodPrompt, lastMessage, round } = ctx;
+    const { scenario, lastMessage, round } = ctx;
 
     const base = scenario === "proactive"
         ? "你刚才主动和主人说了一句话，但你还有些没聊完。"
@@ -110,9 +109,10 @@ export function buildFollowupPrompt(ctx: FollowupContext): string {
           ? "再简短地说 **半句话**"
           : "再用 **1 到 2 个短语**";
 
+    // 心情只在 system prompt 里注入一次（见 proactive-chat 的 sharedSystemPrompt），
+    // 这里不再重复 [当前心情]，避免同一个片段在最终 prompt 里出现两遍
     return [
         base,
-        `[当前心情] ${moodPrompt}`,
         `[上一条消息] "${lastMessage}"`,
         `行为要求：${lengthHint}。不要重述、不要提问、不要换话题、不要改变语气。不超过 ${MAX_FOLLOWUP_LENGTH} 字。`,
     ].join("\n\n");
@@ -216,7 +216,8 @@ export async function generateFollowupReply(
             });
     });
 
-    const text = chunks.join("").trim();
+    // 续轮没有 tools，但会话上下文可能让模型模仿输出工具标记，统一剥掉
+    const text = stripToolCallMarkup(chunks.join(""));
     if (!text) {
         throw new Error("AI 返回了空的连续回复");
     }

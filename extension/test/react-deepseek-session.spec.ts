@@ -2,9 +2,33 @@ import {
   buildPromptWithSystemPrompt,
   describeDeepSeekResponseError,
   extractDeepSeekSessionId,
+  MAX_DEEPSEEK_PARENT_MESSAGE_ID,
   parseDeepSeekToolCalls,
+  shouldRotateDeepSeekSession,
   type DeepSeekWebTool,
 } from "@/service-worker/deepseek/deepseek-core";
+
+describe("DeepSeek session rotation", () => {
+  it("does not rotate a brand-new session", () => {
+    expect(shouldRotateDeepSeekSession(null)).toBe(false);
+  });
+
+  it("keeps the current session below the limit", () => {
+    expect(shouldRotateDeepSeekSession(0)).toBe(false);
+    expect(
+      shouldRotateDeepSeekSession(MAX_DEEPSEEK_PARENT_MESSAGE_ID - 2),
+    ).toBe(false);
+  });
+
+  it("rotates to a new session once parent_message_id reaches the limit", () => {
+    expect(
+      shouldRotateDeepSeekSession(MAX_DEEPSEEK_PARENT_MESSAGE_ID),
+    ).toBe(true);
+    expect(
+      shouldRotateDeepSeekSession(MAX_DEEPSEEK_PARENT_MESSAGE_ID + 2),
+    ).toBe(true);
+  });
+});
 
 describe("DeepSeek session response parsing", () => {
   it("reads the existing nested session ID format", () => {

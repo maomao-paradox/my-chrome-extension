@@ -28,6 +28,7 @@ import { TeamOutlined } from "@ant-design/icons";
 import type { Tool } from "@/types";
 import { bus } from "@/event/bus";
 import MikuChatWindow from "./MikuChatWindow";
+import { useMikuImageSrc } from "./useMikuMood";
 import "./styles/hover-menu.scss";
 
 /** HoverMenu Props */
@@ -80,8 +81,8 @@ const HoverMenu: React.FC<HoverMenuProps> = ({
 
   const dockRef = useRef<HTMLDivElement>(null);
 
-  // Miku 图片资源
-  const mikuSrc = chrome.runtime.getURL("imgs/miku.png");
+  // Miku 图片资源 —— 随 AI 当前心情切换（生气时换 miku_angry）
+  const mikuSrc = useMikuImageSrc();
 
   // 显示整个菜单
   const show = useCallback(() => {

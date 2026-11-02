@@ -3,7 +3,7 @@
  * @description AI 主动对话后台调度层的单元测试
  *
  * 覆盖点：
- *   1. 初始化时的 alarm 自愈创建（含 0.5~10 分钟区间断言）
+ *   1. 初始化时的 alarm 自愈创建（含 0.5~20 分钟区间断言）
  *   2. alarm 已存在时不重复创建
  *   3. 触发后生成消息并写入记忆（字段与内容前缀）
  *   4. 无论成功失败都续排
@@ -91,6 +91,10 @@ beforeEach(() => {
     vi.setSystemTime(FIXED_NOW);
     storageState = {};
 
+    // 固定随机掷骰结果：落在所有概率阈值之外，避免「连续回复」随机多跑几轮，
+    // 让每个用例只断言主动消息本身的落库行为
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+
     mocks.alarmListeners.length = 0;
 
     mocks.alarmsCreate.mockReset();
@@ -155,11 +159,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+    vi.restoreAllMocks();
     vi.useRealTimers();
 });
 
 describe("proactive-chat（background 调度层）", () => {
-    it("初始化时若 alarm 不存在，会创建一个 0.5~10 分钟的随机排期", async () => {
+    it("初始化时若 alarm 不存在，会创建一个 0.5~20 分钟的随机排期", async () => {
         const mod = await loadModule();
         mod.initProactiveChat();
 
@@ -171,7 +176,7 @@ describe("proactive-chat（background 调度层）", () => {
         expect(name).toBe(mod.PROACTIVE_ALARM_NAME);
         // chrome.alarms 硬下限为 30 秒，因此下界是 0.5 分钟
         expect(info.delayInMinutes).toBeGreaterThanOrEqual(0.5);
-        expect(info.delayInMinutes).toBeLessThanOrEqual(10);
+        expect(info.delayInMinutes).toBeLessThanOrEqual(20);
     });
 
     it("alarm 已存在时不会重复创建", async () => {

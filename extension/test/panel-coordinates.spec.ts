@@ -15,7 +15,7 @@ import {
   getViewportTransform,
   isEditableTarget,
   type PanelPoint,
-} from "@/layout/panel-coordinates";
+} from "@/pages/options/layout/panel-coordinates";
 
 /** 九宫格的全部 9 个坐标 */
 const GRID_POINTS: PanelPoint[] = [

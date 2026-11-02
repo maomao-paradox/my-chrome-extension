@@ -75,8 +75,10 @@ describe("buildMemoryGraph", () => {
     const { edges } = buildMemoryGraph([a, b]);
 
     expect(edges).toHaveLength(1);
-    expect(edges[0].data.source).toBe(a.id);
-    expect(edges[0].data.target).toBe(b.id);
+    // 边的方向由 entry.id 字典序决定，与传入顺序无关
+    expect([edges[0].data.source, edges[0].data.target].sort()).toEqual(
+      [a.id, b.id].sort(),
+    );
     // 共享「用户 / 户喜 / 喜欢 / 欢用」四个 bigram
     expect(edges[0].data.weight).toBeGreaterThanOrEqual(3);
     expect(edges[0].data.sharedTerms.length).toBeGreaterThan(0);

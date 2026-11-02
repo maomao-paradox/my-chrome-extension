@@ -33,6 +33,7 @@ import {
 import { Draggable } from "@/components/react-index";
 import AIConversation from "./components/AIConversation";
 import type { AIRole } from "./components/AIConversation";
+import { useMikuImageSrc } from "./useMikuMood";
 import "./styles/miku-chat-window.scss";
 
 /** MikuChatWindow Props */
@@ -81,8 +82,8 @@ const MikuChatWindow: React.FC<MikuChatWindowProps> = ({ onClose }) => {
   // 默认自动播放
   const [isMusicPlaying, setIsMusicPlaying] = useState(true);
 
-  // Miku 图片资源
-  const mikuSrc = chrome.runtime.getURL("imgs/miku.png");
+  // Miku 图片资源 —— 随 AI 当前心情切换（生气时换 miku_angry）
+  const mikuSrc = useMikuImageSrc();
 
   // Draggable 容器样式
   const draggableContainerStyle = useMemo<React.CSSProperties>(

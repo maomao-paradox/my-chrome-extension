@@ -20,7 +20,7 @@ import React from "react";
 import { render, fireEvent, cleanup, act } from "@testing-library/react";
 import type { Tool } from "@/types";
 import { bus } from "@/event/bus";
-import SidebarApp from "@/apps/sidebar/App";
+import SidebarApp from "@/modules/sidebar/App";
 
 // 确保 chrome.runtime.sendMessage 存在（setup.ts 未注入）
 beforeEach(() => {

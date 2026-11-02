@@ -1,7 +1,7 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import ScrollingTimeline, { type ScrollingTimelineItem } from "@/assets/components/ScrollingTimeline";
+import ScrollingTimeline, { type ScrollingTimelineItem } from "@/components/ScrollingTimeline";
 
 const items: ScrollingTimelineItem[] = [
   { id: "one", date: "01.01", title: "第一阶段", description: "需求确认" },
@@ -16,7 +16,9 @@ describe("ScrollingTimeline", () => {
     const { container, getByText } = render(React.createElement(ScrollingTimeline, { items }));
 
     expect(container.querySelectorAll(".timeline-item")).toHaveLength(3);
-    expect(getByText("第一阶段").closest(".timeline-item")).toHaveClass("timeline-item--active");
+    expect(
+      getByText("第一阶段").closest(".timeline-item")?.classList.contains("timeline-item--active"),
+    ).toBe(true);
     expect(container.querySelector(".timeline-count")?.textContent).toBe("1 / 3");
   });
 
@@ -31,18 +33,30 @@ describe("ScrollingTimeline", () => {
 
     expect(onActiveIdChange).toHaveBeenCalledWith("two");
     expect(onSelect).toHaveBeenCalledWith(items[1]);
-    expect(getByText("第二阶段").closest(".timeline-item")).toHaveClass("timeline-item--active");
+    expect(
+      getByText("第二阶段").closest(".timeline-item")?.classList.contains("timeline-item--active"),
+    ).toBe(true);
   });
 
   it("supports keyboard navigation and disables edge controls", () => {
     const onActiveIdChange = vi.fn();
-    const { container } = render(
+    const { container, rerender } = render(
       React.createElement(ScrollingTimeline, { items, activeId: "two", onActiveIdChange }),
     );
     const track = container.querySelector(".timeline-track")!;
 
     fireEvent.keyDown(track, { key: "ArrowRight" });
     expect(onActiveIdChange).toHaveBeenCalledWith("three");
-    expect((container.querySelector(".timeline-nav--next") as HTMLButtonElement).disabled).toBe(true);
+
+    // 受控模式下 activeId 不会自己变化：手动切到最后一个节点，验证边缘按钮禁用
+    rerender(
+      React.createElement(ScrollingTimeline, { items, activeId: "three", onActiveIdChange }),
+    );
+    expect(
+      (container.querySelector(".timeline-nav--next") as HTMLButtonElement).disabled,
+    ).toBe(true);
+    expect(
+      (container.querySelector(".timeline-nav--previous") as HTMLButtonElement).disabled,
+    ).toBe(false);
   });
 });

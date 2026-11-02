@@ -1,17 +1,15 @@
 ## 需求描述
 
-### 现状
+AI聊天发送表情包
 
-执行的AI请求的auth_token和cookies都是使用的默认参数（@/shared/deepseek-core.ts 文件顶部的默认参数 DEFAULT_DEEPSEEK_AUTH_TOKEN、DEFAULT_DEEPSEEK_COOKIES、DEFAULT_DEEPSEEK_SESSION_COOKIE）
+聊天组件路径：extension/src/modules/sidebar/components/AIConversation.tsx
 
-### 变更
+### 接口
+获取数据列表
+    - https://memecub.com/zh/search?q={{描述}}（描述：用户输入的描述，例如“生气”“大肥鱼吃米饭”等）
+    - 响应参数：html文档（你需要从中正则表达式提取 https://gpic.code-nav.cn/memecub/public/{{图片id}}.{{gif|webp}} 这样的图片链接）
 
-我希望修改为安装用户可以使用自己的auth_token 和 cookies，将这几个参数变成可配置，而是不是使用默认值
-
-## Q&A
-
-- Q: 初始化是在 Service Worker 启动时执行，还是首次 AI 请求且凭证为空时执行？ A: 首次 AI 请求且凭证为空时
-- Q: auth_token 是否取 localStorage.userToken.value，并原样使用还是补 Bearer ？ A: 补 Bearer
-- Q: Cookies 是否用 chrome.cookies.getAll() 获取全部（包括 HttpOnly），再拼成 name=value; ...？ A: 是的
-- Q: 配置是否写入 ai_assistant_config 的 deepseekAuthToken、deepseekCookies 等字段？ A: 可以，但是读取配置的位置时后台脚本吧，应该写在 chrome.storge.local
-- Q: 获取成功后是否自动关闭 chat.deepseek.com 标签页？等待登录是否需要超时？ A: 是的，获取成功后自动关闭；需要超时，可以设置为5min
+### 交互
+制作为一个MCP工具，并显示的提供给AI；
+收到工具调用指令后，后台脚本调用接口获取一张随机的表情包，返回给AI，最终由AI展示在聊天框中；
+表情包本身不计入记忆，但是会将用户输入的描述和表情包的链接存储起来，后续用户可以基于之前存储的描述也展示在聊天框中。

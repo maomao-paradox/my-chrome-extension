@@ -14,7 +14,7 @@ import React from "react";
 import { render, fireEvent, cleanup } from "@testing-library/react";
 import { act } from "react";
 import type { Tool } from "@/types";
-import SimpleCarousel from "@/apps/sidebar/components/SimpleCarousel";
+import SimpleCarousel from "@/modules/sidebar/components/SimpleCarousel";
 
 // 每个测试后清理 DOM，避免污染
 afterEach(() => {

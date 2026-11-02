@@ -118,9 +118,6 @@ export const ChatKnowledgeGraph: React.FC<ChatKnowledgeGraphProps> = ({
   return (
     <div className={`ckg-wrapper ckg-theme-${theme} ${className}`} style={{ maxWidth }}>
       <div className="ckg-header">
-        <h1>
-          <span>🐱</span> {data.title ?? '聊天记录知识图谱'}
-        </h1>
         {showBadge && (
           <div className="ckg-badge">
             <span className="ckg-dot" />

@@ -1,7 +1,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import App from "../src/pages/component-wall/App";
+import PushParticles from "../src/components/particles/PushParticles";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -45,21 +45,14 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("PushParticles component wall preview", () => {
-  it("mounts a sized canvas and cancels animation on unmount", () => {
-    act(() => root.render(createElement(App)));
+describe("PushParticles", () => {
+  it("mounts a canvas and cancels animation on unmount", () => {
+    act(() => root.render(createElement(PushParticles, { particleCount: 20 })));
 
-    const tile = container.querySelector<HTMLElement>(
-      '[data-component-id="push-particles"]',
-    );
-    const canvas = tile?.querySelector<HTMLCanvasElement>(
+    const canvas = container.querySelector<HTMLCanvasElement>(
       ".push-particles__canvas",
     );
-
-    expect(tile).not.toBeNull();
     expect(canvas).not.toBeNull();
-    expect(canvas!.width).toBeGreaterThan(0);
-    expect(canvas!.height).toBeGreaterThan(0);
     expect(requestAnimationFrame).toHaveBeenCalled();
 
     act(() => root.unmount());

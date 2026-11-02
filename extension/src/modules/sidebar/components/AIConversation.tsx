@@ -48,8 +48,64 @@ interface ChatMessage {
     id: string;
     role: "user" | "assistant" | "system";
     content: string;
+    /** 图片 URL 列表（用户上传的 blob URL 或 AI 返回的图片链接） */
+    images?: string[];
     streaming?: boolean;
     createdAt: number;
+}
+
+/** memecub 图片 URL 正则 —— 匹配 AI 可能直接贴的图片链接 */
+const IMAGE_URL_REGEX =
+    /(https?:\/\/[^\s)]+\.(?:gif|webp|jpg|jpeg|png)(?:\?[^\s)]*)?)/gi;
+
+/** markdown 图片语法正则 —— ![alt](url) */
+const MARKDOWN_IMAGE_REGEX = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g;
+
+/**
+ * 从文本中提取所有图片 URL（同时支持 markdown 语法和裸链接）
+ * @returns 去重后的图片 URL 数组
+ */
+function extractImageUrls(text: string): string[] {
+    const urls = new Set<string>();
+
+    // 1. markdown 图片语法
+    let mdMatch: RegExpExecArray | null;
+    MARKDOWN_IMAGE_REGEX.lastIndex = 0;
+    while ((mdMatch = MARKDOWN_IMAGE_REGEX.exec(text)) !== null) {
+        urls.add(mdMatch[2]);
+    }
+
+    // 2. 裸图片 URL（处理时先移除已经被 markdown 语法匹配过的，避免重复）
+    const textWithoutMdImages = text.replace(MARKDOWN_IMAGE_REGEX, "");
+    let urlMatch: RegExpExecArray | null;
+    IMAGE_URL_REGEX.lastIndex = 0;
+    while ((urlMatch = IMAGE_URL_REGEX.exec(textWithoutMdImages)) !== null) {
+        urls.add(urlMatch[1]);
+    }
+
+    return Array.from(urls);
+}
+
+/**
+ * 从文本中移除 markdown 图片语法和裸图片 URL，得到纯文本
+ */
+function stripImageMarkup(text: string): string {
+    // 移除 markdown 图片语法，替换为 alt 文本或空
+    let result = text.replace(MARKDOWN_IMAGE_REGEX, (_full, alt) => alt || "");
+    // 移除裸图片 URL
+    result = result.replace(IMAGE_URL_REGEX, "");
+    // 清理多余空行
+    result = result.replace(/\n{3,}/g, "\n\n").trim();
+    return result;
+}
+
+/**
+ * 判断 content 是否纯图片（去光图片 URL 和 markdown 语法后没有实际文字）
+ * —— 纯图片消息不该进 conversation chunk，避免污染文本记忆
+ */
+function isImageOnlyContent(content: string): boolean {
+    const stripped = stripImageMarkup(content).trim();
+    return stripped.length === 0;
 }
 
 /** 时间窗口 —— 控制默认展示多少历史 */
@@ -96,6 +152,8 @@ function parseConversationEntry(
 
     const lines = content.split(/\n+/).filter((l) => l.trim());
     const result: ChatMessage[] = [];
+    // 记录最近一次识别到的角色 —— 无前缀行归到这个角色
+    let lastRole: "user" | "assistant" | null = null;
 
     for (const line of lines) {
         let msgRole: "user" | "assistant" | null = null;
@@ -115,8 +173,14 @@ function parseConversationEntry(
         } else if (aiMatch) {
             msgRole = "assistant";
             body = aiMatch[2];
+        } else if (IMAGE_URL_REGEX.test(body)) {
+            // 裸图片 URL —— 归到最近角色（兜底，通常是 AI）
+            msgRole = lastRole ?? "assistant";
+            IMAGE_URL_REGEX.lastIndex = 0;
+        } else if (lastRole) {
+            // 其他无前缀行 —— 归到最近角色（兼容老数据里没加前缀的 AI 回复）
+            msgRole = lastRole;
         } else {
-            // 无法识别角色 → 跳过这条（不是对话消息）
             continue;
         }
 
@@ -128,19 +192,12 @@ function parseConversationEntry(
                 createdAt: entry.createdAt,
             });
         }
+
+        // 更新最近角色
+        if (msgRole) lastRole = msgRole;
     }
 
     return result;
-}
-
-/** 把一轮 user + AI 回复合成记忆系统的 conversation 格式 */
-function buildConversationChunk(userMsg: string, aiMsg: string): string {
-    const u = userMsg.trim();
-    const a = aiMsg.trim();
-    const parts: string[] = [];
-    if (u) parts.push(`用户：${u}`);
-    if (a) parts.push(`AI：${a}`);
-    return parts.join("\n");
 }
 
 /** 从全量历史中截取指定时间窗口内的消息 */
@@ -174,6 +231,10 @@ const AIConversation: React.FC<AIConversationProps> = ({
     const [errorNotice, setErrorNotice] = useState<string>("");
     const [role, setRole] = useState<string>(defaultRole ?? roleOptions[0]?.value ?? "");
     const [config, setConfig] = useState<AIModelConfig | null>(null);
+
+    /* ── 待发送的图片（blob URL 临时引用，发送后 revoke） ── */
+    const [pendingImages, setPendingImages] = useState<string[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     /* ── 历史持久化状态（全部走记忆系统） ── */
     const [allHistory, setAllHistory] = useState<ChatMessage[]>([]); // 当前角色全量 conversation 消息
@@ -454,11 +515,16 @@ const AIConversation: React.FC<AIConversationProps> = ({
         // 发送新消息 → 强制自动滚到底部
         autoScrollRef.current = true;
 
+        // 取走待发送的图片并清空
+        const imagesToSend = pendingImages;
+        setPendingImages([]);
+
         const userMsgId = genId();
         const userMsg: ChatMessage = {
             id: userMsgId,
             role: "user",
             content: prompt,
+            images: imagesToSend.length > 0 ? imagesToSend : undefined,
             createdAt: Date.now(),
         };
         const aiMsgId = genId();
@@ -494,18 +560,24 @@ const AIConversation: React.FC<AIConversationProps> = ({
             // 收集所有 role: "assistant" 的实时消息 content
             setMessages((prev) => {
                 const userEntry = prev.find((m) => m.id === userMsgId);
+                // 过滤：跳过纯图片消息（content 就是图片 URL，没有实际文字）
                 const aiEntries = prev.filter(
-                    (m) => m.role === "assistant" && m.content.trim(),
+                    (m) =>
+                        m.role === "assistant" &&
+                        m.content.trim() &&
+                        !isImageOnlyContent(m.content),
                 );
 
                 // 如果有至少一条 AI 回复 → 批量保存为一个 conversation entry
                 if (userEntry && aiEntries.length > 0) {
                     const userText = userEntry.content;
-                    const aiTexts = aiEntries.map((m) => m.content.trim());
-                    const chunk = buildConversationChunk(
-                        userText,
-                        aiTexts.join("\n"), // 多条 AI 回复拼成 "\nAI：xxx" 格式
-                    );
+                    // 每条 AI 回复都单独加 AI：前缀
+                    const chunk = [
+                        userText ? `用户：${userText}` : null,
+                        ...aiEntries.map((m) => `AI：${m.content.trim()}`),
+                    ]
+                        .filter((line): line is string => !!line)
+                        .join("\n");
 
                     void (async () => {
                         try {
@@ -541,6 +613,18 @@ const AIConversation: React.FC<AIConversationProps> = ({
                 throw new Error("当前环境不支持 chrome.runtime.connect");
             }
 
+            /* ── 把待发送图片（blob URL）转成 dataURL —— 传给 background 上传 ── */
+            let imageDataUrls: string[] | undefined;
+            if (imagesToSend.length > 0) {
+                try {
+                    imageDataUrls = await Promise.all(
+                        imagesToSend.map((url) => blobUrlToDataUrl(url)),
+                    );
+                } catch (err) {
+                    console.warn("[AIConversation] 图片转 dataURL 失败，降级为无图:", err);
+                }
+            }
+
             port = chrome.runtime.connect({
                 name: `ai-conversation-${messageId}`,
             });
@@ -554,14 +638,55 @@ const AIConversation: React.FC<AIConversationProps> = ({
                     );
                     // 后端已经存了 "用户：xxx" 到记忆，这里不需要再调 persistTurn
                     setLoading(false);
-                    port.disconnect();
+                    port!.disconnect();
                     return;
                 }
 
                 if (!message?.payload || message.payload.messageId !== messageId) return;
 
+                if (message.type === "AI_CONVERSATION_TOOL_CALL") {
+                    // 工具轮：模型说的话保留成一条回复，工具动作只在后台执行。
+                    // 如果这一轮它一句话都没说，就把空占位气泡移掉。
+                    const toolText = String(message.payload.text ?? "").trim();
+                    setMessages((prev) => {
+                        // 先处理文本部分
+                        let updated = toolText
+                            ? prev.map((m) =>
+                                m.id === currentStreamingAiId
+                                    ? { ...m, streaming: false }
+                                    : m,
+                            )
+                            : prev.filter((m) => m.id !== currentStreamingAiId);
+
+                        // 再处理表情包工具结果：从 get_meme 成功结果里提取图片 URL，
+                        // 创建独立的纯图片消息，不跟文本混在一起
+                        const calls = message.payload.calls ?? [];
+                        const memeCalls = calls.filter(
+                            (c: any) =>
+                                c?.name === "get_meme" &&
+                                c?.response?.result?.ok &&
+                                typeof c.response.result.imageUrl === "string",
+                        );
+
+                        if (memeCalls.length > 0) {
+                            const memeMessages: ChatMessage[] = memeCalls.map(
+                                (c: any) => ({
+                                    id: `meme-${genId()}`,
+                                    role: "assistant" as const,
+                                    content: c.response.result.imageUrl,
+                                    createdAt: Date.now(),
+                                }),
+                            );
+                            updated = [...updated, ...memeMessages];
+                        }
+
+                        return updated;
+                    });
+                    return;
+                }
+
                 if (message.type === "AI_CONVERSATION_CONTINUING") {
-                    // 连续回复开始：创建新的 placeholder AI 消息
+                    // 新的一轮回复开始：停掉上一条的流式光标，再建新占位
                     const newAiMsgId = genId();
                     const newAiMsg: ChatMessage = {
                         id: newAiMsgId,
@@ -572,7 +697,14 @@ const AIConversation: React.FC<AIConversationProps> = ({
                     };
                     currentStreamingAiId = newAiMsgId;
                     allAiMsgIds.push(newAiMsgId);
-                    setMessages((prev) => [...prev, newAiMsg]);
+                    setMessages((prev) => [
+                        ...prev.map((m) =>
+                            m.role === "assistant" && m.streaming
+                                ? { ...m, streaming: false }
+                                : m,
+                        ),
+                        newAiMsg,
+                    ]);
                     return;
                 }
 
@@ -611,6 +743,18 @@ const AIConversation: React.FC<AIConversationProps> = ({
                                 : m,
                         ),
                     );
+
+                    // 纯工具轮（模型一句话都没说）：不写记忆，仅移除本轮 AI 占位。
+                    // 只要留下过文本回复，就正常落库（文本和工具调用已被拆成两次回复）。
+                    if (message.payload?.skipPersist) {
+                        setMessages((prev) =>
+                            prev.filter((m) => !allAiMsgIds.includes(m.id)),
+                        );
+                        setLoading(false);
+                        port?.disconnect();
+                        return;
+                    }
+
                     // 对话完成 → 批量写入记忆系统
                     void persistTurn();
                     setLoading(false);
@@ -662,6 +806,10 @@ const AIConversation: React.FC<AIConversationProps> = ({
                     apiKey: config?.apiKey,
                     apiBaseUrl: config?.apiBaseUrl,
                     systemPrompt: buildFinalSystemPrompt(),
+                    /** 开启内置 MCP 工具（如设置下次主动消息间隔） */
+                    enableLocalMcpTools: true,
+                    /** 用户上传的图片（dataURL 数组）—— 让模型能"看到"图 */
+                    imageDataUrls,
                 },
             });
         } catch (error) {
@@ -696,6 +844,57 @@ const AIConversation: React.FC<AIConversationProps> = ({
         setMessages([]);
         setErrorNotice("");
     };
+
+    /* ── 图片选择 ── */
+
+    /** 用户点击「选图」按钮 → 触发隐藏的 file input */
+    const handlePickImage = useCallback(() => {
+        fileInputRef.current?.click();
+    }, []);
+
+    /** 用户选中图片 → 生成 blob URL 加入待发送列表 */
+    const handleImageSelect = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const files = Array.from(e.target.files ?? []);
+            if (files.length === 0) return;
+
+            const urls = files.map((f) => URL.createObjectURL(f));
+            setPendingImages((prev) => [...prev, ...urls]);
+
+            // 清空 input 以便再次选中同一文件
+            e.target.value = "";
+        },
+        [],
+    );
+
+    /** 从待发送列表中移除一张图（同时 revoke blob URL） */
+    const removePendingImage = useCallback((url: string) => {
+        URL.revokeObjectURL(url);
+        setPendingImages((prev) => prev.filter((u) => u !== url));
+    }, []);
+
+    /** 组件卸载时清理所有 blob URL */
+    useEffect(() => {
+        return () => {
+            pendingImages.forEach((url) => URL.revokeObjectURL(url));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    /**
+     * 把 blob URL 转成 dataURL —— 传给 background service worker
+     * （blob URL 只在创建它的页面上下文里有效，background 里用不了）
+     */
+    const blobUrlToDataUrl = useCallback(async (blobUrl: string): Promise<string> => {
+        const res = await fetch(blobUrl);
+        const blob = await res.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(blob);
+        });
+    }, []);
 
     /* ══════════════════════════════════════════════════════════════════
      * 渲染
@@ -770,8 +969,35 @@ const AIConversation: React.FC<AIConversationProps> = ({
                                 {msg.role === "user" ? userIcon : aiIcon}
                             </div>
                             <div className="ac-message-body">
-                                {msg.content ? (
-                                    <p>{msg.content}</p>
+                                {msg.content || msg.images?.length ? (
+                                    <>
+                                        {/* 纯文本部分（已剥离图片标记） */}
+                                        {msg.content && stripImageMarkup(msg.content) ? (
+                                            <p>{stripImageMarkup(msg.content)}</p>
+                                        ) : null}
+                                        {/* content 里内嵌的图片 URL（AI 表情包） */}
+                                        {msg.content && extractImageUrls(msg.content).map((url, idx) => (
+                                            <img
+                                                key={`${msg.id}-embedded-${idx}`}
+                                                className="ac-meme-image"
+                                                src={url}
+                                                alt="表情包"
+                                                loading="lazy"
+                                                onClick={() => window.open(url, "_blank")}
+                                            />
+                                        ))}
+                                        {/* images 数组（用户上传 / 工具返回） */}
+                                        {msg.images?.map((url, idx) => (
+                                            <img
+                                                key={`${msg.id}-extra-${idx}`}
+                                                className={`ac-meme-image ${msg.role === "user" ? "ac-user-image" : ""}`}
+                                                src={url}
+                                                alt={msg.role === "user" ? "用户发送的图片" : "表情包"}
+                                                loading="lazy"
+                                                onClick={() => window.open(url, "_blank")}
+                                            />
+                                        ))}
+                                    </>
                                 ) : msg.streaming ? (
                                     <p className="ac-typing">{typingMessage}</p>
                                 ) : null}
@@ -783,12 +1009,53 @@ const AIConversation: React.FC<AIConversationProps> = ({
 
             {errorNotice && <div className="ac-error-bar">{errorNotice}</div>}
 
+            {/* 待发送图片预览区 */}
+            {pendingImages.length > 0 && (
+                <div className="ac-pending-images">
+                    {pendingImages.map((url) => (
+                        <div key={url} className="ac-pending-item">
+                            <img src={url} alt="待发送" />
+                            <button
+                                type="button"
+                                className="ac-pending-remove"
+                                onClick={() => removePendingImage(url)}
+                                aria-label="移除图片"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             <div className="ac-input-bar">
+                {/* 隐藏的文件选择 input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    hidden
+                    onChange={handleImageSelect}
+                />
+                <button
+                    type="button"
+                    className="ac-pick-image-btn"
+                    onClick={handlePickImage}
+                    disabled={loading}
+                    title="选择图片"
+                >
+                    📷
+                </button>
                 <textarea
                     className="ac-textarea"
                     value={draft}
                     rows={2}
-                    placeholder={inputPlaceholder}
+                    placeholder={
+                        pendingImages.length > 0
+                            ? "图片已附上，说点什么吧（可单独发送图片）"
+                            : inputPlaceholder
+                    }
                     disabled={loading}
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -797,7 +1064,7 @@ const AIConversation: React.FC<AIConversationProps> = ({
                     type="button"
                     className="ac-send-btn"
                     onClick={() => void send()}
-                    disabled={loading || !draft.trim()}
+                    disabled={loading || (!draft.trim() && pendingImages.length === 0)}
                 >
                     {loading ? "..." : sendButtonText}
                 </button>

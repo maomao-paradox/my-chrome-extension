@@ -42,6 +42,7 @@ export default defineConfig({
       "test/panel-coordinates.spec.ts",
       "test/proactive-chat-background.spec.ts",
       "test/proactive-mood.spec.ts",
+      "test/tool-round-prompt.spec.ts",
     ],
     // 全局 setup：注入 maLogger / chrome API 等 chrome 扩展运行时
     setupFiles: ["./test/setup.ts"],

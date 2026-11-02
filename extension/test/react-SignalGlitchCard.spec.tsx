@@ -1,7 +1,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import App from "../src/pages/component-wall/App";
+import SignalGlitchCard from "../src/components/SignalGlitchCard";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -19,21 +19,20 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("SignalGlitchCard component wall preview", () => {
-  it("renders a stable signal card with an animated jagged waveform", () => {
-    act(() => root.render(createElement(App)));
+describe("SignalGlitchCard", () => {
+  it("renders the default glitch text", () => {
+    act(() => root.render(createElement(SignalGlitchCard)));
 
-    const tile = container.querySelector<HTMLElement>(
-      '[data-component-id="signal-glitch-card"]',
-    );
-    const card = tile?.querySelector<HTMLElement>(".signal-glitch-card");
-    const waveform = card?.querySelector<SVGPathElement>(
-      ".signal-glitch-card__wave--main",
-    );
+    const text = container.querySelector<HTMLElement>(".text");
+    expect(text?.textContent).toBe("TEXT GLITCH");
+    expect(text?.getAttribute("data-text")).toBe("TEXT GLITCH");
+  });
 
-    expect(card?.getAttribute("aria-label")).toContain("信号稳定");
-    expect(waveform?.getAttribute("d")).toContain("L266 32 L272 61");
-    expect(card?.querySelectorAll(".signal-glitch-card__tear")).toHaveLength(2);
-    expect(card?.querySelectorAll(".signal-glitch-card__meter i")).toHaveLength(12);
+  it("renders the text passed in", () => {
+    act(() => root.render(createElement(SignalGlitchCard, { text: "SIGNAL" })));
+
+    const text = container.querySelector<HTMLElement>(".text");
+    expect(text?.textContent).toBe("SIGNAL");
+    expect(text?.getAttribute("data-text")).toBe("SIGNAL");
   });
 });
