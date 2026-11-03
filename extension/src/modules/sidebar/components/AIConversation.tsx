@@ -87,14 +87,42 @@ function extractImageUrls(text: string): string[] {
 }
 
 /**
- * 从文本中移除 markdown 图片语法和裸图片 URL，得到纯文本
+ * 从文本中移除 markdown 图片语法和裸图片 URL，得到纯文本。
+ * 注意：markdown 图片的 alt 文字会被丢掉（alt 通常是 "meme" 这类无意义占位，
+ * 保留它会让聊天框显示多余文字）。
  */
 function stripImageMarkup(text: string): string {
-    // 移除 markdown 图片语法，替换为 alt 文本或空
-    let result = text.replace(MARKDOWN_IMAGE_REGEX, (_full, alt) => alt || "");
+    // 移除 markdown 图片语法，直接替换为空（不保留 alt）
+    let result = text.replace(MARKDOWN_IMAGE_REGEX, "");
     // 移除裸图片 URL
     result = result.replace(IMAGE_URL_REGEX, "");
     // 清理多余空行
+    result = result.replace(/\n{3,}/g, "\n\n").trim();
+    return result;
+}
+
+/**
+ * 把一段 AI 回复文本转换成适合存入记忆的干净文本：
+ *   1. 剥掉 MCP 工具调用标记（<webmcp_tool_calls>…</webmcp_tool_calls> 等）
+ *   2. markdown 图片 ![alt](url) → ![](url)（丢掉无用 alt 文字）
+ *   3. 裸图片 URL 保持原样（已是可识别格式）
+ *   4. 清理多余空行
+ *
+ * ❗ 纯图片消息（清洗后没有实际文字）由调用方过滤掉，不进 conversation chunk。
+ */
+function cleanForMemory(content: string): string {
+    if (!content) return "";
+    let result = content;
+
+    // 1. 剥 MCP 工具指令（WebMCP + DSML 两种标记）
+    result = result
+        .replace(/<webmcp_tool_calls>[\s\S]*?<\/webmcp_tool_calls>/gi, "")
+        .replace(/<｜｜DSML｜｜[\s\S]*?<\/｜｜DSML｜｜\s*invoke\s*>/gi, "");
+
+    // 2. markdown 图片：丢掉 alt，只留 URL
+    result = result.replace(MARKDOWN_IMAGE_REGEX, (_full, _alt, url) => `![](${url})`);
+
+    // 3. 清理多余空行
     result = result.replace(/\n{3,}/g, "\n\n").trim();
     return result;
 }
@@ -106,6 +134,47 @@ function stripImageMarkup(text: string): string {
 function isImageOnlyContent(content: string): boolean {
     const stripped = stripImageMarkup(content).trim();
     return stripped.length === 0;
+}
+
+/**
+ * 按空行（连续两次换行）把一段 AI 文本拆成多段（模拟"连续多次回复"）。
+ * 例如 "123\n\nabc" → ["123", "abc"]；单个换行不算分段，连续空行会被过滤掉。
+ * 代码块（```）内部可能含空行，拆分会把代码块切坏，因此整体保留不拆。
+ */
+export function splitIntoConsecutiveMessages(text: string): string[] {
+    if (text.includes("```")) return [text.trim()].filter(Boolean);
+    return text
+        .split(/\n\s*\n/)
+        .map((part) => part.trim())
+        .filter(Boolean);
+}
+
+/**
+ * 把消息列表里的 AI 文本消息按空行展开成多条连续消息。
+ * 第一条沿用原消息 id（保持流式消息的引用关系），后续段落生成新 id。
+ */
+function expandMultiLineReplies(list: ChatMessage[]): ChatMessage[] {
+    const result: ChatMessage[] = [];
+    for (const m of list) {
+        if (m.role !== "assistant" || m.images?.length) {
+            result.push(m);
+            continue;
+        }
+        const parts = splitIntoConsecutiveMessages(m.content);
+        if (parts.length <= 1) {
+            result.push(m);
+            continue;
+        }
+        parts.forEach((part, index) => {
+            result.push({
+                ...m,
+                id: index === 0 ? m.id : `${m.id}-split-${index}`,
+                content: part,
+                streaming: false,
+            });
+        });
+    }
+    return result;
 }
 
 /** 时间窗口 —— 控制默认展示多少历史 */
@@ -318,7 +387,7 @@ const AIConversation: React.FC<AIConversationProps> = ({
         const loadStoredRoles = async () => {
             try {
                 const svc = getMemoryService();
-                const roles = await svc.listRoles();
+                const roles = await svc.listChatRoles();
                 const cards = await Promise.all(
                     roles.map(async (r): Promise<AIRole | null> => {
                         try {
@@ -497,6 +566,11 @@ const AIConversation: React.FC<AIConversationProps> = ({
         if (currentRole?.systemPrompt?.trim()) {
             parts.push(currentRole.systemPrompt.trim());
         }
+        // 回复格式约定：空行 = 连续发出多条消息，让长回复更像即时聊天
+        parts.push(
+            "【回复格式】一次回复中可以用空行（连续两次换行）分隔多个段落，每个空行都会被当作「连续发出的下一条消息」逐条展示给主人。" +
+                "长回复请拆成 2~3 条短消息，每条 1~2 句，更有聊天感；单个换行、短回复或代码/列表内容保持原样即可。",
+        );
         return parts.join("\n\n");
     }, [config, currentRole]);
 
@@ -571,10 +645,10 @@ const AIConversation: React.FC<AIConversationProps> = ({
                 // 如果有至少一条 AI 回复 → 批量保存为一个 conversation entry
                 if (userEntry && aiEntries.length > 0) {
                     const userText = userEntry.content;
-                    // 每条 AI 回复都单独加 AI：前缀
+                    // 每条 AI 回复都单独加 AI：前缀，并用 cleanForMemory 清洗后存
                     const chunk = [
-                        userText ? `用户：${userText}` : null,
-                        ...aiEntries.map((m) => `AI：${m.content.trim()}`),
+                        userText ? `用户：${stripImageMarkup(userText).trim()}` : null,
+                        ...aiEntries.map((m) => `AI：${cleanForMemory(m.content)}`),
                     ]
                         .filter((line): line is string => !!line)
                         .join("\n");
@@ -680,7 +754,14 @@ const AIConversation: React.FC<AIConversationProps> = ({
                             updated = [...updated, ...memeMessages];
                         }
 
-                        return updated;
+                        // 按空行展开多段回复，并把新产生的 split id 也纳入追踪
+                        const expanded = expandMultiLineReplies(updated);
+                        for (const m of expanded) {
+                            if (m.role === "assistant" && !allAiMsgIds.includes(m.id)) {
+                                allAiMsgIds.push(m.id);
+                            }
+                        }
+                        return expanded;
                     });
                     return;
                 }
@@ -724,25 +805,44 @@ const AIConversation: React.FC<AIConversationProps> = ({
 
                 if (message.type === "AI_CONVERSATION_CONTINUOUS_COMPLETE") {
                     // 所有连续回复轮次结束 —— 把正在 streaming 的消息都停掉
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.id === currentStreamingAiId
-                                ? { ...m, streaming: false }
-                                : m,
-                        ),
-                    );
+                    // 并按空行把单条回复展开成多条连续消息
+                    setMessages((prev) => {
+                        const expanded = expandMultiLineReplies(
+                            prev.map((m) =>
+                                m.id === currentStreamingAiId
+                                    ? { ...m, streaming: false }
+                                    : m,
+                            ),
+                        );
+                        // 把新产生的 split id 也纳入追踪，确保 persistTurn 能完整移除
+                        for (const m of expanded) {
+                            if (m.role === "assistant" && !allAiMsgIds.includes(m.id)) {
+                                allAiMsgIds.push(m.id);
+                            }
+                        }
+                        return expanded;
+                    });
                     return;
                 }
 
                 if (message.type === "AI_CONVERSATION_COMPLETE") {
-                    // 最终终点：确保所有 streaming 消息都停掉
-                    setMessages((prev) =>
-                        prev.map((m) =>
-                            m.role === "assistant" && m.streaming
-                                ? { ...m, streaming: false }
-                                : m,
-                        ),
-                    );
+                    // 最终终点：确保所有 streaming 消息都停掉，并按空行展开分段
+                    setMessages((prev) => {
+                        const expanded = expandMultiLineReplies(
+                            prev.map((m) =>
+                                m.role === "assistant" && m.streaming
+                                    ? { ...m, streaming: false }
+                                    : m,
+                            ),
+                        );
+                        // 把新产生的 split id 也纳入追踪，确保 persistTurn 能完整移除
+                        for (const m of expanded) {
+                            if (m.role === "assistant" && !allAiMsgIds.includes(m.id)) {
+                                allAiMsgIds.push(m.id);
+                            }
+                        }
+                        return expanded;
+                    });
 
                     // 纯工具轮（模型一句话都没说）：不写记忆，仅移除本轮 AI 占位。
                     // 只要留下过文本回复，就正常落库（文本和工具调用已被拆成两次回复）。

@@ -244,9 +244,6 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
               "开心",
               "笑哭",
               "狗头",
-              "熊猫头",
-              "奶龙",
-              "卡皮巴拉",
             ];
             return defaults[Math.floor(Math.random() * defaults.length)];
           })();

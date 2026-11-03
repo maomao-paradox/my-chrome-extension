@@ -565,22 +565,23 @@ export class DeepSeekClient {
             client_stream_id: generateStreamId(),
         });
 
-        if (callbacks?.onData) {
-            await this.sendStreamingRequest(
-                '/api/v0/chat/completion',
-                {
-                    headers: { 'x-ds-pow-response': powResponse },
-                    body,
-                },
-                callbacks,
-            );
-            return null;
-        }
-
-        return this.sendRequest('/api/v0/chat/completion', {
-            headers: { 'x-ds-pow-response': powResponse },
-            body,
-        });
+        // ⚠️ /api/v0/chat/completion 端点只会输出 SSE 流（"event: ..."/"data: ..." 行）。
+        // 即使调用方不关心流式内容（比如只要最终结果的短调用），也必须走流式路径
+        // 消费响应 —— 之前 callbacks?.onData 缺失时会落到 sendRequest 分支，
+        // 把 SSE 文本当 JSON 解析，抛出
+        // "SyntaxError: Unexpected token 'e', \"event: rea\"... is not valid JSON"。
+        await this.sendStreamingRequest(
+            '/api/v0/chat/completion',
+            {
+                headers: { 'x-ds-pow-response': powResponse },
+                body,
+            },
+            {
+                onData: callbacks?.onData,
+                onError: callbacks?.onError,
+            },
+        );
+        return null;
     }
 
     /**

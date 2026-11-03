@@ -26,7 +26,9 @@ import {
   cleanup,
   waitFor,
 } from "@testing-library/react";
-import AIConversation from "@/modules/sidebar/components/AIConversation";
+import AIConversation, {
+  splitIntoConsecutiveMessages,
+} from "@/modules/sidebar/components/AIConversation";
 
 /* ------------------------------------------------------------------ *
  * mock @/services/memory：提供可控的 listByCategory 数据
@@ -148,5 +150,39 @@ describe("AIConversation - 加载更早历史按钮", () => {
         queryByRole("button", { name: /加载更早|加载全部|已到最顶/ }),
       ).toBeNull();
     });
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * 空行分段 → 连续多条回复
+ * ------------------------------------------------------------------ */
+describe("splitIntoConsecutiveMessages —— 空行拆分为连续回复", () => {
+  it("双换行（空行）拆成多条消息（123\\n\\nabc → 两条）", () => {
+    expect(splitIntoConsecutiveMessages("123\n\nabc")).toEqual(["123", "abc"]);
+  });
+
+  it("单个换行不分段", () => {
+    expect(splitIntoConsecutiveMessages("123\nabc")).toEqual(["123\nabc"]);
+  });
+
+  it("单个空行把文本拆成多条消息", () => {
+    const parts = splitIntoConsecutiveMessages(
+      "第一句话喵~ \n\n 第二句话喵~",
+    );
+    expect(parts).toEqual(["第一句话喵~", "第二句话喵~"]);
+  });
+
+  it("多个连续空行也只产生空段过滤后的分段", () => {
+    const parts = splitIntoConsecutiveMessages("A\n\n\n\nB\n\nC");
+    expect(parts).toEqual(["A", "B", "C"]);
+  });
+
+  it("没有换行的普通回复保持单条", () => {
+    expect(splitIntoConsecutiveMessages("只有一句话")).toEqual(["只有一句话"]);
+  });
+
+  it("含代码块时不拆分，避免破坏代码", () => {
+    const text = "讲解如下：\n\n```ts\nconst a = 1;\n\nconst b = 2;\n```";
+    expect(splitIntoConsecutiveMessages(text)).toEqual([text.trim()]);
   });
 });

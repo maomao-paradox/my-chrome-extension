@@ -30,7 +30,7 @@
 
 import { completeChatFlow } from "../deepseek";
 import type { ChatHistoryMessage } from "@/types/web-mcp";
-import { getMemoryService } from "@/services/memory";
+import { getMemoryService, isFunctionalRole } from "@/services/memory";
 import type { ProactiveMood } from "./proactive-mood";
 import { getContinuousReplyProbability } from "./proactive-mood";
 import {
@@ -87,12 +87,19 @@ export class StreamManager {
     /**
      * 组装注入 system prompt 的记忆上下文
      * —— 纯辅助方法，方便测试
+     * —— 纯工具角色（graph_extractor / translator_* / textarea_ai_autofill ...）
+     *    不需要记忆注入，直接返回 baseSystemPrompt 原样
      */
     private async buildMemoryContext(
         role: string,
         prompt: string,
         baseSystemPrompt?: string,
     ): Promise<string | undefined> {
+        // 工具角色（表单填充 / 翻译 / 知识图谱）直接返回基础 prompt，
+        // 不注入记忆上下文 —— 它们是一次性任务，"记得的事"反而产生噪音
+        if (isFunctionalRole(role)) {
+            return baseSystemPrompt;
+        }
         try {
             const { assembledContext } = await this.memoryService.buildContext(role, prompt);
             if (!assembledContext) return baseSystemPrompt;
@@ -114,8 +121,9 @@ export class StreamManager {
         userPrompt: string,
         aiResponse: string,
     ): Promise<void> {
-        // 工具型请求（如知识图谱抽取）不写入角色记忆，避免 JSON 回复污染对话历史
-        if (role.startsWith("graph_extractor")) {
+        // 纯工具角色（graph_extractor / translator_* / textarea_ai_autofill ...）
+        // 的输出通常是 JSON 或结构化数据，写入记忆会污染对话历史，跳过
+        if (isFunctionalRole(role)) {
             return;
         }
         try {

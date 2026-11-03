@@ -395,6 +395,79 @@ describe("MemoryImportExport —— 导入导出", () => {
         // TEST_ROLE_2 没被涉及，应该保留
         expect(role2List).toHaveLength(1);
     });
+
+    it("导入只有记忆条目、没有身份设定的备份时自动创建角色", async () => {
+        const roleWithoutIdentity = "imported-role";
+        const imported: MemoryExportPayload = {
+            schemaVersion: 1,
+            exportedAt: new Date().toISOString(),
+            // 备份里没有任何身份设定
+            identities: [],
+            entries: [
+                {
+                    id: "auto-role-entry-1",
+                    role: roleWithoutIdentity,
+                    category: "fact",
+                    content: "备份里的记忆条目",
+                    importance: "medium",
+                    createdAt: Date.now(),
+                    lastAccessedAt: Date.now(),
+                    accessCount: 1,
+                },
+            ],
+            shortTerm: {},
+        };
+
+        const result = await importMemories(imported, "merge");
+
+        // 返回结果包含本次导入涉及的角色，供 UI 自动选中
+        expect(result.rolesImported).toContain(roleWithoutIdentity);
+        // 缺失身份的角色被自动补全，保证导入后无需手动新建角色
+        expect(result.identitiesImported).toBe(1);
+
+        const identity = await service.getIdentity(roleWithoutIdentity);
+        expect(identity).not.toBeNull();
+        expect(identity?.role).toBe(roleWithoutIdentity);
+        expect(identity?.displayName).toBe(roleWithoutIdentity);
+
+        // 记忆条目也已同步落库
+        const entries = await store.listEntries(roleWithoutIdentity);
+        expect(entries).toHaveLength(1);
+        expect(entries[0].content).toBe("备份里的记忆条目");
+    });
+
+    it("导入的角色已存在身份时不覆盖原身份", async () => {
+        await service.upsertIdentity({
+            role: TEST_ROLE,
+            displayName: "原有角色名",
+            systemPromptTemplate: "原有 system prompt",
+        });
+
+        const imported: MemoryExportPayload = {
+            schemaVersion: 1,
+            exportedAt: new Date().toISOString(),
+            identities: [],
+            entries: [
+                {
+                    id: "keep-identity-entry",
+                    role: TEST_ROLE,
+                    category: "fact",
+                    content: "新增记忆",
+                    importance: "medium",
+                    createdAt: Date.now(),
+                    lastAccessedAt: Date.now(),
+                    accessCount: 1,
+                },
+            ],
+            shortTerm: {},
+        };
+
+        await importMemories(imported, "merge");
+
+        const identity = await service.getIdentity(TEST_ROLE);
+        expect(identity?.displayName).toBe("原有角色名");
+        expect(identity?.systemPromptTemplate).toBe("原有 system prompt");
+    });
 });
 
 // ======================================================================

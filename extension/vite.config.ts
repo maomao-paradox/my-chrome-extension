@@ -39,6 +39,12 @@ export default ({
   const isProduction = env.NODE_ENV === "production";
 
   return defineConfig({
+    // 开发服务器配置：监听所有网络接口，支持远程访问
+    server: {
+      host: "0.0.0.0",
+      port: 5432,
+      strictPort: false,
+    },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

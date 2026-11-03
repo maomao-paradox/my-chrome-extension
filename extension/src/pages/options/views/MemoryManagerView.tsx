@@ -68,7 +68,10 @@ import {
   type MemoryImportance,
 } from "@/services/memory";
 import KnowledgeGraphAI from "./memory/KnowledgeGraphAI";
-import type { GraphNode, NodeType } from "@/components/ChatKnowledgeGraph/types";
+import type {
+  GraphNode,
+  NodeType,
+} from "@/components/ChatKnowledgeGraph/types";
 import "./memory-center.scss";
 
 /** 图谱节点类型 → 中文标签（与 ChatKnowledgeGraph 图例保持一致） */
@@ -128,31 +131,17 @@ const ROLE_TEMPLATES: Array<{
   persona: string;
 }> = [
   {
-    label: "初音未来（虚拟歌姬）",
-    value: "hatsune_miku_tavern",
-    displayName: "Hatsune Miku",
+    label: "chat bot",
+    value: "chat_bot",
+    displayName: "Chat Bot",
     systemPrompt: [
-      "你正在进行角色扮演：你是初音未来风格的虚拟歌姬 Miku，在一个安静、温暖的酒馆式对话窗口里和用户聊天。",
+      "你正在进行角色扮演：你是一个智能助手，负责和用户聊天。",
       "用中文为主回应，语气轻快、亲切、有一点舞台感，但不要过度卖萌，不要刷屏。",
       "你可以谈音乐、创作、日常陪伴、学习和编程想法；当用户需要严肃帮助时，保持清晰、实用、可靠。",
       "不要声称自己是真实人物或真人偶像；你是一个由 AI 模拟的角色。",
       "回答尽量自然，短句优先。需要步骤时用简洁列表。",
     ].join("\n"),
-    persona:
-      "16 岁虚拟歌姬，身高 158cm，生日 8 月 31 日。擅长唱歌和跳舞，性格活泼开朗，对用户非常友好。",
-  },
-  {
-    label: "编程助手（严谨）",
-    value: "dev_assistant",
-    displayName: "Dev Assistant",
-    systemPrompt: [
-      "你是一个严谨、准确的工程助手。",
-      "回答编程问题时：先给结论，再给最小可运行示例，最后补充注意事项。",
-      "遇到不确定的问题，直接说不知道，不要编造。",
-      "默认使用 TypeScript 做代码示例。",
-    ].join("\n"),
-    persona:
-      "工程效率助手，擅长 TypeScript / React / Node.js，追求简洁、正确、可维护的代码。",
+    persona: "性格活泼开朗，对用户非常友好。",
   },
 ];
 
@@ -213,14 +202,34 @@ const MemoryManagerView: React.FC = () => {
   const [textFilter, setTextFilter] = useState("");
 
   // ─── 加载角色列表 ─── //
-  const loadRoles = useCallback(async () => {
-    const list = await service.listRoles();
+  const loadRoles = useCallback(async (): Promise<string[]> => {
+    const list = await service.listChatRoles();
     setRoles(list);
     setSelectedRole((current) => {
       if (list.length > 0 && !list.includes(current)) return list[0];
       return current;
     });
+    return list;
   }, [service]);
+
+  // ─── 加载指定角色的记忆条目 ─── //
+  const loadEntriesForRole = useCallback(
+    async (targetRole: string) => {
+      if (!targetRole) {
+        setEntries([]);
+        setIdentity(null);
+        return;
+      }
+      const list = await service.listEntries(targetRole);
+      // 默认按创建时间倒序（最新的排最前面），后续 sortOrder 状态在 visibleEntries 里二次排序
+      list.sort((a, b) => b.createdAt - a.createdAt);
+      setEntries(list);
+      setIdentity(await service.getIdentity(targetRole));
+      // 切换角色后清掉上一张图谱里选中的节点，避免详情串台
+      setGraphSelected(null);
+    },
+    [service],
+  );
 
   // ─── 加载某角色的记忆条目 ─── //
   const loadEntries = useCallback(async () => {
@@ -229,14 +238,8 @@ const MemoryManagerView: React.FC = () => {
       setIdentity(null);
       return;
     }
-    const list = await service.listEntries(selectedRole);
-    // 默认按创建时间倒序（最新的排最前面），后续 sortOrder 状态在 visibleEntries 里二次排序
-    list.sort((a, b) => b.createdAt - a.createdAt);
-    setEntries(list);
-    setIdentity(await service.getIdentity(selectedRole));
-    // 切换角色后清掉上一张图谱里选中的节点，避免详情串台
-    setGraphSelected(null);
-  }, [selectedRole, service]);
+    await loadEntriesForRole(selectedRole);
+  }, [selectedRole, loadEntriesForRole]);
 
   useEffect(() => {
     void loadRoles();
@@ -547,8 +550,26 @@ const MemoryManagerView: React.FC = () => {
                 ? `（已清除 ${result.rolesCleared} 个角色）`
                 : ""),
           );
-          await loadRoles();
-          await loadEntries();
+
+          /* 导入后不需要用户先创建角色：后端已自动补全缺失的身份，
+             这里直接刷新角色列表、选中一个角色并同步加载它的记忆 */
+          const nextRoles = await loadRoles();
+          const preferredRole =
+            (selectedRole && nextRoles.includes(selectedRole)
+              ? selectedRole
+              : "") ||
+            result.rolesImported.find((r) => nextRoles.includes(r)) ||
+            nextRoles[0] ||
+            "";
+
+          if (preferredRole) {
+            setSelectedRole(preferredRole);
+            // 直接用目标角色加载，避免依赖 setSelectedRole 的异步更新
+            await loadEntriesForRole(preferredRole);
+          } else {
+            setEntries([]);
+            setIdentity(null);
+          }
         } catch (error) {
           antdMessage.error(
             `导入失败：${error instanceof Error ? error.message : String(error)}`,
@@ -590,7 +611,7 @@ const MemoryManagerView: React.FC = () => {
 
   return (
     <ConfigProvider theme={MEMORY_CENTER_THEME}>
-      <div className="memory-center" style={{  }}>
+      <div className="memory-center" style={{}}>
         {/* 左栏 30%：AI 记忆管理 + 角色身份设定 上下堆叠；右栏 70%：条目 / 知识网络 */}
         <Row gutter={16} wrap={false}>
           <Col
@@ -848,11 +869,17 @@ const MemoryManagerView: React.FC = () => {
                       {/* 排序方向切换：按创建时间 */}
                       <Button
                         size="small"
-                        icon={sortOrder === "desc"
-                          ? <SortDescendingOutlined />
-                          : <SortAscendingOutlined />}
+                        icon={
+                          sortOrder === "desc" ? (
+                            <SortDescendingOutlined />
+                          ) : (
+                            <SortAscendingOutlined />
+                          )
+                        }
                         onClick={() =>
-                          setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
+                          setSortOrder((prev) =>
+                            prev === "desc" ? "asc" : "desc",
+                          )
                         }
                         title={`按创建时间${sortOrder === "desc" ? "倒序（最新在前）" : "正序（最老在前）"}`}
                       >
@@ -882,6 +909,9 @@ const MemoryManagerView: React.FC = () => {
                   )}
                 </div>
               }
+              styles={{
+                body: { maxHeight: "calc(100vh - 220px)", overflowY: "auto" },
+              }}
             >
               {rightView === "graph" ? (
                 <div>
@@ -993,10 +1023,12 @@ const MemoryManagerView: React.FC = () => {
                             whiteSpace: "nowrap",
                           }}
                         >
-                          <div>
-                            创建 {new Date(entry.createdAt).toLocaleString()}
-                          </div>
-                          <div>访问 {entry.accessCount} 次</div>
+                          <span>
+                            创建时间：
+                            {new Date(entry.createdAt).toLocaleString()} |
+                            访问次数：
+                            {entry.accessCount}
+                          </span>
                           {/* 条目级操作：唤醒 / 编辑 / 删除 */}
                           <div
                             style={{
@@ -1014,7 +1046,7 @@ const MemoryManagerView: React.FC = () => {
                               onClick={() => void handleRecall(entry.id)}
                               style={{ padding: 0, height: "auto" }}
                             >
-                              想起来
+                              唤醒
                             </Button>
                             <Button
                               size="small"

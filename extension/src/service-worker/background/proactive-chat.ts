@@ -17,7 +17,7 @@
  * @author Vivy
  * @date 2026-10-29
  */
-import { getMemoryService } from "@/services/memory";
+import { getMemoryService, isFunctionalRole } from "@/services/memory";
 import {
     classifyDecayState,
     computeRetention,
@@ -62,33 +62,17 @@ export const PROACTIVE_ALARM_NAME = "ai-proactive-chat";
 /**
  * 随机间隔下限（分钟）。
  * chrome.alarms 的 delayInMinutes 硬下限是 30 秒（Chrome 120+，更早版本 1 分钟），
- * 所以「0~20 分钟」实际落地为「0.5~20 分钟」。
+ * 所以「0~120 分钟」实际落地为「0.5~120 分钟」。
  */
 const MIN_DELAY_MINUTES = 0.5;
-/** 随机间隔上限（分钟）—— 之前 10 分钟太频繁，调到 20 分钟更自然 */
-const MAX_DELAY_MINUTES = 20;
+/** 随机间隔上限（分钟）—— 扩大到 120 分钟，避免过于频繁 */
+const MAX_DELAY_MINUTES = 120;
 /** AI 请求超时（毫秒）—— 超时后降级到本地模板 */
 const REQUEST_TIMEOUT_MS = 30_000;
 /** 主动消息最大长度（按字符/码点裁剪） */
 const MAX_MESSAGE_LENGTH = 120;
 /** 默认角色 —— 主人实际使用的记忆命名空间 */
 const DEFAULT_ROLE = "vivy_catgirl";
-
-/**
- * 禁止主动对话使用的内部功能角色。
- *
- * 这些角色的 identity.systemPromptTemplate 里带着专属功能的协议提示词
- * （例如 textarea_ai_autofill 的 [SYSTEM PROTOCOL] 富文本生成指令），
- * 复用会导致：
- *   1. 主动对话的系统提示词被功能协议污染；
- *   2. 闲聊消息写进功能角色的记忆池，反过来干扰其 RAG 检索。
- */
-const EXCLUDED_ROLES = new Set([
-    // 页面 textarea 富文本填充（modules/textSelectionToolbar/textarea-ai.ts）
-    "textarea_ai_autofill",
-    // 页面表格数据生成（content/content-radius.tsx）
-    "table_data_generator",
-]);
 
 /* ---------- 作息调度 ---------- */
 
@@ -434,17 +418,16 @@ function hasUsableAIConfig(
     return hasApiKey || hasDeepSeekCredentials;
 }
 
-/** 取当前角色：优先落到侧边栏聊天窗的默认角色，且必须排除内部功能角色 */
+/** 取当前角色：落到聊天角色（listChatRoles 已过滤纯工具角色），且必须排除内部功能角色 */
 async function resolveRole(memoryService: MemoryService): Promise<string> {
     try {
-        const roles = await memoryService.listRoles();
+        const roles = await memoryService.listChatRoles();
 
         // 1) 优先聊天窗默认角色 —— 消息直接可见
         if (roles.includes(DEFAULT_ROLE)) return DEFAULT_ROLE;
 
-        // 2) 其次任一非内部功能角色
-        const candidates = roles.filter((role) => !EXCLUDED_ROLES.has(role));
-        if (candidates.length > 0) return candidates[0];
+        // 2) 其次任一聊天角色（listChatRoles 已确保非工具类）
+        if (roles.length > 0) return roles[0];
 
         // 3) 全部被排除时也绝不回落 —— 宁可新建干净命名空间，
         //    也不把闲聊写进 textarea_ai_autofill 这类功能角色
@@ -665,16 +648,16 @@ async function notifyActiveTab(text: string, role: string): Promise<void> {
  * 一次完整的主动对话流程：生成 → 写记忆 → 提醒。
  * 生成失败降级到模板；写记忆失败则跳过提醒（避免"提醒了却查不到消息"）。
  */
-async function runProactiveMessage(): Promise<void> {
+async function runProactiveMessage(): Promise<boolean> {
     const now = new Date();
 
     // 作息保护：上班前 / 下班后不发起任何请求，避免整夜持续消耗 token
-    if (!isWorkTime(now)) return;
+    if (!isWorkTime(now)) return false;
 
     const dateKey = getDateKey(now);
 
     // 当天已经发过下班收尾消息 → 不再请求
-    if ((await getOffDutyDate()) === dateKey) return;
+    if ((await getOffDutyDate()) === dateKey) return false;
 
     const closing = isOffDutyWindow(now);
     const period = getTimePeriod(now);
@@ -774,7 +757,7 @@ async function runProactiveMessage(): Promise<void> {
         });
     } catch (error) {
         maLogger.error("[ProactiveChat] 保存主动消息到记忆失败:", error);
-        return;
+        return false;
     }
 
     // 推送成功后才落库心情 —— 生成/写库失败不应计入「被忽略」
@@ -860,6 +843,131 @@ async function runProactiveMessage(): Promise<void> {
                 `累计续轮 ${contRound - 1} 次`,
             );
         }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+     * 让 AI 决定下次主动消息的间隔 —— 独立短调用，不带截图不带 tools
+     *   - 收尾消息（closing）直接跳过：已经标记 off-duty，下次排到明天上班
+     *   - 非 closing 时尝试让 AI 输出一个 0.5~120 的数字
+     *   - 成功 → 用 AI 给的间隔精确排期，返回 true（告诉调用方不用再随机排）
+     *   - 失败/解析异常 → 返回 false（调用方兜底 scheduleNext 随机排）
+     * ══════════════════════════════════════════════════════════════════ */
+    if (closing || !sharedSystemPrompt || !aiConfig) {
+        return false;
+    }
+
+    try {
+        const minutes = await pickNextInterval(role, sharedSystemPrompt, aiConfig, finalText);
+        if (minutes !== null) {
+            await scheduleProactiveMessageIn(minutes);
+            maLogger.info(
+                `[ProactiveChat] 已按 AI 决定的 ${minutes} 分钟精确排期，跳过随机排`,
+            );
+            return true;
+        }
+    } catch (err) {
+        maLogger.warn("[ProactiveChat] pickNextInterval 异常，兜底随机排:", err);
+    }
+    return false;
+}
+
+/**
+ * 让 AI 根据刚发完的主动消息和心情，决定下次主动找主人的间隔。
+ * 独立短调用（不带截图、不带 tools），只输出一个 0.5~120 的数字。
+ * 失败或返回无效值时返回 null，调用方会兜底用随机间隔。
+ *
+ * @returns 夹取后的分钟数，或 null（让调用方兜底）
+ */
+async function pickNextInterval(
+    role: string,
+    sharedSystemPrompt: string,
+    aiConfig: Awaited<ReturnType<typeof loadAIConfig>>,
+    lastText: string,
+): Promise<number | null> {
+    try {
+        if (!aiConfig || !hasUsableAIConfig(aiConfig)) return null;
+
+        const reqPrompt =
+            `你刚才主动找主人说了这句话："${lastText.slice(0, 80)}"\n\n` +
+            `请决定下一次主动找主人的间隔（分钟）。` +
+            `规则：只输出一个数字，范围 0.5~120。` +
+            `寂寞时可设 2~5 分钟，忙碌或不想打扰时设 30~120 分钟。` +
+            `不要输出任何其他内容，包括解释、标点、引号。`;
+
+        // ⚠️ completeChatFlow 的参数是按位置排列的：
+        //   (prompt, role, callbacks, provider, model, apiKey, apiBaseUrl, systemPrompt, ...)
+        // 之前把 aiConfig 误传进 callbacks 位置 —— onData 缺失导致 deepseek 链路
+        // 走了非流式分支，把 SSE 文本当 JSON 解析直接报 SyntaxError。
+        // 且 deepseek 链路走 SSE 流式后返回值是 null，最终文本必须用 onData 自己攒。
+        const textPromise = new Promise<string | undefined>((resolve) => {
+            let text = "";
+            let settled = false;
+            const settle = (value: string | undefined) => {
+                if (settled) return;
+                settled = true;
+                resolve(value);
+            };
+            void completeChatFlow(
+                reqPrompt,
+                role,
+                {
+                    onData: (data: string) => {
+                        text += data;
+                    },
+                    onComplete: () => settle(text.trim() || undefined),
+                    onError: (error: unknown) => {
+                        maLogger.warn(
+                            "[ProactiveChat] pickNextInterval AI 调用失败:",
+                            error,
+                        );
+                        settle(undefined);
+                    },
+                },
+                aiConfig.provider,
+                aiConfig.modelId,
+                aiConfig.apiKey,
+                aiConfig.apiBaseUrl,
+                sharedSystemPrompt,
+            )
+                .then(() => settle(text.trim() || undefined))
+                .catch(() => settle(undefined));
+        });
+
+        // 10 秒超时兜底：超时返回 undefined → 调用方用随机间隔
+        const timeoutPromise = new Promise<undefined>((resolve) => {
+            setTimeout(() => {
+                maLogger.info(
+                    "[ProactiveChat] pickNextInterval 10s 超时，兜底随机间隔",
+                );
+                resolve(undefined);
+            }, 10_000);
+        });
+
+        const result = await Promise.race([textPromise, timeoutPromise]);
+        if (!result) return null;
+
+        // 从输出里抠出第一个数字 —— 模型偶尔会在数字前后加文字，做个宽容解析
+        const match = result.match(/(\d+(?:\.\d+)?)/);
+        if (!match) {
+            maLogger.info(
+                `[ProactiveChat] pickNextInterval 未匹配到数字，输出: "${result}"`,
+            );
+            return null;
+        }
+        const num = parseFloat(match[1]);
+        if (!isFinite(num)) return null;
+
+        const clamped = Math.min(
+            MAX_MANUAL_DELAY_MINUTES,
+            Math.max(MIN_DELAY_MINUTES, num),
+        );
+        maLogger.info(
+            `[ProactiveChat] AI 决定下次间隔 ${clamped} 分钟（原始输出: "${result.trim()}"）`,
+        );
+        return clamped;
+    } catch (err) {
+        maLogger.warn("[ProactiveChat] pickNextInterval 异常:", err);
+        return null;
     }
 }
 
@@ -955,13 +1063,16 @@ export function initProactiveChat(): void {
         chrome.alarms.onAlarm.addListener((alarm) => {
             if (alarm.name !== PROACTIVE_ALARM_NAME) return;
 
-            // 无论成功失败都续排，避免链路中断后永久停摆
+            /* runProactiveMessage 返回 true 表示 AI 已经决定并排好下次间隔，
+               此时跳过 finally 里的随机排，避免覆盖 AI 的精确设定 */
             void (async () => {
+                let skipRandomSchedule = false;
                 try {
-                    await runProactiveMessage();
+                    skipRandomSchedule = await runProactiveMessage();
                 } catch (error) {
                     maLogger.warn("[ProactiveChat] 主动对话执行失败:", error);
-                } finally {
+                }
+                if (!skipRandomSchedule) {
                     await scheduleNext();
                 }
             })();

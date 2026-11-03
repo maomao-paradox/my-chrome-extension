@@ -22,6 +22,7 @@ import type { MemoryEntry } from "@/services/memory/types";
 /** 所有外部依赖的 mock 句柄（hoisted 保证 vi.mock 工厂可访问） */
 const mocks = vi.hoisted(() => ({
     listRoles: vi.fn(),
+    listChatRoles: vi.fn(),
     getIdentity: vi.fn(),
     addEntry: vi.fn(),
     listByCategory: vi.fn(),
@@ -38,16 +39,32 @@ const mocks = vi.hoisted(() => ({
 
 /* ---------- 依赖替身 ---------- */
 
-vi.mock("@/services/memory", () => ({
-    getMemoryService: () => ({
-        listRoles: mocks.listRoles,
-        getIdentity: mocks.getIdentity,
-        addEntry: mocks.addEntry,
-        listByCategory: mocks.listByCategory,
-        listEntries: mocks.listEntries,
-        buildContext: mocks.buildContext,
-    }),
-}));
+vi.mock("@/services/memory", async (importOriginal) => {
+    const orig = await importOriginal<typeof import("@/services/memory")>();
+    return {
+        ...orig,
+        // 用真实 isFunctionalRole（纯函数，不依赖 storage）
+        isFunctionalRole: orig.isFunctionalRole,
+        getMemoryService: () => ({
+            listRoles: mocks.listRoles,
+            // listChatRoles 复用 listRoles 的 mock，让真实 isFunctionalRole 做过滤
+            listChatRoles: mocks.listChatRoles,
+            getIdentity: mocks.getIdentity,
+            addEntry: mocks.addEntry,
+            listByCategory: mocks.listByCategory,
+            listEntries: mocks.listEntries,
+            buildContext: mocks.buildContext,
+        }),
+    };
+});
+// 兜底：barrel export 的 memory-service 也要被 mock 成真函数
+vi.mock("@/services/memory/memory-service", async (importOriginal) => {
+    const orig = await importOriginal<typeof import("@/services/memory/memory-service")>();
+    return {
+        ...orig,
+        isFunctionalRole: orig.isFunctionalRole,
+    };
+});
 
 vi.mock("@/service-worker/chrome-api/ai-config", () => ({
     loadAIConfig: mocks.loadAIConfig,
@@ -103,6 +120,7 @@ beforeEach(() => {
     mocks.tabsSendMessage.mockReset().mockResolvedValue(undefined);
 
     mocks.listRoles.mockReset().mockResolvedValue(["miku"]);
+    mocks.listChatRoles.mockReset().mockResolvedValue(["miku"]);
     mocks.listByCategory.mockReset().mockResolvedValue([]);
     mocks.listEntries.mockReset().mockResolvedValue([]);
     mocks.getIdentity.mockReset().mockResolvedValue(null);
@@ -176,7 +194,7 @@ describe("proactive-chat（background 调度层）", () => {
         expect(name).toBe(mod.PROACTIVE_ALARM_NAME);
         // chrome.alarms 硬下限为 30 秒，因此下界是 0.5 分钟
         expect(info.delayInMinutes).toBeGreaterThanOrEqual(0.5);
-        expect(info.delayInMinutes).toBeLessThanOrEqual(20);
+        expect(info.delayInMinutes).toBeLessThanOrEqual(120);
     });
 
     it("alarm 已存在时不会重复创建", async () => {
@@ -213,6 +231,8 @@ describe("proactive-chat（background 调度层）", () => {
 
     it("角色列表只有功能角色时，也绝不会写入 textarea_ai_autofill", async () => {
         mocks.listRoles.mockResolvedValue(["textarea_ai_autofill"]);
+        // listChatRoles 过滤后为空 → resolveRole 走 DEFAULT_ROLE 兜底
+        mocks.listChatRoles.mockResolvedValue([]);
 
         const mod = await loadModule();
         mod.initProactiveChat();
@@ -239,6 +259,8 @@ describe("proactive-chat（background 调度层）", () => {
             "miku",
             "vivy_catgirl",
         ]);
+        // listChatRoles 过滤掉工具类 → 只剩聊天角色
+        mocks.listChatRoles.mockResolvedValue(["miku", "vivy_catgirl"]);
 
         const mod = await loadModule();
         mod.initProactiveChat();
@@ -539,8 +561,12 @@ describe("心情与时间上下文", () => {
             );
         }
 
-        expect(mocks.completeChatFlow.mock.calls[2][7]).toContain("闹小脾气");
-        expect(mocks.completeChatFlow.mock.calls[5][7]).toContain(
+        // 每轮 runProactiveMessage 触发 2 次 completeChatFlow：
+        //   - 主消息生成（偶数索引 calls[0], calls[2], calls[4]...）
+        //   - pickNextInterval 让 AI 决定下次间隔（奇数索引）
+        // 迭代 2 对应 ignoredStreak=3 → 闹脾气；迭代 5 对应 ignoredStreak=6 → 发疯
+        expect(mocks.completeChatFlow.mock.calls[4][7]).toContain("闹小脾气");
+        expect(mocks.completeChatFlow.mock.calls[10][7]).toContain(
             "原样连续重复",
         );
     });

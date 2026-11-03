@@ -27,6 +27,30 @@ import type {
     ShortTermSnapshot,
 } from "./types";
 
+/**
+ * 判定某个角色是否为纯工具类（非聊天角色）。
+ * 工具类角色不应出现在 options 记忆页面的角色列表里，
+ * 也不应在 AI 请求时走记忆读写链路，避免 JSON/工具输出污染对话历史。
+ *
+ * 识别规则：
+ *   - 已知固定角色（graph_extractor / textarea_ai_autofill / table_data_generator ...）
+ *   - 动态角色前缀（translator_*：每个 hostname 一个独立命名空间）
+ *
+ * 和 proactive-chat.ts 的 EXCLUDED_ROLES 保持一致，统一维护在这里。
+ */
+const KNOWN_FUNCTIONAL_ROLES = new Set([
+    "graph_extractor",
+    "textarea_ai_autofill",
+    "table_data_generator",
+]);
+const FUNCTIONAL_ROLE_PREFIXES = ["translator_"];
+
+export function isFunctionalRole(role: string | undefined | null): boolean {
+    if (!role) return false;
+    if (KNOWN_FUNCTIONAL_ROLES.has(role)) return true;
+    return FUNCTIONAL_ROLE_PREFIXES.some((prefix) => role.startsWith(prefix));
+}
+
 /** 上下文构建时的 token 预算（字符数近似） */
 const CONTEXT_BUDGET = 2000;
 
@@ -214,9 +238,21 @@ export class MemoryService {
         return null;
     }
 
-    /** 列出所有已注册角色 */
+    /**
+     * 列出所有已注册角色（包括纯工具类）。
+     * —— options 记忆管理页默认调用这个，给工具角色加标签显示，方便排查。
+     */
     async listRoles(): Promise<string[]> {
         return this.store.listAllRoles();
+    }
+
+    /**
+     * 仅列出「聊天角色」（过滤掉 graph_extractor / translator_* 等纯工具类）。
+     * —— 给 AI 聊天窗口、proactive-chat 主动对话等只需要聊天角色的调用方使用。
+     */
+    async listChatRoles(): Promise<string[]> {
+        const all = await this.store.listAllRoles();
+        return all.filter((r) => !isFunctionalRole(r));
     }
 
     /** 清除某角色所有记忆（忘记一切） */
@@ -383,15 +419,29 @@ export class MemoryService {
     // ─── 上下文构建 ─── //
 
     /**
-     * 构建注入 system prompt 的记忆上下文
-     * —— 这是最核心的方法，每次对话前调用
+     * 构建注入 system prompt 的记忆上下文（身份 + 短期快照 + 长期 RAG 检索片段）。
+     *
+     * ⚠️ 纯工具角色（graph_extractor / translator_* / textarea_ai_autofill ...）
+     *    直接返回空 assembledContext —— 它们是一次性任务，
+     *    "你记得的关于用户的事" 只会产生噪音，不会提升输出质量。
      *
      * @param role  目标角色
      * @param query 当前用户输入（用于检索相关记忆）
      */
     async buildContext(role: string, query?: string): Promise<MemoryQueryResult> {
-        const [identity, shortTerm, longTermEntries] = await Promise.all([
-            this.store.getIdentity(role),
+        // 工具角色不注入记忆上下文，但 identity 还是正常返回（系统需要知道自己是谁）
+        const identity = await this.store.getIdentity(role);
+
+        if (isFunctionalRole(role)) {
+            return {
+                identity: identity ?? undefined,
+                shortTerm: undefined,
+                entries: [],
+                assembledContext: "",
+            };
+        }
+
+        const [shortTerm, longTermEntries] = await Promise.all([
             this.store.getShortTerm(role),
             this.retrieve(role, query),
         ]);

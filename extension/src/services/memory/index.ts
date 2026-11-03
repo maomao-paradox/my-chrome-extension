@@ -18,7 +18,8 @@
  *   await downloadMemoriesAsFile();
  */
 
-export { getMemoryService, MemoryService } from "./memory-service";
+export { getMemoryService, MemoryService, isFunctionalRole } from "./memory-service";
+// listChatRoles 是 MemoryService 的实例方法，不需要额外 export
 export { getMemoryStore, MemoryStore, generateMemoryId } from "./memory-store";
 export {
     exportAllMemories,
