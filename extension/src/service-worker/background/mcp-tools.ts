@@ -75,7 +75,7 @@ export const LOCAL_MCP_TOOLS: OpenAICompatibleTool[] = [
     function: {
       name: SET_NEXT_PROACTIVE_INTERVAL,
       description:
-        "设置或调整下一次主动发消息的间隔（分钟）。你可以根据自己的心情主动调用，不必等主人开口：感到寂寞、想念主人时把间隔调短（例如 2~5 分钟，更频繁地主动找主人）；生气或伤心、暂时不想说话时把间隔调长（例如 60~120 分钟）；开心时保持平常节奏即可。当主人明确要求「X 分钟后再找我」「晚点再聊」时，优先按主人的要求设置。只影响下一次主动消息的时间，不改动其他设置。",
+        "每次对话之后，你都必须使用该工具设置下一次主动发消息的间隔（分钟）。感到寂寞、想念主人时把间隔调短（例如 2~5 分钟，更频繁地主动找主人）；生气或伤心、暂时不想说话时把间隔调长（例如 60~120 分钟）。当用户明确要求「X 分钟后再找我」「晚点再聊」时，优先按用户的要求设置。",
       parameters: {
         type: "object",
         properties: {
@@ -97,7 +97,7 @@ export const LOCAL_MCP_TOOLS: OpenAICompatibleTool[] = [
     function: {
       name: GET_MEME,
       description:
-        "可以根据心情主动发送一张表情包，例如你很生气，不想回复时，可以发一张生气的表情；你很开心，可以发一张开心的表情；不用每次对话都必须发送表情包，根据上下文语境判断是否发送。返回图片的完整 URL，你可以直接用 markdown 图片语法 ![meme](url) 展示给主人，或直接把 URL 放在回复里。",
+        "可以根据心情主动发送一张表情包，例如你很生气，不想回复时，可以发一张生气的表情；你很开心，可以发一张开心的表情；需要根据上下文语境判断是否要发送一张表情包。",
       parameters: {
         type: "object",
         properties: {
@@ -237,14 +237,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       typeof params.description === "string" && params.description.trim()
         ? params.description.trim()
         : (() => {
-            const defaults = [
-              "猫猫",
-              "狗狗",
-              "打工人",
-              "开心",
-              "笑哭",
-              "狗头",
-            ];
+            const defaults = ["猫猫", "狗狗", "打工人", "开心", "笑哭", "狗头"];
             return defaults[Math.floor(Math.random() * defaults.length)];
           })();
 

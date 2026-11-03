@@ -1,0 +1,20 @@
+# 构建产物（容器内重新编译，无需宿主机 target）
+target/
+
+# 版本控制与本地环境
+.git
+.env
+
+# 本地数据目录（容器内使用 /data 卷）
+data/
+
+# 测试目录（cargo build --release 不需要，减小构建上下文）
+tests/
+
+# Docker 资产自身
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 文档
+README.md

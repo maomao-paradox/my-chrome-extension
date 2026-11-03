@@ -28,6 +28,7 @@ extension/.env*
 !extension/.env.template
 
 # Backend
+memory-server/target
 
 # Editor directories and files
 .vscode/*

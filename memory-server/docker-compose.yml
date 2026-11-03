@@ -1,0 +1,19 @@
+# memory-server 便捷编排：单容器 + 命名卷持久化 SQLite 数据
+services:
+  memory-server:
+    build: .
+    ports:
+      - "8790:8790"
+    volumes:
+      # SQLite 数据文件持久化（容器重建后数据保留）
+      - memory-data:/data
+    environment:
+      RUST_LOG: info
+      # 开启鉴权时取消注释并替换为强随机令牌：
+      # API_TOKEN: "change-me-to-a-strong-random-token"
+      # 自定义 CORS 源（逗号分隔）：
+      # CORS_ALLOWED_ORIGINS: "https://example.com,https://app.example.com"
+    restart: unless-stopped
+
+volumes:
+  memory-data:

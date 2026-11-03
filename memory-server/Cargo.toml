@@ -1,0 +1,41 @@
+# memory-server：记忆系统后端服务（Rust 实现）
+#
+# 分层记忆 + 艾宾浩斯遗忘曲线 + BM25 检索的服务端落地，
+# 本文件仅描述构建配置，业务说明见各模块注释。
+
+[package]
+name = "memory-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# HTTP 框架与中间件栈
+axum = "0.8"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace", "limit"] }
+# 异步运行时（完整特性）
+tokio = { version = "1", features = ["full"] }
+# 序列化
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# 数据库：SQLite + 嵌入式迁移（运行时检查查询，避免编译期依赖数据库）
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "migrate"] }
+# 日志与链路追踪
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# 分词与随机数（RAG 检索、ID 生成，后续任务使用）
+regex = "1"
+rand = "0.9"
+# 错误处理
+thiserror = "2"
+anyhow = "1"
+
+[dev-dependencies]
+# util 特性提供 ServiceExt::oneshot，用于路由单元测试
+tower = { version = "0.5", features = ["util"] }
+
+# Release 构建优化：链接时优化 + 单代码生成单元 + 剥离符号
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
