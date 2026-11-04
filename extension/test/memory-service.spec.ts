@@ -12,6 +12,10 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+    MemoryBackendClient,
+    setMemoryBackendClient,
+} from "@/services/memory/backend-client";
+import {
     getMemoryStore,
     generateMemoryId,
 } from "@/services/memory/memory-store";
@@ -35,6 +39,15 @@ let service: MemoryService;
 let store: ReturnType<typeof getMemoryStore>;
 
 beforeEach(() => {
+    // 本文件只测本地实现：注入必定失败的探针，确保门面稳定走 chrome.storage
+    setMemoryBackendClient(
+        new MemoryBackendClient({
+            fetchImpl: async () => {
+                throw new TypeError("backend disabled in unit tests");
+            },
+        }),
+    );
+
     // vitest 会在每次 import 时重置模块吗？不一定，所以手动 clear
     store = getMemoryStore();
     store.invalidateCache();
@@ -46,6 +59,7 @@ afterEach(async () => {
     await store.clearRole(TEST_ROLE);
     await store.clearRole(TEST_ROLE_2);
     store.invalidateCache();
+    setMemoryBackendClient(null);
 });
 
 // ======================================================================

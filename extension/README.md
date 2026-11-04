@@ -140,6 +140,17 @@ npx vitest run test/content-feature-manager.spec.ts
 - 首次发起 DeepSeek 请求且本地没有凭证时，扩展会打开 `chat.deepseek.com` 等待用户登录；登录成功后读取页面令牌及包含 HttpOnly 项的 Cookies，并保存到 `chrome.storage.local` 的 `ai_assistant_config` 中供后续请求使用。
 - DeepSeek 登录初始化最长等待 5 分钟；凭证获取成功后授权标签页会自动关闭，不再回退到扩展内置的默认令牌或 Cookies。
 
+### AI 记忆系统与后端探针
+
+- 记忆读写统一走 `src/services/memory` 的统一门面；首次调用时先探测 `GET /health`。
+- 探针通过 → 身份、条目、检索、上下文、observe、短期摘要与导入导出全部请求 `memory-server`；探针失败 → 自动回退到原有的 `chrome.storage.local` 本地实现，本地行为保持不变。
+- 探针结果带缓存：健康 30 秒、失败 10 秒，避免后端离线时反复超时；并发调用会复用同一次探针。
+- 后端业务请求发生网络中断或 5xx 时，本次调用立即回退本地，并把探针标记为失败，后续直接走本地。
+- 后端配置保存在 `chrome.storage.local`：`memoryBackendBaseUrl`（默认 `http://127.0.0.1:8790`）与可选的 `memoryBackendApiToken`；设置令牌后业务请求会同时携带 `Authorization: Bearer` 与 `X-API-Key`。
+- 设置页首页的 HUD 信号牌跟随探针状态（彩蛋）：后端在线显示 `SIGNAL ACQUIRED`，离线显示 `SIGNAL LOST`，每 30 秒自动刷新。
+- 记忆管理页在后端在线时提供「迁移本地到后端」按钮：把浏览器 `chrome.storage` 中的全部角色记忆（身份/条目/短期摘要）一键发送到后端，支持合并/替换两种模式，不删除本地数据。
+- 注意：项目使用 React 19，antd 静态方法（`Modal.confirm` / `message.*`）依赖 `@ant-design/v5-patch-for-react-19` 补丁，已在 options 入口引入；新增使用静态方法的页面入口时同样需要引入该补丁。
+
 ### 网页工具（WebMCP）
 
 - 侧边栏“网页工具”页会发现当前网页及 iframe 注册的 WebMCP 工具，工具卡片会标明 frame，支持 JSON 参数手动执行。

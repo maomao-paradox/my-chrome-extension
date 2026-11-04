@@ -16,6 +16,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useOptionsPerformance } from "../composables/useOptionsPerformance";
+import { getMemoryBackendClient } from "@/services/memory/backend-client";
 import SignalGlitchCard from "@/components/SignalGlitchCard";
 import TextScramble from "@/components/TextScramble";
 import "./hero-section.scss";
@@ -113,15 +114,49 @@ const SCRAMBLE_PHRASES = [
 /** 乱码字符集 */
 const SCRAMBLE_CHARS = "!<>-_\\/[]{}?=+*^?#________";
 
+/* ── 后端信号牌文案（彩蛋） ── */
+/** 探针通过：信号已捕获 */
+const SIGNAL_ONLINE_TEXT = "SIGNAL ACQUIRED";
+/** 探针失败：信号丢失 */
+const SIGNAL_OFFLINE_TEXT = "SIGNAL LOST";
+/** 信号牌刷新间隔（与后端探针缓存 TTL 对齐） */
+const SIGNAL_PROBE_INTERVAL_MS = 30_000;
+
 /* ══════════════════════════════════════════════════════════════════
  * 主组件
  * ══════════════════════════════════════════════════════════════════ */
+
+/** 根据后端探针结果解析信号牌文案（导出供单元测试） */
+export const resolveSignalText = (online: boolean): string =>
+  online ? SIGNAL_ONLINE_TEXT : SIGNAL_OFFLINE_TEXT;
 
 const HeroSection: React.FC = () => {
   /* ── 性能级别（low 时停用脉冲与虚线动画） ── */
   const { performanceLevel } = useOptionsPerformance();
   /* ── 画布 ref + 流线段坐标（随方框真实位置动态计算） ── */
   const flowRef = useRef<HTMLDivElement>(null);
+  /* ── 后端信号状态：探针通过 → SIGNAL ACQUIRED，失败 → SIGNAL LOST ── */
+  const [backendOnline, setBackendOnline] = useState(false);
+
+  useEffect(() => {
+    let disposed = false;
+
+    /** 探测后端健康状态（探针缓存由 client 内部处理） */
+    const probeBackend = async () => {
+      const online = await getMemoryBackendClient().isAvailable();
+      if (!disposed) setBackendOnline(online);
+    };
+
+    void probeBackend();
+    const timer = setInterval(() => {
+      void probeBackend();
+    }, SIGNAL_PROBE_INTERVAL_MS);
+
+    return () => {
+      disposed = true;
+      clearInterval(timer);
+    };
+  }, []);
 
   useEffect(() => {
     const el = flowRef.current;
@@ -236,9 +271,9 @@ const HeroSection: React.FC = () => {
    * ══════════════════════════════════════════════════════════════════ */
   return (
     <section className={consoleClass} aria-label="AI 核心链路">
-      {/* 顶部 HUD：左侧点阵状态球（点击可反色）+ 右侧信号故障牌 */}
+      {/* 顶部 HUD：左侧点阵状态球（点击可反色）+ 右侧信号牌（跟随后端探针状态） */}
       <div className="ai-console-glitch">
-        <SignalGlitchCard text="SIGNAL LOST" />
+        <SignalGlitchCard text={resolveSignalText(backendOnline)} />
       </div>
 
       {/* 底部：Matrix 台词乱码打字机 */}

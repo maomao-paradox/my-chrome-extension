@@ -1,0 +1,892 @@
+openapi: 3.0.3
+info:
+  title: KIRA:NOVE 记忆系统后端 API
+  version: "1.0.0"
+  description: |
+    为浏览器扩展记忆系统提供的独立后端服务（Rust + axum + SQLite）。
+
+    核心能力：
+    - 长期记忆条目 CRUD（艾宾浩斯遗忘曲线：active / fading / forgotten 三态）
+    - BM25（中文 bigram）混合排序检索（0.5×RAG + 0.3×保留率 + 0.2×重要度）
+    - 上下文装配（2000 字符预算，可直接注入 system prompt）
+    - observe 自动提取（偏好 / 事实 / 对话语料）
+    - 角色身份与短期记忆快照
+    - 与扩展端备份文件（schemaVersion: 1）互通的导入导出
+
+    通用约定：
+    - 字段命名统一 camelCase，时间戳统一为毫秒整数（对应 JS `Date.now()`）
+    - 错误响应统一为 `{"error": {"code": "...", "message": "..."}}`
+    - 设置 `API_TOKEN` 后，`/api/*` 需携带凭证；`/health`、`/readyz` 始终放行
+servers:
+  - url: http://127.0.0.1:8790
+    description: 本地默认地址（SERVER_HOST / SERVER_PORT 可配）
+tags:
+  - name: 探针
+    description: 存活与就绪检查（无需鉴权）
+  - name: 角色与身份
+    description: 角色枚举、统计、遗忘与身份记忆
+  - name: 记忆条目
+    description: 长期记忆条目的增删改查与手动唤醒
+  - name: 检索与上下文
+    description: 混合排序检索、上下文装配、对话观察
+  - name: 短期记忆
+    description: 滚动摘要快照读写
+  - name: 导入导出
+    description: 与扩展端备份文件互通的备份与恢复
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [探针]
+      summary: 存活探针
+      security: []
+      responses:
+        "200":
+          description: 服务存活
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+              example:
+                status: ok
+
+  /readyz:
+    get:
+      tags: [探针]
+      summary: 就绪探针
+      description: 执行 `SELECT 1` ping 数据库，失败时返回 503。
+      security: []
+      responses:
+        "200":
+          description: 数据库可用
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ready]
+              example:
+                status: ready
+        "503":
+          description: 数据库不可用
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/roles:
+    get:
+      tags: [角色与身份]
+      summary: 列出所有角色
+      description: 汇总 identities / entries / short_term 三张表中出现过的角色。
+      parameters:
+        - name: chatOnly
+          in: query
+          required: false
+          description: 为 `true` 时过滤纯工具角色（graph_extractor、textarea_ai_autofill、table_data_generator、translator_*）
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: 角色列表
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [roles]
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      type: string
+              example:
+                roles: [miku, graph_extractor]
+
+  /api/v1/roles/{role}/stats:
+    get:
+      tags: [角色与身份]
+      summary: 角色记忆条目计数
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      responses:
+        "200":
+          description: 条目数统计
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [role, count]
+                properties:
+                  role:
+                    type: string
+                  count:
+                    type: integer
+                    format: int64
+                    description: 该角色的长期记忆条目总数
+
+  /api/v1/roles/{role}:
+    delete:
+      tags: [角色与身份]
+      summary: 忘记该角色的一切
+      description: 删除该角色在 entries / identity / short_term 三张表中的全部数据。
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      responses:
+        "204":
+          description: 已清除（无响应体）
+
+  /api/v1/roles/{role}/identity:
+    get:
+      tags: [角色与身份]
+      summary: 读取角色身份
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      responses:
+        "200":
+          description: 身份记忆
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityMemory"
+        "404":
+          description: 该角色不存在身份记忆
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    put:
+      tags: [角色与身份]
+      summary: 注册或更新角色身份
+      description: 已存在时 `version` 自动 +1，`updatedAt` 刷新。
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdentityBody"
+            example:
+              displayName: 初音未来
+              systemPromptTemplate: 你是初音未来，用户的虚拟歌姬伙伴。
+              personaDescription: 活泼、爱唱歌，说话带一点电子感。
+      responses:
+        "200":
+          description: 写入后的身份记忆
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityMemory"
+        "400":
+          description: 请求体格式错误
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/roles/{role}/entries:
+    post:
+      tags: [记忆条目]
+      summary: 新增记忆条目
+      description: |
+        创建时自动补全遗忘曲线字段（`stability`、`lastReactivatedAt`），
+        并在该角色条目超过 1500 条时按「保留率×重要度」淘汰最低者（critical / identity 豁免）。
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEntryBody"
+            example:
+              content: 主人喜欢喝美式咖啡
+              category: preference
+              importance: high
+              tags: [饮食]
+      responses:
+        "201":
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryEntry"
+        "400":
+          description: content 为空或请求体非法
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    get:
+      tags: [记忆条目]
+      summary: 列出角色记忆条目
+      description: 返回条目附带运行时计算的 `decayState` 与 `retention`，按 `createdAt` 倒序。
+      parameters:
+        - $ref: "#/components/parameters/Role"
+        - name: category
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MemoryCategory"
+        - name: state
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MemoryDecayState"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        "200":
+          description: 条目列表
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [entries]
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MemoryEntry"
+        "400":
+          description: category / state / limit / offset 取值非法
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/entries/{id}:
+    patch:
+      tags: [记忆条目]
+      summary: 局部更新记忆条目
+      parameters:
+        - $ref: "#/components/parameters/EntryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntryPatch"
+            example:
+              importance: critical
+              tags: [重要]
+      responses:
+        "200":
+          description: 更新后的条目
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryEntry"
+        "404":
+          description: 条目不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    delete:
+      tags: [记忆条目]
+      summary: 删除记忆条目
+      parameters:
+        - $ref: "#/components/parameters/EntryId"
+      responses:
+        "204":
+          description: 删除成功（无响应体）
+        "404":
+          description: 条目不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/entries/{id}/recall:
+    post:
+      tags: [记忆条目]
+      summary: 手动唤醒记忆条目
+      description: 稳定度按 ×2.2 增长（封顶 17520 小时），`accessCount` +1，状态回到 active。
+      parameters:
+        - $ref: "#/components/parameters/EntryId"
+      responses:
+        "200":
+          description: 唤醒后的条目
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryEntry"
+        "404":
+          description: 条目不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/roles/{role}/retrieve:
+    post:
+      tags: [检索与上下文]
+      summary: 混合排序检索
+      description: |
+        `0.5×RAG + 0.3×保留率 + 0.2×重要度` 混合打分，三态分流：
+        - forgotten 仅当 RAG 归一化分 ≥ 0.15 时复活带回；
+        - fading 仅重要度为 high/critical 或 RAG 命中时保留。
+
+        仅最终入选的条目写回复活状态（刷新 `lastReactivatedAt`、`accessCount` +1）。
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetrieveBody"
+            example:
+              query: 主人喜欢喝什么
+              limit: 15
+      responses:
+        "200":
+          description: 检索结果
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [entries]
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MemoryEntry"
+        "400":
+          description: 请求体非法
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/roles/{role}/context:
+    post:
+      tags: [检索与上下文]
+      summary: 装配可直接注入 system prompt 的上下文
+      description: |
+        2000 字符预算内依次装配 `[角色身份]` → `[近期对话摘要]` → `[你记得的关于用户的事]`（最多 8 条）。
+        纯工具角色的 `assembledContext` 为空串。
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContextBody"
+            example:
+              query: 主人喜欢喝什么
+      responses:
+        "200":
+          description: 上下文装配结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryQueryResult"
+        "400":
+          description: 请求体非法
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/roles/{role}/observe:
+    post:
+      tags: [检索与上下文]
+      summary: 观察一轮对话并自动提取记忆
+      description: |
+        三条提取规则：
+        1. 用户明示偏好（「记住/我喜欢/我讨厌/我叫…」）→ preference / high，一轮一条；
+        2. 具体事实（项目、框架、版本号、操作系统、URL）→ fact / medium，一轮一条；
+        3. 整轮对话切块入 conversation 语料（寒暄过滤、合计 <12 字符过滤、最近 8 条 Jaccard ≥0.85 去重）。
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ObserveBody"
+            example:
+              userMessage: 记住：我喜欢喝美式咖啡
+              aiResponse: 好的主人，我记住了喵～
+      responses:
+        "200":
+          description: 观察完成
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+                    enum: [true]
+        "400":
+          description: 请求体非法
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/roles/{role}/short-term:
+    get:
+      tags: [短期记忆]
+      summary: 读取短期记忆快照
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      responses:
+        "200":
+          description: 短期记忆快照
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortTermSnapshot"
+        "404":
+          description: 该角色不存在短期记忆
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    put:
+      tags: [短期记忆]
+      summary: 写入短期记忆快照
+      description: |
+        `requestBody` 支持两种形态（untagged oneOf）：
+        - **Direct**：直接提供摘要与覆盖消息数；
+        - **Messages**：提供消息列表，服务端取最近 6 条、每条截断 100 字符自动生成摘要。
+      parameters:
+        - $ref: "#/components/parameters/Role"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShortTermInput"
+            examples:
+              direct:
+                summary: 直接写入摘要
+                value:
+                  summary: 主人在讨论 Rust 后端与 SQLite 迁移。
+                  coveredMessageCount: 12
+              messages:
+                summary: 由消息列表自动生成
+                value:
+                  messages:
+                    - role: user
+                      content: 帮我看看这个 SQLite 迁移
+                    - role: assistant
+                      content: 好的，迁移脚本已经写好了喵～
+      responses:
+        "200":
+          description: 写入后的快照
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortTermSnapshot"
+        "400":
+          description: messages 为空或请求体非法
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/export:
+    get:
+      tags: [导入导出]
+      summary: 导出记忆备份
+      description: 缺省导出全部角色；带 `role` 时仅导出该角色。载荷与扩展端备份文件格式一致。
+      parameters:
+        - name: role
+          in: query
+          required: false
+          description: 仅导出指定角色
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 导出数据包
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryExportPayload"
+
+  /api/v1/import:
+    post:
+      tags: [导入导出]
+      summary: 导入记忆备份
+      description: |
+        - `merge`（默认）：直接合并写入；
+        - `replace`：先清除载荷涉及角色的既有 entries / identity / short_term，再写入。
+
+        载荷中仅含条目而无身份的角色会自动补建默认身份。
+      parameters:
+        - name: mode
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [merge, replace]
+            default: merge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryExportPayload"
+      responses:
+        "200":
+          description: 导入统计
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResult"
+        "400":
+          description: schemaVersion 不受支持或 mode 非法
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: "当服务端设置 API_TOKEN 时，携带 Authorization: Bearer <token>"
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: "当服务端设置 API_TOKEN 时，携带 X-API-Key: <token>"
+
+  parameters:
+    Role:
+      name: role
+      in: path
+      required: true
+      description: 角色标识
+      schema:
+        type: string
+      example: miku
+    EntryId:
+      name: id
+      in: path
+      required: true
+      description: 记忆条目 ID（`{毫秒时间戳base36}-{8位随机base36}`）
+      schema:
+        type: string
+      example: m0k3x9-a1b2c3d4
+
+  schemas:
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [bad_request, unauthorized, not_found, payload_too_large, internal]
+            message:
+              type: string
+      example:
+        error:
+          code: not_found
+          message: "记忆条目不存在: m0k3x9-a1b2c3d4"
+
+    MemoryImportance:
+      type: string
+      enum: [low, medium, high, critical]
+      description: 重要程度，决定检索权重与遗忘豁免
+
+    MemoryCategory:
+      type: string
+      enum: [identity, conversation, preference, fact, episodic]
+      description: 记忆分类
+
+    MemoryDecayState:
+      type: string
+      enum: [active, fading, forgotten]
+      description: 遗忘状态（由保留率 R(t) 推导：≥0.55 active，0.2~0.55 fading，<0.2 forgotten）
+
+    MemoryEntry:
+      type: object
+      required: [id, role, category, content, importance, createdAt, lastAccessedAt, accessCount]
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+        category:
+          $ref: "#/components/schemas/MemoryCategory"
+        content:
+          type: string
+        importance:
+          $ref: "#/components/schemas/MemoryImportance"
+        source:
+          type: string
+          description: 来源摘要（从哪段对话提取）
+        createdAt:
+          type: integer
+          format: int64
+          description: 创建时间戳（毫秒）
+        lastAccessedAt:
+          type: integer
+          format: int64
+          description: 最后访问时间戳（毫秒）
+        accessCount:
+          type: integer
+          format: int32
+        tags:
+          type: array
+          items:
+            type: string
+        stability:
+          type: number
+          format: double
+          description: 记忆稳定性 S（小时），越大遗忘越慢
+        lastReactivatedAt:
+          type: integer
+          format: int64
+          description: 上一次「真正被想起」的毫秒时间戳
+        decayState:
+          $ref: "#/components/schemas/MemoryDecayState"
+        retention:
+          type: number
+          format: double
+          description: 运行时计算的保留率（仅 API 响应）
+      example:
+        id: m0k3x9-a1b2c3d4
+        role: miku
+        category: preference
+        content: 主人喜欢喝美式咖啡
+        importance: high
+        createdAt: 1793692800000
+        lastAccessedAt: 1793692800000
+        accessCount: 1
+        stability: 720
+        lastReactivatedAt: 1793692800000
+        decayState: active
+        retention: 0.98
+
+    IdentityMemory:
+      type: object
+      required: [role, displayName, systemPromptTemplate, version, updatedAt]
+      properties:
+        role:
+          type: string
+        displayName:
+          type: string
+        systemPromptTemplate:
+          type: string
+        personaDescription:
+          type: string
+        version:
+          type: integer
+          format: int32
+        updatedAt:
+          type: integer
+          format: int64
+
+    IdentityBody:
+      type: object
+      required: [displayName, systemPromptTemplate]
+      properties:
+        displayName:
+          type: string
+        systemPromptTemplate:
+          type: string
+        personaDescription:
+          type: string
+
+    CreateEntryBody:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          description: 记忆内容（trim 后不得为空）
+        category:
+          $ref: "#/components/schemas/MemoryCategory"
+          description: 缺省为 fact
+        importance:
+          $ref: "#/components/schemas/MemoryImportance"
+          description: 缺省为 medium
+        source:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    EntryPatch:
+      type: object
+      description: 局部更新，所有字段可选
+      properties:
+        content:
+          type: string
+        importance:
+          $ref: "#/components/schemas/MemoryImportance"
+        category:
+          $ref: "#/components/schemas/MemoryCategory"
+        tags:
+          type: array
+          items:
+            type: string
+
+    RetrieveBody:
+      type: object
+      properties:
+        query:
+          type: string
+          description: 检索词；为空时仅按保留率与重要度排序
+        limit:
+          type: integer
+          minimum: 0
+          default: 15
+          maximum: 100
+          description: 返回条数，缺省 15，上限 100
+
+    ContextBody:
+      type: object
+      properties:
+        query:
+          type: string
+
+    ObserveBody:
+      type: object
+      required: [userMessage, aiResponse]
+      properties:
+        userMessage:
+          type: string
+        aiResponse:
+          type: string
+
+    MemoryQueryResult:
+      type: object
+      required: [entries, assembledContext]
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryEntry"
+        identity:
+          $ref: "#/components/schemas/IdentityMemory"
+        shortTerm:
+          $ref: "#/components/schemas/ShortTermSnapshot"
+        assembledContext:
+          type: string
+          description: 可直接注入 system prompt 的文本；纯工具角色为空串
+
+    ShortTermSnapshot:
+      type: object
+      required: [summary, coveredMessageCount, updatedAt]
+      properties:
+        summary:
+          type: string
+        coveredMessageCount:
+          type: integer
+          format: int32
+        updatedAt:
+          type: integer
+          format: int64
+
+    ChatMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          description: 消息角色（user / assistant 等）
+        content:
+          type: string
+
+    ShortTermInput:
+      oneOf:
+        - type: object
+          title: Direct
+          required: [summary, coveredMessageCount]
+          properties:
+            summary:
+              type: string
+            coveredMessageCount:
+              type: integer
+              format: int32
+        - type: object
+          title: Messages
+          required: [messages]
+          properties:
+            messages:
+              type: array
+              items:
+                $ref: "#/components/schemas/ChatMessage"
+
+    MemoryExportPayload:
+      type: object
+      required: [schemaVersion, exportedAt, identities, entries, shortTerm]
+      properties:
+        schemaVersion:
+          type: integer
+          format: int32
+          enum: [1]
+        exportedAt:
+          type: string
+          description: 导出时间（ISO 8601 UTC 字符串）
+          example: "2026-11-04T02:30:00.000Z"
+        identities:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentityMemory"
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemoryEntry"
+        shortTerm:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/ShortTermSnapshot"
+
+    ImportResult:
+      type: object
+      required:
+        [identitiesImported, entriesImported, shortTermImported, rolesCleared, rolesImported]
+      properties:
+        identitiesImported:
+          type: integer
+        entriesImported:
+          type: integer
+        shortTermImported:
+          type: integer
+        rolesCleared:
+          type: integer
+        rolesImported:
+          type: array
+          items:
+            type: string

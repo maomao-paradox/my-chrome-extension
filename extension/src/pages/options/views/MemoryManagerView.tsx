@@ -61,6 +61,8 @@ import {
   getMemoryService,
   importFromFile,
   isExemptFromForgetting,
+  migrateLocalToBackend,
+  getMemoryBackendClient,
   type IdentityMemory,
   type MemoryCategory,
   type MemoryDecayState,
@@ -200,6 +202,20 @@ const MemoryManagerView: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   /** 文本筛选：匹配 content 内容，空字符串表示不筛选 */
   const [textFilter, setTextFilter] = useState("");
+  /** 后端是否在线 —— 在线时才展示「迁移本地到后端」入口 */
+  const [backendOnline, setBackendOnline] = useState(false);
+
+  useEffect(() => {
+    let disposed = false;
+    void getMemoryBackendClient()
+      .isAvailable()
+      .then((online) => {
+        if (!disposed) setBackendOnline(online);
+      });
+    return () => {
+      disposed = true;
+    };
+  }, []);
 
   // ─── 加载角色列表 ─── //
   const loadRoles = useCallback(async (): Promise<string[]> => {
@@ -517,6 +533,48 @@ const MemoryManagerView: React.FC = () => {
 
   const triggerImport = () => fileInputRef.current?.click();
 
+  // ─── 迁移本地记忆到后端 ─── //
+  const handleMigrateToBackend = () => {
+    Modal.confirm({
+      title: "迁移本地记忆到后端",
+      content: (
+        <div>
+          <p>
+            将浏览器本地（chrome.storage）中的全部角色记忆发送到{" "}
+            <b>memory-server</b>。
+          </p>
+          <p>
+            <b>合并模式</b>：与后端现有数据合并，同 ID 条目会被覆盖。
+            <br />
+            <b>替换模式</b>：先清除后端中涉及的角色，再导入本地数据。
+          </p>
+          <p>迁移不会删除浏览器本地数据，可重复执行。</p>
+        </div>
+      ),
+      okText: `以"${importMode === "merge" ? "合并" : "替换"}"模式迁移`,
+      cancelText: "取消",
+      onOk: async () => {
+        try {
+          setLoading(true);
+          const result = await migrateLocalToBackend(importMode);
+          antdMessage.success(
+            `迁移成功：${result.identitiesImported} 个身份，` +
+              `${result.entriesImported} 条记忆，` +
+              `${result.shortTermImported} 份短期摘要`,
+          );
+          await loadRoles();
+          await loadEntries();
+        } catch (error) {
+          antdMessage.error(
+            `迁移失败：${error instanceof Error ? error.message : String(error)}`,
+          );
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -731,6 +789,16 @@ const MemoryManagerView: React.FC = () => {
                       { value: "replace", label: "替换" },
                     ]}
                   />
+                  {backendOnline && (
+                    <Button
+                      icon={<CloudUploadOutlined />}
+                      onClick={handleMigrateToBackend}
+                      loading={loading}
+                      style={{ marginLeft: 8 }}
+                    >
+                      迁移本地到后端
+                    </Button>
+                  )}
                 </div>
               </Space>
             </Card>

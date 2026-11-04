@@ -457,7 +457,12 @@ export class StreamManager {
                     });
 
                     /* ── 心情驱动的连续回复链（在最后一条文本之后） ── */
-                    let allAiContent = aiFullContent;
+                    /*
+                     * 观察基底用 totalText（各工具轮解析后的干净文本拼接），
+                     * 而不是 aiFullContent（原始流式内容，可能夹带 <webmcp_tool_calls> 标记），
+                     * 也不是 finalRoundText（仅最后一轮，会丢掉工具调用之前的首条回复）。
+                     */
+                    let allAiContent = totalText || aiFullContent;
                     if (mood && finalRoundText) {
                         try {
                             allAiContent = await this.tryContinuousReplyChain(
@@ -472,6 +477,7 @@ export class StreamManager {
                                 prompt,
                                 mood,
                                 finalRoundText,
+                                totalText || finalRoundText,
                             );
                         } catch (chainError) {
                             // 续轮链整体异常不应阻塞主流程，降级为正常结束
@@ -542,7 +548,10 @@ export class StreamManager {
      * 首条 AI 回复完成后调用。根据 mood 计算概率，每次续轮概率减半，
      * 硬上限 MAX_CONTINUOUS_ROUNDS 轮。任何一轮失败都 break，不阻塞主流程。
      *
-     * @returns 首条回复 + 所有续轮内容的拼接字符串（让 observe 能学习完整对话）
+     * @param firstReplyContent 首条回复（作为续轮的对话上下文）
+     * @param memorySeedContent 观察/落库用的完整回复（含工具轮之前的所有轮次文本）；
+     *                          缺省时退化为 firstReplyContent
+     * @returns 完整回复（memorySeed）+ 所有续轮内容的拼接字符串（让 observe 能学习完整对话）
      */
     private async tryContinuousReplyChain(
         port: chrome.runtime.Port,
@@ -556,8 +565,9 @@ export class StreamManager {
         userPrompt: string,
         mood: ProactiveMood,
         firstReplyContent: string,
+        memorySeedContent?: string,
     ): Promise<string> {
-        let allContent = firstReplyContent;
+        let allContent = memorySeedContent ?? firstReplyContent;
         const baseContProb = getContinuousReplyProbability(mood);
         let round = 1;
 

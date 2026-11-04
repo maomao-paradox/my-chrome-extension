@@ -68,6 +68,12 @@ export const SET_NEXT_PROACTIVE_INTERVAL = "set_next_proactive_interval";
 /** 工具名 —— 获取表情包 */
 export const GET_MEME = "get_meme";
 
+/** 工具名 —— 设置 AI 对主人的好感度 */
+export const SET_AFFECTION = "set_affection";
+
+/** chrome.storage.local 里好感度的 key —— 前后端共用 */
+export const AFFECTION_STORAGE_KEY = "ai_affection_value";
+
 /** 模型可见的工具声明 */
 export const LOCAL_MCP_TOOLS: OpenAICompatibleTool[] = [
   {
@@ -82,7 +88,7 @@ export const LOCAL_MCP_TOOLS: OpenAICompatibleTool[] = [
           minutes: {
             type: "number",
             description:
-              "距离下一次主动消息的分钟数，范围 0.5~120。数值越小主动消息越频繁：寂寞时可设 2~5 分钟，生气或伤心时可设 60~120 分钟，主人口头指定时以主人为准。",
+              "距离下一次主动消息的分钟数，数值为 0 或者范围 0.5~120。数值越小主动消息越频繁，0 表示立即发送下一轮消息；寂寞时可设 2~5 分钟；生气或伤心时可设 60~120 分钟；主人口头指定时以主人为准。",
             minimum: 0.5,
             maximum: 120,
           },
@@ -108,6 +114,28 @@ export const LOCAL_MCP_TOOLS: OpenAICompatibleTool[] = [
           },
         },
         required: ["description"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: SET_AFFECTION,
+      description:
+        "每次和主人对话之后，你都必须使用该工具更新对主人的好感度数值（0~100）。对话愉快、主人对你好 → 好感度上升；惹主人生气、说错话 → 好感度下降；正常闲聊时根据心情微调即可。这个数值会实时显示在左侧面板上，影响你下一轮主动消息的语气和频率。",
+      parameters: {
+        type: "object",
+        properties: {
+          value: {
+            type: "number",
+            description:
+              "好感度数值，范围 0~100。0 表示极度厌恶，50 表示一般，100 表示超级喜欢。对话愉快时可以加 1~5，惹主人生气时可以减 5~15，普通闲聊微调 ±1~2 即可。",
+            minimum: 0,
+            maximum: 100,
+          },
+        },
+        required: ["value"],
         additionalProperties: false,
       },
     },
@@ -267,6 +295,20 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       description,
       imageUrl,
       message: `找到啦！一张关于「${description}」的表情包：${imageUrl}`,
+    };
+  },
+
+  [SET_AFFECTION]: async (params) => {
+    const raw = readNumber(params, "value");
+    const value = Math.min(100, Math.max(0, Math.round(raw)));
+
+    await chrome.storage.local.set({ [AFFECTION_STORAGE_KEY]: value });
+
+    maLogger.info(`[MCP] set_affection: 好感度 → ${value}`);
+    return {
+      ok: true,
+      affection: value,
+      message: `好感度已更新为 ${value}`,
     };
   },
 };

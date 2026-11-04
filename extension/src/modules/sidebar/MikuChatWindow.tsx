@@ -34,6 +34,7 @@ import { Draggable } from "@/components/react-index";
 import AIConversation from "./components/AIConversation";
 import type { AIRole } from "./components/AIConversation";
 import { useMikuImageSrc } from "./useMikuMood";
+import { useAffection } from "./useAffection";
 import "./styles/miku-chat-window.scss";
 
 /** MikuChatWindow Props */
@@ -84,6 +85,9 @@ const MikuChatWindow: React.FC<MikuChatWindowProps> = ({ onClose }) => {
 
   // Miku 图片资源 —— 随 AI 当前心情切换（生气时换 miku_angry）
   const mikuSrc = useMikuImageSrc();
+
+  // AI 对主人的好感度（0~100，从 AI 回复里自动提取）
+  const affection = useAffection();
 
   // Draggable 容器样式
   const draggableContainerStyle = useMemo<React.CSSProperties>(
@@ -176,6 +180,18 @@ const MikuChatWindow: React.FC<MikuChatWindowProps> = ({ onClose }) => {
               <span className="disc-ring"></span>
               <span className="disc-label"></span>
               <span className="disc-hole"></span>
+            </div>
+
+            {/* 好感度条 —— 在角色图片上方 */}
+            <div className="affection-meter" aria-label={`好感度 ${affection}%`}>
+              <span className="affection-label">好感度</span>
+              <div className="affection-track">
+                <div
+                  className="affection-fill"
+                  style={{ width: `${affection}%` }}
+                />
+              </div>
+              <span className="affection-value">{affection}</span>
             </div>
 
             {/* Miku 角色图片 */}

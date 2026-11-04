@@ -4,6 +4,9 @@
  */
 import { StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
+// antd 静态方法（Modal.confirm / message.*）在 React 19 下的官方兼容补丁
+// —— 不引入时静态调用会静默失败（弹窗与提示均不渲染）
+import "@ant-design/v5-patch-for-react-19";
 import {
   installGlobalLogger,
   syncGlobalLoggerFromStorage,

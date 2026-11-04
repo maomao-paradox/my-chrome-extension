@@ -34,6 +34,7 @@ import React, {
 import { loadAIConfig, type AIModelConfig } from "@/service-worker/chrome-api/ai-config";
 import { getMemoryService } from "@/services/memory";
 import { buildStorageKey, type MemoryEntry } from "@/services/memory/types";
+import { extractAffection, saveAffection } from "../useAffection";
 
 /** 角色选项 —— 与原 Placeholder 保持相同接口 */
 export interface AIRole {
@@ -128,11 +129,18 @@ function cleanForMemory(content: string): string {
 }
 
 /**
- * 判断 content 是否纯图片（去光图片 URL 和 markdown 语法后没有实际文字）
- * —— 纯图片消息不该进 conversation chunk，避免污染文本记忆
+ * 判断 content 在剥掉 MCP 工具指令后是否为空。
+ * —— 只有 MCP 指令、没有任何实际文字/图片内容的消息不该进 conversation chunk。
+ *
+ * 注意：图片 URL（裸链接或 markdown 语法）必须保留在记忆里，
+ * 所以这里只剥 MCP 标记，**不**剥图片 URL。
  */
-function isImageOnlyContent(content: string): boolean {
-    const stripped = stripImageMarkup(content).trim();
+function isEmptyAfterMcpStrip(content: string): boolean {
+    if (!content?.trim()) return true;
+    const stripped = content
+        .replace(/<webmcp_tool_calls>[\s\S]*?<\/webmcp_tool_calls>/gi, "")
+        .replace(/<｜｜DSML｜｜[\s\S]*?<\/｜｜DSML｜｜\s*invoke\s*>/gi, "")
+        .trim();
     return stripped.length === 0;
 }
 
@@ -634,20 +642,20 @@ const AIConversation: React.FC<AIConversationProps> = ({
             // 收集所有 role: "assistant" 的实时消息 content
             setMessages((prev) => {
                 const userEntry = prev.find((m) => m.id === userMsgId);
-                // 过滤：跳过纯图片消息（content 就是图片 URL，没有实际文字）
+                // 过滤：跳过只有 MCP 指令、没有任何文字/图片内容的消息
                 const aiEntries = prev.filter(
                     (m) =>
                         m.role === "assistant" &&
                         m.content.trim() &&
-                        !isImageOnlyContent(m.content),
+                        !isEmptyAfterMcpStrip(m.content),
                 );
 
                 // 如果有至少一条 AI 回复 → 批量保存为一个 conversation entry
                 if (userEntry && aiEntries.length > 0) {
                     const userText = userEntry.content;
-                    // 每条 AI 回复都单独加 AI：前缀，并用 cleanForMemory 清洗后存
+                    // 存入记忆时只剥 MCP 指令，图片链接必须保留！
                     const chunk = [
-                        userText ? `用户：${stripImageMarkup(userText).trim()}` : null,
+                        userText ? `用户：${userText.trim()}` : null,
                         ...aiEntries.map((m) => `AI：${cleanForMemory(m.content)}`),
                     ]
                         .filter((line): line is string => !!line)
@@ -674,6 +682,15 @@ const AIConversation: React.FC<AIConversationProps> = ({
                             persistStarted = false;
                         }
                     })();
+                }
+
+                // 从 AI 回复里提取好感度数字（如 "好感度73"），存 storage 供左侧面板显示
+                for (const ai of aiEntries) {
+                    const affection = extractAffection(ai.content);
+                    if (affection !== null) {
+                        void saveAffection(affection);
+                        break;
+                    }
                 }
 
                 // 移除所有本轮临时消息（user + 所有 assistant）

@@ -56,7 +56,7 @@ docker compose up --build
 
 ## API 一览
 
-Base：`http://127.0.0.1:8790`，统一 JSON，camelCase 字段。
+Base：`http://127.0.0.1:8790`，统一 JSON，camelCase 字段。完整机器可读规范见 [openapi.yaml](./openapi.yaml)（可用 Swagger UI / Redoc / `openapi-generator` 直接消费）。
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |

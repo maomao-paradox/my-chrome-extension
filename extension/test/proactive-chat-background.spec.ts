@@ -561,12 +561,11 @@ describe("心情与时间上下文", () => {
             );
         }
 
-        // 每轮 runProactiveMessage 触发 2 次 completeChatFlow：
-        //   - 主消息生成（偶数索引 calls[0], calls[2], calls[4]...）
-        //   - pickNextInterval 让 AI 决定下次间隔（奇数索引）
+        // 每轮 runProactiveMessage 触发 1 次 completeChatFlow（主消息生成）。
+        // pickNextInterval 已删除，不再额外调 AI。
         // 迭代 2 对应 ignoredStreak=3 → 闹脾气；迭代 5 对应 ignoredStreak=6 → 发疯
-        expect(mocks.completeChatFlow.mock.calls[4][7]).toContain("闹小脾气");
-        expect(mocks.completeChatFlow.mock.calls[10][7]).toContain(
+        expect(mocks.completeChatFlow.mock.calls[2][7]).toContain("闹小脾气");
+        expect(mocks.completeChatFlow.mock.calls[5][7]).toContain(
             "原样连续重复",
         );
     });

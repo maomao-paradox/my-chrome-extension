@@ -19,32 +19,38 @@
  */
 import { getMemoryService, isFunctionalRole } from "@/services/memory";
 import {
-    classifyDecayState,
-    computeRetention,
-    normalizeEntry,
+  classifyDecayState,
+  computeRetention,
+  normalizeEntry,
 } from "@/services/memory/decay";
 import type { MemoryEntry, MemoryImportance } from "@/services/memory/types";
 import { loadAIConfig } from "../chrome-api/ai-config";
 import { completeChatFlow, uploadFile } from "../deepseek";
 import { stripToolCallMarkup } from "../deepseek/tool-call-markup";
 import {
-    createDefaultMoodState,
-    deriveMood,
-    describeMood,
-    detectHurt,
-    extractUserText,
-    getDateKey,
-    getContinuousReplyProbability,
-    MOOD_STATE_KEY,
-    normalizeMoodState,
-    type ProactiveMoodState,
+  executeLocalMcpTool,
+  isLocalMcpTool,
+  LOCAL_MCP_TOOLS,
+  SET_NEXT_PROACTIVE_INTERVAL,
+} from "./mcp-tools";
+import {
+  createDefaultMoodState,
+  deriveMood,
+  describeMood,
+  detectHurt,
+  extractUserText,
+  getDateKey,
+  getContinuousReplyProbability,
+  MOOD_STATE_KEY,
+  normalizeMoodState,
+  type ProactiveMoodState,
 } from "./proactive-mood";
 import {
-    MAX_CONTINUOUS_ROUNDS,
-    computeNextProbability,
-    shouldTrigger,
-    buildFollowupPrompt,
-    generateFollowupReply,
+  MAX_CONTINUOUS_ROUNDS,
+  computeNextProbability,
+  shouldTrigger,
+  buildFollowupPrompt,
+  generateFollowupReply,
 } from "./chat-chain";
 
 /** 时间段 —— 按小时分段，用于挑选问候语与提示 AI 的时间上下文 */
@@ -87,20 +93,20 @@ const OFF_DUTY_FLAG_KEY = "proactive_chat_off_duty_date";
 
 /** 当天下班收尾消息的兜底模板（AI 不可用时使用） */
 const CLOSING_TEMPLATES = [
-    "今天辛苦了，早点休息，明天见。",
-    "下班时间到啦，今天就到这里吧，晚安。",
-    "收工啦，去好好休息，明天见。",
+  "今天辛苦了，早点休息，明天见。",
+  "下班时间到啦，今天就到这里吧，晚安。",
+  "收工啦，去好好休息，明天见。",
 ];
 
 /** 星期标签 —— 让模型能区分工作日与周末 */
 const WEEKDAY_LABELS = [
-    "星期日",
-    "星期一",
-    "星期二",
-    "星期三",
-    "星期四",
-    "星期五",
-    "星期六",
+  "星期日",
+  "星期一",
+  "星期二",
+  "星期三",
+  "星期四",
+  "星期五",
+  "星期六",
 ];
 
 /* ---------- 记忆上下文 ---------- */
@@ -123,18 +129,18 @@ const MAX_MEMORY_LINE_CHARS = 120;
 
 /** 其他记忆的排序权重：重要度优先，同级再看新旧 */
 const IMPORTANCE_RANK: Record<MemoryImportance, number> = {
-    critical: 3,
-    high: 2,
-    medium: 1,
-    low: 0,
+  critical: 3,
+  high: 2,
+  medium: 1,
+  low: 0,
 };
 
 /** 主动消息的行为要求 —— 放在 user request 里，模型对「当前这一轮」更敏感 */
 const OPENING_INSTRUCTION =
-    "你要主动向用户开口。结合上面的记忆与当前时间，说 1 到 2 句自然简短的话；不要复述最近对话原文，也不要连续追问。";
+  "你要主动向用户开口。结合上面的记忆与当前时间，说 1 到 2 句自然简短的话；不要复述最近对话原文，也不要连续追问。";
 /** 下班收尾的行为要求 */
 const CLOSING_INSTRUCTION =
-    "这是今天最后一次主动消息。结合上面的记忆与当前时间，说 1 到 2 句收尾的话（类似「晚安，明天见」）；不要再追问，也不要安排新任务。";
+  "这是今天最后一次主动消息。结合上面的记忆与当前时间，说 1 到 2 句收尾的话（类似「晚安，明天见」）；不要再追问，也不要安排新任务。";
 
 /**
  * 单条记忆压缩成一行：去掉换行、按码点截断。
@@ -143,13 +149,13 @@ const CLOSING_INSTRUCTION =
  * 也容易让某一条超长记忆吃光整段预算。
  */
 function formatMemoryLine(entry: MemoryEntry): string {
-    const compact = entry.content.replace(/\s*\n+\s*/g, " / ").trim();
-    const chars = Array.from(compact);
-    const text =
-        chars.length > MAX_MEMORY_LINE_CHARS
-            ? `${chars.slice(0, MAX_MEMORY_LINE_CHARS).join("")}…`
-            : compact;
-    return `- ${text}`;
+  const compact = entry.content.replace(/\s*\n+\s*/g, " / ").trim();
+  const chars = Array.from(compact);
+  const text =
+    chars.length > MAX_MEMORY_LINE_CHARS
+      ? `${chars.slice(0, MAX_MEMORY_LINE_CHARS).join("")}…`
+      : compact;
+  return `- ${text}`;
 }
 
 /**
@@ -160,104 +166,101 @@ function formatMemoryLine(entry: MemoryEntry): string {
  * @returns 可直接拼进 system prompt 的分段文本；没有可用记忆时为空串
  */
 export function assembleMemoryContext(
-    entries: readonly MemoryEntry[],
-    now: number,
+  entries: readonly MemoryEntry[],
+  now: number,
 ): string {
-    let budget = MEMORY_CONTEXT_BUDGET;
+  let budget = MEMORY_CONTEXT_BUDGET;
 
-    const render = (title: string, list: readonly MemoryEntry[]): string => {
-        const lines: string[] = [];
-        for (const entry of list) {
-            const line = formatMemoryLine(entry);
-            // 预算不足时保留优先级更高的段落，直接丢弃后面的条目
-            if (line.length + 1 > budget) break;
-            lines.push(line);
-            budget -= line.length + 1;
-        }
-        return lines.length > 0 ? `[${title}]\n${lines.join("\n")}` : "";
-    };
+  const render = (title: string, list: readonly MemoryEntry[]): string => {
+    const lines: string[] = [];
+    for (const entry of list) {
+      const line = formatMemoryLine(entry);
+      // 预算不足时保留优先级更高的段落，直接丢弃后面的条目
+      if (line.length + 1 > budget) break;
+      lines.push(line);
+      budget -= line.length + 1;
+    }
+    return lines.length > 0 ? `[${title}]\n${lines.join("\n")}` : "";
+  };
 
-    // 1) 对话记忆：最近 24 小时，最多 20 条，按时间正序展示（读起来像流水账）
-    const conversations = entries
-        .filter(
-            (entry) =>
-                entry.category === "conversation" &&
-                entry.createdAt >= now - CONVERSATION_MEMORY_WINDOW_MS,
-        )
-        .sort((a, b) => a.createdAt - b.createdAt)
-        .slice(-MAX_CONVERSATION_MEMORIES);
+  // 1) 对话记忆：最近 24 小时，最多 20 条，按时间正序展示（读起来像流水账）
+  const conversations = entries
+    .filter(
+      (entry) =>
+        entry.category === "conversation" &&
+        entry.createdAt >= now - CONVERSATION_MEMORY_WINDOW_MS,
+    )
+    .sort((a, b) => a.createdAt - b.createdAt)
+    .slice(-MAX_CONVERSATION_MEMORIES);
 
-    // 2) 用户偏好：只留保留率仍处于 active 的「清晰记忆」
-    const preferences = entries
-        .filter((entry) => entry.category === "preference")
-        .map((entry) => normalizeEntry(entry))
-        .filter((entry) => classifyDecayState(entry, now) === "active")
-        .sort(
-            (a, b) => computeRetention(b, now) - computeRetention(a, now),
-        );
+  // 2) 用户偏好：只留保留率仍处于 active 的「清晰记忆」
+  const preferences = entries
+    .filter((entry) => entry.category === "preference")
+    .map((entry) => normalizeEntry(entry))
+    .filter((entry) => classifyDecayState(entry, now) === "active")
+    .sort((a, b) => computeRetention(b, now) - computeRetention(a, now));
 
-    // 3) 其他记忆（事实 / 情景 / 身份）：全量保留，按重要度与新旧排序
-    const others = entries
-        .filter(
-            (entry) =>
-                entry.category !== "conversation" &&
-                entry.category !== "preference",
-        )
-        .sort(
-            (a, b) =>
-                IMPORTANCE_RANK[b.importance] - IMPORTANCE_RANK[a.importance] ||
-                b.createdAt - a.createdAt,
-        );
+  // 3) 其他记忆（事实 / 情景 / 身份）：全量保留，按重要度与新旧排序
+  const others = entries
+    .filter(
+      (entry) =>
+        entry.category !== "conversation" && entry.category !== "preference",
+    )
+    .sort(
+      (a, b) =>
+        IMPORTANCE_RANK[b.importance] - IMPORTANCE_RANK[a.importance] ||
+        b.createdAt - a.createdAt,
+    );
 
-    return [
-        render("最近的对话记忆（24 小时内）", conversations),
-        render("用户偏好（清晰的记忆）", preferences),
-        render("其他记忆", others),
-    ]
-        .filter(Boolean)
-        .join("\n\n");
+  return [
+    render("最近的对话记忆（24 小时内）", conversations),
+    render("用户偏好（清晰的记忆）", preferences),
+    render("其他记忆", others),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /** 本地降级模板池 —— AI 不可用或生成失败时按时间段随机挑一条 */
 const FALLBACK_TEMPLATES: Record<TimePeriod, string[]> = {
-    清晨: [
-        "早安呀，新的一天开始了。今天有什么想做的事吗？",
-        "清晨好，先慢慢醒来吧。今天的计划已经想好了吗？",
-        "新的一天开始啦，记得给自己留一点轻松的时间。",
-    ],
-    上午: [
-        "上午好呀，工作或学习还顺利吗？",
-        "忙了一会儿的话，要不要起来活动一下？",
-        "今天上午有什么值得期待的小事吗？",
-    ],
-    下午: [
-        "下午好，事情进展得还顺利吗？",
-        "忙到现在辛苦啦，记得喝点水、休息一下。",
-        "下午的节奏还好吗？需要的话可以陪你聊聊。",
-    ],
-    傍晚: [
-        "傍晚好，今天过得怎么样？",
-        "一天快要结束啦，有什么想和我分享的吗？",
-        "忙了一天的话，现在可以稍微放松一下了。",
-    ],
-    晚上: [
-        "晚上好呀，今天有什么开心的事吗？",
-        "夜晚适合放慢一点节奏，想聊聊今天吗？",
-        "今天辛苦啦，记得给自己一点休息时间。",
-    ],
-    深夜: [
-        "还没休息吗？如果累了，就先照顾好自己吧。",
-        "深夜好呀，愿你今晚能轻松一些。",
-        "这么晚还醒着呀，想说说话的话我在这里。",
-    ],
+  清晨: [
+    "早安呀，新的一天开始了。今天有什么想做的事吗？",
+    "清晨好，先慢慢醒来吧。今天的计划已经想好了吗？",
+    "新的一天开始啦，记得给自己留一点轻松的时间。",
+  ],
+  上午: [
+    "上午好呀，工作或学习还顺利吗？",
+    "忙了一会儿的话，要不要起来活动一下？",
+    "今天上午有什么值得期待的小事吗？",
+  ],
+  下午: [
+    "下午好，事情进展得还顺利吗？",
+    "忙到现在辛苦啦，记得喝点水、休息一下。",
+    "下午的节奏还好吗？需要的话可以陪你聊聊。",
+  ],
+  傍晚: [
+    "傍晚好，今天过得怎么样？",
+    "一天快要结束啦，有什么想和我分享的吗？",
+    "忙了一天的话，现在可以稍微放松一下了。",
+  ],
+  晚上: [
+    "晚上好呀，今天有什么开心的事吗？",
+    "夜晚适合放慢一点节奏，想聊聊今天吗？",
+    "今天辛苦啦，记得给自己一点休息时间。",
+  ],
+  深夜: [
+    "还没休息吗？如果累了，就先照顾好自己吧。",
+    "深夜好呀，愿你今晚能轻松一些。",
+    "这么晚还醒着呀，想说说话的话我在这里。",
+  ],
 };
 
 /** 发往 content script 的消息载荷 */
 interface ProactiveMessagePayload {
-    /** 生成的主动消息文本 */
-    text: string;
-    /** 生成消息的角色 key（content 侧当前不使用，留给未来扩展） */
-    role: string;
+  /** 生成的主动消息文本 */
+  text: string;
+  /** 生成消息的角色 key（content 侧当前不使用，留给未来扩展） */
+  role: string;
 }
 
 /** alarm 监听是否已注册 —— 防止重复注册（SW 冷启动可能多次执行顶层代码） */
@@ -265,105 +268,106 @@ let alarmListenerRegistered = false;
 
 /** 按小时解析时间段 */
 function getTimePeriod(date: Date): TimePeriod {
-    const hour = date.getHours();
-    if (hour < 5) return "深夜";
-    if (hour < 8) return "清晨";
-    if (hour < 12) return "上午";
-    if (hour < 17) return "下午";
-    if (hour < 19) return "傍晚";
-    if (hour < 23) return "晚上";
-    return "深夜";
+  const hour = date.getHours();
+  if (hour < 5) return "深夜";
+  if (hour < 8) return "清晨";
+  if (hour < 12) return "上午";
+  if (hour < 17) return "下午";
+  if (hour < 19) return "傍晚";
+  if (hour < 23) return "晚上";
+  return "深夜";
 }
 
 /** 格式化为 HH:mm */
 function getFormattedTime(date: Date): string {
-    return `${String(date.getHours()).padStart(2, "0")}:${String(
-        date.getMinutes(),
-    ).padStart(2, "0")}`;
+  return `${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes(),
+  ).padStart(2, "0")}`;
 }
 
 /* ---------- 作息判断（纯函数，便于单测） ---------- */
 
 /** 当前是否处于工作时段 —— 上班前 / 下班后都不主动打扰 */
 export function isWorkTime(now: Date): boolean {
-    const hour = now.getHours();
-    return hour >= WORK_START_HOUR && hour < WORK_END_HOUR;
+  const hour = now.getHours();
+  return hour >= WORK_START_HOUR && hour < WORK_END_HOUR;
 }
 
 /** 是否已进入下班前的收尾窗口（下班前 15 分钟） */
 export function isOffDutyWindow(now: Date): boolean {
-    const minutes = now.getHours() * 60 + now.getMinutes();
-    const endMinutes = WORK_END_HOUR * 60;
-    return (
-        minutes >= endMinutes - OFF_DUTY_WINDOW_MINUTES &&
-        minutes < endMinutes
-    );
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  const endMinutes = WORK_END_HOUR * 60;
+  return (
+    minutes >= endMinutes - OFF_DUTY_WINDOW_MINUTES && minutes < endMinutes
+  );
 }
 
 /** 下一次上班时间 —— 今天上班点已过则顺延到明天 */
 export function getNextWorkStart(now: Date): Date {
-    const next = new Date(now.getTime());
-    next.setHours(WORK_START_HOUR, 0, 0, 0);
-    if (next.getTime() <= now.getTime()) {
-        next.setDate(next.getDate() + 1);
-    }
-    return next;
+  const next = new Date(now.getTime());
+  next.setHours(WORK_START_HOUR, 0, 0, 0);
+  if (next.getTime() <= now.getTime()) {
+    next.setDate(next.getDate() + 1);
+  }
+  return next;
 }
 
 /** 日期上下文 —— 带上星期，让模型能区分工作日与周末 */
 export function getDateContext(date: Date): string {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${date.getFullYear()}年${month}月${day}日 ${WEEKDAY_LABELS[date.getDay()]}`;
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${date.getFullYear()}年${month}月${day}日 ${WEEKDAY_LABELS[date.getDay()]}`;
 }
 
 /** 从模板池里按时间段随机挑一条；收尾场景固定挑晚安模板 */
 function getFallbackMessage(period: TimePeriod, closing = false): string {
-    const templates = closing ? CLOSING_TEMPLATES : FALLBACK_TEMPLATES[period];
-    return templates[Math.floor(Math.random() * templates.length)];
+  const templates = closing ? CLOSING_TEMPLATES : FALLBACK_TEMPLATES[period];
+  return templates[Math.floor(Math.random() * templates.length)];
 }
 
 /** 读取「已发送下班收尾」的日期标记 */
 async function getOffDutyDate(): Promise<string | null> {
-    try {
-        const result = await chrome.storage.local.get(OFF_DUTY_FLAG_KEY);
-        return (result[OFF_DUTY_FLAG_KEY] as string | undefined) ?? null;
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 读取下班标记失败:", error);
-        return null;
-    }
+  try {
+    const result = await chrome.storage.local.get(OFF_DUTY_FLAG_KEY);
+    return (result[OFF_DUTY_FLAG_KEY] as string | undefined) ?? null;
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 读取下班标记失败:", error);
+    return null;
+  }
 }
 
 /** 记录「今天已发送下班收尾」，当天不再触发请求 */
 async function markOffDuty(dateKey: string): Promise<void> {
-    try {
-        await chrome.storage.local.set({ [OFF_DUTY_FLAG_KEY]: dateKey });
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 写入下班标记失败:", error);
-    }
+  try {
+    await chrome.storage.local.set({ [OFF_DUTY_FLAG_KEY]: dateKey });
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 写入下班标记失败:", error);
+  }
 }
 
 /**
  * 读取当天心情状态（跨天自动重置为「活跃开心」）。
  * export 给 runtime-connections.ts 共用（入口层忽略判断也需要读心情）。
  */
-export async function loadMoodState(dateKey: string): Promise<ProactiveMoodState> {
-    try {
-        const result = await chrome.storage.local.get(MOOD_STATE_KEY);
-        return normalizeMoodState(result[MOOD_STATE_KEY], dateKey);
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 读取心情状态失败:", error);
-        return createDefaultMoodState(dateKey);
-    }
+export async function loadMoodState(
+  dateKey: string,
+): Promise<ProactiveMoodState> {
+  try {
+    const result = await chrome.storage.local.get(MOOD_STATE_KEY);
+    return normalizeMoodState(result[MOOD_STATE_KEY], dateKey);
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 读取心情状态失败:", error);
+    return createDefaultMoodState(dateKey);
+  }
 }
 
 /** 持久化心情状态 */
 async function saveMoodState(state: ProactiveMoodState): Promise<void> {
-    try {
-        await chrome.storage.local.set({ [MOOD_STATE_KEY]: state });
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 保存心情状态失败:", error);
-    }
+  try {
+    await chrome.storage.local.set({ [MOOD_STATE_KEY]: state });
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 保存心情状态失败:", error);
+  }
 }
 
 /**
@@ -371,71 +375,67 @@ async function saveMoodState(state: ProactiveMoodState): Promise<void> {
  * 对话被合并成「用户：…\nAI：…」存进 conversation，这里反解出用户部分。
  */
 async function loadTodayUserTurns(
-    memoryService: ReturnType<typeof getMemoryService>,
-    role: string,
-    now: Date,
+  memoryService: ReturnType<typeof getMemoryService>,
+  role: string,
+  now: Date,
 ): Promise<{ userTexts: string[]; lastReplyAt: number }> {
-    try {
-        const entries = await memoryService.listByCategory(
-            role,
-            "conversation",
-        );
-        const startOfDay = new Date(now.getTime());
-        startOfDay.setHours(0, 0, 0, 0);
-        const startAt = startOfDay.getTime();
+  try {
+    const entries = await memoryService.listByCategory(role, "conversation");
+    const startOfDay = new Date(now.getTime());
+    startOfDay.setHours(0, 0, 0, 0);
+    const startAt = startOfDay.getTime();
 
-        const turns = entries.filter(
-            (entry) =>
-                entry.source === "ai-conversation" &&
-                entry.createdAt >= startAt,
-        );
+    const turns = entries.filter(
+      (entry) =>
+        entry.source === "ai-conversation" && entry.createdAt >= startAt,
+    );
 
-        return {
-            userTexts: turns
-                .map((entry) => extractUserText(entry.content))
-                .filter(Boolean),
-            lastReplyAt: turns.reduce(
-                (latest, entry) => Math.max(latest, entry.createdAt),
-                0,
-            ),
-        };
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 读取今日对话失败:", error);
-        return { userTexts: [], lastReplyAt: 0 };
-    }
+    return {
+      userTexts: turns
+        .map((entry) => extractUserText(entry.content))
+        .filter(Boolean),
+      lastReplyAt: turns.reduce(
+        (latest, entry) => Math.max(latest, entry.createdAt),
+        0,
+      ),
+    };
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 读取今日对话失败:", error);
+    return { userTexts: [], lastReplyAt: 0 };
+  }
 }
 
 /** 判断 AI 配置是否可用（普通 apiKey 或 DeepSeek 登录凭据） */
 function hasUsableAIConfig(
-    config: AIConfig | null | undefined,
+  config: AIConfig | null | undefined,
 ): config is AIConfig {
-    if (!config) return false;
+  if (!config) return false;
 
-    const hasApiKey = Boolean(config.apiKey?.trim());
-    const hasDeepSeekCredentials = Boolean(
-        config.deepseekAuthToken?.trim() && config.deepseekCookies?.trim(),
-    );
-    return hasApiKey || hasDeepSeekCredentials;
+  const hasApiKey = Boolean(config.apiKey?.trim());
+  const hasDeepSeekCredentials = Boolean(
+    config.deepseekAuthToken?.trim() && config.deepseekCookies?.trim(),
+  );
+  return hasApiKey || hasDeepSeekCredentials;
 }
 
 /** 取当前角色：落到聊天角色（listChatRoles 已过滤纯工具角色），且必须排除内部功能角色 */
 async function resolveRole(memoryService: MemoryService): Promise<string> {
-    try {
-        const roles = await memoryService.listChatRoles();
+  try {
+    const roles = await memoryService.listChatRoles();
 
-        // 1) 优先聊天窗默认角色 —— 消息直接可见
-        if (roles.includes(DEFAULT_ROLE)) return DEFAULT_ROLE;
+    // 1) 优先聊天窗默认角色 —— 消息直接可见
+    if (roles.includes(DEFAULT_ROLE)) return DEFAULT_ROLE;
 
-        // 2) 其次任一聊天角色（listChatRoles 已确保非工具类）
-        if (roles.length > 0) return roles[0];
+    // 2) 其次任一聊天角色（listChatRoles 已确保非工具类）
+    if (roles.length > 0) return roles[0];
 
-        // 3) 全部被排除时也绝不回落 —— 宁可新建干净命名空间，
-        //    也不把闲聊写进 textarea_ai_autofill 这类功能角色
-        return DEFAULT_ROLE;
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 获取角色列表失败，使用默认角色:", error);
-        return DEFAULT_ROLE;
-    }
+    // 3) 全部被排除时也绝不回落 —— 宁可新建干净命名空间，
+    //    也不把闲聊写进 textarea_ai_autofill 这类功能角色
+    return DEFAULT_ROLE;
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 获取角色列表失败，使用默认角色:", error);
+    return DEFAULT_ROLE;
+  }
 }
 
 /**
@@ -444,37 +444,37 @@ async function resolveRole(memoryService: MemoryService): Promise<string> {
  * @returns 上传成功的 file_id，或 undefined
  */
 async function captureAndUploadActiveTab(): Promise<string | undefined> {
-    try {
-        // Service Worker 没有「当前窗口」概念，必须显式传 windowId，
-        // 否则 captureVisibleTab 会以 "No active window" 失败
-        const focusedWindow = await chrome.windows.getLastFocused({
-            windowTypes: ['normal'],
-        });
-        if (!focusedWindow.id) {
-            maLogger.warn("[ProactiveChat] 未取到聚焦窗口，跳过截图");
-            return undefined;
-        }
-
-        maLogger.info("[ProactiveChat] 开始截图，windowId:", focusedWindow.id);
-        const dataUrl = await chrome.tabs.captureVisibleTab(focusedWindow.id, {
-            format: 'png',
-        });
-        if (!dataUrl) {
-            maLogger.warn("[ProactiveChat] 截图返回空，跳过图片上传");
-            return undefined;
-        }
-
-        // data:image/png;base64,xxxxx → 去掉前缀，base64 → Uint8Array
-        const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
-        const binary = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-
-        const fileId = await uploadFile(binary, 'image/png', 'screenshot.png');
-        maLogger.info("[ProactiveChat] 截图上传成功:", fileId);
-        return fileId;
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 截图或上传失败，跳过图片:", error);
-        return undefined;
+  try {
+    // Service Worker 没有「当前窗口」概念，必须显式传 windowId，
+    // 否则 captureVisibleTab 会以 "No active window" 失败
+    const focusedWindow = await chrome.windows.getLastFocused({
+      windowTypes: ["normal"],
+    });
+    if (!focusedWindow.id) {
+      maLogger.warn("[ProactiveChat] 未取到聚焦窗口，跳过截图");
+      return undefined;
     }
+
+    maLogger.info("[ProactiveChat] 开始截图，windowId:", focusedWindow.id);
+    const dataUrl = await chrome.tabs.captureVisibleTab(focusedWindow.id, {
+      format: "png",
+    });
+    if (!dataUrl) {
+      maLogger.warn("[ProactiveChat] 截图返回空，跳过图片上传");
+      return undefined;
+    }
+
+    // data:image/png;base64,xxxxx → 去掉前缀，base64 → Uint8Array
+    const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
+    const binary = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+
+    const fileId = await uploadFile(binary, "image/png", "screenshot.png");
+    maLogger.info("[ProactiveChat] 截图上传成功:", fileId);
+    return fileId;
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 截图或上传失败，跳过图片:", error);
+    return undefined;
+  }
 }
 
 /**
@@ -488,120 +488,155 @@ async function captureAndUploadActiveTab(): Promise<string | undefined> {
  *   可以组装一次 systemPrompt 后，首条回复和连续回复续轮都复用它。
  */
 async function generateMessage(
-    role: string,
-    now: Date,
-    closing: boolean,
-    moodPrompt: string,
-    /** 可选：当前活跃标签页截图的 file_id，让 AI "看到"主人在做什么 */
-    fileIds?: string[],
-    presetSystemPrompt?: string,
-): Promise<string> {
-    const config = await loadAIConfig();
-    if (!hasUsableAIConfig(config)) {
-        throw new Error("AI 配置不可用");
+  role: string,
+  now: Date,
+  closing: boolean,
+  moodPrompt: string,
+  /** 可选：当前活跃标签页截图的 file_id，让 AI "看到"主人在做什么 */
+  fileIds?: string[],
+  presetSystemPrompt?: string,
+): Promise<{ text: string; scheduledByMcp: boolean }> {
+  const config = await loadAIConfig();
+  if (!hasUsableAIConfig(config)) {
+    throw new Error("AI 配置不可用");
+  }
+
+  // 系统提示词：优先使用调用方预设的，否则自己组装（identity + memory + 心情）
+  // 时间上下文放在 systemPrompt 组装之前 —— promptSections 里也要用
+  const timeContext = `现在是 ${getDateContext(now)} ${getTimePeriod(now)} ${getFormattedTime(now)}`;
+
+  let systemPrompt: string;
+  if (presetSystemPrompt) {
+    systemPrompt = presetSystemPrompt;
+  } else {
+    const memoryService = getMemoryService();
+    const identity = await memoryService.getIdentity(role);
+
+    // 读取记忆失败不阻塞主流程，只降级为无记忆上下文
+    let memoryContext = "";
+    try {
+      const entries = await memoryService.listEntries(role);
+      memoryContext = assembleMemoryContext(entries, now.getTime());
+    } catch (error) {
+      maLogger.warn("[ProactiveChat] 读取记忆失败，忽略记忆上下文:", error);
     }
 
-    // 系统提示词：优先使用调用方预设的，否则自己组装（identity + memory + 心情）
-    // 时间上下文放在 systemPrompt 组装之前 —— promptSections 里也要用
-    const timeContext = `现在是 ${getDateContext(now)} ${getTimePeriod(now)} ${getFormattedTime(now)}`;
+    // 系统提示词只放「身份 + 记忆 + 心情」这些长期设定
+    systemPrompt = [
+      config.systemPrompt?.trim(),
+      identity?.systemPromptTemplate?.trim(),
+      identity?.personaDescription?.trim()
+        ? `[角色身份]\n${identity.personaDescription}`
+        : undefined,
+      memoryContext,
+      `[当前心情] ${moodPrompt}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  }
 
-    let systemPrompt: string;
-    if (presetSystemPrompt) {
-        systemPrompt = presetSystemPrompt;
-    } else {
-        const memoryService = getMemoryService();
-        const identity = await memoryService.getIdentity(role);
+  // 行为要求与时间一起放进 user request —— 模型对「当前这一轮」的指令更敏感
+  const promptSections: string[] = [timeContext];
+  if (fileIds && fileIds.length > 0) {
+    promptSections.push(
+      "我给你附上了一张当前屏幕的截图，你可以看到我现在正在做什么。请结合画面内容，用你的身份和心情自然地和我聊一句。",
+    );
+  }
+  promptSections.push(closing ? CLOSING_INSTRUCTION : OPENING_INSTRUCTION);
+  const requestPrompt = promptSections.join("\n\n");
 
-        // 读取记忆失败不阻塞主流程，只降级为无记忆上下文
-        let memoryContext = "";
-        try {
-            const entries = await memoryService.listEntries(role);
-            memoryContext = assembleMemoryContext(entries, now.getTime());
-        } catch (error) {
-            maLogger.warn("[ProactiveChat] 读取记忆失败，忽略记忆上下文:", error);
-        }
+  const chunks: string[] = [];
+  let scheduledByMcp = false;
+  let toolCallsPromise: Promise<void> = Promise.resolve();
 
-        // 系统提示词只放「身份 + 记忆 + 心情」这些长期设定
-        systemPrompt = [
-            config.systemPrompt?.trim(),
-            identity?.systemPromptTemplate?.trim(),
-            identity?.personaDescription?.trim()
-                ? `[角色身份]\n${identity.personaDescription}`
-                : undefined,
-            memoryContext,
-            `[当前心情] ${moodPrompt}`,
-        ]
-            .filter(Boolean)
-            .join("\n\n");
-    }
+  // 用 Promise 包住回调式流式接口，并加超时看门狗
+  await new Promise<void>((resolve, reject) => {
+    let settled = false;
 
-    // 行为要求与时间一起放进 user request —— 模型对「当前这一轮」的指令更敏感
-    const promptSections: string[] = [timeContext];
-    if (fileIds && fileIds.length > 0) {
-        promptSections.push(
-            "我给你附上了一张当前屏幕的截图，你可以看到我现在正在做什么。请结合画面内容，用你的身份和心情自然地和我聊一句。",
-        );
-    }
-    promptSections.push(closing ? CLOSING_INSTRUCTION : OPENING_INSTRUCTION);
-    const requestPrompt = promptSections.join("\n\n");
+    const finish = (error?: Error): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    };
 
-    const chunks: string[] = [];
+    const timeoutId = setTimeout(() => {
+      finish(new Error("AI 主动消息生成超时"));
+    }, REQUEST_TIMEOUT_MS);
 
-    // 用 Promise 包住回调式流式接口，并加超时看门狗
-    await new Promise<void>((resolve, reject) => {
-        let settled = false;
-
-        const finish = (error?: Error): void => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timeoutId);
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
-        };
-
-        const timeoutId = setTimeout(() => {
-            finish(new Error("AI 主动消息生成超时"));
-        }, REQUEST_TIMEOUT_MS);
-
-        void completeChatFlow(
-            requestPrompt,
-            role,
-            {
-                onData: (data: string) => {
-                    if (data) chunks.push(data);
-                },
-                onComplete: () => finish(),
-                onError: (error: unknown) => {
-                    finish(
-                        error instanceof Error
-                            ? error
-                            : new Error(String(error)),
+    void completeChatFlow(
+      requestPrompt,
+      role,
+      {
+        onData: (data: string) => {
+          if (data) chunks.push(data);
+        },
+        onComplete: (result: any) => {
+          // 模型在生成开场白的同时调了本地 MCP 工具
+          // （如 set_next_proactive_interval）—— 后台静默执行，
+          // 工具结果不喂回模型（开场白已经生成完了，不需要再回复）
+          if (
+            Array.isArray(result?.functionCalls) &&
+            result.functionCalls.length > 0
+          ) {
+            const localCalls = result.functionCalls.filter((c: any) =>
+              isLocalMcpTool(c.name),
+            );
+            if (localCalls.length > 0) {
+              toolCallsPromise = Promise.allSettled(
+                localCalls.map((c: any) =>
+                  executeLocalMcpTool(c.name, c.args ?? {}, { role }),
+                ),
+              ).then((results) => {
+                results.forEach((r, i) => {
+                  if (r.status === "fulfilled") {
+                    // set_next_proactive_interval 执行成功 → 标记已排期
+                    if (localCalls[i].name === SET_NEXT_PROACTIVE_INTERVAL) {
+                      scheduledByMcp = true;
+                    }
+                  } else {
+                    maLogger.warn(
+                      `[ProactiveChat] 主动消息工具调用失败 (${localCalls[i].name}):`,
+                      (r as PromiseRejectedResult).reason,
                     );
-                },
-            },
-            config.provider,
-            config.modelId,
-            config.apiKey,
-            config.apiBaseUrl,
-            systemPrompt,
-            undefined, // OpenAICompatibleRequestOptions
-            fileIds,
-        )
-            // 即使 onComplete 未被调用，Promise 正常结束也算完成
-            .then(() => finish())
-            .catch((error: unknown) => {
-                finish(error instanceof Error ? error : new Error(String(error)));
-            });
-    });
+                  }
+                });
+              });
+            }
+          }
+          finish();
+        },
+        onError: (error: unknown) => {
+          finish(error instanceof Error ? error : new Error(String(error)));
+        },
+      },
+      config.provider,
+      config.modelId,
+      config.apiKey,
+      config.apiBaseUrl,
+      systemPrompt,
+      { tools: LOCAL_MCP_TOOLS }, // 注入内置 MCP 工具
+      fileIds,
+    )
+      // 即使 onComplete 未被调用，Promise 正常结束也算完成
+      .then(() => finish())
+      .catch((error: unknown) => {
+        finish(error instanceof Error ? error : new Error(String(error)));
+      });
+  });
 
-    const text = chunks.join("").trim();
-    if (!text) {
-        throw new Error("AI 返回了空的主动消息");
-    }
-    return text;
+  // 等工具调用执行完再往下走
+  await toolCallsPromise;
+
+  const text = chunks.join("").trim();
+  if (!text) {
+    throw new Error("AI 返回了空的主动消息");
+  }
+  return { text, scheduledByMcp };
 }
 
 /**
@@ -610,38 +645,35 @@ async function generateMessage(
  * 页面不可注入（chrome:// / 扩展页 / 无 content script）时静默跳过。
  */
 async function notifyActiveTab(text: string, role: string): Promise<void> {
-    try {
-        const [tab] = await chrome.tabs.query({
-            active: true,
-            currentWindow: true,
-        });
-        if (!tab?.id) return;
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    if (!tab?.id) return;
 
-        const payload: ProactiveMessagePayload = { text, role };
+    const payload: ProactiveMessagePayload = { text, role };
 
-        // 刻意不 await 回执：content 侧的 messenger.ext.listen 封装对每条消息
-        // 都返回 true（异步保持通道），若这里 await，Promise 可能长时间 pending，
-        // 拖住 runProactiveMessage 的 finally，导致后续排期停摆。
-        // 提醒只是尽力而为，失败记录日志即可。
-        void chrome.tabs
-            .sendMessage(
-                tab.id,
-                {
-                    type: "PROACTIVE_AI_MESSAGE",
-                    target: "content",
-                    payload,
-                },
-                { frameId: 0 },
-            )
-            .catch((error: unknown) => {
-                maLogger.warn(
-                    "[ProactiveChat] 向活跃标签页发送提醒失败:",
-                    error,
-                );
-            });
-    } catch (error) {
+    // 刻意不 await 回执：content 侧的 messenger.ext.listen 封装对每条消息
+    // 都返回 true（异步保持通道），若这里 await，Promise 可能长时间 pending，
+    // 拖住 runProactiveMessage 的 finally，导致后续排期停摆。
+    // 提醒只是尽力而为，失败记录日志即可。
+    void chrome.tabs
+      .sendMessage(
+        tab.id,
+        {
+          type: "PROACTIVE_AI_MESSAGE",
+          target: "content",
+          payload,
+        },
+        { frameId: 0 },
+      )
+      .catch((error: unknown) => {
         maLogger.warn("[ProactiveChat] 向活跃标签页发送提醒失败:", error);
-    }
+      });
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 向活跃标签页发送提醒失败:", error);
+  }
 }
 
 /**
@@ -649,362 +681,257 @@ async function notifyActiveTab(text: string, role: string): Promise<void> {
  * 生成失败降级到模板；写记忆失败则跳过提醒（避免"提醒了却查不到消息"）。
  */
 async function runProactiveMessage(): Promise<boolean> {
-    const now = new Date();
+  const now = new Date();
 
-    // 作息保护：上班前 / 下班后不发起任何请求，避免整夜持续消耗 token
-    if (!isWorkTime(now)) return false;
+  // 作息保护：上班前 / 下班后不发起任何请求，避免整夜持续消耗 token
+  if (!isWorkTime(now)) return false;
 
-    const dateKey = getDateKey(now);
+  const dateKey = getDateKey(now);
 
-    // 当天已经发过下班收尾消息 → 不再请求
-    if ((await getOffDutyDate()) === dateKey) return false;
+  // 当天已经发过下班收尾消息 → 不再请求
+  if ((await getOffDutyDate()) === dateKey) return false;
 
-    const closing = isOffDutyWindow(now);
-    const period = getTimePeriod(now);
-    const memoryService = getMemoryService();
-    const role = await resolveRole(memoryService);
+  const closing = isOffDutyWindow(now);
+  const period = getTimePeriod(now);
+  const memoryService = getMemoryService();
+  const role = await resolveRole(memoryService);
 
-    // 心情推导：主人是否回复过 → 连续被忽略次数；今天是否被批评 → 伤心
-    const moodState = await loadMoodState(dateKey);
-    const { userTexts, lastReplyAt } = await loadTodayUserTurns(
-        memoryService,
-        role,
-        now,
-    );
-    const replied = lastReplyAt > moodState.lastPushAt;
-    const nextState: ProactiveMoodState = {
-        date: dateKey,
-        ignoredStreak: replied ? 0 : moodState.ignoredStreak + 1,
-        hurt: moodState.hurt || detectHurt(userTexts),
-        lastPushAt: now.getTime(),
-    };
-    const moodPrompt = describeMood(
-        deriveMood(nextState),
-        nextState.ignoredStreak,
-    );
+  // 心情推导：主人是否回复过 → 连续被忽略次数；今天是否被批评 → 伤心
+  const moodState = await loadMoodState(dateKey);
+  const { userTexts, lastReplyAt } = await loadTodayUserTurns(
+    memoryService,
+    role,
+    now,
+  );
+  const replied = lastReplyAt > moodState.lastPushAt;
+  const nextState: ProactiveMoodState = {
+    date: dateKey,
+    ignoredStreak: replied ? 0 : moodState.ignoredStreak + 1,
+    hurt: moodState.hurt || detectHurt(userTexts),
+    lastPushAt: now.getTime(),
+  };
+  const moodPrompt = describeMood(
+    deriveMood(nextState),
+    nextState.ignoredStreak,
+  );
 
-    // 尝试截取当前活跃标签页并上传 —— 让 AI "看到"主人在做什么
-    // 截图/上传失败静默降级，不阻塞主动对话主流程
-    let fileIds: string[] | undefined;
-    try {
-        const fileId = await captureAndUploadActiveTab();
-        if (fileId) {
-            fileIds = [fileId];
-        }
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 截图上传异常，降级为无图:", error);
+  // 尝试截取当前活跃标签页并上传 —— 让 AI "看到"主人在做什么
+  // 截图/上传失败静默降级，不阻塞主动对话主流程
+  let fileIds: string[] | undefined;
+  try {
+    const fileId = await captureAndUploadActiveTab();
+    if (fileId) {
+      fileIds = [fileId];
     }
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 截图上传异常，降级为无图:", error);
+  }
 
-    /* ══════════════════════════════════════════════════════════════════
-     * 组装 systemPrompt —— 一次组装，首条回复和连续回复续轮都复用
-     * 避免 generateMessage 和后续 generateFollowupReply 各自独立 loadAIConfig + listEntries
-     * ══════════════════════════════════════════════════════════════════ */
-    let sharedSystemPrompt: string | undefined;
-    let aiConfig: Awaited<ReturnType<typeof loadAIConfig>> | null = null;
-    try {
-        aiConfig = await loadAIConfig();
-        if (hasUsableAIConfig(aiConfig)) {
-            const identity = await memoryService.getIdentity(role);
+  /* ══════════════════════════════════════════════════════════════════
+   * 组装 systemPrompt —— 一次组装，首条回复和连续回复续轮都复用
+   * 避免 generateMessage 和后续 generateFollowupReply 各自独立 loadAIConfig + listEntries
+   * ══════════════════════════════════════════════════════════════════ */
+  let sharedSystemPrompt: string | undefined;
+  let aiConfig: Awaited<ReturnType<typeof loadAIConfig>> | null = null;
+  try {
+    aiConfig = await loadAIConfig();
+    if (hasUsableAIConfig(aiConfig)) {
+      const identity = await memoryService.getIdentity(role);
 
-            // 读取记忆失败不阻塞主流程，只降级为无记忆上下文
-            let memoryContext = "";
-            try {
-                const entries = await memoryService.listEntries(role);
-                memoryContext = assembleMemoryContext(entries, now.getTime());
-            } catch (memErr) {
-                maLogger.warn("[ProactiveChat] 组装 systemPrompt 时读取记忆失败:", memErr);
-            }
-
-            sharedSystemPrompt = [
-                aiConfig.systemPrompt?.trim(),
-                identity?.systemPromptTemplate?.trim(),
-                identity?.personaDescription?.trim()
-                    ? `[角色身份]\n${identity.personaDescription}`
-                    : undefined,
-                memoryContext,
-                `[当前心情] ${moodPrompt}`,
-            ]
-                .filter(Boolean)
-                .join("\n\n");
-        }
-    } catch (sysPromptErr) {
-        maLogger.warn("[ProactiveChat] 组装 systemPrompt 失败，续轮链将跳过:", sysPromptErr);
-    }
-
-    let text: string;
-    try {
-        // 传入 presetSystemPrompt —— generateMessage 跳过重复组装
-        text = await generateMessage(
-            role, now, closing, moodPrompt, fileIds, sharedSystemPrompt,
+      // 读取记忆失败不阻塞主流程，只降级为无记忆上下文
+      let memoryContext = "";
+      try {
+        const entries = await memoryService.listEntries(role);
+        memoryContext = assembleMemoryContext(entries, now.getTime());
+      } catch (memErr) {
+        maLogger.warn(
+          "[ProactiveChat] 组装 systemPrompt 时读取记忆失败:",
+          memErr,
         );
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] AI 生成失败，使用本地问候:", error);
-        text = getFallbackMessage(period, closing);
+      }
+
+      sharedSystemPrompt = [
+        aiConfig.systemPrompt?.trim(),
+        identity?.systemPromptTemplate?.trim(),
+        identity?.personaDescription?.trim()
+          ? `[角色身份]\n${identity.personaDescription}`
+          : undefined,
+        memoryContext,
+        `[当前心情] ${moodPrompt}`,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
     }
+  } catch (sysPromptErr) {
+    maLogger.warn(
+      "[ProactiveChat] 组装 systemPrompt 失败，续轮链将跳过:",
+      sysPromptErr,
+    );
+  }
 
-    // 主动消息没有 tools，但会话上下文可能让模型模仿输出工具标记 —— 先剥掉再裁剪
-    const finalText = Array.from(stripToolCallMarkup(text))
-        .slice(0, MAX_MESSAGE_LENGTH)
-        .join("");
+  let text: string;
+  let scheduledByMcp = false;
+  try {
+    // 传入 presetSystemPrompt —— generateMessage 跳过重复组装
+    const result = await generateMessage(
+      role,
+      now,
+      closing,
+      moodPrompt,
+      fileIds,
+      sharedSystemPrompt,
+    );
+    text = result.text;
+    scheduledByMcp = result.scheduledByMcp;
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] AI 生成失败，使用本地问候:", error);
+    text = getFallbackMessage(period, closing);
+    scheduledByMcp = false;
+  }
 
-    try {
-        await memoryService.addEntry({
-            role,
-            content: `AI：${finalText}`,
-            category: "conversation",
-            importance: "low",
-            source: "ai-proactive",
-        });
-    } catch (error) {
-        maLogger.error("[ProactiveChat] 保存主动消息到记忆失败:", error);
-        return false;
-    }
+  // 主动消息没有 tools，但会话上下文可能让模型模仿输出工具标记 —— 先剥掉再裁剪
+  const finalText = Array.from(stripToolCallMarkup(text))
+    .slice(0, MAX_MESSAGE_LENGTH)
+    .join("");
 
-    // 推送成功后才落库心情 —— 生成/写库失败不应计入「被忽略」
-    await saveMoodState(nextState);
-
-    // 收尾消息落库成功后才打标记 —— 写库失败时不静音，留给下一次机会
-    if (closing) {
-        await markOffDuty(dateKey);
-    }
-
-    await notifyActiveTab(finalText, role);
-
-    /* ══════════════════════════════════════════════════════════════════
-     * 主动对话的连续回复循环
-     *   - 只有在主消息（非 closing 收尾）成功后才进入
-     *   - 续轮不带截图（首条 captureVisibleTab + uploadFile 已完成，
-     *     续轮复用同一个 systemPrompt，不再消耗截图上传开销）
-     *   - 任何一轮失败都 break，不影响主链路
-     *   - 连续回复不影响 mood 推导（不算 ignoredStreak / lastPushAt）
-     * ══════════════════════════════════════════════════════════════════ */
-    if (!closing && sharedSystemPrompt && aiConfig) {
-        const baseContProb = getContinuousReplyProbability(deriveMood(nextState));
-        let contRound = 1;
-
-        while (contRound < MAX_CONTINUOUS_ROUNDS) {
-            const prob = computeNextProbability(baseContProb, contRound);
-            if (prob <= 0 || !shouldTrigger(prob)) break;
-
-            maLogger.info(
-                "[ProactiveChat] 主动对话连续回复触发 ——",
-                `round=${contRound}, prob=${(prob * 100).toFixed(1)}%`,
-            );
-
-            try {
-                // 心情已经在 sharedSystemPrompt 里注入，这里不重复传
-                const followupPrompt = buildFollowupPrompt({
-                    scenario: "proactive",
-                    lastMessage: finalText.slice(0, 60),
-                    round: contRound,
-                });
-
-                // ⚠️ 续轮不带 fileIds —— 只有主消息才 captureVisibleTab + uploadFile
-                const followupText = await generateFollowupReply(
-                    role,
-                    sharedSystemPrompt,
-                    followupPrompt,
-                    {
-                        provider: aiConfig.provider,
-                        modelId: aiConfig.modelId,
-                        apiKey: aiConfig.apiKey,
-                        apiBaseUrl: aiConfig.apiBaseUrl,
-                    },
-                );
-
-                const trimmed = Array.from(followupText)
-                    .slice(0, MAX_MESSAGE_LENGTH)
-                    .join("");
-
-                // 续轮消息落记忆 + 通知 dock 再次弹出
-                await memoryService.addEntry({
-                    role,
-                    content: `AI：${trimmed}`,
-                    category: "conversation",
-                    importance: "low",
-                    source: "ai-proactive-followup",
-                });
-                await notifyActiveTab(trimmed, role);
-            } catch (contErr) {
-                // 续轮任何一轮失败都停，不影响主链路
-                maLogger.warn(
-                    "[ProactiveChat] 主动对话连续回复生成失败，停止续轮:",
-                    contErr,
-                );
-                break;
-            }
-
-            contRound++;
-        }
-
-        if (contRound > 1) {
-            maLogger.info(
-                "[ProactiveChat] 主动对话连续回复链结束 ——",
-                `累计续轮 ${contRound - 1} 次`,
-            );
-        }
-    }
-
-    /* ══════════════════════════════════════════════════════════════════
-     * 让 AI 决定下次主动消息的间隔 —— 独立短调用，不带截图不带 tools
-     *   - 收尾消息（closing）直接跳过：已经标记 off-duty，下次排到明天上班
-     *   - 非 closing 时尝试让 AI 输出一个 0.5~120 的数字
-     *   - 成功 → 用 AI 给的间隔精确排期，返回 true（告诉调用方不用再随机排）
-     *   - 失败/解析异常 → 返回 false（调用方兜底 scheduleNext 随机排）
-     * ══════════════════════════════════════════════════════════════════ */
-    if (closing || !sharedSystemPrompt || !aiConfig) {
-        return false;
-    }
-
-    try {
-        const minutes = await pickNextInterval(role, sharedSystemPrompt, aiConfig, finalText);
-        if (minutes !== null) {
-            await scheduleProactiveMessageIn(minutes);
-            maLogger.info(
-                `[ProactiveChat] 已按 AI 决定的 ${minutes} 分钟精确排期，跳过随机排`,
-            );
-            return true;
-        }
-    } catch (err) {
-        maLogger.warn("[ProactiveChat] pickNextInterval 异常，兜底随机排:", err);
-    }
+  try {
+    await memoryService.addEntry({
+      role,
+      content: `AI：${finalText}`,
+      category: "conversation",
+      importance: "low",
+      source: "ai-proactive",
+    });
+  } catch (error) {
+    maLogger.error("[ProactiveChat] 保存主动消息到记忆失败:", error);
     return false;
-}
+  }
 
-/**
- * 让 AI 根据刚发完的主动消息和心情，决定下次主动找主人的间隔。
- * 独立短调用（不带截图、不带 tools），只输出一个 0.5~120 的数字。
- * 失败或返回无效值时返回 null，调用方会兜底用随机间隔。
- *
- * @returns 夹取后的分钟数，或 null（让调用方兜底）
- */
-async function pickNextInterval(
-    role: string,
-    sharedSystemPrompt: string,
-    aiConfig: Awaited<ReturnType<typeof loadAIConfig>>,
-    lastText: string,
-): Promise<number | null> {
-    try {
-        if (!aiConfig || !hasUsableAIConfig(aiConfig)) return null;
+  // 推送成功后才落库心情 —— 生成/写库失败不应计入「被忽略」
+  await saveMoodState(nextState);
 
-        const reqPrompt =
-            `你刚才主动找主人说了这句话："${lastText.slice(0, 80)}"\n\n` +
-            `请决定下一次主动找主人的间隔（分钟）。` +
-            `规则：只输出一个数字，范围 0.5~120。` +
-            `寂寞时可设 2~5 分钟，忙碌或不想打扰时设 30~120 分钟。` +
-            `不要输出任何其他内容，包括解释、标点、引号。`;
+  // 收尾消息落库成功后才打标记 —— 写库失败时不静音，留给下一次机会
+  if (closing) {
+    await markOffDuty(dateKey);
+  }
 
-        // ⚠️ completeChatFlow 的参数是按位置排列的：
-        //   (prompt, role, callbacks, provider, model, apiKey, apiBaseUrl, systemPrompt, ...)
-        // 之前把 aiConfig 误传进 callbacks 位置 —— onData 缺失导致 deepseek 链路
-        // 走了非流式分支，把 SSE 文本当 JSON 解析直接报 SyntaxError。
-        // 且 deepseek 链路走 SSE 流式后返回值是 null，最终文本必须用 onData 自己攒。
-        const textPromise = new Promise<string | undefined>((resolve) => {
-            let text = "";
-            let settled = false;
-            const settle = (value: string | undefined) => {
-                if (settled) return;
-                settled = true;
-                resolve(value);
-            };
-            void completeChatFlow(
-                reqPrompt,
-                role,
-                {
-                    onData: (data: string) => {
-                        text += data;
-                    },
-                    onComplete: () => settle(text.trim() || undefined),
-                    onError: (error: unknown) => {
-                        maLogger.warn(
-                            "[ProactiveChat] pickNextInterval AI 调用失败:",
-                            error,
-                        );
-                        settle(undefined);
-                    },
-                },
-                aiConfig.provider,
-                aiConfig.modelId,
-                aiConfig.apiKey,
-                aiConfig.apiBaseUrl,
-                sharedSystemPrompt,
-            )
-                .then(() => settle(text.trim() || undefined))
-                .catch(() => settle(undefined));
+  await notifyActiveTab(finalText, role);
+
+  /* ══════════════════════════════════════════════════════════════════
+   * 主动对话的连续回复循环
+   *   - 只有在主消息（非 closing 收尾）成功后才进入
+   *   - 续轮不带截图（首条 captureVisibleTab + uploadFile 已完成，
+   *     续轮复用同一个 systemPrompt，不再消耗截图上传开销）
+   *   - 任何一轮失败都 break，不影响主链路
+   *   - 连续回复不影响 mood 推导（不算 ignoredStreak / lastPushAt）
+   * ══════════════════════════════════════════════════════════════════ */
+  if (!closing && sharedSystemPrompt && aiConfig) {
+    const baseContProb = getContinuousReplyProbability(deriveMood(nextState));
+    let contRound = 1;
+
+    while (contRound < MAX_CONTINUOUS_ROUNDS) {
+      const prob = computeNextProbability(baseContProb, contRound);
+      if (prob <= 0 || !shouldTrigger(prob)) break;
+
+      maLogger.info(
+        "[ProactiveChat] 主动对话连续回复触发 ——",
+        `round=${contRound}, prob=${(prob * 100).toFixed(1)}%`,
+      );
+
+      try {
+        // 心情已经在 sharedSystemPrompt 里注入，这里不重复传
+        const followupPrompt = buildFollowupPrompt({
+          scenario: "proactive",
+          lastMessage: finalText.slice(0, 60),
+          round: contRound,
         });
 
-        // 10 秒超时兜底：超时返回 undefined → 调用方用随机间隔
-        const timeoutPromise = new Promise<undefined>((resolve) => {
-            setTimeout(() => {
-                maLogger.info(
-                    "[ProactiveChat] pickNextInterval 10s 超时，兜底随机间隔",
-                );
-                resolve(undefined);
-            }, 10_000);
+        // ⚠️ 续轮不带 fileIds —— 只有主消息才 captureVisibleTab + uploadFile
+        const followupText = await generateFollowupReply(
+          role,
+          sharedSystemPrompt,
+          followupPrompt,
+          {
+            provider: aiConfig.provider,
+            modelId: aiConfig.modelId,
+            apiKey: aiConfig.apiKey,
+            apiBaseUrl: aiConfig.apiBaseUrl,
+          },
+        );
+
+        const trimmed = Array.from(followupText)
+          .slice(0, MAX_MESSAGE_LENGTH)
+          .join("");
+
+        // 续轮消息落记忆 + 通知 dock 再次弹出
+        await memoryService.addEntry({
+          role,
+          content: `AI：${trimmed}`,
+          category: "conversation",
+          importance: "low",
+          source: "ai-proactive-followup",
         });
-
-        const result = await Promise.race([textPromise, timeoutPromise]);
-        if (!result) return null;
-
-        // 从输出里抠出第一个数字 —— 模型偶尔会在数字前后加文字，做个宽容解析
-        const match = result.match(/(\d+(?:\.\d+)?)/);
-        if (!match) {
-            maLogger.info(
-                `[ProactiveChat] pickNextInterval 未匹配到数字，输出: "${result}"`,
-            );
-            return null;
-        }
-        const num = parseFloat(match[1]);
-        if (!isFinite(num)) return null;
-
-        const clamped = Math.min(
-            MAX_MANUAL_DELAY_MINUTES,
-            Math.max(MIN_DELAY_MINUTES, num),
+        await notifyActiveTab(trimmed, role);
+      } catch (contErr) {
+        // 续轮任何一轮失败都停，不影响主链路
+        maLogger.warn(
+          "[ProactiveChat] 主动对话连续回复生成失败，停止续轮:",
+          contErr,
         );
-        maLogger.info(
-            `[ProactiveChat] AI 决定下次间隔 ${clamped} 分钟（原始输出: "${result.trim()}"）`,
-        );
-        return clamped;
-    } catch (err) {
-        maLogger.warn("[ProactiveChat] pickNextInterval 异常:", err);
-        return null;
+        break;
+      }
+
+      contRound++;
     }
+
+    if (contRound > 1) {
+      maLogger.info(
+        "[ProactiveChat] 主动对话连续回复链结束 ——",
+        `累计续轮 ${contRound - 1} 次`,
+      );
+    }
+  }
+
+  // MCP 工具 set_next_proactive_interval 已注入 generateMessage：
+  // 模型调了工具 → scheduledByMcp=true → 返回 true 跳过 scheduleNext 兜底
+  // 模型没调 / 不支持 tools → scheduledByMcp=false → 返回 false 让外层兜底 scheduleNext
+  return scheduledByMcp;
 }
 
 /** 排下一次触发：工作时段内随机；时段外或当天已收尾则直接对齐到下次上班 */
 async function scheduleNext(): Promise<void> {
-    const now = new Date();
+  const now = new Date();
 
-    try {
-        const scheduleToNextWorkStart = async (): Promise<void> => {
-            const nextStart = getNextWorkStart(now);
-            await chrome.alarms.create(PROACTIVE_ALARM_NAME, {
-                when: nextStart.getTime(),
-            });
-        };
+  try {
+    const scheduleToNextWorkStart = async (): Promise<void> => {
+      const nextStart = getNextWorkStart(now);
+      await chrome.alarms.create(PROACTIVE_ALARM_NAME, {
+        when: nextStart.getTime(),
+      });
+    };
 
-        // 1) 非工作时段：不排随机轮询，直接等到上班点，避免整夜空转
-        if (!isWorkTime(now)) {
-            await scheduleToNextWorkStart();
-            return;
-        }
-
-        // 2) 今天已经说过晚安：等明天上班
-        if ((await getOffDutyDate()) === getDateKey(now)) {
-            await scheduleToNextWorkStart();
-            return;
-        }
-
-        // 3) 正常随机间隔
-        const delay =
-            MIN_DELAY_MINUTES +
-            Math.random() * (MAX_DELAY_MINUTES - MIN_DELAY_MINUTES);
-        await chrome.alarms.create(PROACTIVE_ALARM_NAME, {
-            delayInMinutes: delay,
-        });
-    } catch (error) {
-        maLogger.warn("[ProactiveChat] 排期失败:", error);
+    // 1) 非工作时段：不排随机轮询，直接等到上班点，避免整夜空转
+    if (!isWorkTime(now)) {
+      await scheduleToNextWorkStart();
+      return;
     }
+
+    // 2) 今天已经说过晚安：等明天上班
+    if ((await getOffDutyDate()) === getDateKey(now)) {
+      await scheduleToNextWorkStart();
+      return;
+    }
+
+    // 3) 正常随机间隔
+    const delay =
+      MIN_DELAY_MINUTES +
+      Math.random() * (MAX_DELAY_MINUTES - MIN_DELAY_MINUTES);
+    await chrome.alarms.create(PROACTIVE_ALARM_NAME, {
+      delayInMinutes: delay,
+    });
+  } catch (error) {
+    maLogger.warn("[ProactiveChat] 排期失败:", error);
+  }
 }
 
 /** MCP 工具允许设置的最大延迟（分钟）—— 2 小时，避免模型给出离谱数值 */
@@ -1020,25 +947,32 @@ export const MAX_MANUAL_DELAY_MINUTES = 120;
  * @returns 实际生效的分钟数（夹取后的值）
  */
 export async function scheduleProactiveMessageIn(
-    minutes: number,
+  minutes: number,
 ): Promise<number> {
-    if (!chrome.alarms?.create) {
-        throw new Error("chrome.alarms 不可用，无法设置主动消息间隔");
-    }
+  if (!chrome.alarms?.create) {
+    throw new Error("chrome.alarms 不可用，无法设置主动消息间隔");
+  }
 
-    const safeMinutes = Math.min(
-        MAX_MANUAL_DELAY_MINUTES,
-        Math.max(MIN_DELAY_MINUTES, minutes),
-    );
+  // minutes === 0 → 立即触发下一轮主动消息（不等时钟）
+  if (minutes === 0) {
+    await chrome.alarms.create(PROACTIVE_ALARM_NAME, { when: Date.now() });
+    maLogger.info("[ProactiveChat] MCP 要求立即触发下一轮主动消息");
+    return 0;
+  }
 
-    await chrome.alarms.create(PROACTIVE_ALARM_NAME, {
-        delayInMinutes: safeMinutes,
-    });
+  const safeMinutes = Math.min(
+    MAX_MANUAL_DELAY_MINUTES,
+    Math.max(MIN_DELAY_MINUTES, minutes),
+  );
 
-    maLogger.info(
-        `[ProactiveChat] MCP 设置下次主动消息间隔: ${safeMinutes} 分钟`,
-    );
-    return safeMinutes;
+  await chrome.alarms.create(PROACTIVE_ALARM_NAME, {
+    delayInMinutes: safeMinutes,
+  });
+
+  maLogger.info(
+    `[ProactiveChat] MCP 设置下次主动消息间隔: ${safeMinutes} 分钟`,
+  );
+  return safeMinutes;
 }
 
 /**
@@ -1047,45 +981,45 @@ export async function scheduleProactiveMessageIn(
  * 这里用 alarms.get 做一次自愈，避免首次安装/手动清除后没有排期。
  */
 export function initProactiveChat(): void {
-    // chrome.alarms 需要 manifest 声明 "alarms" 权限；
-    // 缺失时为 undefined，这里必须兜底，否则 background 顶层会抛错并连带
-    // 中断后续所有初始化（消息监听、快捷键等）。
-    if (!chrome.alarms?.onAlarm) {
-        maLogger.warn(
-            "[ProactiveChat] chrome.alarms 不可用，已跳过主动对话调度；" +
-                "请检查 manifest 的 permissions 是否包含 \"alarms\"",
-        );
-        return;
-    }
+  // chrome.alarms 需要 manifest 声明 "alarms" 权限；
+  // 缺失时为 undefined，这里必须兜底，否则 background 顶层会抛错并连带
+  // 中断后续所有初始化（消息监听、快捷键等）。
+  if (!chrome.alarms?.onAlarm) {
+    maLogger.warn(
+      "[ProactiveChat] chrome.alarms 不可用，已跳过主动对话调度；" +
+        '请检查 manifest 的 permissions 是否包含 "alarms"',
+    );
+    return;
+  }
 
-    if (!alarmListenerRegistered) {
-        alarmListenerRegistered = true;
-        chrome.alarms.onAlarm.addListener((alarm) => {
-            if (alarm.name !== PROACTIVE_ALARM_NAME) return;
+  if (!alarmListenerRegistered) {
+    alarmListenerRegistered = true;
+    chrome.alarms.onAlarm.addListener((alarm) => {
+      if (alarm.name !== PROACTIVE_ALARM_NAME) return;
 
-            /* runProactiveMessage 返回 true 表示 AI 已经决定并排好下次间隔，
-               此时跳过 finally 里的随机排，避免覆盖 AI 的精确设定 */
-            void (async () => {
-                let skipRandomSchedule = false;
-                try {
-                    skipRandomSchedule = await runProactiveMessage();
-                } catch (error) {
-                    maLogger.warn("[ProactiveChat] 主动对话执行失败:", error);
-                }
-                if (!skipRandomSchedule) {
-                    await scheduleNext();
-                }
-            })();
-        });
-    }
+      void (async () => {
+        // runProactiveMessage 返回 true = 模型调了 MCP 工具精确排期，跳过兜底；
+        // 返回 false = 模型没调 / 失败，走 scheduleNext 随机兜底
+        let skipRandomSchedule = false;
+        try {
+          skipRandomSchedule = await runProactiveMessage();
+        } catch (error) {
+          maLogger.warn("[ProactiveChat] 主动对话执行失败:", error);
+        }
+        if (!skipRandomSchedule) {
+          await scheduleNext();
+        }
+      })();
+    });
+  }
 
-    void chrome.alarms
-        .get(PROACTIVE_ALARM_NAME)
-        .then((existing) => {
-            if (!existing) void scheduleNext();
-        })
-        .catch((error) => {
-            maLogger.warn("[ProactiveChat] 读取 alarm 状态失败:", error);
-            void scheduleNext();
-        });
+  void chrome.alarms
+    .get(PROACTIVE_ALARM_NAME)
+    .then((existing) => {
+      if (!existing) void scheduleNext();
+    })
+    .catch((error) => {
+      maLogger.warn("[ProactiveChat] 读取 alarm 状态失败:", error);
+      void scheduleNext();
+    });
 }

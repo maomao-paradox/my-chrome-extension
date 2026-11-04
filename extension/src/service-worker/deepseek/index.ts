@@ -20,6 +20,7 @@ import {
   type OpenAICompatibleRequestOptions,
 } from "./openai-request";
 import { stripToolCallMarkup } from "./tool-call-markup";
+import { parseDeepSeekToolCalls, type DeepSeekWebTool } from "./deepseek-core";
 
 /** 供连续回复 / 主动消息等无 tools 链路复用：去掉模型模仿输出的工具标记 */
 export { stripToolCallMarkup };
@@ -427,6 +428,11 @@ async function callGenericAIAPI(
     let streamedContent = "";
     const toolCallDeltas = new Map<number, OpenAIToolCallDelta>();
 
+    // OpenAI-compatible providers 不支持 WebMCP 标记的自动解析 ——
+    // 如果模型按 WebMCP 协议输出了 <webmcp_tool_calls> 文本标记，
+    // 需要我们自己剥掉并解析。
+    const webMcpTools = (options?.tools ?? []) as DeepSeekWebTool[];
+
     while (true) {
       const { value, done } = await reader.read();
 
@@ -445,7 +451,8 @@ async function callGenericAIAPI(
         if (parsedContent) {
           hasContent = true;
           streamedContent += parsedContent;
-          callbacks?.onData?.(parsedContent);
+          // 流式推送时剥掉 <webmcp_tool_calls> 标记，避免漏给前端
+          callbacks?.onData?.(stripToolCallMarkup(parsedContent));
         }
       }
 
@@ -459,19 +466,33 @@ async function callGenericAIAPI(
           if (parsedContent) {
             hasContent = true;
             streamedContent += parsedContent;
-            callbacks?.onData?.(parsedContent);
+            callbacks?.onData?.(stripToolCallMarkup(parsedContent));
           }
         }
         break;
       }
     }
 
-    const functionCalls = finalizeOpenAIToolCalls(toolCallDeltas);
+    // 合并原生 function_call delta + WebMCP 文本标记里的工具调用
+    const nativeFunctionCalls = finalizeOpenAIToolCalls(toolCallDeltas);
+    const webMcpFunctionCalls = webMcpTools.length > 0
+      ? parseDeepSeekToolCalls(streamedContent, webMcpTools).map((c) => ({
+          id: c.id,
+          name: c.name,
+          args: c.args,
+        }))
+      : [];
+    const functionCalls = [...nativeFunctionCalls, ...webMcpFunctionCalls];
+
     if (!hasContent && functionCalls.length === 0) {
       throw createEmptyGenericStreamError(provider, rawSample);
     }
 
-    callbacks?.onComplete?.({ text: streamedContent, functionCalls });
+    // 最终返回文本也剥掉 WebMCP 标记 —— 下游 tool_round 处理不应该看到这些标记
+    callbacks?.onComplete?.({
+      text: stripToolCallMarkup(streamedContent),
+      functionCalls,
+    });
     return null;
   } catch (error) {
     callbacks?.onError?.(error);

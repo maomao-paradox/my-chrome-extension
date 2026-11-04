@@ -7,7 +7,11 @@
  */
 
 import { getMemoryStore } from "./memory-store";
-import { getMemoryService } from "./memory-service";
+import { getMemoryGateway } from "./memory-gateway";
+import {
+  getMemoryBackendClient,
+  isMemoryBackendFallbackError,
+} from "./backend-client";
 import type {
   IdentityMemory,
   MemoryEntry,
@@ -17,26 +21,45 @@ import type {
 
 /**
  * 导出所有记忆数据为 JSON 对象
- * —— 同步收集各角色的 entries / identity / shortterm
+ * —— 后端可用时从后端导出，否则走本地 chrome.storage
+ *
+ * @param role 可选：仅导出指定角色
  */
-export async function exportAllMemories(): Promise<MemoryExportPayload> {
+export async function exportAllMemories(
+  role?: string,
+): Promise<MemoryExportPayload> {
+  const client = getMemoryBackendClient();
+  if (await client.isAvailable()) {
+    try {
+      return await client.exportAll(role);
+    } catch (error) {
+      if (!isMemoryBackendFallbackError(error)) throw error;
+    }
+  }
+  return exportAllMemoriesLocally(role);
+}
+
+/** 本地导出实现 —— 同步收集各角色的 entries / identity / shortterm */
+async function exportAllMemoriesLocally(
+  role?: string,
+): Promise<MemoryExportPayload> {
   const store = getMemoryStore();
-  const roles = await store.listAllRoles();
+  const roles = role ? [role] : await store.listAllRoles();
 
   const identities: IdentityMemory[] = [];
   const entries: MemoryEntry[] = [];
   const shortTerm: Record<string, ShortTermSnapshot> = {};
 
-  for (const role of roles) {
+  for (const item of roles) {
     const [identity, roleEntries, snapshot] = await Promise.all([
-      store.getIdentity(role),
-      store.listEntries(role),
-      store.getShortTerm(role),
+      store.getIdentity(item),
+      store.listEntries(item),
+      store.getShortTerm(item),
     ]);
 
     if (identity) identities.push(identity);
     entries.push(...roleEntries);
-    if (snapshot) shortTerm[role] = snapshot;
+    if (snapshot) shortTerm[item] = snapshot;
   }
 
   return {
@@ -81,6 +104,7 @@ export async function downloadMemoriesAsFile(filename?: string): Promise<void> {
 
 /**
  * 从 JSON 对象恢复记忆数据
+ * —— 后端可用时交给后端导入（与本地合并语义一致），否则走本地
  *
  * @param payload        导入数据包
  * @param mode           合并模式：merge=与现有合并 | replace=完全替换
@@ -94,6 +118,28 @@ export async function importMemories(
   shortTermImported: number;
   rolesCleared: number;
   /** 本次导入涉及的所有角色（去重）—— 供 UI 导入后自动选中并同步展示 */
+  rolesImported: string[];
+}> {
+  const client = getMemoryBackendClient();
+  if (await client.isAvailable()) {
+    try {
+      return await client.importMemories(payload, mode);
+    } catch (error) {
+      if (!isMemoryBackendFallbackError(error)) throw error;
+    }
+  }
+  return importMemoriesLocally(payload, mode);
+}
+
+/** 本地导入实现 */
+async function importMemoriesLocally(
+  payload: MemoryExportPayload,
+  mode: "merge" | "replace" = "merge",
+): Promise<{
+  identitiesImported: number;
+  entriesImported: number;
+  shortTermImported: number;
+  rolesCleared: number;
   rolesImported: string[];
 }> {
   const store = getMemoryStore();
@@ -202,25 +248,39 @@ export async function importFromFile(
   return importMemories(payload, mode);
 }
 
-/** 导出单个角色的记忆 */
+/** 导出单个角色的记忆 —— 走后端时由服务端按角色裁剪 */
 export async function exportSingleRole(
   role: string,
 ): Promise<MemoryExportPayload> {
-  const store = getMemoryStore();
-  const [identity, entries, shortTerm] = await Promise.all([
-    store.getIdentity(role),
-    store.listEntries(role),
-    store.getShortTerm(role),
-  ]);
-
-  return {
-    schemaVersion: 1,
-    exportedAt: new Date().toISOString(),
-    identities: identity ? [identity] : [],
-    entries,
-    shortTerm: shortTerm ? { [role]: shortTerm } : {},
-  };
+  return exportAllMemories(role);
 }
 
-/** 导出 service —— 让上层可以拿到 service 做更多操作 */
-export const getService = () => getMemoryService();
+/**
+ * 将浏览器本地（chrome.storage.local）的记忆一键迁移到后端
+ * —— 本地导出 payload → 直接 POST 到后端 /api/v1/import
+ *
+ * 与 importMemories 的分流逻辑不同：这里数据源始终是本地存储，
+ * 目标始终是后端，用于「纯前端时代 → 后端时代」的数据搬迁。
+ *
+ * @param mode 合并模式：merge=与后端现有数据合并 | replace=替换涉及角色
+ * @throws 后端探针未通过时抛错（调用方应提示用户先启动后端）
+ */
+export async function migrateLocalToBackend(
+  mode: "merge" | "replace" = "merge",
+): Promise<{
+  identitiesImported: number;
+  entriesImported: number;
+  shortTermImported: number;
+  rolesCleared: number;
+  rolesImported: string[];
+}> {
+  const client = getMemoryBackendClient();
+  if (!(await client.isAvailable())) {
+    throw new Error("记忆后端当前不可达，请先启动 memory-server 再迁移");
+  }
+  const payload = await exportAllMemoriesLocally();
+  return client.importMemories(payload, mode);
+}
+
+/** 导出 service —— 让上层可以拿到统一门面（后端优先，失败回退本地） */
+export const getService = () => getMemoryGateway();

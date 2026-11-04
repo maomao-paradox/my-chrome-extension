@@ -18,8 +18,31 @@
  *   await downloadMemoriesAsFile();
  */
 
-export { getMemoryService, MemoryService, isFunctionalRole } from "./memory-service";
-// listChatRoles 是 MemoryService 的实例方法，不需要额外 export
+// 统一门面：探针通过走后端，失败回退本地；签名与 MemoryService 一致
+export {
+    getMemoryService,
+    getMemoryGateway,
+    MemoryGateway,
+    isFunctionalRole,
+} from "./memory-gateway";
+export type { AddMemoryEntryParams, MemoryMode } from "./memory-gateway";
+
+// 本地实现（需要绕过探针直接操作 chrome.storage 时使用）
+export { MemoryService } from "./memory-service";
+
+// 后端客户端与配置
+export {
+    MemoryBackendClient,
+    MemoryBackendError,
+    getMemoryBackendClient,
+    setMemoryBackendClient,
+    resolveMemoryBackendConfig,
+    setMemoryBackendConfig,
+    isMemoryBackendFallbackError,
+    DEFAULT_MEMORY_BACKEND_BASE_URL,
+    MEMORY_BACKEND_BASE_URL_KEY,
+    MEMORY_BACKEND_TOKEN_KEY,
+} from "./backend-client";
 export { getMemoryStore, MemoryStore, generateMemoryId } from "./memory-store";
 export {
     exportAllMemories,
@@ -27,6 +50,7 @@ export {
     downloadMemoriesAsFile,
     importMemories,
     importFromFile,
+    migrateLocalToBackend,
 } from "./memory-exporter";
 
 // ─── 遗忘曲线（艾宾浩斯） ─── //
