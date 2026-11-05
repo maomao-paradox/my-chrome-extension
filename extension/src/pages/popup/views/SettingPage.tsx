@@ -40,6 +40,10 @@ import {
 } from "../composables/useDomainManager";
 import { usePluginManager } from "../composables/usePluginManager";
 import JungleKnotButton from "@/components/Jungle-knot/Button";
+import {
+  isAIProactiveChatEnabled,
+  setAIProactiveChatEnabled,
+} from "@/service-worker/background/proactive-chat-toggle";
 import "./setting-page.scss";
 
 /**
@@ -86,6 +90,8 @@ export const SettingPage: FC<{}> = () => {
   const [currentActivedTabDomain, setCurrentActivedTabDomain] =
     useState<string>("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [aiProactiveChatEnabled, setAiProactiveChatEnabledState] =
+    useState<boolean>(true);
 
   // 保存状态重置定时器
   const saveResetTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -356,6 +362,10 @@ export const SettingPage: FC<{}> = () => {
       loadPopupMouseTrail();
       await loadConfig();
 
+      // 读取 AI 自主式聊天开关
+      const proactiveEnabled = await isAIProactiveChatEnabled();
+      setAiProactiveChatEnabledState(proactiveEnabled);
+
       /** 获取当前活动标签页域名 */
       const tab = await getActivedTab();
       const domain = tab ? extractDomain(tab?.url || "") : "";
@@ -591,9 +601,21 @@ export const SettingPage: FC<{}> = () => {
             <span className="panel-status">{routedPluginCount} 个入口</span>
           </div>
 
-          {pluginConfigEntries.length > 0 ? (
-            <div className="switch-list">
-              {pluginConfigEntries.map(([key, app]) => (
+          <div className="switch-list">
+            {/* AI 自主式聊天开关 —— 独立于插件配置，直接读写 storage */}
+            <div className="switch-row">
+              <MASwitch
+                label="自主式AI"
+                checked={aiProactiveChatEnabled}
+                onChange={async (checked) => {
+                  setAiProactiveChatEnabledState(checked);
+                  await setAIProactiveChatEnabled(checked);
+                }}
+              />
+            </div>
+
+            {pluginConfigEntries.length > 0 ? (
+              pluginConfigEntries.map(([key, app]) => (
                 <div key={key} className="switch-row">
                   <MASwitch
                     label={(app as any).name}
@@ -626,16 +648,16 @@ export const SettingPage: FC<{}> = () => {
                       )}
                   </MASwitch>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="empty-icon">
-                <SettingOutlined />
+              ))
+            ) : (
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <SettingOutlined />
+                </div>
+                <p className="empty-title">暂无配置项</p>
               </div>
-              <p className="empty-title">暂无配置项</p>
-            </div>
-          )}
+            )}
+          </div>
         </section>
       </div>
 

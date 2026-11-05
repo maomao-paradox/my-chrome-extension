@@ -14,7 +14,7 @@ KIRA:NOVE 记忆系统的 Rust 后端：axum + SQLite（sqlx，WAL 模式），�
 - **observe 三规则**：规则 1 用户明示（记住/我喜欢/我讨厌/我叫…）→ preference（high），一轮一条；规则 2 具体事实（项目/框架/版本/操作系统/URL）→ fact（medium），一轮一条；规则 3 整轮对话切块（用户 150 字符 + AI 250 字符）入 conversation 语料，含寒暄过滤、合计 <12 字符过滤、与最近 8 条 Jaccard ≥ 0.85 去重。
 - **1500 条容量淘汰**：单角色软上限 1500 条，超出时按「保留率 × 重要度」淘汰最低者，critical / identity 类目豁免。
 
-上下文装配：预算 2000 字符，依次放入 `[角色身份]` → `[近期对话摘要]` → `[你记得的关于用户的事]`（最多 8 条，fading 标注「（印象模糊）」）；纯工具角色（`graph_extractor` / `textarea_ai_autofill` / `table_data_generator` / `translator_*`）返回空 `assembledContext`，identity 仍返回。
+上下文装配：预算 2000 字符，依次放入 `[角色身份]` → `[近期对话摘要]` → `[你记得的关于用户的事]`（最多 8 条，行首标注入库时间 `[YYYY/MM/DD HH:mm:ss]`，fading 标注「（印象模糊）」）；纯工具角色（`graph_extractor` / `textarea_ai_autofill` / `table_data_generator` / `translator_*`）返回空 `assembledContext`，identity 仍返回。
 
 ## 与扩展端的关系
 

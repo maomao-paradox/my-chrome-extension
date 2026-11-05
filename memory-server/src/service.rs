@@ -9,6 +9,7 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::{LazyLock, Mutex};
 
+use chrono::TimeZone;
 use regex::Regex;
 
 use crate::decay::{
@@ -907,10 +908,12 @@ fn assemble_prompt_context(
         } else {
             ""
         };
+        // 行首注入入库时间，让 AI 能感知记忆的时序远近
         let line = format!(
-            "- [{}] {}{blur_mark}",
+            "- [{}] [{}] {}{blur_mark}",
+            format_memory_time(entry.created_at),
             category_label(entry.category),
-            entry.content
+            entry.content,
         );
         let line_len = line.chars().count();
         if line_len + 1 > budget {
@@ -928,6 +931,15 @@ fn assemble_prompt_context(
     }
 
     chunks.join("\n\n")
+}
+
+/// 格式化记忆入库时间 —— 注入 prompt 用 `YYYY/MM/DD HH:mm:ss`（毫秒时间戳，本地时区）
+fn format_memory_time(timestamp_ms: i64) -> String {
+    chrono::Local
+        .timestamp_millis_opt(timestamp_ms)
+        .single()
+        .map(|dt| dt.format("%Y/%m/%d %H:%M:%S").to_string())
+        .unwrap_or_else(|| "未知时间".to_string())
 }
 
 /// 记忆类目的中文标签（用于上下文装配）
@@ -1298,7 +1310,10 @@ mod tests {
         assert!(result.assembled_context.contains("[近期对话摘要]\n最近聊了猫和咖啡"));
         assert!(result
             .assembled_context
-            .contains("[你记得的关于用户的事]\n- [用户偏好] 主人喜欢喝美式咖啡"));
+            .contains("[你记得的关于用户的事]\n- [20"));
+        assert!(result
+            .assembled_context
+            .contains("] [用户偏好] 主人喜欢喝美式咖啡"));
         assert!(result.assembled_context.contains("\n\n"));
         assert!(result.short_term.is_some());
         assert_eq!(result.entries.len(), 1);
@@ -1366,7 +1381,7 @@ mod tests {
         let result = svc.build_context("miku", None).await.expect("构建失败");
         assert!(result
             .assembled_context
-            .contains("- [用户偏好] 主人对花粉过敏（印象模糊）"));
+            .contains("] [用户偏好] 主人对花粉过敏（印象模糊）"));
     }
 
     // ---------- 6. observe 三规则 ----------

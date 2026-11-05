@@ -1,6 +1,7 @@
-import { ensureDeepSeekCredentials } from "../background/deepseek-credentials";
+import { ensureDeepSeekCredentials, refreshDeepSeekCredentials } from "../background/deepseek-credentials";
 import {
   DeepSeekClient,
+  InvalidTokenError,
   normalizeSystemPrompt,
   type DeepSeekCompletionOptions,
   type DeepSeekPowChallenge,
@@ -31,35 +32,43 @@ const ANTHROPIC_ENDPOINT = "/messages";
 class ChromeSessionStore implements DeepSeekSessionStore {
   private readonly roleSessionMap = new Map<string, SessionData>();
 
+  /** 单一 JSON blob key —— 每个角色一个，值为 `{ sessionId, parentMessageId }` */
+  private static readonly BLOB_KEY_PREFIX = "deepseek_session_";
+
+  private blobKey(roleKey: string): string {
+    return `${ChromeSessionStore.BLOB_KEY_PREFIX}${roleKey}`;
+  }
+
   async get(role: string): Promise<SessionData | null> {
     const roleKey = this.normalizeRole(role);
-    const cachedSessionData = this.roleSessionMap.get(roleKey);
-    if (cachedSessionData) {
-      return cachedSessionData;
-    }
+
+    // 1) 内存缓存命中 → 直接返回
+    const cached = this.roleSessionMap.get(roleKey);
+    if (cached) return cached;
 
     try {
-      const sessionKey = `deepseek_session_id_${roleKey}`;
-      const parentIdKey = `deepseek_parent_message_id_${roleKey}`;
-      const result = await chrome.storage.local.get([sessionKey, parentIdKey]);
-      const sessionData: SessionData = {
-        sessionId: (result[sessionKey] as string) || "",
-        parentMessageId:
-          result[parentIdKey] !== undefined
-            ? (result[parentIdKey] as number)
-            : null,
-      };
+      // 2) 单一 JSON blob 读取
+      const result = await chrome.storage.local.get(this.blobKey(roleKey));
+      const blob = result[this.blobKey(roleKey)];
+      if (
+        blob &&
+        typeof blob === "object" &&
+        !Array.isArray(blob)
+      ) {
+        const data = this.fromBlob(blob as Record<string, unknown>);
+        this.roleSessionMap.set(roleKey, data);
+        return data;
+      }
 
-      this.roleSessionMap.set(roleKey, sessionData);
-      return sessionData;
+      // 3) 不存在 → 返回默认空 sessionData
+      const empty: SessionData = { sessionId: "", parentMessageId: null };
+      this.roleSessionMap.set(roleKey, empty);
+      return empty;
     } catch (error) {
-      console.error("Error loading persisted data:", error);
-      const defaultSessionData: SessionData = {
-        sessionId: "",
-        parentMessageId: null,
-      };
-      this.roleSessionMap.set(roleKey, defaultSessionData);
-      return defaultSessionData;
+      console.error("Error loading session data:", error);
+      const empty: SessionData = { sessionId: "", parentMessageId: null };
+      this.roleSessionMap.set(roleKey, empty);
+      return empty;
     }
   }
 
@@ -68,14 +77,11 @@ class ChromeSessionStore implements DeepSeekSessionStore {
     this.roleSessionMap.set(roleKey, sessionData);
 
     try {
-      const sessionKey = `deepseek_session_id_${roleKey}`;
-      const parentIdKey = `deepseek_parent_message_id_${roleKey}`;
       await chrome.storage.local.set({
-        [sessionKey]: sessionData.sessionId,
-        [parentIdKey]: sessionData.parentMessageId,
+        [this.blobKey(roleKey)]: this.toBlob(sessionData),
       });
     } catch (error) {
-      console.error("Error saving persisted data:", error);
+      console.error("Error saving session data:", error);
     }
   }
 
@@ -84,13 +90,31 @@ class ChromeSessionStore implements DeepSeekSessionStore {
     this.roleSessionMap.delete(roleKey);
 
     try {
-      const sessionKey = `deepseek_session_id_${roleKey}`;
-      const parentIdKey = `deepseek_parent_message_id_${roleKey}`;
-      await chrome.storage.local.remove([sessionKey, parentIdKey]);
+      await chrome.storage.local.remove(this.blobKey(roleKey));
       console.log(`Session data cleared for role: ${roleKey}`);
     } catch (error) {
       console.error("Error clearing session data:", error);
     }
+  }
+
+  /** SessionData → 存储用 JSON blob */
+  private toBlob(data: SessionData): Record<string, unknown> {
+    return {
+      sessionId: data.sessionId,
+      parentMessageId: data.parentMessageId,
+    };
+  }
+
+  /** 从 JSON blob 恢复 SessionData，缺字段兜底为默认值 */
+  private fromBlob(blob: Record<string, unknown>): SessionData {
+    return {
+      sessionId: typeof blob.sessionId === "string" ? blob.sessionId : "",
+      parentMessageId:
+        typeof blob.parentMessageId === "number" ||
+        blob.parentMessageId === null
+          ? (blob.parentMessageId as number | null)
+          : null,
+    };
   }
 
   private normalizeRole(role: string): string {
@@ -280,17 +304,31 @@ export async function completeChatFlow(
           options,
         );
       case "deepseek":
-      default:
-        return await (
-          await getConfiguredDeepSeekClient()
-        ).completeChatFlow(
-          prompt,
-          role,
-          callbacks,
-          systemPrompt,
-          options?.tools,
-          fileIds,
-        );
+      default: {
+        const runDeepSeekFlow = async () => {
+          const client = await getConfiguredDeepSeekClient();
+          return client.completeChatFlow(
+            prompt,
+            role,
+            callbacks,
+            systemPrompt,
+            options?.tools,
+            fileIds,
+          );
+        };
+
+        try {
+          return await runDeepSeekFlow();
+        } catch (error) {
+          // Token 失效（40003）→ 强制刷新凭证后重试一次
+          if (error instanceof InvalidTokenError) {
+            console.warn("[DeepSeek] Token invalid (40003), refreshing credentials...");
+            await refreshDeepSeekCredentials();
+            return await runDeepSeekFlow();
+          }
+          throw error;
+        }
+      }
     }
   }
 

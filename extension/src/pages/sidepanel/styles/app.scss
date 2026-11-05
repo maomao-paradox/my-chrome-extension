@@ -321,6 +321,100 @@ h1 {
   animation: fadeIn 0.3s ease-in-out;
 }
 
+/* Chat tab 专用容器 —— 撑满剩余高度让 AIConversation 内部滚动 */
+.chat-panel-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+
+  .miku-conversation {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .ai-conversation {
+    /* 覆盖原弹窗的深色背景，使用侧边栏主题 */
+    background: transparent;
+    color: var(--text-primary);
+    padding: 8px 4px;
+
+    /* 输入区 —— 适配侧边栏宽度 */
+    .ac-input-bar {
+      flex-wrap: wrap;
+    }
+
+    /* 头像区适配侧边栏主题 */
+    .ac-message-avatar {
+      background: rgba(22, 93, 255, 0.22);
+      color: var(--primary-light);
+      border-color: rgba(22, 93, 255, 0.32);
+    }
+
+    .ac-message--user .ac-message-body {
+      background: rgba(22, 93, 255, 0.22);
+      border-color: rgba(22, 93, 255, 0.4);
+    }
+
+    .ac-message--assistant .ac-message-body {
+      background: rgba(22, 27, 34, 0.8);
+      border-color: rgba(48, 54, 61, 0.5);
+    }
+
+    .ac-textarea {
+      background: rgba(22, 27, 34, 0.8);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+
+      &:focus {
+        border-color: var(--primary-color);
+      }
+    }
+
+    .ac-send-btn {
+      background: var(--gradient-primary);
+    }
+
+    .ac-message-list::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+    }
+  }
+}
+
+/* 当选中 chat tab 时，让 main-content 变成 flex 容器且不滚动 */
+.main-content.is-chat-mode {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 8px;
+
+  /* TableContainer 在 chat 模式下也要 flex:1 撑满 */
+  > .section-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    > .section-content {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+
+      > .fade-in {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+      }
+    }
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -85,10 +85,6 @@ const AITerminalView = () => {
   };
   return (
     <section className="options-view options-ai">
-      <header className="options-view__heading">
-        <span>AEGIS TERMINAL / DECK-07</span>
-        <h2>星舰 AI 终端</h2>
-      </header>
       <div className="options-grid-2">
         <div className="options-panel">
           <h3>模型链路</h3>

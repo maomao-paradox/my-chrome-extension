@@ -7,10 +7,12 @@ import {
   deriveMood,
   getDateKey,
   getIgnoreProbability,
+  shouldTrigger,
   type ProactiveMood,
 } from "./proactive-mood";
-import { shouldTrigger } from "./chat-chain";
 import { loadMoodState } from "./proactive-chat";
+import { isAIChatEnabled } from "./ai-chat-toggle";
+import { tryHandleSlashCommand } from "./slash-commands";
 
 /**
  * 把 dataURL 数组上传成 file_id 数组 —— 让 AI "看到"用户发的图
@@ -100,6 +102,44 @@ function registerAiConversationPort(
     );
     const resolvedTargetTabId =
       typeof targetTabId === "number" ? targetTabId : port.sender?.tab?.id;
+
+    /* ══════════════════════════════════════════════════════════════════
+     * AI 聊天全局开关（最高优先级门控）
+     *   关掉时：不调 AI、不消耗 token，只给前端发友好提示然后断连。
+     *   记忆写入跳过 —— 因为 observe 需要 AI 回复才有用，空写无意义。
+     * ══════════════════════════════════════════════════════════════════ */
+    if (!(await isAIChatEnabled())) {
+      maLogger.info("[StreamManager] AI 聊天已被全局开关关闭，拒绝本次请求");
+      port.postMessage({
+        type: "AI_CONVERSATION_ERROR",
+        payload: {
+          message: "AI 聊天已关闭，请在扩展设置中开启",
+          code: "ai_chat_disabled",
+        },
+      });
+      port.disconnect();
+      return;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+     * 斜杠指令拦截 —— AI 请求之前的本地命令
+     *   成功拦截后：发确认消息 → 断连；不走 AI、不 observe、不写记忆。
+     *   失败（非指令）：放行，继续走心情忽略 → startStream 链路。
+     * ══════════════════════════════════════════════════════════════════ */
+    const slashResult = await tryHandleSlashCommand(prompt, role);
+    if (slashResult.handled) {
+      maLogger.info(
+        "[StreamManager] 斜杠指令拦截 ——",
+        prompt.trim(),
+      );
+      port.postMessage({
+        type: "AI_CONVERSATION_STREAM_DATA",
+        payload: { messageId, content: slashResult.reply },
+      });
+      port.postMessage({ type: "AI_CONVERSATION_COMPLETE" });
+      port.disconnect();
+      return;
+    }
 
     /* ══════════════════════════════════════════════════════════════════
      * 心情驱动的忽略判断（前置拦截层）

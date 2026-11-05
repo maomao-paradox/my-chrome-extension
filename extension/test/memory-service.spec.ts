@@ -261,6 +261,10 @@ describe("MemoryService —— 业务层", () => {
         expect(result.assembledContext).toContain("角色身份");
         expect(result.assembledContext).toContain("虚拟歌姬");
         expect(result.assembledContext).toContain("你记得的关于用户的事");
+        // 每条长期记忆行首注入入库时间，格式 `- [YYYY/MM/DD HH:mm:ss]`
+        expect(result.assembledContext).toMatch(
+            /- \[\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}\] \[用户偏好\] 用户喜欢 TypeScript/,
+        );
     });
 
     it("observe 规则 1：捕获用户说'记住XXX'为 preference", async () => {

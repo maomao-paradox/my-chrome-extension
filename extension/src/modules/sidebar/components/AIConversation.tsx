@@ -145,7 +145,7 @@ function isEmptyAfterMcpStrip(content: string): boolean {
 }
 
 /**
- * 按空行（连续两次换行）把一段 AI 文本拆成多段（模拟"连续多次回复"）。
+ * 按空行（连续两次换行）把一段 AI 文本拆成多段显示。
  * 例如 "123\n\nabc" → ["123", "abc"]；单个换行不算分段，连续空行会被过滤掉。
  * 代码块（```）内部可能含空行，拆分会把代码块切坏，因此整体保留不拆。
  */
@@ -576,7 +576,7 @@ const AIConversation: React.FC<AIConversationProps> = ({
         }
         // 回复格式约定：空行 = 连续发出多条消息，让长回复更像即时聊天
         parts.push(
-            "【回复格式】一次回复中可以用空行（连续两次换行）分隔多个段落，每个空行都会被当作「连续发出的下一条消息」逐条展示给主人。" +
+            "[回复格式]\n一次回复中可以用空行（连续两次换行）分隔多个段落，每个空行都会被当作「连续发出的下一条消息」逐条展示给主人。" +
                 "长回复请拆成 2~3 条短消息，每条 1~2 句，更有聊天感；单个换行、短回复或代码/列表内容保持原样即可。",
         );
         return parts.join("\n\n");
@@ -783,29 +783,6 @@ const AIConversation: React.FC<AIConversationProps> = ({
                     return;
                 }
 
-                if (message.type === "AI_CONVERSATION_CONTINUING") {
-                    // 新的一轮回复开始：停掉上一条的流式光标，再建新占位
-                    const newAiMsgId = genId();
-                    const newAiMsg: ChatMessage = {
-                        id: newAiMsgId,
-                        role: "assistant",
-                        content: "",
-                        streaming: true,
-                        createdAt: Date.now(),
-                    };
-                    currentStreamingAiId = newAiMsgId;
-                    allAiMsgIds.push(newAiMsgId);
-                    setMessages((prev) => [
-                        ...prev.map((m) =>
-                            m.role === "assistant" && m.streaming
-                                ? { ...m, streaming: false }
-                                : m,
-                        ),
-                        newAiMsg,
-                    ]);
-                    return;
-                }
-
                 if (message.type === "AI_CONVERSATION_STREAM_DATA") {
                     const chunk = message.payload.content || "";
                     if (!chunk) return;
@@ -817,28 +794,6 @@ const AIConversation: React.FC<AIConversationProps> = ({
                                 : m,
                         ),
                     );
-                    return;
-                }
-
-                if (message.type === "AI_CONVERSATION_CONTINUOUS_COMPLETE") {
-                    // 所有连续回复轮次结束 —— 把正在 streaming 的消息都停掉
-                    // 并按空行把单条回复展开成多条连续消息
-                    setMessages((prev) => {
-                        const expanded = expandMultiLineReplies(
-                            prev.map((m) =>
-                                m.id === currentStreamingAiId
-                                    ? { ...m, streaming: false }
-                                    : m,
-                            ),
-                        );
-                        // 把新产生的 split id 也纳入追踪，确保 persistTurn 能完整移除
-                        for (const m of expanded) {
-                            if (m.role === "assistant" && !allAiMsgIds.includes(m.id)) {
-                                allAiMsgIds.push(m.id);
-                            }
-                        }
-                        return expanded;
-                    });
                     return;
                 }
 
@@ -1167,7 +1122,7 @@ const AIConversation: React.FC<AIConversationProps> = ({
                 <textarea
                     className="ac-textarea"
                     value={draft}
-                    rows={2}
+                    rows={1}
                     placeholder={
                         pendingImages.length > 0
                             ? "图片已附上，说点什么吧（可单独发送图片）"

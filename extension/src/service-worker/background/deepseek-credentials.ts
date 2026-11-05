@@ -202,3 +202,38 @@ export const ensureDeepSeekCredentials = async (): Promise<AIModelConfig> => {
 
   return initializationPromise;
 };
+
+/** 需要随 token 一起清理的 DeepSeek 会话存储 key 前缀 */
+const DEEPSEEK_SESSION_KEY_PREFIXES = [
+  "deepseek_session_",
+  "deepseek_session_id_",
+  "deepseek_parent_message_id_",
+];
+
+/** 清空所有 DeepSeek 会话相关的本地存储（session id、parent message id 等） */
+const clearDeepSeekSessionStorage = async (): Promise<void> => {
+  const all = await chrome.storage.local.get(null);
+  const keysToRemove = Object.keys(all).filter((key) =>
+    DEEPSEEK_SESSION_KEY_PREFIXES.some((prefix) => key.startsWith(prefix)),
+  );
+  if (keysToRemove.length > 0) {
+    await chrome.storage.local.remove(keysToRemove);
+  }
+};
+
+/**
+ * 强制刷新 DeepSeek 凭证 —— 清空当前 token/cookies + 全部会话数据后重新走登录捕获流程。
+ * 用于 API 返回 40003 INVALID_TOKEN 时自动恢复。
+ */
+export const refreshDeepSeekCredentials = async (): Promise<AIModelConfig> => {
+  await Promise.all([
+    updateCredentialConfig({
+      deepseekAuthToken: "",
+      deepseekCookies: "",
+      deepseekCredentialStatus: "pending",
+      deepseekCredentialError: undefined,
+    }),
+    clearDeepSeekSessionStorage(),
+  ]);
+  return ensureDeepSeekCredentials();
+};

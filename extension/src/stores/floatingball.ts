@@ -38,8 +38,8 @@ interface FloatingballState {
   toggle: (key: "dialog" | "drawer", forced?: boolean) => void;
   /** 切换当前激活的工具 */
   changeTool: (tool: Tool | null) => void;
-  /** 切换侧边栏状态（通过 chrome.runtime 消息）*/
-  toggleSidepanel: (forced?: boolean) => void;
+  /** 切换侧边栏状态（通过 chrome.runtime 消息），可选指定打开时聚焦的 tab */
+  toggleSidepanel: (forced?: boolean, targetTabId?: string) => void;
   /** 从 storage 加载配置 */
   loadConfig: () => Promise<void>;
   /** 设置启用状态 */
@@ -73,10 +73,15 @@ export const useFloatingballStore = create<FloatingballState>((set, get) => ({
 
   changeTool: (tool) => set({ activeTool: tool }),
 
-  toggleSidepanel: (forced) => {
+  toggleSidepanel: (forced, targetTabId) => {
     const active = typeof forced === "boolean" ? forced : !get().isSidePanelModeActive;
     const type = active ? "OPEN_SIDEPANEL" : "CLOSE_SIDEPANEL";
-    // 开启/关闭侧边栏
+    // 开启侧边栏时，将目标 tab 暂存到 storage，供侧边栏页面读取
+    if (active && targetTabId) {
+      chrome.storage.local.set({ __sidepanel_target_tab__: targetTabId });
+    } else if (!active) {
+      chrome.storage.local.remove("__sidepanel_target_tab__");
+    }
     chrome.runtime.sendMessage({ type, target: "background" }, () => {
       if (chrome.runtime.lastError) {
         maLogger.log("侧边栏状态切换失败", chrome.runtime.lastError.message);

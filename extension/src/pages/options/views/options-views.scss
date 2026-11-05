@@ -1,6 +1,6 @@
 .options-view {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   color: rgba(228, 245, 255, 0.92);
 }
 
@@ -32,13 +32,13 @@
   border: 1px solid rgba(105, 183, 255, 0.2);
   background: rgba(5, 13, 24, 0.78);
   box-shadow: inset 0 1px 0 rgba(197, 236, 255, 0.05);
-  padding: 16px;
+  padding: 12px 14px;
 }
 
-.options-panel h3 { margin: 0 0 14px; color: #dff7ff; font-size: 13px; }
-.options-grid-2, .options-knowledge__layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.options-panel label { display: grid; gap: 6px; margin: 12px 0; color: rgba(189, 221, 240, 0.82); font-size: 13px; }
-.options-panel input:not([type="checkbox"]):not([type="color"]):not([type="range"]), .options-panel select, .options-panel textarea, .options-config-row input, .options-user-card input, .options-rule input, .options-rule textarea, .options-inline textarea { width: 100%; border: 1px solid rgba(96, 181, 239, 0.2); background: rgba(3, 10, 18, 0.82); color: #edfaff; padding: 9px 10px; }
+.options-panel h3 { margin: 0 0 8px; color: #dff7ff; font-size: 13px; }
+.options-grid-2, .options-knowledge__layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.options-panel label { display: grid; gap: 4px; margin: 8px 0; color: rgba(189, 221, 240, 0.82); font-size: 13px; }
+.options-panel input:not([type="checkbox"]):not([type="color"]):not([type="range"]), .options-panel select, .options-panel textarea, .options-config-row input, .options-user-card input, .options-rule input, .options-rule textarea, .options-inline textarea { width: 100%; border: 1px solid rgba(96, 181, 239, 0.2); background: rgba(3, 10, 18, 0.82); color: #edfaff; padding: 7px 9px; }
 .options-panel textarea, .options-rule textarea { resize: vertical; min-height: 84px; }
 .options-actions, .options-inline, .options-config-row__controls, .options-config-row__top, .options-panel__toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .options-actions button, .options-inline button, .options-config-row button, .options-panel button, .options-user-card button, .options-rule button { border: 1px solid rgba(122, 247, 208, 0.45); background: rgba(122, 247, 208, 0.08); color: #eaffff; padding: 8px 12px; cursor: pointer; }
@@ -62,4 +62,145 @@
 .options-node-list small { color: rgba(170, 207, 228, 0.62); }
 .options-node-editor { align-self: start; }
 .options-list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(105, 183, 255, 0.12); }
+
+/* ── MCP 工具列表 ── */
+.mcp-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.mcp-tool-card {
+  border: 1px solid rgba(105, 183, 255, 0.22);
+  background: rgba(5, 13, 24, 0.78);
+  box-shadow: inset 0 1px 0 rgba(197, 236, 255, 0.05);
+  border-radius: 4px;
+  padding: 14px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: rgba(105, 183, 255, 0.42);
+    box-shadow: inset 0 1px 0 rgba(197, 236, 255, 0.08),
+      0 0 18px rgba(105, 183, 255, 0.08);
+  }
+}
+
+.mcp-tool-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(105, 183, 255, 0.12);
+}
+
+.mcp-tool-card__name {
+  font-family: "Courier New", "Menlo", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7af7d0;
+  letter-spacing: 0.02em;
+}
+
+.mcp-tool-card__badge {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(122, 247, 208, 0.7);
+  border: 1px solid rgba(122, 247, 208, 0.35);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+.mcp-tool-card__desc {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(212, 234, 248, 0.82);
+}
+
+.mcp-tool-card__params {
+  margin-top: 4px;
+
+  h4 {
+    margin: 0 0 6px;
+    font-size: 10px;
+    font-family: "Courier New", monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(105, 183, 255, 0.75);
+  }
+}
+
+.mcp-tool-card__empty {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(170, 207, 228, 0.5);
+  font-style: italic;
+}
+
+.mcp-tool-card__param-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.mcp-tool-card__param {
+  background: rgba(3, 10, 18, 0.55);
+  border: 1px solid rgba(105, 183, 255, 0.1);
+  border-radius: 3px;
+  padding: 8px 10px;
+}
+
+.mcp-tool-card__param-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  code {
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #edfaff;
+  }
+}
+
+.mcp-tool-card__param-type {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  color: rgba(170, 207, 228, 0.68);
+  background: rgba(105, 183, 255, 0.08);
+  border: 1px solid rgba(105, 183, 255, 0.18);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.mcp-tool-card__param-req {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 198, 120, 0.85);
+  border: 1px solid rgba(255, 198, 120, 0.35);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.mcp-tool-card__param-desc {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(189, 221, 240, 0.72);
+}
+
+@media (max-width: 760px) {
+  .mcp-tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 760px) { .options-grid-2, .options-knowledge__layout { grid-template-columns: 1fr; } .options-user-card { grid-template-columns: 1fr; } }

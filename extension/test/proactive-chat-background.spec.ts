@@ -108,7 +108,7 @@ beforeEach(() => {
     vi.setSystemTime(FIXED_NOW);
     storageState = {};
 
-    // 固定随机掷骰结果：落在所有概率阈值之外，避免「连续回复」随机多跑几轮，
+    // 固定随机掷骰结果：落在所有概率阈值之外，避免心情驱动的忽略判断，
     // 让每个用例只断言主动消息本身的落库行为
     vi.spyOn(Math, "random").mockReturnValue(0.99);
 
@@ -413,7 +413,7 @@ describe("proactive-chat（background 调度层）", () => {
     });
 });
 
-describe("作息调度（9:00-19:00）", () => {
+describe("作息调度（9:00-18:00）", () => {
     const at = (iso: string) => new Date(iso);
 
     /** 取最后一次 alarm 排期参数 */
@@ -709,8 +709,13 @@ describe("记忆上下文分段", () => {
         );
 
         expect(context).toContain("[最近的对话记忆");
-        expect(context).toContain("[用户偏好");
+        // proactive-chat 按 category 分段，偏好段 section 标题是「你记得的关于用户的事」
+        expect(context).toContain("[你记得的关于用户的事]");
         expect(context).toContain("[其他记忆]");
+        // 每行应该有时间前缀 `- [YYYY/MM/DD HH:mm:ss] ...`
+        expect(context).toMatch(
+            /- \[\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}\]/,
+        );
     });
 
     it("没有记忆时返回空串", async () => {

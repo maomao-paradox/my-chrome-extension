@@ -19,6 +19,7 @@
 import type { OpenAICompatibleTool } from "../deepseek/openai-request";
 import { scheduleProactiveMessageIn } from "./proactive-chat";
 import { getMemoryService } from "@/services/memory";
+import { uploadFile } from "../deepseek";
 
 /** memecub 表情包搜索接口 */
 const MEMECUB_SEARCH_URL = "https://memecub.com/zh/search";
@@ -70,6 +71,9 @@ export const GET_MEME = "get_meme";
 
 /** 工具名 —— 设置 AI 对主人的好感度 */
 export const SET_AFFECTION = "set_affection";
+
+/** 工具名 —— 截取当前屏幕并上传 */
+export const CAPTURE_SCREEN = "capture_screen";
 
 /** chrome.storage.local 里好感度的 key —— 前后端共用 */
 export const AFFECTION_STORAGE_KEY = "ai_affection_value";
@@ -136,6 +140,20 @@ export const LOCAL_MCP_TOOLS: OpenAICompatibleTool[] = [
           },
         },
         required: ["value"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: CAPTURE_SCREEN,
+      description:
+        "当你想知道用户当前正在做什么、屏幕上显示什么内容时，调用此工具截取当前活动标签页的屏幕截图。",
+      parameters: {
+        type: "object",
+        properties: {},
+        required: [],
         additionalProperties: false,
       },
     },
@@ -309,6 +327,40 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       ok: true,
       affection: value,
       message: `好感度已更新为 ${value}`,
+    };
+  },
+
+  [CAPTURE_SCREEN]: async () => {
+    const lastFocused = await chrome.windows.getLastFocused();
+    if (!lastFocused?.id) {
+      throw new McpToolError(
+        RPC_ERROR.INTERNAL_ERROR,
+        "无法获取当前窗口",
+      );
+    }
+
+    const dataUrl = await chrome.tabs.captureVisibleTab(lastFocused.id, {
+      format: "png",
+    });
+    if (!dataUrl) {
+      throw new McpToolError(
+        RPC_ERROR.INTERNAL_ERROR,
+        "截图失败，未返回数据",
+      );
+    }
+
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], `proactive-screenshot-${Date.now()}.png`, {
+      type: "image/png",
+    });
+
+    const fileId = await uploadFile(file);
+    maLogger.info(`[MCP] capture_screen: 截图上传完成 fileId=${fileId}`);
+
+    return {
+      ok: true,
+      fileId,
+      message: "屏幕截图已捕获并上传",
     };
   },
 };

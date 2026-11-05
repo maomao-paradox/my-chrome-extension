@@ -82,6 +82,16 @@ const CONVERSATION_AI_CHARS = 250;
 /** 太琐碎的一轮对话不值得入库 */
 const MIN_CONVERSATION_CHARS = 12;
 
+/**
+ * 格式化记忆入库时间 —— 注入 prompt 用 `YYYY/MM/DD HH:mm:ss`
+ * （毫秒时间戳，本地时区）
+ */
+function formatMemoryTime(timestampMs: number): string {
+    const d = new Date(timestampMs);
+    const pad = (n: number): string => String(n).padStart(2, "0");
+    return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
 /** 去重时回看的最近对话条目数 */
 const CONVERSATION_DEDUP_WINDOW = 8;
 
@@ -504,7 +514,8 @@ export class MemoryService {
         for (const entry of params.longTermEntries) {
             // 模糊记忆加标注，让 AI 知道这是"隐约记得"而非确定事实
             const blurMark = entry.decayState === "fading" ? "（印象模糊）" : "";
-            const line = `- [${categoryLabels[entry.category]}] ${entry.content}${blurMark}`;
+            // 行首注入入库时间，让 AI 能感知记忆的时序远近
+            const line = `- [${formatMemoryTime(entry.createdAt)}] ${entry.content}${blurMark}`;
             if (line.length + 1 > budget) break;
             entryLines.push(line);
             budget -= line.length + 1;
@@ -513,7 +524,7 @@ export class MemoryService {
         }
 
         if (entryLines.length > 0) {
-            chunks.push(`[你记得的关于用户的事]\n${entryLines.join("\n")}`);
+            chunks.push(`[聊天记录]\n${entryLines.join("\n")}`);
         }
 
         return chunks.length > 0 ? chunks.join("\n\n") : "";

@@ -499,30 +499,11 @@ const PanelNavShell: React.FC<PanelNavShellProps> = ({
         detail: `主题 ${themeColor.toUpperCase()} / 语言 ${language.toUpperCase()} / 性能 ${performanceMode.toUpperCase()}`,
       };
 
-      const users = (snapshot.userInfo || {}) as Record<
-        string,
-        { enabled?: boolean }
-      >;
-      const totalUsers = Object.keys(users).length;
-      const enabledUsers = Object.values(users).filter(
-        (user) => user?.enabled !== false,
-      ).length;
       next.right = {
-        status:
-          totalUsers === 0
-            ? StarshipStatus.Standby
-            : enabledUsers === totalUsers
-              ? StarshipStatus.Online
-              : StarshipStatus.Warning,
-        metric: String(totalUsers).padStart(2, "0"),
-        headline:
-          totalUsers === 0
-            ? "暂无船员档案"
-            : `${enabledUsers} 名船员处于启用态`,
-        detail:
-          totalUsers === 0
-            ? "进入模块创建首个自动登录用户"
-            : `已备案 ${totalUsers} / 禁用 ${totalUsers - enabledUsers}`,
+        status: StarshipStatus.Online,
+        metric: "04",
+        headline: "MCP 工具已就绪",
+        detail: "AI 可通过 JSON-RPC 2.0 调用",
       };
 
       const domainConfigs = (snapshot.domainConfigs || {}) as Record<

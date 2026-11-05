@@ -133,9 +133,8 @@ export function describeMood(
 }
 
 /* ══════════════════════════════════════════════════════════════════
- * 心情驱动的概率函数 —— 单一真值源
- *   getIgnoreProbability       : 用户发问后 AI 直接忽略不回复的概率
- *   getContinuousReplyProbability: AI 回复后继续多说一句的基础概率
+ * 心情驱动的概率函数
+ *   getIgnoreProbability : 用户发问后 AI 直接忽略不回复的概率
  *
  * 设计取舍：
  *   ignoredStreak（AI 主动被主人忽略的次数）会影响 deriveMood，
@@ -172,19 +171,13 @@ export function getIgnoreProbability(mood: ProactiveMood): number {
 }
 
 /**
- * AI 回复后，继续多说一句的基础概率（心情驱动）。
- * 实际触发概率 = getContinuousReplyProbability(mood) * 0.5^(round-1)，
- * 每次续轮减半，最低到 MIN_PROBABILITY 以下直接停止。
+ * 掷骰判断 —— Math.random() < probability。
+ *
+ * @param probability 触发概率，范围 [0, 1]
+ * @returns true = 命中，应该触发；false = 不命中
  */
-export function getContinuousReplyProbability(mood: ProactiveMood): number {
-    switch (mood) {
-        case "happy":
-            return 0.4;
-        case "sad":
-            return 0.1;
-        case "angry":
-            return 0.3;
-        case "frenzy":
-            return 0.05;
-    }
+export function shouldTrigger(probability: number): boolean {
+    if (probability <= 0) return false;
+    if (probability >= 1) return true;
+    return Math.random() < probability;
 }

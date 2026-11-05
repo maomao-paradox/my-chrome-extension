@@ -32,6 +32,7 @@ import AITerminalView from "./views/AITerminalView";
 import KnowledgeGraphView from "./views/KnowledgeGraphView";
 import MemoryManagerView from "./views/MemoryManagerView";
 import UserOption from "./views/UserOption";
+import McpToolsView from "./views/McpToolsView";
 import "./views/options-views.scss";
 
 // 懒加载组件
@@ -63,7 +64,7 @@ const componentMap: Record<
   "top-left": XHRuleOption,
   "top-right": MemoryManagerView,
   left: ExtensionSettings,
-  right: UserOption,
+  right: McpToolsView,
   bottom: ContentScriptDomainConfig,
   "bottom-left": KnowledgeGraphView,
   "bottom-right": AITerminalView,

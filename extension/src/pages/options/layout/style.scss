@@ -135,18 +135,17 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  padding-bottom: 20px;
+  overflow: visible;
   margin: 0 auto;
-  padding: 16px;
+  padding: 14px 18px;
   border: 1px solid rgba(86, 170, 235, 0.16);
-  border-radius: 20px;
+  border-radius: 16px;
   background: transparent;
   box-shadow:
     0 18px 60px rgba(0, 0, 0, 0.32),
     0 0 28px rgba(68, 165, 255, 0.06),
     inset 0 1px 0 rgba(183, 231, 255, 0.05);
+  max-width: 920px;
 }
 
 .module-shell--ai {
@@ -178,7 +177,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 14px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   /* 头部固定高度，不参与压缩 */
   flex-shrink: 0;
 }
@@ -294,16 +293,8 @@
 
 .module-shell__body {
   position: relative;
-  /* 占满 header 之外的剩余空间，内容超出时在内部滚动，避免溢出容器 */
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: hidden;
-  scrollbar-width: none;
-}
-
-.module-shell__body::-webkit-scrollbar {
-  display: none;
+  /* 不设 flex: 1，由内容撑开；panel-content 统一负责滚动 */
+  overflow: visible;
 }
 
 .edge-nav {

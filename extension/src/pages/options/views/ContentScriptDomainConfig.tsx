@@ -43,7 +43,6 @@ const ContentScriptDomainConfig = () => {
 
   return (
     <section className="options-view options-domain-config">
-      <header className="options-view__heading"><span>DOMAIN MATRIX</span><h2>内容脚本域名配置</h2></header>
       {entries.map(([name, config]) => (
         <article className="options-config-row" key={name}>
           <div className="options-config-row__top"><strong>{name}</strong><label className="options-toggle"><input type="checkbox" checked={config.enabled} onChange={(event) => void save({ ...configs, [name]: { ...config, enabled: event.target.checked } }, `${name} 已${event.target.checked ? "启用" : "禁用"}`)} /><span>{config.enabled ? "启用" : "禁用"}</span></label></div>

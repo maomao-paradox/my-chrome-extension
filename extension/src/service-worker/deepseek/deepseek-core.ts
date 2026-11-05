@@ -4,6 +4,17 @@ export const DEFAULT_DEEPSEEK_API_BASE_URL = 'https://chat.deepseek.com';
 export const DEFAULT_DEEPSEEK_USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36';
 
+/** DeepSeek 服务端返回 token 失效错误码 */
+const DEEPSEEK_INVALID_TOKEN_CODE = 40003;
+
+/** 当 DeepSeek API 返回 INVALID_TOKEN（40003）时抛出，由上层负责刷新凭证 */
+export class InvalidTokenError extends Error {
+    constructor(message = 'DeepSeek token invalid or expired') {
+        super(message);
+        this.name = 'InvalidTokenError';
+    }
+}
+
 export interface SessionData {
     sessionId: string | null;
     parentMessageId: number | null;
@@ -530,6 +541,13 @@ export class DeepSeekClient {
         this.fetchImpl = resolvedFetch.bind(globalThis) as typeof fetch;
     }
 
+    /**
+     * 清除当前角色的全部 DeepSeek 会话状态 —— 包括：
+     *   - chat_session_id（对话上下文）
+     *   - parent_message_id（每次对话 +2，首次新对话会从 null → 2）
+     *   - 内存 session 缓存
+     * 调用后下一次 completion 会自动创建全新会话。
+     */
     async clearSessionData(role: string): Promise<void> {
         await this.sessionStore.clear(normalizeRole(role));
     }
@@ -1085,6 +1103,19 @@ export class DeepSeekClient {
             throw new Error(`DeepSeek request failed with status ${response.status}: ${responseText}`);
         }
 
-        return responseText ? JSON.parse(responseText) : null;
+        const parsed = responseText ? JSON.parse(responseText) : null;
+
+        // 检测业务错误码 40003 INVALID_TOKEN —— 抛出让上层刷新凭证后重试
+        if (
+            parsed &&
+            typeof parsed === 'object' &&
+            (parsed as Record<string, unknown>).code === DEEPSEEK_INVALID_TOKEN_CODE
+        ) {
+            throw new InvalidTokenError(
+                `DeepSeek API returned INVALID_TOKEN (40003): ${(parsed as Record<string, unknown>).msg || 'token expired'}`,
+            );
+        }
+
+        return parsed;
     }
 }

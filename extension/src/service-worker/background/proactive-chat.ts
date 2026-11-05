@@ -25,13 +25,14 @@ import {
 } from "@/services/memory/decay";
 import type { MemoryEntry, MemoryImportance } from "@/services/memory/types";
 import { loadAIConfig } from "../chrome-api/ai-config";
-import { completeChatFlow, uploadFile } from "../deepseek";
+import { completeChatFlow } from "../deepseek";
 import { stripToolCallMarkup } from "../deepseek/tool-call-markup";
 import {
   executeLocalMcpTool,
   isLocalMcpTool,
   LOCAL_MCP_TOOLS,
   SET_NEXT_PROACTIVE_INTERVAL,
+  CAPTURE_SCREEN,
 } from "./mcp-tools";
 import {
   createDefaultMoodState,
@@ -40,18 +41,19 @@ import {
   detectHurt,
   extractUserText,
   getDateKey,
-  getContinuousReplyProbability,
   MOOD_STATE_KEY,
   normalizeMoodState,
   type ProactiveMoodState,
 } from "./proactive-mood";
 import {
-  MAX_CONTINUOUS_ROUNDS,
-  computeNextProbability,
-  shouldTrigger,
-  buildFollowupPrompt,
-  generateFollowupReply,
-} from "./chat-chain";
+  isAIChatEnabled,
+  AI_CHAT_ENABLED_KEY,
+  onAIChatEnabledChange,
+} from "./ai-chat-toggle";
+import {
+  isAIProactiveChatEnabled,
+  onAIProactiveChatEnabledChange,
+} from "./proactive-chat-toggle";
 
 /** 时间段 —— 按小时分段，用于挑选问候语与提示 AI 的时间上下文 */
 type TimePeriod = "清晨" | "上午" | "下午" | "傍晚" | "晚上" | "深夜";
@@ -155,7 +157,13 @@ function formatMemoryLine(entry: MemoryEntry): string {
     chars.length > MAX_MEMORY_LINE_CHARS
       ? `${chars.slice(0, MAX_MEMORY_LINE_CHARS).join("")}…`
       : compact;
-  return `- ${text}`;
+  // 行首注入时间，和记忆服务的格式对齐 `YYYY/MM/DD HH:mm:ss`
+  // proactive-chat 已经按 category 分段（preferences/others/conversations），
+  // 行内不再重复标类目标签
+  const d = new Date(entry.createdAt);
+  const pad = (n: number): string => String(n).padStart(2, "0");
+  const time = `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  return `- [${time}] ${text}`;
 }
 
 /**
@@ -213,8 +221,8 @@ export function assembleMemoryContext(
     );
 
   return [
-    render("最近的对话记忆（24 小时内）", conversations),
-    render("用户偏好（清晰的记忆）", preferences),
+    render("最近的对话记忆", conversations),
+    render("你记得的关于用户的事", preferences),
     render("其他记忆", others),
   ]
     .filter(Boolean)
@@ -439,45 +447,6 @@ async function resolveRole(memoryService: MemoryService): Promise<string> {
 }
 
 /**
- * 截取当前活跃标签页并上传到 DeepSeek
- * 失败时静默返回 undefined（chrome:// / 扩展页 / 无活跃窗口等场景无法截图）
- * @returns 上传成功的 file_id，或 undefined
- */
-async function captureAndUploadActiveTab(): Promise<string | undefined> {
-  try {
-    // Service Worker 没有「当前窗口」概念，必须显式传 windowId，
-    // 否则 captureVisibleTab 会以 "No active window" 失败
-    const focusedWindow = await chrome.windows.getLastFocused({
-      windowTypes: ["normal"],
-    });
-    if (!focusedWindow.id) {
-      maLogger.warn("[ProactiveChat] 未取到聚焦窗口，跳过截图");
-      return undefined;
-    }
-
-    maLogger.info("[ProactiveChat] 开始截图，windowId:", focusedWindow.id);
-    const dataUrl = await chrome.tabs.captureVisibleTab(focusedWindow.id, {
-      format: "png",
-    });
-    if (!dataUrl) {
-      maLogger.warn("[ProactiveChat] 截图返回空，跳过图片上传");
-      return undefined;
-    }
-
-    // data:image/png;base64,xxxxx → 去掉前缀，base64 → Uint8Array
-    const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
-    const binary = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-
-    const fileId = await uploadFile(binary, "image/png", "screenshot.png");
-    maLogger.info("[ProactiveChat] 截图上传成功:", fileId);
-    return fileId;
-  } catch (error) {
-    maLogger.warn("[ProactiveChat] 截图或上传失败，跳过图片:", error);
-    return undefined;
-  }
-}
-
-/**
  * 调用真实 AI 生成主动开场白。
  * 记忆检索由本模块显式完成（不走 StreamManager，因为它依赖 Port）。
  *
@@ -492,10 +461,8 @@ async function generateMessage(
   now: Date,
   closing: boolean,
   moodPrompt: string,
-  /** 可选：当前活跃标签页截图的 file_id，让 AI "看到"主人在做什么 */
-  fileIds?: string[],
   presetSystemPrompt?: string,
-): Promise<{ text: string; scheduledByMcp: boolean }> {
+): Promise<{ text: string; scheduledByMcp: boolean; usedScreenshot: boolean }> {
   const config = await loadAIConfig();
   if (!hasUsableAIConfig(config)) {
     throw new Error("AI 配置不可用");
@@ -537,16 +504,12 @@ async function generateMessage(
 
   // 行为要求与时间一起放进 user request —— 模型对「当前这一轮」的指令更敏感
   const promptSections: string[] = [timeContext];
-  if (fileIds && fileIds.length > 0) {
-    promptSections.push(
-      "我给你附上了一张当前屏幕的截图，你可以看到我现在正在做什么。请结合画面内容，用你的身份和心情自然地和我聊一句。",
-    );
-  }
   promptSections.push(closing ? CLOSING_INSTRUCTION : OPENING_INSTRUCTION);
   const requestPrompt = promptSections.join("\n\n");
 
   const chunks: string[] = [];
   let scheduledByMcp = false;
+  let wantsScreenshot = false;
   let toolCallsPromise: Promise<void> = Promise.resolve();
 
   // 用 Promise 包住回调式流式接口，并加超时看门狗
@@ -577,8 +540,7 @@ async function generateMessage(
         },
         onComplete: (result: any) => {
           // 模型在生成开场白的同时调了本地 MCP 工具
-          // （如 set_next_proactive_interval）—— 后台静默执行，
-          // 工具结果不喂回模型（开场白已经生成完了，不需要再回复）
+          // （如 set_next_proactive_interval / capture_screen）
           if (
             Array.isArray(result?.functionCalls) &&
             result.functionCalls.length > 0
@@ -586,21 +548,31 @@ async function generateMessage(
             const localCalls = result.functionCalls.filter((c: any) =>
               isLocalMcpTool(c.name),
             );
-            if (localCalls.length > 0) {
+
+            // 检查是否请求了屏幕截图 —— 单独标记，后续统一处理
+            wantsScreenshot = localCalls.some(
+              (c: any) => c.name === CAPTURE_SCREEN,
+            );
+
+            // 其他工具（不含 capture_screen）走原有静默执行流程
+            const otherCalls = localCalls.filter(
+              (c: any) => c.name !== CAPTURE_SCREEN,
+            );
+            if (otherCalls.length > 0) {
               toolCallsPromise = Promise.allSettled(
-                localCalls.map((c: any) =>
+                otherCalls.map((c: any) =>
                   executeLocalMcpTool(c.name, c.args ?? {}, { role }),
                 ),
               ).then((results) => {
                 results.forEach((r, i) => {
                   if (r.status === "fulfilled") {
                     // set_next_proactive_interval 执行成功 → 标记已排期
-                    if (localCalls[i].name === SET_NEXT_PROACTIVE_INTERVAL) {
+                    if (otherCalls[i].name === SET_NEXT_PROACTIVE_INTERVAL) {
                       scheduledByMcp = true;
                     }
                   } else {
                     maLogger.warn(
-                      `[ProactiveChat] 主动消息工具调用失败 (${localCalls[i].name}):`,
+                      `[ProactiveChat] 主动消息工具调用失败 (${otherCalls[i].name}):`,
                       (r as PromiseRejectedResult).reason,
                     );
                   }
@@ -620,7 +592,6 @@ async function generateMessage(
       config.apiBaseUrl,
       systemPrompt,
       { tools: LOCAL_MCP_TOOLS }, // 注入内置 MCP 工具
-      fileIds,
     )
       // 即使 onComplete 未被调用，Promise 正常结束也算完成
       .then(() => finish())
@@ -632,11 +603,112 @@ async function generateMessage(
   // 等工具调用执行完再往下走
   await toolCallsPromise;
 
+  // ── 如果 AI 请求了屏幕截图，执行工具并发起第二轮带图对话 ──
+  if (wantsScreenshot) {
+    maLogger.info("[ProactiveChat] AI 请求了屏幕截图，执行 capture_screen...");
+    try {
+      const captureResult = await executeLocalMcpTool(
+        CAPTURE_SCREEN,
+        {},
+        { role },
+      );
+      const fileId =
+        captureResult.result &&
+        typeof captureResult.result === "object" &&
+        "fileId" in captureResult.result
+          ? (captureResult.result.fileId as string)
+          : undefined;
+
+      if (fileId) {
+        maLogger.info(
+          "[ProactiveChat] 截图上传成功，发起第二轮带图对话 fileId:",
+          fileId,
+        );
+        const followupText = await generateScreenshotFollowup(
+          role,
+          systemPrompt,
+          fileId,
+          config,
+        );
+        if (followupText) {
+          return { text: followupText, scheduledByMcp, usedScreenshot: true };
+        }
+      } else {
+        maLogger.warn("[ProactiveChat] capture_screen 未返回 fileId");
+      }
+    } catch (error) {
+      maLogger.warn("[ProactiveChat] 截图工具执行或第二轮对话失败:", error);
+    }
+  }
+
   const text = chunks.join("").trim();
   if (!text) {
     throw new Error("AI 返回了空的主动消息");
   }
-  return { text, scheduledByMcp };
+  return { text, scheduledByMcp, usedScreenshot: false };
+}
+
+/**
+ * 第二轮对话：把截图作为附件发给 AI，让它基于画面内容生成开场白。
+ * 复用同一个 session（由 completeChatFlow 内部维护），保持上下文连贯。
+ */
+async function generateScreenshotFollowup(
+  role: string,
+  systemPrompt: string,
+  fileId: string,
+  config: NonNullable<Awaited<ReturnType<typeof loadAIConfig>>>,
+): Promise<string> {
+  const prompt =
+    "我给你附上了一张当前屏幕的截图，你可以看到我现在正在做什么。请结合画面内容，用你的身份和心情自然地和我聊一句。";
+
+  const chunks: string[] = [];
+
+  await new Promise<void>((resolve, reject) => {
+    let settled = false;
+    const finish = (error?: Error): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      finish(new Error("截图 followup 生成超时"));
+    }, REQUEST_TIMEOUT_MS);
+
+    void completeChatFlow(
+      prompt,
+      role,
+      {
+        onData: (data: string) => {
+          if (data) chunks.push(data);
+        },
+        onComplete: () => {
+          finish();
+        },
+        onError: (error: unknown) => {
+          finish(error instanceof Error ? error : new Error(String(error)));
+        },
+      },
+      config.provider,
+      config.modelId,
+      config.apiKey,
+      config.apiBaseUrl,
+      systemPrompt,
+      { tools: [] }, // 第二轮不需要工具
+      [fileId],
+    )
+      .then(() => finish())
+      .catch((error: unknown) => {
+        finish(error instanceof Error ? error : new Error(String(error)));
+      });
+  });
+
+  return chunks.join("").trim();
 }
 
 /**
@@ -715,18 +787,6 @@ async function runProactiveMessage(): Promise<boolean> {
     nextState.ignoredStreak,
   );
 
-  // 尝试截取当前活跃标签页并上传 —— 让 AI "看到"主人在做什么
-  // 截图/上传失败静默降级，不阻塞主动对话主流程
-  let fileIds: string[] | undefined;
-  try {
-    const fileId = await captureAndUploadActiveTab();
-    if (fileId) {
-      fileIds = [fileId];
-    }
-  } catch (error) {
-    maLogger.warn("[ProactiveChat] 截图上传异常，降级为无图:", error);
-  }
-
   /* ══════════════════════════════════════════════════════════════════
    * 组装 systemPrompt —— 一次组装，首条回复和连续回复续轮都复用
    * 避免 generateMessage 和后续 generateFollowupReply 各自独立 loadAIConfig + listEntries
@@ -778,7 +838,6 @@ async function runProactiveMessage(): Promise<boolean> {
       now,
       closing,
       moodPrompt,
-      fileIds,
       sharedSystemPrompt,
     );
     text = result.text;
@@ -816,81 +875,6 @@ async function runProactiveMessage(): Promise<boolean> {
   }
 
   await notifyActiveTab(finalText, role);
-
-  /* ══════════════════════════════════════════════════════════════════
-   * 主动对话的连续回复循环
-   *   - 只有在主消息（非 closing 收尾）成功后才进入
-   *   - 续轮不带截图（首条 captureVisibleTab + uploadFile 已完成，
-   *     续轮复用同一个 systemPrompt，不再消耗截图上传开销）
-   *   - 任何一轮失败都 break，不影响主链路
-   *   - 连续回复不影响 mood 推导（不算 ignoredStreak / lastPushAt）
-   * ══════════════════════════════════════════════════════════════════ */
-  if (!closing && sharedSystemPrompt && aiConfig) {
-    const baseContProb = getContinuousReplyProbability(deriveMood(nextState));
-    let contRound = 1;
-
-    while (contRound < MAX_CONTINUOUS_ROUNDS) {
-      const prob = computeNextProbability(baseContProb, contRound);
-      if (prob <= 0 || !shouldTrigger(prob)) break;
-
-      maLogger.info(
-        "[ProactiveChat] 主动对话连续回复触发 ——",
-        `round=${contRound}, prob=${(prob * 100).toFixed(1)}%`,
-      );
-
-      try {
-        // 心情已经在 sharedSystemPrompt 里注入，这里不重复传
-        const followupPrompt = buildFollowupPrompt({
-          scenario: "proactive",
-          lastMessage: finalText.slice(0, 60),
-          round: contRound,
-        });
-
-        // ⚠️ 续轮不带 fileIds —— 只有主消息才 captureVisibleTab + uploadFile
-        const followupText = await generateFollowupReply(
-          role,
-          sharedSystemPrompt,
-          followupPrompt,
-          {
-            provider: aiConfig.provider,
-            modelId: aiConfig.modelId,
-            apiKey: aiConfig.apiKey,
-            apiBaseUrl: aiConfig.apiBaseUrl,
-          },
-        );
-
-        const trimmed = Array.from(followupText)
-          .slice(0, MAX_MESSAGE_LENGTH)
-          .join("");
-
-        // 续轮消息落记忆 + 通知 dock 再次弹出
-        await memoryService.addEntry({
-          role,
-          content: `AI：${trimmed}`,
-          category: "conversation",
-          importance: "low",
-          source: "ai-proactive-followup",
-        });
-        await notifyActiveTab(trimmed, role);
-      } catch (contErr) {
-        // 续轮任何一轮失败都停，不影响主链路
-        maLogger.warn(
-          "[ProactiveChat] 主动对话连续回复生成失败，停止续轮:",
-          contErr,
-        );
-        break;
-      }
-
-      contRound++;
-    }
-
-    if (contRound > 1) {
-      maLogger.info(
-        "[ProactiveChat] 主动对话连续回复链结束 ——",
-        `累计续轮 ${contRound - 1} 次`,
-      );
-    }
-  }
 
   // MCP 工具 set_next_proactive_interval 已注入 generateMessage：
   // 模型调了工具 → scheduledByMcp=true → 返回 true 跳过 scheduleNext 兜底
@@ -992,12 +976,77 @@ export function initProactiveChat(): void {
     return;
   }
 
+  // ── 启动时先过全局 AI 开关 + 主动聊天开关 ──
+  void Promise.all([isAIChatEnabled(), isAIProactiveChatEnabled()]).then(
+    async ([aiEnabled, proactiveEnabled]) => {
+      if (!aiEnabled || !proactiveEnabled) {
+        maLogger.info(
+          "[ProactiveChat] 开关已关闭，清除主动对话 alarm",
+          { aiEnabled, proactiveEnabled },
+        );
+        void chrome.alarms.clear(PROACTIVE_ALARM_NAME);
+        return;
+      }
+      // 开关开着：保证 alarm 存在
+      try {
+        const existing = await chrome.alarms.get(PROACTIVE_ALARM_NAME);
+        if (!existing) void scheduleNext();
+      } catch (error) {
+        maLogger.warn("[ProactiveChat] 读取 alarm 状态失败:", error);
+        void scheduleNext();
+      }
+    },
+  );
+
+  // ── 全局 AI 开关变化监听（skipInitial：启动检查已覆盖初始值） ──
+  onAIChatEnabledChange((enabled) => {
+    if (!enabled) {
+      maLogger.info(
+        "[ProactiveChat] AI 聊天开关变为关闭，清除主动对话 alarm",
+      );
+      void chrome.alarms.clear(PROACTIVE_ALARM_NAME);
+    } else {
+      maLogger.info(
+        "[ProactiveChat] AI 聊天开关变为开启，重新排期主动对话",
+      );
+      void scheduleNext();
+    }
+  }, true);
+
+  // ── 主动聊天开关变化监听 ──
+  onAIProactiveChatEnabledChange((enabled) => {
+    if (!enabled) {
+      maLogger.info(
+        "[ProactiveChat] AI 自主式聊天开关变为关闭，清除主动对话 alarm",
+      );
+      void chrome.alarms.clear(PROACTIVE_ALARM_NAME);
+    } else {
+      maLogger.info(
+        "[ProactiveChat] AI 自主式聊天开关变为开启，重新排期主动对话",
+      );
+      void scheduleNext();
+    }
+  }, true);
+
   if (!alarmListenerRegistered) {
     alarmListenerRegistered = true;
     chrome.alarms.onAlarm.addListener((alarm) => {
       if (alarm.name !== PROACTIVE_ALARM_NAME) return;
 
       void (async () => {
+        // alarm 触发时再查一次开关 —— 防止 init 之后、alarm 到之前用户关了开关
+        const [aiEnabled, proactiveEnabled] = await Promise.all([
+          isAIChatEnabled(),
+          isAIProactiveChatEnabled(),
+        ]);
+        if (!aiEnabled || !proactiveEnabled) {
+          maLogger.info(
+            "[ProactiveChat] alarm 触发但开关已关闭，跳过本次",
+            { aiEnabled, proactiveEnabled },
+          );
+          return;
+        }
+
         // runProactiveMessage 返回 true = 模型调了 MCP 工具精确排期，跳过兜底；
         // 返回 false = 模型没调 / 失败，走 scheduleNext 随机兜底
         let skipRandomSchedule = false;
@@ -1012,14 +1061,4 @@ export function initProactiveChat(): void {
       })();
     });
   }
-
-  void chrome.alarms
-    .get(PROACTIVE_ALARM_NAME)
-    .then((existing) => {
-      if (!existing) void scheduleNext();
-    })
-    .catch((error) => {
-      maLogger.warn("[ProactiveChat] 读取 alarm 状态失败:", error);
-      void scheduleNext();
-    });
 }
