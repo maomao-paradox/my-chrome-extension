@@ -296,6 +296,7 @@ struct CreateEntryBody {
     importance: Option<MemoryImportance>,
     source: Option<String>,
     tags: Option<Vec<String>>,
+    created_at: Option<i64>,
 }
 
 /// POST /api/v1/roles/{role}/entries —— 新增条目（空 content → 400），返回 201
@@ -309,13 +310,14 @@ async fn create_entry(
     }
     let entry = state
         .service
-        .add_entry(
+        .add_entry_at(
             &role,
             &body.content,
             body.category,
             body.importance,
             body.source,
             body.tags,
+            body.created_at,
         )
         .await?;
     Ok((StatusCode::CREATED, Json(json!(entry))))
@@ -460,6 +462,7 @@ async fn build_context(
 struct ObserveBody {
     user_message: String,
     ai_response: String,
+    created_at: Option<i64>,
 }
 
 /// POST /api/v1/roles/{role}/observe —— 观察一轮对话并自动提取记忆
@@ -470,7 +473,12 @@ async fn observe(
 ) -> AppResult<Json<Value>> {
     state
         .service
-        .observe(&role, &body.user_message, &body.ai_response)
+        .observe_at(
+            &role,
+            &body.user_message,
+            &body.ai_response,
+            body.created_at,
+        )
         .await?;
     Ok(Json(json!({ "ok": true })))
 }

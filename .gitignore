@@ -15,8 +15,6 @@ package-lock.json
 # Extension
 extension/node_modules
 extension/dist
-extension/dist-service
-extension/dist-ssr
 extension/src/plugins/live2d-widget
 extension/src/auto-imports.d.ts
 extension/src/components.d.ts
@@ -29,6 +27,7 @@ extension/.env*
 
 # Backend
 memory-server/target
+memory-server/src/study*
 
 # Editor directories and files
 .vscode/*

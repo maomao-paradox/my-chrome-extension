@@ -602,12 +602,13 @@ const AIConversation: React.FC<AIConversationProps> = ({
         setPendingImages([]);
 
         const userMsgId = genId();
+        const userMessageCreatedAt = Date.now();
         const userMsg: ChatMessage = {
             id: userMsgId,
             role: "user",
             content: prompt,
             images: imagesToSend.length > 0 ? imagesToSend : undefined,
-            createdAt: Date.now(),
+            createdAt: userMessageCreatedAt,
         };
         const aiMsgId = genId();
         const aiMsg: ChatMessage = {
@@ -670,6 +671,7 @@ const AIConversation: React.FC<AIConversationProps> = ({
                                 category: "conversation",
                                 importance: "medium",
                                 source: "ai-conversation",
+                                createdAt: userEntry.createdAt,
                             });
                             // 历史重载后移除所有本轮实时消息
                             await loadHistoryForRole(role);
@@ -872,6 +874,7 @@ const AIConversation: React.FC<AIConversationProps> = ({
                 type: "START_AI_CONVERSATION",
                 payload: {
                     prompt,
+                    createdAt: userMessageCreatedAt,
                     role,
                     provider: config?.provider,
                     model: config?.modelId,

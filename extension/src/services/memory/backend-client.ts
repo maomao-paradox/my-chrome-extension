@@ -166,6 +166,7 @@ export interface BackendAddEntryParams {
     importance?: MemoryImportance;
     source?: string;
     tags?: string[];
+    createdAt?: number;
 }
 
 /** 短期记忆输入 —— 直接摘要或消息列表二选一 */
@@ -348,6 +349,7 @@ export class MemoryBackendClient {
                     importance: params.importance,
                     source: params.source,
                     tags: params.tags,
+                    createdAt: params.createdAt,
                 },
             },
         );
@@ -426,10 +428,15 @@ export class MemoryBackendClient {
     }
 
     /** 观察一轮对话，服务端自动提取记忆 */
-    async observe(role: string, userMessage: string, aiResponse: string): Promise<void> {
+    async observe(
+        role: string,
+        userMessage: string,
+        aiResponse: string,
+        createdAt?: number,
+    ): Promise<void> {
         await this.request<{ ok: boolean }>(
             `/api/v1/roles/${encodeSegment(role)}/observe`,
-            { method: "POST", body: { userMessage, aiResponse } },
+            { method: "POST", body: { userMessage, aiResponse, createdAt } },
         );
     }
 

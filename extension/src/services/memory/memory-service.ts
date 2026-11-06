@@ -52,7 +52,11 @@ export function isFunctionalRole(role: string | undefined | null): boolean {
 }
 
 /** 上下文构建时的 token 预算（字符数近似） */
-const CONTEXT_BUDGET = 2000;
+const CONTEXT_BUDGET = 10_000;
+
+/** 对话上下文只携带最近 24 小时内的最新 20 条记录 */
+const CONVERSATION_CONTEXT_WINDOW_MS = 24 * 60 * 60 * 1000;
+const CONVERSATION_CONTEXT_LIMIT = 20;
 
 /** 归一化的重要度权重 ∈ [0, 1] —— 混排打分时使用 */
 const IMPORTANCE_WEIGHT: Record<MemoryImportance, number> = {
@@ -160,6 +164,7 @@ export class MemoryService {
         importance?: MemoryImportance;
         source?: string;
         tags?: string[];
+        createdAt?: number;
     }): Promise<MemoryEntry> {
         const now = Date.now();
         const base: MemoryEntry = {
@@ -170,7 +175,7 @@ export class MemoryService {
             importance: params.importance ?? "medium",
             source: params.source,
             tags: params.tags,
-            createdAt: now,
+            createdAt: params.createdAt ?? now,
             lastAccessedAt: now,
             accessCount: 1,
         };
@@ -288,7 +293,13 @@ export class MemoryService {
      * @param query  可选查询文本（用户当前输入）
      * @param limit  返回条数上限
      */
-    async retrieve(role: string, query?: string, limit = 15): Promise<MemoryEntry[]> {
+    async retrieve(
+        role: string,
+        query?: string,
+        limit = 15,
+        category?: MemoryCategory,
+        excludeIds?: ReadonlySet<string>,
+    ): Promise<MemoryEntry[]> {
         const rawEntries = await this.store.listEntries(role);
         if (rawEntries.length === 0) return [];
 
@@ -313,6 +324,9 @@ export class MemoryService {
         const candidates: Candidate[] = [];
 
         for (const entry of all) {
+            if (category && entry.category !== category) continue;
+            if (excludeIds?.has(entry.id)) continue;
+
             const retention = computeRetention(entry, now);
             const state = classifyDecayState(entry, now);
             const rag = ragMap.get(entry.id) ?? 0;
@@ -429,16 +443,15 @@ export class MemoryService {
     // ─── 上下文构建 ─── //
 
     /**
-     * 构建注入 system prompt 的记忆上下文（身份 + 短期快照 + 长期 RAG 检索片段）。
+     * 构建注入 system prompt 的记忆上下文（身份 + 短期快照 + 最近对话记录）。
      *
      * ⚠️ 纯工具角色（graph_extractor / translator_* / textarea_ai_autofill ...）
      *    直接返回空 assembledContext —— 它们是一次性任务，
-     *    "你记得的关于用户的事" 只会产生噪音，不会提升输出质量。
+     *    最近聊天记录只会产生噪音，不会提升输出质量。
      *
      * @param role  目标角色
-     * @param query 当前用户输入（用于检索相关记忆）
      */
-    async buildContext(role: string, query?: string): Promise<MemoryQueryResult> {
+    async buildContext(role: string, _query?: string): Promise<MemoryQueryResult> {
         // 工具角色不注入记忆上下文，但 identity 还是正常返回（系统需要知道自己是谁）
         const identity = await this.store.getIdentity(role);
 
@@ -451,21 +464,31 @@ export class MemoryService {
             };
         }
 
-        const [shortTerm, longTermEntries] = await Promise.all([
+        const now = Date.now();
+        const [shortTerm, conversationEntries] = await Promise.all([
             this.store.getShortTerm(role),
-            this.retrieve(role, query),
+            this.store.listByCategory(role, "conversation"),
         ]);
+        const recentConversationEntries = conversationEntries
+            .filter(
+                (entry) =>
+                    entry.createdAt >= now - CONVERSATION_CONTEXT_WINDOW_MS &&
+                    entry.createdAt <= now,
+            )
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .slice(0, CONVERSATION_CONTEXT_LIMIT)
+            .reverse();
 
         const assembledContext = this.assemblePromptContext({
             identity,
             shortTerm,
-            longTermEntries,
+            recentConversationEntries,
         });
 
         return {
             identity: identity ?? undefined,
             shortTerm: shortTerm ?? undefined,
-            entries: longTermEntries,
+            entries: recentConversationEntries,
             assembledContext,
         };
     }
@@ -477,7 +500,7 @@ export class MemoryService {
     private assemblePromptContext(params: {
         identity: IdentityMemory | null;
         shortTerm: ShortTermSnapshot | null;
-        longTermEntries: MemoryEntry[];
+        recentConversationEntries: MemoryEntry[];
     }): string {
         const chunks: string[] = [];
         let budget = CONTEXT_BUDGET;
@@ -500,31 +523,17 @@ export class MemoryService {
             }
         }
 
-        // 3. 长期记忆 —— 保持 retrieve() 的混合排序结果（RAG × 保留率 × 重要度）
-        const usedCategories = new Set<MemoryCategory>();
-        const categoryLabels: Record<MemoryCategory, string> = {
-            identity: "身份",
-            conversation: "对话片段",
-            preference: "用户偏好",
-            fact: "事实信息",
-            episodic: "情景回忆",
-        };
-
+        // 3. 最近 24 小时的对话记录，按发生顺序注入
         const entryLines: string[] = [];
-        for (const entry of params.longTermEntries) {
-            // 模糊记忆加标注，让 AI 知道这是"隐约记得"而非确定事实
-            const blurMark = entry.decayState === "fading" ? "（印象模糊）" : "";
-            // 行首注入入库时间，让 AI 能感知记忆的时序远近
-            const line = `- [${formatMemoryTime(entry.createdAt)}] ${entry.content}${blurMark}`;
+        for (const entry of params.recentConversationEntries) {
+            const line = `- [${formatMemoryTime(entry.createdAt)}] ${entry.content}`;
             if (line.length + 1 > budget) break;
             entryLines.push(line);
             budget -= line.length + 1;
-            usedCategories.add(entry.category);
-            if (entryLines.length >= 8) break; // 最多 8 条，避免 prompt 太臃肿
         }
 
         if (entryLines.length > 0) {
-            chunks.push(`[聊天记录]\n${entryLines.join("\n")}`);
+            chunks.push(`[最近24小时的聊天记录]\n${entryLines.join("\n")}`);
         }
 
         return chunks.length > 0 ? chunks.join("\n\n") : "";
@@ -544,7 +553,12 @@ export class MemoryService {
      * @param userMessage   用户输入
      * @param aiResponse    AI 输出
      */
-    async observe(role: string, userMessage: string, aiResponse: string): Promise<void> {
+    async observe(
+        role: string,
+        userMessage: string,
+        aiResponse: string,
+        createdAt?: number,
+    ): Promise<void> {
         // 规则 1：用户说"记住XXX"或"我喜欢XXX" —— 捕获为 preference
         const preferencePatterns = [
             /记住[：:]?\s*(.+)/,
@@ -563,6 +577,7 @@ export class MemoryService {
                     category: "preference",
                     importance: "high",
                     source: userMessage,
+                    createdAt,
                 });
                 break; // 一轮只取一个 preference
             }
@@ -586,13 +601,14 @@ export class MemoryService {
                     category: "fact",
                     importance: "medium",
                     source: userMessage,
+                    createdAt,
                 });
                 break;
             }
         }
 
         // 规则 3：整轮对话入 RAG 语料库
-        await this.recordConversationTurn(role, userMessage, aiResponse);
+        await this.recordConversationTurn(role, userMessage, aiResponse, createdAt);
     }
 
     /**
@@ -606,6 +622,7 @@ export class MemoryService {
         role: string,
         userMessage: string,
         aiResponse: string,
+        createdAt?: number,
     ): Promise<void> {
         const chunk = this.buildConversationChunk(userMessage, aiResponse);
         if (!chunk) return;
@@ -618,6 +635,7 @@ export class MemoryService {
             category: "conversation",
             importance: "medium",
             source: "auto:conversation",
+            createdAt,
         });
     }
 

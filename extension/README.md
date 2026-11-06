@@ -146,6 +146,7 @@ npx vitest run test/content-feature-manager.spec.ts
 - 探针通过 → 身份、条目、检索、上下文、observe、短期摘要与导入导出全部请求 `memory-server`；探针失败 → 自动回退到原有的 `chrome.storage.local` 本地实现，本地行为保持不变。
 - 探针结果带缓存：健康 30 秒、失败 10 秒，避免后端离线时反复超时；并发调用会复用同一次探针。
 - 后端业务请求发生网络中断或 5xx 时，本次调用立即回退本地，并把探针标记为失败，后续直接走本地。
+- 对话记忆按用户发送消息时的时间记录；聊天上下文携带最近 24 小时内最新的 20 条对话记录，按发生顺序展示，并使用约 10,000 字符的上下文预算。
 - 后端配置保存在 `chrome.storage.local`：`memoryBackendBaseUrl`（默认 `http://127.0.0.1:8790`）与可选的 `memoryBackendApiToken`；设置令牌后业务请求会同时携带 `Authorization: Bearer` 与 `X-API-Key`。
 - 设置页首页的 HUD 信号牌跟随探针状态（彩蛋）：后端在线显示 `SIGNAL ACQUIRED`，离线显示 `SIGNAL LOST`，每 30 秒自动刷新。
 - 记忆管理页在后端在线时提供「迁移本地到后端」按钮：把浏览器 `chrome.storage` 中的全部角色记忆（身份/条目/短期摘要）一键发送到后端，支持合并/替换两种模式，不删除本地数据。
@@ -156,7 +157,7 @@ npx vitest run test/content-feature-manager.spec.ts
 - 侧边栏“网页工具”页会发现当前网页及 iframe 注册的 WebMCP 工具，工具卡片会标明 frame，支持 JSON 参数手动执行。
 - AI 助手可以按工具 Schema 发起自动函数调用，并将结果带回对话；工具名包含 frame 信息以区分不同 frame 中的同名工具。
 - 自动函数调用支持 DeepSeek 内置网页会话、OpenAI 或 OpenAI-compatible API；DeepSeek 网页会话通过工具协议 Prompt 执行 WebMCP，无需 API Key（DeepSeek 配置中的 API Key 不参与该链路）。Anthropic 和 Google 链路暂不支持此功能。
-- 内置 MCP 工具（如设置下次主动消息间隔）与文本分开处理：同一轮里 AI 说的话保留为一条回复，工具在后台执行，随后把执行结果交回模型，由模型决定继续调用工具还是直接回复；全程没有文本的纯工具轮不写入记忆。
+- 内置 MCP 工具与文本分开处理：工具在后台执行后，除“设置下次主动消息间隔”和“设置好感度”外，执行结果会交回模型续问；这两个状态工具只更新状态，不触发结果续问。
 - AI 可自动执行网页注册的工具。请仅在信任该网页及其工具时使用。
 
 ### 隐藏成就

@@ -76,6 +76,7 @@ function registerAiConversationPort(
 
     const {
       prompt,
+      createdAt,
       role,
       provider,
       model,
@@ -173,6 +174,7 @@ function registerAiConversationPort(
             category: "conversation",
             importance: "medium",
             source: "ai-ignored",
+              createdAt: typeof createdAt === "number" ? createdAt : Date.now(),
           });
         } catch (persistError) {
           maLogger.warn("[StreamManager] 忽略路径落库失败:", persistError);
@@ -221,6 +223,7 @@ function registerAiConversationPort(
         fileIds, // ← 用户上传的图片 file_id 列表
       },
       mood, // ← 顺手传进 StreamManager，避免重复读 storage
+      typeof createdAt === "number" ? createdAt : undefined,
     );
   });
 }

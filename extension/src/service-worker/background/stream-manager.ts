@@ -34,6 +34,7 @@ import {
     buildToolRoundMessages,
     type ToolExecutionResult,
 } from "./tool-round-prompt";
+import type { ProactiveMood } from "./proactive-mood";
 
 /** 一次模型返回的工具调用 */
 type ToolCall = { id: string; name: string; args: Record<string, unknown> };
@@ -103,6 +104,7 @@ export class StreamManager {
         role: string,
         userPrompt: string,
         aiResponse: string,
+        createdAt: number,
     ): Promise<void> {
         // 纯工具角色（graph_extractor / translator_* / textarea_ai_autofill ...）
         // 的输出通常是 JSON 或结构化数据，写入记忆会污染对话历史，跳过
@@ -110,7 +112,12 @@ export class StreamManager {
             return;
         }
         try {
-            await this.memoryService.observe(role, userPrompt, aiResponse);
+            await this.memoryService.observe(
+                role,
+                userPrompt,
+                aiResponse,
+                createdAt,
+            );
         } catch (error) {
             console.warn("[Memory] observe failed:", error);
         }
@@ -256,8 +263,10 @@ export class StreamManager {
         options?: StreamOptions,
         /** 入口层 runtime-connections.ts 已读取好的心情状态，传进来避免重复读 storage */
         mood?: ProactiveMood,
+        userMessageCreatedAt?: number,
     ): void {
         const startTime = performance.now();
+        const conversationCreatedAt = userMessageCreatedAt ?? Date.now();
         console.log(
             "开始流式传输:",
             messageId,
@@ -446,7 +455,12 @@ export class StreamManager {
 
                     // 只有真正产生了对话文本才交给记忆系统观察
                     if (allAiContent.trim()) {
-                        void this.observeConversation(role, prompt, allAiContent);
+                        void this.observeConversation(
+                            role,
+                            prompt,
+                            allAiContent,
+                            conversationCreatedAt,
+                        );
                     }
 
                     // 发最终 COMPLETE —— 前端收到后触发 persistTurn

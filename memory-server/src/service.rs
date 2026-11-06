@@ -2,7 +2,8 @@
 //!
 //! 与扩展端 `services/memory/memory-service.ts` + `memory-exporter.ts` 逐一对应：
 //! - 混合排序 `0.5×RAG + 0.3×保留率 + 0.2×重要度`，三态分流，仅入选条目写回复活；
-//! - 上下文装配预算 2000 字符，工具角色返回空 assembledContext；
+//! - 上下文装配预算 10000 字符，携带最近 24 小时最多 20 条对话记录；
+//!   工具角色返回空 assembledContext；
 //! - observe 三规则：明示偏好 / 具体事实 / 对话语料（寒暄过滤 + Jaccard 去重）；
 //! - 导入导出与扩展端备份文件（schemaVersion: 1）完全兼容。
 
@@ -25,7 +26,7 @@ use crate::rag::{tokenize, Bm25Index};
 use crate::store::SqliteMemoryStore;
 
 /// 上下文构建时的字符预算（对应 TS CONTEXT_BUDGET）
-const CONTEXT_BUDGET: usize = 2000;
+const CONTEXT_BUDGET: usize = 10_000;
 
 /// 混合排序权重：RAG 相关性 / 遗忘保留率 / 重要度
 const SCORE_WEIGHT_RAG: f64 = 0.5;
@@ -55,8 +56,9 @@ const CONVERSATION_DUP_THRESHOLD: f64 = 0.85;
 const SHORT_TERM_RECENT_MESSAGES: usize = 6;
 const SHORT_TERM_CONTENT_CHARS: usize = 100;
 
-/// 长期记忆块最多注入的条目数
-const CONTEXT_MAX_ENTRIES: usize = 8;
+/// 对话上下文窗口与最多注入的记录数
+const CONVERSATION_CONTEXT_WINDOW_MS: i64 = 24 * 60 * 60 * 1000;
+const CONVERSATION_CONTEXT_LIMIT: usize = 20;
 
 /// 寒暄类噪声回复 —— 这类文本没有检索价值（忽略大小写）
 static TRIVIAL_REPLY: LazyLock<Regex> = LazyLock::new(|| {
@@ -185,6 +187,21 @@ impl MemoryService {
         source: Option<String>,
         tags: Option<Vec<String>>,
     ) -> AppResult<MemoryEntry> {
+        self.add_entry_at(role, content, category, importance, source, tags, None)
+            .await
+    }
+
+    /// 新增记忆并可保留原始消息时间；last_accessed_at 仍使用当前时间。
+    pub async fn add_entry_at(
+        &self,
+        role: &str,
+        content: &str,
+        category: Option<MemoryCategory>,
+        importance: Option<MemoryImportance>,
+        source: Option<String>,
+        tags: Option<Vec<String>>,
+        created_at: Option<i64>,
+    ) -> AppResult<MemoryEntry> {
         let now = now_ms();
         let base = MemoryEntry {
             id: generate_memory_id(),
@@ -194,7 +211,7 @@ impl MemoryService {
             importance: importance.unwrap_or(MemoryImportance::Medium),
             source,
             tags,
-            created_at: now,
+            created_at: created_at.filter(|timestamp| *timestamp > 0).unwrap_or(now),
             last_accessed_at: now,
             access_count: 1,
             stability: None,
@@ -335,6 +352,17 @@ impl MemoryService {
         query: Option<&str>,
         limit: usize,
     ) -> AppResult<Vec<MemoryEntry>> {
+        self.retrieve_filtered(role, query, limit, None, None).await
+    }
+
+    async fn retrieve_filtered(
+        &self,
+        role: &str,
+        query: Option<&str>,
+        limit: usize,
+        category: Option<MemoryCategory>,
+        exclude_ids: Option<&HashSet<String>>,
+    ) -> AppResult<Vec<MemoryEntry>> {
         let raw_entries = self.store.list_entries(role).await?;
         if raw_entries.is_empty() {
             return Ok(Vec::new());
@@ -361,6 +389,13 @@ impl MemoryService {
         let mut candidates: Vec<Candidate> = Vec::new();
 
         for entry in all {
+            if exclude_ids.is_some_and(|ids| ids.contains(&entry.id)) {
+                continue;
+            }
+            if category.is_some_and(|category| entry.category != category) {
+                continue;
+            }
+
             let retention = compute_retention(&entry, now);
             let state = classify_decay_state(&entry, now);
             let rag = rag_map.get(&entry.id).copied().unwrap_or(0.0);
@@ -518,14 +553,14 @@ impl MemoryService {
 
     // ─── 上下文构建 ─── //
 
-    /// 构建注入 system prompt 的记忆上下文（身份 + 短期快照 + 长期 RAG 检索片段）
+    /// 构建注入 system prompt 的记忆上下文（身份 + 短期快照 + 最近对话记录）
     ///
     /// 纯工具角色直接返回空 assembledContext —— 它们是一次性任务，
-    /// 「你记得的关于用户的事」只会产生噪音；identity 仍正常返回。
+    /// 最近聊天记录只会产生噪音；identity 仍正常返回。
     pub async fn build_context(
         &self,
         role: &str,
-        query: Option<&str>,
+        _query: Option<&str>,
     ) -> AppResult<MemoryQueryResult> {
         let identity = self.store.get_identity(role).await?;
 
@@ -538,17 +573,27 @@ impl MemoryService {
             });
         }
 
-        let short_term = self.store.get_short_term(role).await?;
-        let long_term_entries = self.retrieve(role, query, 15).await?;
+        let now = now_ms();
+        let (short_term, mut conversation_entries) = tokio::try_join!(
+            self.store.get_short_term(role),
+            self.store.list_by_category(role, MemoryCategory::Conversation),
+        )?;
+        conversation_entries.retain(|entry| {
+            entry.created_at >= now - CONVERSATION_CONTEXT_WINDOW_MS
+                && entry.created_at <= now
+        });
+        conversation_entries.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+        conversation_entries.truncate(CONVERSATION_CONTEXT_LIMIT);
+        conversation_entries.reverse();
 
         let assembled_context = assemble_prompt_context(
             identity.as_ref(),
             short_term.as_ref(),
-            &long_term_entries,
+            &conversation_entries,
         );
 
         Ok(MemoryQueryResult {
-            entries: long_term_entries,
+            entries: conversation_entries,
             identity,
             short_term,
             assembled_context,
@@ -563,18 +608,34 @@ impl MemoryService {
     ///   规则 1  用户明显示意（记住/我喜欢/我叫…）→ preference（high）
     ///   规则 2  用户提到具体事实（URL/版本号/技术栈）→ fact（medium）
     ///   规则 3  整轮对话入语料库（category: conversation）→ 供 RAG 检索回忆
-    pub async fn observe(&self, role: &str, user_message: &str, ai_response: &str) -> AppResult<()> {
+    pub async fn observe(
+        &self,
+        role: &str,
+        user_message: &str,
+        ai_response: &str,
+    ) -> AppResult<()> {
+        self.observe_at(role, user_message, ai_response, None).await
+    }
+
+    pub async fn observe_at(
+        &self,
+        role: &str,
+        user_message: &str,
+        ai_response: &str,
+        created_at: Option<i64>,
+    ) -> AppResult<()> {
         // 规则 1：用户说「记住XXX」或「我喜欢XXX」—— 捕获为 preference（一轮只取一条）
         for pattern in PREFERENCE_PATTERNS.iter() {
             if let Some(caps) = pattern.captures(user_message) {
                 if let Some(m) = caps.get(1) {
-                    self.add_entry(
+                    self.add_entry_at(
                         role,
                         m.as_str().trim(),
                         Some(MemoryCategory::Preference),
                         Some(MemoryImportance::High),
                         Some(user_message.to_string()),
                         None,
+                        created_at,
                     )
                     .await?;
                     break;
@@ -585,13 +646,14 @@ impl MemoryService {
         // 规则 2：用户提到具体事实（URL、版本号、技术名）—— 捕获为 fact（一轮只取一条）
         for pattern in FACT_PATTERNS.iter() {
             if let Some(m) = pattern.find(user_message) {
-                self.add_entry(
+                self.add_entry_at(
                     role,
                     m.as_str().trim(),
                     Some(MemoryCategory::Fact),
                     Some(MemoryImportance::Medium),
                     Some(user_message.to_string()),
                     None,
+                    created_at,
                 )
                 .await?;
                 break;
@@ -599,7 +661,7 @@ impl MemoryService {
         }
 
         // 规则 3：整轮对话入 RAG 语料库
-        self.record_conversation_turn(role, user_message, ai_response)
+        self.record_conversation_turn(role, user_message, ai_response, created_at)
             .await
     }
 
@@ -613,6 +675,7 @@ impl MemoryService {
         role: &str,
         user_message: &str,
         ai_response: &str,
+        created_at: Option<i64>,
     ) -> AppResult<()> {
         let Some(chunk) = build_conversation_chunk(user_message, ai_response) else {
             return Ok(());
@@ -622,13 +685,14 @@ impl MemoryService {
             return Ok(());
         }
 
-        self.add_entry(
+        self.add_entry_at(
             role,
             &chunk,
             Some(MemoryCategory::Conversation),
             Some(MemoryImportance::Medium),
             Some("auto:conversation".to_string()),
             None,
+            created_at,
         )
         .await?;
         Ok(())
@@ -872,7 +936,7 @@ fn build_conversation_chunk(user_message: &str, ai_response: &str) -> Option<Str
 fn assemble_prompt_context(
     identity: Option<&IdentityMemory>,
     short_term: Option<&ShortTermSnapshot>,
-    long_term_entries: &[MemoryEntry],
+    recent_conversations: &[MemoryEntry],
 ) -> String {
     let mut chunks: Vec<String> = Vec::new();
     let mut budget = CONTEXT_BUDGET;
@@ -899,20 +963,12 @@ fn assemble_prompt_context(
         }
     }
 
-    // 3. 长期记忆 —— 保持 retrieve() 的混合排序结果（RAG × 保留率 × 重要度）
+    // 3. 最近 24 小时的对话记录，按发生顺序注入
     let mut entry_lines: Vec<String> = Vec::new();
-    for entry in long_term_entries {
-        // 模糊记忆加标注，让 AI 知道这是「隐约记得」而非确定事实
-        let blur_mark = if entry.decay_state == Some(MemoryDecayState::Fading) {
-            "（印象模糊）"
-        } else {
-            ""
-        };
-        // 行首注入入库时间，让 AI 能感知记忆的时序远近
+    for entry in recent_conversations {
         let line = format!(
-            "- [{}] [{}] {}{blur_mark}",
+            "- [{}] {}",
             format_memory_time(entry.created_at),
-            category_label(entry.category),
             entry.content,
         );
         let line_len = line.chars().count();
@@ -921,13 +977,13 @@ fn assemble_prompt_context(
         }
         budget -= line_len + 1;
         entry_lines.push(line);
-        if entry_lines.len() >= CONTEXT_MAX_ENTRIES {
-            break; // 最多 8 条，避免 prompt 太臃肿
-        }
     }
 
     if !entry_lines.is_empty() {
-        chunks.push(format!("[你记得的关于用户的事]\n{}", entry_lines.join("\n")));
+        chunks.push(format!(
+            "[最近24小时的聊天记录]\n{}",
+            entry_lines.join("\n")
+        ));
     }
 
     chunks.join("\n\n")
@@ -940,17 +996,6 @@ fn format_memory_time(timestamp_ms: i64) -> String {
         .single()
         .map(|dt| dt.format("%Y/%m/%d %H:%M:%S").to_string())
         .unwrap_or_else(|| "未知时间".to_string())
-}
-
-/// 记忆类目的中文标签（用于上下文装配）
-fn category_label(category: MemoryCategory) -> &'static str {
-    match category {
-        MemoryCategory::Identity => "身份",
-        MemoryCategory::Conversation => "对话片段",
-        MemoryCategory::Preference => "用户偏好",
-        MemoryCategory::Fact => "事实信息",
-        MemoryCategory::Episodic => "情景回忆",
-    }
 }
 
 /// 当前 UTC 时间的 ISO8601 字符串（毫秒精度，形如 2026-11-03T12:00:00.000Z）
@@ -1289,6 +1334,16 @@ mod tests {
         svc.save_short_term_direct("miku", "最近聊了猫和咖啡".to_string(), 6)
             .await
             .expect("短期写入失败");
+        insert_entry(
+            &svc,
+            "recent-chat",
+            "miku",
+            MemoryCategory::Conversation,
+            MemoryImportance::Medium,
+            "用户：最近在学 Rust\nAI：可以从所有权开始。",
+            now_ms(),
+        )
+        .await;
         svc.add_entry(
             "miku",
             "主人喜欢喝美式咖啡",
@@ -1301,7 +1356,7 @@ mod tests {
         .expect("新增失败");
 
         let result = svc
-            .build_context("miku", Some("咖啡"))
+            .build_context("miku", Some("量子火箭"))
             .await
             .expect("构建失败");
 
@@ -1310,20 +1365,78 @@ mod tests {
         assert!(result.assembled_context.contains("[近期对话摘要]\n最近聊了猫和咖啡"));
         assert!(result
             .assembled_context
-            .contains("[你记得的关于用户的事]\n- [20"));
-        assert!(result
-            .assembled_context
-            .contains("] [用户偏好] 主人喜欢喝美式咖啡"));
+            .contains("[最近24小时的聊天记录]\n- [20"));
+        assert!(result.assembled_context.contains("最近在学 Rust"));
+        assert!(!result.assembled_context.contains("主人喜欢喝美式咖啡"));
         assert!(result.assembled_context.contains("\n\n"));
         assert!(result.short_term.is_some());
         assert_eq!(result.entries.len(), 1);
     }
 
     #[tokio::test]
+    async fn build_context_只返回最近24小时最新20条对话() {
+        let svc = test_service().await;
+        let now = now_ms();
+
+        for i in 0..25 {
+            insert_entry(
+                &svc,
+                &format!("recent-{i}"),
+                "miku",
+                MemoryCategory::Conversation,
+                MemoryImportance::Medium,
+                &format!("近期-{} 对话内容", i + 1),
+                now - (25 - i) as i64 * 60_000,
+            )
+            .await;
+        }
+        insert_entry(
+            &svc,
+            "old-chat",
+            "miku",
+            MemoryCategory::Conversation,
+            MemoryImportance::Medium,
+            "24小时前的对话",
+            now - CONVERSATION_CONTEXT_WINDOW_MS - 1,
+        )
+        .await;
+        insert_entry(
+            &svc,
+            "future-chat",
+            "miku",
+            MemoryCategory::Conversation,
+            MemoryImportance::Medium,
+            "未来时间的对话",
+            now + 60_000,
+        )
+        .await;
+        insert_entry(
+            &svc,
+            "preference",
+            "miku",
+            MemoryCategory::Preference,
+            MemoryImportance::High,
+            "用户喜欢简体中文",
+            now,
+        )
+        .await;
+
+        let result = svc.build_context("miku", None).await.expect("构建失败");
+
+        assert_eq!(result.entries.len(), 20);
+        assert!(result.entries[0].content.contains("近期-6"));
+        assert!(result.entries[19].content.contains("近期-25"));
+        assert_eq!(result.assembled_context.matches("近期-").count(), 20);
+        assert!(!result.assembled_context.contains("24小时前的对话"));
+        assert!(!result.assembled_context.contains("未来时间的对话"));
+        assert!(!result.assembled_context.contains("用户喜欢简体中文"));
+    }
+
+    #[tokio::test]
     async fn build_context_超长内容预算截断() {
         let svc = test_service().await;
-        // persona 直接吃满预算：5（块头）+ 1（换行）+ 1994 = 2000，正文 2001 字符必超
-        let long_persona = "喵".repeat(2001);
+        // 超长 persona 被整体跳过，最近对话记录仍受总预算约束
+        let long_persona = "喵".repeat(CONTEXT_BUDGET + 1);
         svc.upsert_identity(
             "miku",
             "初音未来".to_string(),
@@ -1332,13 +1445,12 @@ mod tests {
         )
         .await
         .expect("身份写入失败");
-        // 塞 10 条长条目，验证最多 8 条且整体不超预算
-        for i in 0..10 {
+        for i in 0..25 {
             svc.add_entry(
                 "miku",
-                &format!("第{i}条{}", "很长的记忆内容".repeat(30)),
-                Some(MemoryCategory::Fact),
-                Some(MemoryImportance::High),
+                &format!("第{i}条{}", "很长的对话内容".repeat(100)),
+                Some(MemoryCategory::Conversation),
+                Some(MemoryImportance::Medium),
                 None,
                 None,
             )
@@ -1349,39 +1461,35 @@ mod tests {
         let result = svc.build_context("miku", None).await.expect("构建失败");
         // 超长 persona 块被整体跳过
         assert!(!result.assembled_context.contains("[角色身份]"));
-        // 最多 8 条
+        // 最多 20 条
         let line_count = result
             .assembled_context
             .lines()
             .filter(|l| l.starts_with("- ["))
             .count();
-        assert!(line_count <= 8, "长期记忆行数应 ≤ 8，实际 {line_count}");
+        assert!(line_count <= 20, "对话记录行数应 ≤ 20，实际 {line_count}");
         // 整体不超预算（允许末尾截断，但绝不无限膨胀）
         assert!(result.assembled_context.chars().count() <= CONTEXT_BUDGET);
     }
 
     #[tokio::test]
-    async fn build_context_fading条目标注印象模糊() {
+    async fn build_context_不注入长期偏好() {
         let svc = test_service().await;
         let now = now_ms();
-        // high S=720h，fading 需要 0.2≤R<0.55 → Δt ∈ (430h, 1159h)，取 500h
-        let fading_anchor = now - (500.0 * HOUR_MS) as i64;
         insert_entry(
             &svc,
-            "fading-1",
+            "preference-1",
             "miku",
             MemoryCategory::Preference,
             MemoryImportance::High,
             "主人对花粉过敏",
-            fading_anchor,
+            now,
         )
         .await;
         svc.rag_cache.lock().expect("锁中毒").clear();
 
         let result = svc.build_context("miku", None).await.expect("构建失败");
-        assert!(result
-            .assembled_context
-            .contains("] [用户偏好] 主人对花粉过敏（印象模糊）"));
+        assert!(!result.assembled_context.contains("主人对花粉过敏"));
     }
 
     // ---------- 6. observe 三规则 ----------
@@ -1402,6 +1510,25 @@ mod tests {
         assert_eq!(prefs[0].content, "我喜欢喝美式咖啡");
         assert_eq!(prefs[0].importance, MemoryImportance::High);
         assert_eq!(prefs[0].source, Some("记住：我喜欢喝美式咖啡".to_string()));
+    }
+
+    #[tokio::test]
+    async fn observe_保留用户消息原始时间() {
+        let svc = test_service().await;
+        let created_at = 1_743_840_428_000_i64;
+
+        svc.observe_at(
+            "miku",
+            "记住：我喜欢喝美式咖啡",
+            "好呀，我记住你喜欢喝美式咖啡了。",
+            Some(created_at),
+        )
+        .await
+        .expect("observe 失败");
+
+        let entries = svc.store().list_entries("miku").await.expect("查询失败");
+        assert!(entries.len() >= 2);
+        assert!(entries.iter().all(|entry| entry.created_at == created_at));
 
         // 「我的名字是…」也命中规则 1
         svc.observe("miku", "我的名字是小明", "很高兴认识你，小明！这段回复足够长。")

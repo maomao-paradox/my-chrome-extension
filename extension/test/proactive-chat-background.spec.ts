@@ -30,6 +30,7 @@ const mocks = vi.hoisted(() => ({
     buildContext: vi.fn(),
     loadAIConfig: vi.fn(),
     completeChatFlow: vi.fn(),
+    executeLocalMcpTool: vi.fn(),
     alarmsCreate: vi.fn(),
     alarmsGet: vi.fn(),
     alarmListeners: [] as Array<(alarm: { name: string }) => void>,
@@ -72,6 +73,21 @@ vi.mock("@/service-worker/chrome-api/ai-config", () => ({
 
 vi.mock("@/service-worker/deepseek", () => ({
     completeChatFlow: mocks.completeChatFlow,
+}));
+
+vi.mock("@/service-worker/background/mcp-tools", () => ({
+    CAPTURE_SCREEN: "capture_screen",
+    LOCAL_MCP_TOOLS: [],
+    SET_AFFECTION: "set_affection",
+    SET_NEXT_PROACTIVE_INTERVAL: "set_next_proactive_interval",
+    executeLocalMcpTool: mocks.executeLocalMcpTool,
+    isLocalMcpTool: (name: string) =>
+        [
+            "capture_screen",
+            "get_meme",
+            "set_affection",
+            "set_next_proactive_interval",
+        ].includes(name),
 }));
 
 /** 每次重新加载被测模块，重置模块级状态（监听注册标记等） */
@@ -130,6 +146,13 @@ beforeEach(() => {
     });
     mocks.addEntry.mockReset().mockResolvedValue(undefined);
     mocks.loadAIConfig.mockReset().mockResolvedValue(defaultAIConfig());
+    mocks.executeLocalMcpTool.mockReset().mockImplementation(
+        async (name: string) => ({
+            jsonrpc: "2.0",
+            id: `test-${name}`,
+            result: { ok: true },
+        }),
+    );
 
     // 默认 AI 正常返回：流式推一段文本后完成
     mocks.completeChatFlow.mockReset().mockImplementation(
@@ -227,6 +250,126 @@ describe("proactive-chat（background 调度层）", () => {
             importance: "low",
             source: "ai-proactive",
         });
+    });
+
+    it("执行多个内置工具后仅将非排期工具结果发给模型，再保存续轮回复", async () => {
+        mocks.executeLocalMcpTool.mockImplementation(
+            async (name: string, args: Record<string, unknown>) => ({
+                jsonrpc: "2.0",
+                id: `test-${name}`,
+                result:
+                    name === "get_meme"
+                        ? {
+                              ok: true,
+                              description: args.description,
+                              imageUrl: "https://example.com/cat.png",
+                          }
+                        : {
+                              ok: true,
+                              minutes: args.minutes,
+                              scheduledAt: 123,
+                          },
+            }),
+        );
+        mocks.completeChatFlow.mockImplementation(
+            async (
+                _prompt: string,
+                _role: string,
+                callbacks?: {
+                    onData?: (data: string) => void;
+                    onComplete?: (result?: unknown) => void;
+                },
+            ) => {
+                if (mocks.completeChatFlow.mock.calls.length === 1) {
+                    callbacks?.onComplete?.({
+                        text: "肚子饿扁啦，先给你找张表情包喵。",
+                        functionCalls: [
+                            {
+                                id: "meme-call",
+                                name: "get_meme",
+                                args: { description: "猫猫委屈" },
+                            },
+                            {
+                                id: "interval-call",
+                                name: "set_next_proactive_interval",
+                                args: { minutes: 15 },
+                            },
+                            {
+                                id: "affection-call",
+                                name: "set_affection",
+                                args: { value: 78 },
+                            },
+                        ],
+                    });
+                    return null;
+                }
+
+                callbacks?.onComplete?.({
+                    text: "表情包拿到啦，十五分钟后我再来找你喵。",
+                    functionCalls: [],
+                });
+                return null;
+            },
+        );
+
+        const mod = await loadModule();
+        mod.initProactiveChat();
+        await flush();
+        mocks.alarmListeners[0]({ name: mod.PROACTIVE_ALARM_NAME });
+
+        await vi.waitFor(() => expect(mocks.addEntry).toHaveBeenCalledTimes(1));
+
+        expect(mocks.executeLocalMcpTool).toHaveBeenCalledTimes(3);
+        expect(mocks.completeChatFlow).toHaveBeenCalledTimes(2);
+        const toolResultPrompt = mocks.completeChatFlow.mock.calls[1][0] as string;
+        expect(toolResultPrompt).toContain("[TOOL RESULTS]");
+        expect(toolResultPrompt).toContain("get_meme");
+        expect(toolResultPrompt).toContain("猫猫委屈");
+        expect(toolResultPrompt).toContain("https://example.com/cat.png");
+        expect(toolResultPrompt).not.toContain("set_next_proactive_interval");
+        expect(toolResultPrompt).not.toContain("set_affection");
+        expect(toolResultPrompt).not.toContain('"minutes":15');
+        expect(toolResultPrompt).not.toContain('"value":78');
+        expect(mocks.executeLocalMcpTool).toHaveBeenCalledWith(
+            "set_affection",
+            { value: 78 },
+            { role: "miku" },
+        );
+        expect(mocks.addEntry.mock.calls[0][0].content).toContain(
+            "表情包拿到啦，十五分钟后我再来找你喵。",
+        );
+    });
+
+    it("只调用排期工具时不再发起工具结果续问", async () => {
+        mocks.completeChatFlow.mockImplementation(
+            async (
+                _prompt: string,
+                _role: string,
+                callbacks?: { onComplete?: (result?: unknown) => void },
+            ) => {
+                callbacks?.onComplete?.({
+                    text: "我十五分钟后再来找你喵。",
+                    functionCalls: [
+                        {
+                            id: "interval-call",
+                            name: "set_next_proactive_interval",
+                            args: { minutes: 15 },
+                        },
+                    ],
+                });
+                return null;
+            },
+        );
+
+        const mod = await loadModule();
+        mod.initProactiveChat();
+        await flush();
+        mocks.alarmListeners[0]({ name: mod.PROACTIVE_ALARM_NAME });
+
+        await vi.waitFor(() => expect(mocks.addEntry).toHaveBeenCalledTimes(1));
+
+        expect(mocks.executeLocalMcpTool).toHaveBeenCalledTimes(1);
+        expect(mocks.completeChatFlow).toHaveBeenCalledTimes(1);
     });
 
     it("角色列表只有功能角色时，也绝不会写入 textarea_ai_autofill", async () => {

@@ -32,6 +32,7 @@ export interface AddMemoryEntryParams {
     importance?: MemoryImportance;
     source?: string;
     tags?: string[];
+    createdAt?: number;
 }
 
 /** 短期记忆消息 */
@@ -177,10 +178,15 @@ export class MemoryGateway {
         );
     }
 
-    async observe(role: string, userMessage: string, aiResponse: string): Promise<void> {
+    async observe(
+        role: string,
+        userMessage: string,
+        aiResponse: string,
+        createdAt?: number,
+    ): Promise<void> {
         await this.route(
-            (client) => client.observe(role, userMessage, aiResponse),
-            () => this.local.observe(role, userMessage, aiResponse),
+            (client) => client.observe(role, userMessage, aiResponse, createdAt),
+            () => this.local.observe(role, userMessage, aiResponse, createdAt),
         );
     }
 

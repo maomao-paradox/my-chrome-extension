@@ -167,6 +167,60 @@ describe("MemoryGateway —— 模式分流", () => {
         await expect(getMemoryStore().listEntries(TEST_ROLE)).resolves.toHaveLength(0);
     });
 
+    it("后端写入记忆时保留用户消息的原始时间", async () => {
+        const requestBodies: Array<{ url: string; body: Record<string, unknown> }> = [];
+        const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+            const url = urlOf(input);
+            if (url.endsWith("/health")) return jsonResponse({ status: "ok" });
+            if (init?.method === "POST") {
+                requestBodies.push({
+                    url,
+                    body: JSON.parse(String(init.body)) as Record<string, unknown>,
+                });
+            }
+            if (url.endsWith("/observe")) return jsonResponse({ ok: true });
+            if (url.endsWith("/entries")) {
+                return jsonResponse({
+                    id: "timed-entry",
+                    role: TEST_ROLE,
+                    category: "conversation",
+                    content: "用户：消息",
+                    importance: "medium",
+                    createdAt: 1_743_840_428_000,
+                    lastAccessedAt: Date.now(),
+                    accessCount: 1,
+                }, 201);
+            }
+            return jsonResponse({});
+        });
+        setMemoryBackendClient(
+            new MemoryBackendClient({ fetchImpl: fetchMock as unknown as typeof fetch }),
+        );
+        const gateway = new MemoryGateway();
+        const createdAt = 1_743_840_428_000;
+
+        await gateway.addEntry({
+            role: TEST_ROLE,
+            content: "用户：消息",
+            category: "conversation",
+            createdAt,
+        });
+        await gateway.observe(TEST_ROLE, "用户消息", "AI 回复", createdAt);
+
+        expect(requestBodies).toContainEqual(
+            expect.objectContaining({
+                url: expect.stringMatching(/\/entries$/),
+                body: expect.objectContaining({ createdAt }),
+            }),
+        );
+        expect(requestBodies).toContainEqual(
+            expect.objectContaining({
+                url: expect.stringMatching(/\/observe$/),
+                body: expect.objectContaining({ createdAt }),
+            }),
+        );
+    });
+
     it("探针失败 → 完全走本地，行为不变", async () => {
         const fetchMock = vi.fn(async () => {
             throw new TypeError("Failed to fetch");

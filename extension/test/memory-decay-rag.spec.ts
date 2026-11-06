@@ -331,10 +331,10 @@ describe("MemoryService.retrieve —— 遗忘分流", () => {
 });
 
 // ======================================================================
-// 4. 上下文注入 —— 模糊记忆标注
+// 4. 上下文注入 —— 只携带近期对话
 // ======================================================================
-describe("buildContext —— 遗忘状态影响注入内容", () => {
-    it("fading 状态的高重要度记忆被注入并标注印象模糊", async () => {
+describe("buildContext —— 仅注入近期对话记录", () => {
+    it("长期用户偏好不会混入聊天记录分块", async () => {
         const now = Date.now();
         await store.saveEntries([
             makeEntry({
@@ -349,24 +349,24 @@ describe("buildContext —— 遗忘状态影响注入内容", () => {
 
         const ctx = await service.buildContext(TEST_ROLE, "今天聊点什么");
 
-        expect(ctx.assembledContext).toContain("想学 Rust");
-        expect(ctx.assembledContext).toContain("印象模糊");
+        expect(ctx.assembledContext).not.toContain("想学 Rust");
     });
 
-    it("已遗忘的低价值记忆不出现在最终 prompt 上下文里", async () => {
+    it("超过 24 小时的对话不出现在上下文里", async () => {
         const now = Date.now();
         await store.saveEntries([
             makeEntry({
-                content: "用户某天吃过一碗很咸的面",
+                content: "24小时前的历史对话",
                 importance: "low",
-                createdAt: now - 100 * HOUR_MS,
-                lastAccessedAt: now - 100 * HOUR_MS,
-                lastReactivatedAt: now - 100 * HOUR_MS,
+                category: "conversation",
+                createdAt: now - 24 * HOUR_MS - 1,
+                lastAccessedAt: now - 24 * HOUR_MS - 1,
+                lastReactivatedAt: now - 24 * HOUR_MS - 1,
             }),
         ]);
 
         const ctx = await service.buildContext(TEST_ROLE, "今天聊点什么");
-        expect(ctx.assembledContext).not.toContain("很咸的面");
+        expect(ctx.assembledContext).not.toContain("24小时前的历史对话");
     });
 });
 

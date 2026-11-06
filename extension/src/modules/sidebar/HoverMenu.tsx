@@ -27,6 +27,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { TeamOutlined } from "@ant-design/icons";
 import type { Tool } from "@/types";
 import { bus } from "@/event/bus";
+import MikuChatWindow from "./MikuChatWindow";
 import { useFloatingballStore } from "@/stores/floatingball";
 import { useMikuImageSrc } from "./useMikuMood";
 import "./styles/hover-menu.scss";
@@ -43,7 +44,7 @@ export interface HoverMenuProps {
   onClick?: (item: Tool) => void;
 }
 
-/** 彩虹色数组（与原 Vue 版保持一致） */
+/** 彩虹色数组 */
 const RAINBOW_COLORS = [
   "#FF0000",
   "#FF7F00",
@@ -74,6 +75,8 @@ const HoverMenu: React.FC<HoverMenuProps> = ({
   const [isActive, setIsActive] = useState(false);
   // Miku trigger 是否可见
   const [mikuTriggerVisible, setMikuTriggerVisible] = useState(false);
+  // Miku 对话窗口是否可见
+  const [mikuChatVisible, setMikuChatVisible] = useState(false);
   // 当前 hover 的菜单项索引（保留状态，用于未来扩展）
   const [hoverIdx, setHoverIdx] = useState(-1);
 
@@ -94,10 +97,16 @@ const HoverMenu: React.FC<HoverMenuProps> = ({
     setIsActive(false);
   }, []);
 
-  // 切换 Miku 对话窗口 —— 改为打开侧边栏并跳到 chat tab
-  const openMikuChatInSidepanel = useCallback(() => {
-    useFloatingballStore.getState().toggleSidepanel(true, "chat");
+  // 切换 Miku 对话窗口
+  const toggleMikuChat = useCallback(() => {
+    setMikuTriggerVisible((prev) => !prev);
+    setMikuChatVisible((prev) => !prev);
   }, []);
+
+  //   // 切换 Miku 对话窗口 —— 改为打开侧边栏并跳到 chat tab
+  // const openMikuChatInSidepanel = useCallback(() => {
+  //   useFloatingballStore.getState().toggleSidepanel(true, "chat");
+  // }, []);
 
   // 鼠标进入菜单项
   const onMouseEnter = useCallback((index: number) => {
@@ -177,7 +186,8 @@ const HoverMenu: React.FC<HoverMenuProps> = ({
             }}
             onClick={(e) => {
               e.stopPropagation();
-              openMikuChatInSidepanel();
+              toggleMikuChat();
+              // openMikuChatInSidepanel();
             }}
           >
             <img
@@ -211,6 +221,8 @@ const HoverMenu: React.FC<HoverMenuProps> = ({
           </li>
         ))}
       </div>
+
+      {mikuChatVisible && <MikuChatWindow onClose={toggleMikuChat} />}
     </>
   );
 };

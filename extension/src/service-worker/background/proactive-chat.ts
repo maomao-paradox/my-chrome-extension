@@ -32,8 +32,14 @@ import {
   isLocalMcpTool,
   LOCAL_MCP_TOOLS,
   SET_NEXT_PROACTIVE_INTERVAL,
+  SET_AFFECTION,
   CAPTURE_SCREEN,
 } from "./mcp-tools";
+import {
+  MAX_TOOL_ROUNDS,
+  buildToolResultPrompt,
+  type ToolExecutionResult,
+} from "./tool-round-prompt";
 import {
   createDefaultMoodState,
   deriveMood,
@@ -507,208 +513,154 @@ async function generateMessage(
   promptSections.push(closing ? CLOSING_INSTRUCTION : OPENING_INSTRUCTION);
   const requestPrompt = promptSections.join("\n\n");
 
-  const chunks: string[] = [];
   let scheduledByMcp = false;
-  let wantsScreenshot = false;
-  let toolCallsPromise: Promise<void> = Promise.resolve();
+  let usedScreenshot = false;
+  let roundPrompt = requestPrompt;
+  let fileIds: string[] | undefined;
+  let toolRounds = 0;
+  const replyParts: string[] = [];
 
-  // 用 Promise 包住回调式流式接口，并加超时看门狗
-  await new Promise<void>((resolve, reject) => {
-    let settled = false;
+  for (;;) {
+    const roundChunks: string[] = [];
+    let completedText: string | undefined;
+    let functionCalls: Array<{
+      name: string;
+      args?: Record<string, unknown>;
+    }> = [];
 
-    const finish = (error?: Error): void => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeoutId);
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    };
+    await new Promise<void>((resolve, reject) => {
+      let settled = false;
 
-    const timeoutId = setTimeout(() => {
-      finish(new Error("AI 主动消息生成超时"));
-    }, REQUEST_TIMEOUT_MS);
+      const finish = (error?: Error): void => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      };
 
-    void completeChatFlow(
-      requestPrompt,
-      role,
-      {
-        onData: (data: string) => {
-          if (data) chunks.push(data);
+      const timeoutId = setTimeout(() => {
+        finish(new Error("AI 主动消息生成超时"));
+      }, REQUEST_TIMEOUT_MS);
+
+      void completeChatFlow(
+        roundPrompt,
+        role,
+        {
+          onData: (data: string) => {
+            if (data) roundChunks.push(data);
+          },
+          onComplete: (result: unknown) => {
+            if (result && typeof result === "object") {
+              const completion = result as {
+                text?: unknown;
+                functionCalls?: unknown;
+              };
+              completedText =
+                typeof completion.text === "string" ? completion.text : undefined;
+              functionCalls = Array.isArray(completion.functionCalls)
+                ? (completion.functionCalls as typeof functionCalls)
+                : [];
+            }
+            finish();
+          },
+          onError: (error: unknown) => {
+            finish(error instanceof Error ? error : new Error(String(error)));
+          },
         },
-        onComplete: (result: any) => {
-          // 模型在生成开场白的同时调了本地 MCP 工具
-          // （如 set_next_proactive_interval / capture_screen）
+        config.provider,
+        config.modelId,
+        config.apiKey,
+        config.apiBaseUrl,
+        systemPrompt,
+        { tools: toolRounds < MAX_TOOL_ROUNDS ? LOCAL_MCP_TOOLS : [] },
+        fileIds,
+      )
+        .then(() => finish())
+        .catch((error: unknown) => {
+          finish(error instanceof Error ? error : new Error(String(error)));
+        });
+    });
+
+    const roundText = (completedText ?? roundChunks.join("")).trim();
+    if (roundText) replyParts.push(roundText);
+
+    const localCalls = functionCalls.filter((call) =>
+      isLocalMcpTool(call.name),
+    );
+    if (localCalls.length === 0) break;
+
+    const toolResults = await Promise.all(
+      localCalls.map(async (call): Promise<ToolExecutionResult> => {
+        const args = call.args ?? {};
+        try {
+          const response = await executeLocalMcpTool(call.name, args, { role });
           if (
-            Array.isArray(result?.functionCalls) &&
-            result.functionCalls.length > 0
+            call.name === SET_NEXT_PROACTIVE_INTERVAL &&
+            "result" in response &&
+            response.result &&
+            typeof response.result === "object" &&
+            "ok" in response.result &&
+            response.result.ok === true
           ) {
-            const localCalls = result.functionCalls.filter((c: any) =>
-              isLocalMcpTool(c.name),
-            );
-
-            // 检查是否请求了屏幕截图 —— 单独标记，后续统一处理
-            wantsScreenshot = localCalls.some(
-              (c: any) => c.name === CAPTURE_SCREEN,
-            );
-
-            // 其他工具（不含 capture_screen）走原有静默执行流程
-            const otherCalls = localCalls.filter(
-              (c: any) => c.name !== CAPTURE_SCREEN,
-            );
-            if (otherCalls.length > 0) {
-              toolCallsPromise = Promise.allSettled(
-                otherCalls.map((c: any) =>
-                  executeLocalMcpTool(c.name, c.args ?? {}, { role }),
-                ),
-              ).then((results) => {
-                results.forEach((r, i) => {
-                  if (r.status === "fulfilled") {
-                    // set_next_proactive_interval 执行成功 → 标记已排期
-                    if (otherCalls[i].name === SET_NEXT_PROACTIVE_INTERVAL) {
-                      scheduledByMcp = true;
-                    }
-                  } else {
-                    maLogger.warn(
-                      `[ProactiveChat] 主动消息工具调用失败 (${otherCalls[i].name}):`,
-                      (r as PromiseRejectedResult).reason,
-                    );
-                  }
-                });
-              });
+            scheduledByMcp = true;
+          }
+          if (call.name === CAPTURE_SCREEN) {
+            const result =
+              "result" in response && response.result &&
+              typeof response.result === "object"
+                ? response.result
+                : undefined;
+            const fileId =
+              result && "fileId" in result && typeof result.fileId === "string"
+                ? result.fileId
+                : undefined;
+            if (fileId) {
+              fileIds = [fileId];
+              usedScreenshot = true;
             }
           }
-          finish();
-        },
-        onError: (error: unknown) => {
-          finish(error instanceof Error ? error : new Error(String(error)));
-        },
-      },
-      config.provider,
-      config.modelId,
-      config.apiKey,
-      config.apiBaseUrl,
-      systemPrompt,
-      { tools: LOCAL_MCP_TOOLS }, // 注入内置 MCP 工具
-    )
-      // 即使 onComplete 未被调用，Promise 正常结束也算完成
-      .then(() => finish())
-      .catch((error: unknown) => {
-        finish(error instanceof Error ? error : new Error(String(error)));
-      });
-  });
-
-  // 等工具调用执行完再往下走
-  await toolCallsPromise;
-
-  // ── 如果 AI 请求了屏幕截图，执行工具并发起第二轮带图对话 ──
-  if (wantsScreenshot) {
-    maLogger.info("[ProactiveChat] AI 请求了屏幕截图，执行 capture_screen...");
-    try {
-      const captureResult = await executeLocalMcpTool(
-        CAPTURE_SCREEN,
-        {},
-        { role },
-      );
-      const fileId =
-        captureResult.result &&
-        typeof captureResult.result === "object" &&
-        "fileId" in captureResult.result
-          ? (captureResult.result.fileId as string)
-          : undefined;
-
-      if (fileId) {
-        maLogger.info(
-          "[ProactiveChat] 截图上传成功，发起第二轮带图对话 fileId:",
-          fileId,
-        );
-        const followupText = await generateScreenshotFollowup(
-          role,
-          systemPrompt,
-          fileId,
-          config,
-        );
-        if (followupText) {
-          return { text: followupText, scheduledByMcp, usedScreenshot: true };
+          return { name: call.name, args, response };
+        } catch (error) {
+          maLogger.warn(
+            `[ProactiveChat] 主动消息工具调用失败 (${call.name}):`,
+            error,
+          );
+          return {
+            name: call.name,
+            args,
+            response: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+          };
         }
-      } else {
-        maLogger.warn("[ProactiveChat] capture_screen 未返回 fileId");
-      }
-    } catch (error) {
-      maLogger.warn("[ProactiveChat] 截图工具执行或第二轮对话失败:", error);
-    }
+      }),
+    );
+
+    const resultsForModel = toolResults.filter(
+      (result) =>
+        result.name !== SET_NEXT_PROACTIVE_INTERVAL &&
+        result.name !== SET_AFFECTION,
+    );
+    if (resultsForModel.length === 0) break;
+
+    toolRounds += 1;
+    roundPrompt = [
+      buildToolResultPrompt(resultsForModel),
+      ...(usedScreenshot
+        ? ["你还收到了一张当前屏幕截图，请结合截图内容自然地回复。"]
+        : []),
+    ].join("\n\n");
   }
 
-  const text = chunks.join("").trim();
+  const text = replyParts.join("\n").trim();
   if (!text) {
     throw new Error("AI 返回了空的主动消息");
   }
-  return { text, scheduledByMcp, usedScreenshot: false };
-}
-
-/**
- * 第二轮对话：把截图作为附件发给 AI，让它基于画面内容生成开场白。
- * 复用同一个 session（由 completeChatFlow 内部维护），保持上下文连贯。
- */
-async function generateScreenshotFollowup(
-  role: string,
-  systemPrompt: string,
-  fileId: string,
-  config: NonNullable<Awaited<ReturnType<typeof loadAIConfig>>>,
-): Promise<string> {
-  const prompt =
-    "我给你附上了一张当前屏幕的截图，你可以看到我现在正在做什么。请结合画面内容，用你的身份和心情自然地和我聊一句。";
-
-  const chunks: string[] = [];
-
-  await new Promise<void>((resolve, reject) => {
-    let settled = false;
-    const finish = (error?: Error): void => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeoutId);
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      finish(new Error("截图 followup 生成超时"));
-    }, REQUEST_TIMEOUT_MS);
-
-    void completeChatFlow(
-      prompt,
-      role,
-      {
-        onData: (data: string) => {
-          if (data) chunks.push(data);
-        },
-        onComplete: () => {
-          finish();
-        },
-        onError: (error: unknown) => {
-          finish(error instanceof Error ? error : new Error(String(error)));
-        },
-      },
-      config.provider,
-      config.modelId,
-      config.apiKey,
-      config.apiBaseUrl,
-      systemPrompt,
-      { tools: [] }, // 第二轮不需要工具
-      [fileId],
-    )
-      .then(() => finish())
-      .catch((error: unknown) => {
-        finish(error instanceof Error ? error : new Error(String(error)));
-      });
-  });
-
-  return chunks.join("").trim();
+  return { text, scheduledByMcp, usedScreenshot };
 }
 
 /**
