@@ -6,7 +6,7 @@
  *   service-worker/background/proactive-chat.ts（chrome.alarms）
  *
  * 本模块只做一件事：
- *   收到 background 的 PROACTIVE_AI_MESSAGE 后，用事件总线让 dock 滑出，
+ *   收到 background 的 PROACTIVE_AI_REMINDER 后，用事件总线让 dock 滑出，
  *   2 秒后自动收回。复用的是鼠标悬浮那套纯 CSS transition
  *   （.dock.active 触发 .miku-trigger / .dock-cell 的 transform 动画）。
  *

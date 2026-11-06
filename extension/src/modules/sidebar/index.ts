@@ -459,7 +459,7 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response?: unknown) => void,
   ) => {
     if (
-      message?.type === "PROACTIVE_AI_MESSAGE" &&
+      message?.type === "PROACTIVE_AI_REMINDER" &&
       message?.target === "content"
     ) {
       playProactiveReminder();

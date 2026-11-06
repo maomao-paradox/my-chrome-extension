@@ -43,6 +43,7 @@ export default defineConfig({
       "test/memory-graph.spec.ts",
       "test/panel-coordinates.spec.ts",
       "test/proactive-chat-background.spec.ts",
+      "test/mcp-tools.spec.ts",
       "test/proactive-mood.spec.ts",
       "test/tool-round-prompt.spec.ts",
       "test/deepseek-core.spec.ts",

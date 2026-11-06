@@ -54,9 +54,44 @@ export function isFunctionalRole(role: string | undefined | null): boolean {
 /** 上下文构建时的 token 预算（字符数近似） */
 const CONTEXT_BUDGET = 10_000;
 
-/** 对话上下文只携带最近 24 小时内的最新 20 条记录 */
+/** 对话上下文只携带最近 24 小时内的最新 5 条记录 */
 const CONVERSATION_CONTEXT_WINDOW_MS = 24 * 60 * 60 * 1000;
-const CONVERSATION_CONTEXT_LIMIT = 20;
+const CONVERSATION_CONTEXT_LIMIT = 5;
+
+/** 选出最近 24 小时内最新的对话片段，并按发生顺序返回。 */
+export function selectRecentConversationEntries(
+    entries: readonly MemoryEntry[],
+    now: number,
+): MemoryEntry[] {
+    return entries
+        .filter(
+            (entry) =>
+                entry.category === "conversation" &&
+                entry.createdAt >= now - CONVERSATION_CONTEXT_WINDOW_MS &&
+                entry.createdAt <= now,
+        )
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, CONVERSATION_CONTEXT_LIMIT)
+        .reverse();
+}
+
+/** 格式化对话片段；保留片段内原始换行和完整内容。 */
+export function formatRecentConversationContext(
+    entries: readonly MemoryEntry[],
+    budget = Number.POSITIVE_INFINITY,
+): string {
+    const entryLines: string[] = [];
+    for (const entry of entries) {
+        const line = `- [${formatMemoryTime(entry.createdAt)}] ${entry.content}`;
+        if (line.length + 1 > budget) break;
+        entryLines.push(line);
+        budget -= line.length + 1;
+    }
+
+    return entryLines.length > 0
+        ? `[最近24小时的聊天记录]\n${entryLines.join("\n")}`
+        : "";
+}
 
 /** 归一化的重要度权重 ∈ [0, 1] —— 混排打分时使用 */
 const IMPORTANCE_WEIGHT: Record<MemoryImportance, number> = {
@@ -469,15 +504,10 @@ export class MemoryService {
             this.store.getShortTerm(role),
             this.store.listByCategory(role, "conversation"),
         ]);
-        const recentConversationEntries = conversationEntries
-            .filter(
-                (entry) =>
-                    entry.createdAt >= now - CONVERSATION_CONTEXT_WINDOW_MS &&
-                    entry.createdAt <= now,
-            )
-            .sort((a, b) => b.createdAt - a.createdAt)
-            .slice(0, CONVERSATION_CONTEXT_LIMIT)
-            .reverse();
+        const recentConversationEntries = selectRecentConversationEntries(
+            conversationEntries,
+            now,
+        );
 
         const assembledContext = this.assemblePromptContext({
             identity,
@@ -523,18 +553,12 @@ export class MemoryService {
             }
         }
 
-        // 3. 最近 24 小时的对话记录，按发生顺序注入
-        const entryLines: string[] = [];
-        for (const entry of params.recentConversationEntries) {
-            const line = `- [${formatMemoryTime(entry.createdAt)}] ${entry.content}`;
-            if (line.length + 1 > budget) break;
-            entryLines.push(line);
-            budget -= line.length + 1;
-        }
-
-        if (entryLines.length > 0) {
-            chunks.push(`[最近24小时的聊天记录]\n${entryLines.join("\n")}`);
-        }
+        // 3. 最近 24 小时的对话片段，按发生顺序完整注入
+        const conversationContext = formatRecentConversationContext(
+            params.recentConversationEntries,
+            budget,
+        );
+        if (conversationContext) chunks.push(conversationContext);
 
         return chunks.length > 0 ? chunks.join("\n\n") : "";
     }

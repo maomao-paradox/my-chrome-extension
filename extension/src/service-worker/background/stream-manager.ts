@@ -13,7 +13,8 @@
  * 工具调用轮（内置 MCP 工具）：
  *   - 同一轮里模型可能「既说话又调用工具」：文本保留为一条 AI 回复，
  *     工具由后台执行（JSON-RPC 2.0），前端只收到 TOOL_CALL 通知
- *   - 工具执行结果拼成下一轮请求，再向模型请求一次
+ *   - 需要模型理解的工具结果拼成下一轮请求；状态工具（好感度 / 排期）
+ *     执行后不续问，除非同轮还有其他需要模型处理的工具
  *   - 下一轮模型自己决定：继续调用工具，还是直接返回文本
  *   - 循环上限 MAX_TOOL_ROUNDS；只有全程没有文本时才 skipPersist（不写记忆）
  *
@@ -27,6 +28,7 @@ import {
     LOCAL_MCP_TOOLS,
     executeLocalMcpTool,
     isLocalMcpTool,
+    shouldReturnToolResultToModel,
 } from "./mcp-tools";
 import {
     MAX_TOOL_ROUNDS,
@@ -206,7 +208,7 @@ export class StreamManager {
 
     /**
      * 依次执行内置 MCP 工具（JSON-RPC 2.0）。
-     * 执行失败也返回错误信封 —— 下一轮模型需要知道「工具挂了」，才能决定怎么回复。
+     * 执行失败也返回错误信封 —— 可交回模型处理的工具需要让模型知道失败原因。
      *
      * @param messageId 本次对话的唯一标识（用于日志）
      * @param calls 模型返回的工具调用列表
@@ -377,6 +379,9 @@ export class StreamManager {
                             role,
                         );
                         didExecuteTool = true;
+                        const toolResultsForModel = toolResults.filter((result) =>
+                            shouldReturnToolResultToModel(result.name),
+                        );
 
                         // 本轮文本已经流式显示 → 让前端把它留作一条回复；
                         // 没有文本则直接移除空占位
@@ -393,6 +398,9 @@ export class StreamManager {
                             console.warn("发送 TOOL_CALL 失败:", postErr);
                         }
 
+                        // 状态工具已完成，不需要续问模型；只有这类工具时直接结束本轮。
+                        if (toolResultsForModel.length === 0) break;
+
                         // 工具结果会回填给模型，所以下一轮先建一个占位气泡
                         try {
                             port.postMessage({
@@ -405,7 +413,7 @@ export class StreamManager {
                         }
 
                         toolRounds += 1;
-                        roundPrompt = buildToolResultPrompt(toolResults);
+                        roundPrompt = buildToolResultPrompt(toolResultsForModel);
                         roundOptions = {
                             ...roundOptions,
                             // 工具轮用尽后禁用工具，逼模型这一轮直接回复文本

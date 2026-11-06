@@ -275,6 +275,9 @@ describe("MemoryService —— 业务层", () => {
         expect(result.assembledContext).toContain("虚拟歌姬");
         expect(result.assembledContext).toContain("最近24小时的聊天记录");
         expect(result.assembledContext).toContain("最近在学习 TypeScript");
+        expect(result.assembledContext).toContain(
+            "用户：最近在学习 TypeScript\nAI：可以从类型系统开始。",
+        );
         expect(result.assembledContext).not.toContain("用户喜欢 TypeScript");
         expect(result.assembledContext).not.toContain("Ubuntu 22.04");
         // 每条对话记录行首注入时间，格式 `- [YYYY/MM/DD HH:mm:ss]`
@@ -283,7 +286,7 @@ describe("MemoryService —— 业务层", () => {
         );
     });
 
-    it("buildContext 只返回最近 24 小时内最新的 20 条对话记录", async () => {
+    it("buildContext 只返回最近 24 小时内最新的 5 条对话记录", async () => {
         const now = Date.now();
         const oldConversationAt = now - 24 * 60 * 60 * 1000 - 1;
         const futureConversationAt = now + 60_000;
@@ -320,10 +323,10 @@ describe("MemoryService —— 业务层", () => {
 
         const result = await service.buildContext(TEST_ROLE);
 
-        expect(result.entries).toHaveLength(20);
-        expect(result.entries[0].content).toContain("近期-6");
-        expect(result.entries[19].content).toContain("近期-25");
-        expect(result.assembledContext.match(/近期-\d+/g)).toHaveLength(20);
+        expect(result.entries).toHaveLength(5);
+        expect(result.entries[0].content).toContain("近期-21");
+        expect(result.entries[4].content).toContain("近期-25");
+        expect(result.assembledContext.match(/近期-\d+/g)).toHaveLength(5);
         expect(result.assembledContext).not.toContain("24小时前的对话");
         expect(result.assembledContext).not.toContain("未来时间的对话");
         expect(result.assembledContext).not.toContain("用户喜欢简体中文");

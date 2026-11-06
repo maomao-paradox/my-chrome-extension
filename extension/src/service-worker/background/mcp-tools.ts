@@ -18,7 +18,6 @@
 
 import type { OpenAICompatibleTool } from "../deepseek/openai-request";
 import { scheduleProactiveMessageIn } from "./proactive-chat";
-import { getMemoryService } from "@/services/memory";
 import { uploadFile } from "../deepseek";
 
 /** memecub 表情包搜索接口 */
@@ -71,6 +70,11 @@ export const GET_MEME = "get_meme";
 
 /** 工具名 —— 设置 AI 对主人的好感度 */
 export const SET_AFFECTION = "set_affection";
+
+/** 状态类工具执行后不需要将结果再交回模型。 */
+export function shouldReturnToolResultToModel(name: string): boolean {
+  return name !== SET_AFFECTION && name !== SET_NEXT_PROACTIVE_INTERVAL;
+}
 
 /** 工具名 —— 截取当前屏幕并上传 */
 export const CAPTURE_SCREEN = "capture_screen";
@@ -162,7 +166,7 @@ export const LOCAL_MCP_TOOLS: OpenAICompatibleTool[] = [
 
 /**
  * 工具 handler 签名：params 已从 JSON-RPC 请求中取出
- * 可选的 role 参数用于需要存储记忆的工具（如 get_meme）
+ * 可选的执行上下文会透传给工具 handler
  */
 type ToolHandler = (
   params: Record<string, unknown>,
@@ -277,7 +281,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
     };
   },
 
-  [GET_MEME]: async (params, context) => {
+  [GET_MEME]: async (params) => {
     // description 可选：缺失时用随机默认词
     const description =
       typeof params.description === "string" && params.description.trim()
@@ -288,25 +292,6 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
           })();
 
     const imageUrl = await fetchRandomMeme(description);
-
-    // 存储表情包记录到记忆系统（category: episodic，不参与对话记忆）
-    const role = context?.role;
-    if (role) {
-      try {
-        const svc = getMemoryService();
-        await svc.addEntry({
-          role,
-          content: `表情包：${description} → ${imageUrl}`,
-          category: "episodic",
-          importance: "low",
-          source: "mcp:get_meme",
-          tags: ["meme", description],
-        });
-      } catch (storeErr) {
-        console.warn("[get_meme] 存储表情包记录失败:", storeErr);
-        // 存储失败不影响主流程
-      }
-    }
 
     return {
       ok: true,

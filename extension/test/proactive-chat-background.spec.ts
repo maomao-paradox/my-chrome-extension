@@ -88,6 +88,8 @@ vi.mock("@/service-worker/background/mcp-tools", () => ({
             "set_affection",
             "set_next_proactive_interval",
         ].includes(name),
+    shouldReturnToolResultToModel: (name: string) =>
+        name !== "set_affection" && name !== "set_next_proactive_interval",
 }));
 
 /** 每次重新加载被测模块，重置模块级状态（监听注册标记等） */
@@ -231,7 +233,26 @@ describe("proactive-chat（background 调度层）", () => {
         expect(mocks.alarmsCreate).not.toHaveBeenCalled();
     });
 
-    it("accepted: alarm 触发后生成消息并写入记忆", async () => {
+    it("accepted: alarm 触发后立即提醒侧边栏，再生成并保存消息", async () => {
+        let finishGeneration!: () => void;
+        mocks.completeChatFlow.mockImplementation(
+            async (
+                _prompt: string,
+                _role: string,
+                callbacks?: {
+                    onData?: (data: string) => void;
+                    onComplete?: () => void;
+                },
+            ) => {
+                callbacks?.onData?.("早安呀");
+                await new Promise<void>((resolve) => {
+                    finishGeneration = resolve;
+                });
+                callbacks?.onComplete?.();
+                return null;
+            },
+        );
+
         const mod = await loadModule();
         mod.initProactiveChat();
         await flush();
@@ -240,7 +261,20 @@ describe("proactive-chat（background 调度层）", () => {
         expect(listener).toBeTypeOf("function");
         listener({ name: mod.PROACTIVE_ALARM_NAME });
 
+        await vi.waitFor(() =>
+            expect(mocks.tabsSendMessage).toHaveBeenCalledTimes(1),
+        );
+        expect(mocks.completeChatFlow).toHaveBeenCalledTimes(1);
+        expect(mocks.addEntry).not.toHaveBeenCalled();
+
+        finishGeneration();
         await vi.waitFor(() => expect(mocks.addEntry).toHaveBeenCalledTimes(1));
+
+        expect(mocks.tabsSendMessage).toHaveBeenCalledWith(
+            1,
+            { type: "PROACTIVE_AI_REMINDER", target: "content" },
+            { frameId: 0 },
+        );
 
         const entry = mocks.addEntry.mock.calls[0][0];
         expect(entry).toMatchObject({
@@ -340,7 +374,7 @@ describe("proactive-chat（background 调度层）", () => {
         );
     });
 
-    it("只调用排期工具时不再发起工具结果续问", async () => {
+    it("只调用状态工具时不再发起工具结果续问", async () => {
         mocks.completeChatFlow.mockImplementation(
             async (
                 _prompt: string,
@@ -355,6 +389,11 @@ describe("proactive-chat（background 调度层）", () => {
                             name: "set_next_proactive_interval",
                             args: { minutes: 15 },
                         },
+                        {
+                            id: "affection-call",
+                            name: "set_affection",
+                            args: { value: 52 },
+                        },
                     ],
                 });
                 return null;
@@ -368,7 +407,7 @@ describe("proactive-chat（background 调度层）", () => {
 
         await vi.waitFor(() => expect(mocks.addEntry).toHaveBeenCalledTimes(1));
 
-        expect(mocks.executeLocalMcpTool).toHaveBeenCalledTimes(1);
+        expect(mocks.executeLocalMcpTool).toHaveBeenCalledTimes(2);
         expect(mocks.completeChatFlow).toHaveBeenCalledTimes(1);
     });
 
@@ -757,11 +796,14 @@ describe("记忆上下文分段", () => {
         expect(context).not.toContain("两天前的对话");
     });
 
-    it("对话记忆最多 20 条，保留最新的", async () => {
+    it("对话记忆最多 5 个片段，保留最新的并完整保留多行内容", async () => {
         const mod = await loadModule();
         const conversations = Array.from({ length: 25 }, (_, i) =>
             entry({
-                content: `近期对话-${i + 1}`,
+                content:
+                    i === 24
+                        ? `用户：近期对话-${i + 1}\nAI：${"回应".repeat(90)}\nAI：最后一条连续消息`
+                        : `近期对话-${i + 1}`,
                 category: "conversation",
                 // i 越小越旧，i = 24 是最近的一条
                 createdAt: NOW - (25 - i) * 60_000,
@@ -772,7 +814,11 @@ describe("记忆上下文分段", () => {
 
         expect(context).toContain("近期对话-25");
         expect(context).not.toContain("近期对话-5");
-        expect(context.match(/近期对话-\d+/g)).toHaveLength(20);
+        expect(context.match(/近期对话-\d+/g)).toHaveLength(5);
+        expect(context).toContain(`AI：${"回应".repeat(90)}`);
+        expect(context).toContain("AI：最后一条连续消息");
+        expect(context).toContain("[最近24小时的聊天记录]");
+        expect(context).not.toContain("[最近的对话记忆]");
     });
 
     it("用户偏好只保留仍然清晰的记忆", async () => {
@@ -851,7 +897,7 @@ describe("记忆上下文分段", () => {
             NOW,
         );
 
-        expect(context).toContain("[最近的对话记忆");
+        expect(context).toContain("[最近24小时的聊天记录]");
         // proactive-chat 按 category 分段，偏好段 section 标题是「你记得的关于用户的事」
         expect(context).toContain("[你记得的关于用户的事]");
         expect(context).toContain("[其他记忆]");

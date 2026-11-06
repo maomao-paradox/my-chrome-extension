@@ -28,7 +28,11 @@ export {
 export type { AddMemoryEntryParams, MemoryMode } from "./memory-gateway";
 
 // 本地实现（需要绕过探针直接操作 chrome.storage 时使用）
-export { MemoryService } from "./memory-service";
+export {
+    MemoryService,
+    formatRecentConversationContext,
+    selectRecentConversationEntries,
+} from "./memory-service";
 
 // 后端客户端与配置
 export {

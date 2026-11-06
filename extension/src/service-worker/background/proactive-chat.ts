@@ -17,7 +17,12 @@
  * @author Vivy
  * @date 2026-10-29
  */
-import { getMemoryService, isFunctionalRole } from "@/services/memory";
+import {
+  formatRecentConversationContext,
+  getMemoryService,
+  isFunctionalRole,
+  selectRecentConversationEntries,
+} from "@/services/memory";
 import {
   classifyDecayState,
   computeRetention,
@@ -32,8 +37,8 @@ import {
   isLocalMcpTool,
   LOCAL_MCP_TOOLS,
   SET_NEXT_PROACTIVE_INTERVAL,
-  SET_AFFECTION,
   CAPTURE_SCREEN,
+  shouldReturnToolResultToModel,
 } from "./mcp-tools";
 import {
   MAX_TOOL_ROUNDS,
@@ -122,16 +127,12 @@ const WEEKDAY_LABELS = [
 /**
  * 记忆分段规则 —— 不同类型记忆的性质不同，混在一起会让模型分不清
  * 「主人明确说过的偏好」和「某次闲聊的碎片」：
- *   1. 对话记忆：只保留最近 24 小时、最多 20 条（了解近况即可，避免复读）
+ *   1. 对话记忆：只保留最近 24 小时内最新的 5 个对话片段
  *   2. 用户偏好：走艾宾浩斯保留率，只注入仍然「清晰」（active）的那部分
  *   3. 其他记忆（事实 / 情景 / 身份）：全部带上，按重要度排序
  */
-/** 对话记忆的时间窗口（24 小时） */
-const CONVERSATION_MEMORY_WINDOW_MS = 24 * 60 * 60 * 1000;
-/** 对话记忆条数上限 */
-const MAX_CONVERSATION_MEMORIES = 20;
-/** 整段记忆上下文的字符预算，防止 prompt 无上限膨胀 */
-const MEMORY_CONTEXT_BUDGET = 2000;
+/** 与普通聊天一致的记忆上下文字符预算 */
+const MEMORY_CONTEXT_BUDGET = 2_000;
 /** 单条记忆展示时的字符上限 */
 const MAX_MEMORY_LINE_CHARS = 120;
 
@@ -151,10 +152,8 @@ const CLOSING_INSTRUCTION =
   "这是今天最后一次主动消息。结合上面的记忆与当前时间，说 1 到 2 句收尾的话（类似「晚安，明天见」）；不要再追问，也不要安排新任务。";
 
 /**
- * 单条记忆压缩成一行：去掉换行、按码点截断。
- *
- * 对话记忆的内容是「用户：…\nAI：…」的多行块，直接塞进列表会把排版撑乱，
- * 也容易让某一条超长记忆吃光整段预算。
+ * 将偏好、事实等非对话记忆压缩成一行；对话片段使用共享格式化器，
+ * 保留多条连续消息的换行和完整内容。
  */
 function formatMemoryLine(entry: MemoryEntry): string {
   const compact = entry.content.replace(/\s*\n+\s*/g, " / ").trim();
@@ -197,15 +196,8 @@ export function assembleMemoryContext(
     return lines.length > 0 ? `[${title}]\n${lines.join("\n")}` : "";
   };
 
-  // 1) 对话记忆：最近 24 小时，最多 20 条，按时间正序展示（读起来像流水账）
-  const conversations = entries
-    .filter(
-      (entry) =>
-        entry.category === "conversation" &&
-        entry.createdAt >= now - CONVERSATION_MEMORY_WINDOW_MS,
-    )
-    .sort((a, b) => a.createdAt - b.createdAt)
-    .slice(-MAX_CONVERSATION_MEMORIES);
+  // 对话片段与普通聊天共用同一套时间窗口、条数上限和原文格式。
+  const conversations = selectRecentConversationEntries(entries, now);
 
   // 2) 用户偏好：只留保留率仍处于 active 的「清晰记忆」
   const preferences = entries
@@ -226,8 +218,14 @@ export function assembleMemoryContext(
         b.createdAt - a.createdAt,
     );
 
+  const conversationContext = formatRecentConversationContext(
+    conversations,
+    budget,
+  );
+  if (conversationContext) budget -= conversationContext.length + 2;
+
   return [
-    render("最近的对话记忆", conversations),
+    conversationContext,
     render("你记得的关于用户的事", preferences),
     render("其他记忆", others),
   ]
@@ -268,14 +266,6 @@ const FALLBACK_TEMPLATES: Record<TimePeriod, string[]> = {
     "这么晚还醒着呀，想说说话的话我在这里。",
   ],
 };
-
-/** 发往 content script 的消息载荷 */
-interface ProactiveMessagePayload {
-  /** 生成的主动消息文本 */
-  text: string;
-  /** 生成消息的角色 key（content 侧当前不使用，留给未来扩展） */
-  role: string;
-}
 
 /** alarm 监听是否已注册 —— 防止重复注册（SW 冷启动可能多次执行顶层代码） */
 let alarmListenerRegistered = false;
@@ -640,10 +630,8 @@ async function generateMessage(
       }),
     );
 
-    const resultsForModel = toolResults.filter(
-      (result) =>
-        result.name !== SET_NEXT_PROACTIVE_INTERVAL &&
-        result.name !== SET_AFFECTION,
+    const resultsForModel = toolResults.filter((result) =>
+      shouldReturnToolResultToModel(result.name),
     );
     if (resultsForModel.length === 0) break;
 
@@ -668,15 +656,13 @@ async function generateMessage(
  * 只发给顶层 frame（侧边栏只在顶层注入）。
  * 页面不可注入（chrome:// / 扩展页 / 无 content script）时静默跳过。
  */
-async function notifyActiveTab(text: string, role: string): Promise<void> {
+async function notifyActiveTab(): Promise<void> {
   try {
     const [tab] = await chrome.tabs.query({
       active: true,
       currentWindow: true,
     });
     if (!tab?.id) return;
-
-    const payload: ProactiveMessagePayload = { text, role };
 
     // 刻意不 await 回执：content 侧的 messenger.ext.listen 封装对每条消息
     // 都返回 true（异步保持通道），若这里 await，Promise 可能长时间 pending，
@@ -686,9 +672,8 @@ async function notifyActiveTab(text: string, role: string): Promise<void> {
       .sendMessage(
         tab.id,
         {
-          type: "PROACTIVE_AI_MESSAGE",
+          type: "PROACTIVE_AI_REMINDER",
           target: "content",
-          payload,
         },
         { frameId: 0 },
       )
@@ -714,6 +699,8 @@ async function runProactiveMessage(): Promise<boolean> {
 
   // 当天已经发过下班收尾消息 → 不再请求
   if ((await getOffDutyDate()) === dateKey) return false;
+
+  void notifyActiveTab();
 
   const closing = isOffDutyWindow(now);
   const period = getTimePeriod(now);
@@ -825,8 +812,6 @@ async function runProactiveMessage(): Promise<boolean> {
   if (closing) {
     await markOffDuty(dateKey);
   }
-
-  await notifyActiveTab(finalText, role);
 
   // MCP 工具 set_next_proactive_interval 已注入 generateMessage：
   // 模型调了工具 → scheduledByMcp=true → 返回 true 跳过 scheduleNext 兜底
